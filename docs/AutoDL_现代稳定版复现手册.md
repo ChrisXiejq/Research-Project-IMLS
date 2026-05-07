@@ -297,6 +297,8 @@ PY
 
 ## 7. 运行论文核心实验（三策略）
 
+# 7.1. 使用gurobi
+
 ```bash
 export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
 
@@ -305,6 +307,20 @@ python run_all_scenarios.py \
   --scenario_glob "scenario_0*.json" \
   --init_glob "ego_init_*.json" \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
+  --with_notv \
+  --with_notv_cl
+```
+
+# 7.2. 不使用gurobi
+
+```bash
+export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
+
+python run_all_scenarios.py \
+  --scenario_glob "scenario_0*.json" \
+  --init_glob "ego_init_*.json" \
+  --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
+  --solver_backend ipopt_approx \
   --with_notv \
   --with_notv_cl
 ```

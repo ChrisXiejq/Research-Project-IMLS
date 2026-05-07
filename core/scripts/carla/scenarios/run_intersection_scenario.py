@@ -282,6 +282,7 @@ class RunIntersectionScenario:
                 self._setup_camera(drone_viz_params)
             self._setup_predictions(prediction_params)
         except Exception as e:
+            self._destroy_created_actors()
             print("Failed to setup the scenario!")
             raise e
 
@@ -483,6 +484,29 @@ class RunIntersectionScenario:
                 client.set_timeout(max(carla_params.timeout_period, 300.0))
                 self.world = client.load_world(carla_params.map_str)
         self.world.set_weather(getattr(carla.WeatherParameters, "ClearNoon"))
+        self._destroy_stale_scenario_actors()
+
+    def _destroy_stale_scenario_actors(self):
+        scenario_roles = {"ego", "static", "drone"}
+        stale_actors = []
+        for actor in self.world.get_actors():
+            role_name = actor.attributes.get("role_name", "")
+            if role_name in scenario_roles or role_name.startswith("target"):
+                stale_actors.append(actor)
+
+        if stale_actors:
+            print(f"Destroying {len(stale_actors)} stale CARLA scenario actors before setup.")
+            for actor in stale_actors:
+                actor.destroy()
+            self.world.wait_for_tick()
+
+    def _destroy_created_actors(self):
+        for actor in getattr(self, "vehicle_actors", []):
+            if actor is not None and actor.is_alive:
+                actor.destroy()
+        drone = getattr(self, "drone", None)
+        if drone is not None and drone.is_alive:
+            drone.destroy()
 
     def _setup_camera(self, drone_viz_params):
         bp_library = self.world.get_blueprint_library()
