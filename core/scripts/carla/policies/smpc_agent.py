@@ -50,7 +50,7 @@ class SMPCAgent(object):
         self.N_modes=N_modes
         try:
             from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
-            self.planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(self.map, sampling_resolution=0.5))
+            self.planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(self.map, 0.5))
             self.planner.setup()
         except ModuleNotFoundError:
             # CARLA >= 0.9.13 removed DAO, constructor takes (map, resolution).

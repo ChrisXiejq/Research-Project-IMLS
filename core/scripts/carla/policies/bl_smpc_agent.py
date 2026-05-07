@@ -35,7 +35,7 @@ class BLSMPCAgent(object):
         carla_map     = self.world.get_map()
         try:
             from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
-            planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(carla_map, sampling_resolution=0.5))
+            planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(carla_map, 0.5))
             planner.setup()
         except ModuleNotFoundError:
             # CARLA >= 0.9.13 removed DAO, constructor takes (map, resolution).

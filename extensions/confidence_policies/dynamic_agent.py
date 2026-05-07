@@ -27,7 +27,7 @@ class DynamicAgent(ABC):
         carla_map = world.get_map()
         try:
             from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
-            planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(carla_map, sampling_resolution=0.5))
+            planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(carla_map, 0.5))
             planner.setup()
         except ModuleNotFoundError:
             planner = GlobalRoutePlanner(carla_map, 0.5)
