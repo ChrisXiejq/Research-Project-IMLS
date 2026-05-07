@@ -337,14 +337,18 @@ python run_all_scenarios.py \
 
 ```bash
 cd ~/autodl-tmp/Research-Project-IMLS/core
-MPLBACKEND=Agg python scripts/compute_scenario_results.py --compute_metrics
+MPLBACKEND=Agg python scripts/compute_scenario_results.py \
+  --results_dir ./results/<本次运行时间戳目录> \
+  --compute_metrics
 ```
 
 输出目录：
 
-- `core/results/df_full.csv`
-- `core/results/df_norm.csv`
-- `core/results/df_final.csv`
+- `core/results/<YYYYMMDD_HHMMSS>/df_full.csv`
+- `core/results/<YYYYMMDD_HHMMSS>/df_norm.csv`
+- `core/results/<YYYYMMDD_HHMMSS>/df_final.csv`
+
+说明：`run_all_scenarios.py` 在未显式传入 `--results_dir` 时，会自动保存到 `core/results/YYYYMMDD_HHMMSS/`，用于保留可追溯的多次实验记录。
 
 若要给无 Gurobi 结果生成论文风格图，策略名需要使用 `_ipopt_approx` 后缀：
 

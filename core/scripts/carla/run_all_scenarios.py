@@ -2,6 +2,7 @@ import os
 import glob
 import json
 import argparse
+from datetime import datetime
 
 
 
@@ -153,10 +154,13 @@ if __name__ == '__main__':
         raise RuntimeError(f"No scenarios matched: {args.scenario_glob}")
 
     if args.results_dir is None:
-        results_folder = os.path.join(os.path.abspath(__file__).split("scripts")[0], "results")
+        results_root = os.path.join(os.path.abspath(__file__).split("scripts")[0], "results")
+        run_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        results_folder = os.path.join(results_root, run_stamp)
     else:
         results_folder = os.path.abspath(args.results_dir)
     os.makedirs(results_folder, exist_ok=True)
+    print(f"Saving experiment outputs under: {results_folder}")
 
     for scenario in scenarios_list:
         # Load the scenario and generate parameters.
