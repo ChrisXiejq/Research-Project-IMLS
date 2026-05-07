@@ -487,7 +487,12 @@ class RunLKScenario:
     def _setup_carla_world(self, carla_params):
         client = carla.Client(carla_params.ip_addr, carla_params.port)
         client.set_timeout(carla_params.timeout_period)
-        self.world = client.load_world(carla_params.map_str)
+        current_world = client.get_world()
+        current_map = current_world.get_map().name.split("/")[-1]
+        if current_map == carla_params.map_str:
+            self.world = current_world
+        else:
+            self.world = client.load_world(carla_params.map_str)
         self.world.set_weather(getattr(carla.WeatherParameters, "ClearNoon"))
 
     def _setup_camera(self, drone_viz_params):
