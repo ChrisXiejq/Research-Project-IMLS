@@ -5,6 +5,13 @@ from itertools import product
 import scipy.stats as stats
 from scipy.stats import norm
 import pdb
+
+GUROBI_UNAVAILABLE_MSG = (
+    "CasADi Gurobi plugin is unavailable. Install/configure Gurobi or run "
+    "`run_all_scenarios.py --solver_backend ipopt_approx` for the no-Gurobi "
+    "approximation path."
+)
+
 class RefTrajGenerator():
 
     def __init__(self,
@@ -353,7 +360,10 @@ class SMPC_MMPreds():
 
         for i in range((self.t_bar_max)*self.N_TV_max):
             self.opti.append(ca.Opti('conic'))
-            self.opti[i].solver("gurobi", p_opts_grb, s_opts_grb)
+            try:
+                self.opti[i].solver("gurobi", p_opts_grb, s_opts_grb)
+            except RuntimeError as exc:
+                raise RuntimeError(GUROBI_UNAVAILABLE_MSG) from exc
 
 
             N_TV=1+int(i/self.t_bar_max)
@@ -759,7 +769,9 @@ class SMPC_MMPreds():
             eval_oa     = np.array([sol.value(x[0]) for x in self.eval_oa[i]])
 
 
-        except:
+        except RuntimeError as exc:
+            if "gurobi" in str(exc).lower():
+                raise RuntimeError(GUROBI_UNAVAILABLE_MSG) from exc
 
 
             # Suboptimal solution (e.g. timed out).
@@ -1012,7 +1024,10 @@ class SMPC_MMPreds_OBCA():
 
         for i in range((self.t_bar_max)*self.N_TV_max):
             self.opti.append(ca.Opti('conic'))
-            self.opti[i].solver("gurobi", s_opts_grb, p_opts_grb)
+            try:
+                self.opti[i].solver("gurobi", s_opts_grb, p_opts_grb)
+            except RuntimeError as exc:
+                raise RuntimeError(GUROBI_UNAVAILABLE_MSG) from exc
 
 
             N_TV=1+int(i/self.t_bar_max)
@@ -1734,7 +1749,10 @@ class SMPC_MMPreds_OL():
         
         p_opts_grb = {'error_on_fail':0}
 
-        self.opti.solver("gurobi", p_opts_grb, s_opts_grb)
+        try:
+            self.opti.solver("gurobi", p_opts_grb, s_opts_grb)
+        except RuntimeError as exc:
+            raise RuntimeError(GUROBI_UNAVAILABLE_MSG) from exc
 
 
         self.z_ref=self.opti.parameter(4, self.N+1)

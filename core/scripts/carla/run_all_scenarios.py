@@ -15,6 +15,12 @@ def _prepare_drone_viz_params(scenario_dict, enable_camera_viz=False):
     return drone_viz_dict
 
 
+def _policy_output_name(policy_name, solver_backend):
+    if solver_backend == "gurobi":
+        return policy_name
+    return f"{policy_name}_{solver_backend}"
+
+
 def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, enable_camera_viz=False):
     if scene =="intersection":
         from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
@@ -28,7 +34,8 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
 
     vehicles_params_list = []
 
-    for vp_dict in scenario_dict["vehicle_params"]:
+    for vp_src in scenario_dict["vehicle_params"]:
+        vp_dict = dict(vp_src)
         if vp_dict["role"] == "static":
             continue
             # vehicles_params_list.append( VehicleParams(**vp_dict) )
@@ -60,7 +67,8 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
     
     runner.run_scenario()
 
-def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir, enable_camera_viz=False):
+def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
+                 enable_camera_viz=False, solver_backend="gurobi"):
     if scene =="intersection":
         from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
     else:
@@ -85,7 +93,8 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
     else:
         raise ValueError(f"Invalid ego policy config: {ego_policy_config}")
 
-    for vp_dict in scenario_dict["vehicle_params"]:
+    for vp_src in scenario_dict["vehicle_params"]:
+        vp_dict = dict(vp_src)
         if vp_dict["role"] == "static":
             # Not generating static vehicles
             vehicles_params_list.append( VehicleParams(**vp_dict) )
@@ -97,6 +106,7 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
             vp_dict.update(ego_init_dict)
             vp_dict["policy_type"] = policy_type
             vp_dict["smpc_config"] = policy_config
+            vp_dict["solver_backend"] = solver_backend
             vehicles_params_list.append( VehicleParams(**vp_dict) )
         else:
 
@@ -133,6 +143,8 @@ if __name__ == '__main__':
                         help="Also run no-TV centerline rollout.")
     parser.add_argument("--enable_camera_viz", action="store_true",
                         help="Enable CARLA RGB camera sensor and avi/opencv visualization. Disabled by default for AutoDL stability.")
+    parser.add_argument("--solver_backend", choices=["gurobi", "ipopt_approx"], default="gurobi",
+                        help="Solver backend for SMPC policies. Use ipopt_approx when Gurobi is unavailable.")
     args = parser.parse_args()
 
     scenario_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/")
@@ -175,6 +187,9 @@ if __name__ == '__main__':
                 run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=True, enable_camera_viz=args.enable_camera_viz)
 
             for ego_policy_config in args.policies:
-                savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_{ego_policy_config}")
-                print(f"Running {scenario_name} {ego_init_name} {ego_policy_config}")
-                run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir, enable_camera_viz=args.enable_camera_viz)
+                output_policy_name = _policy_output_name(ego_policy_config, args.solver_backend)
+                savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_{output_policy_name}")
+                print(f"Running {scenario_name} {ego_init_name} {ego_policy_config} ({args.solver_backend})")
+                run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
+                             enable_camera_viz=args.enable_camera_viz,
+                             solver_backend=args.solver_backend)

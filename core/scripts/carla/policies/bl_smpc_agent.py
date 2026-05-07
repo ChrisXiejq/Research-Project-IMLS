@@ -29,7 +29,10 @@ class BLSMPCAgent(object):
                  nominal_speed_mps =8.0, # sets desired speed (m/s) for tracking path
                  dt =0.2,
                  N=8,                   # time discretization (s) used to generate a reference
-                 N_modes = 3, fps= 20):
+                 N_modes = 3, fps= 20,
+                 risk=0.5,
+                 d_min=2.0,
+                 c_obs_sl=10000):
         self.vehicle = vehicle
         self.world   = vehicle.get_world()
         carla_map     = self.world.get_map()
@@ -55,12 +58,13 @@ class BLSMPCAgent(object):
         self.nominal_speed = nominal_speed_mps # m/s
         self.lat_accel_max = 2.0  # m/s^2
         self.lf, self.lr = vehicle_name_to_lf_lr(self.vehicle.type_id)
-        self._setup_mpc(N=N, DT=dt, N_modes=N_modes, L_F=self.lf, L_R=self.lr, fps=fps)
+        self._setup_mpc(N=N, DT=dt, N_modes=N_modes, L_F=self.lf, L_R=self.lr, fps=fps,
+                        RISK=risk, C_OBS_SL=c_obs_sl)
 
         self._fit_velocity_profile()
 
         self._low_level_control = LowLevelControl(vehicle)
-        self.d_min=2.0
+        self.d_min=d_min
 
 
         self.goal_reached = False # flags when the end of the path is reached and agent should stop

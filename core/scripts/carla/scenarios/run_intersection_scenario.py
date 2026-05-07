@@ -17,6 +17,7 @@ from policies.static_agent import StaticAgent
 from policies.smpc_agent import SMPCAgent
 from policies.mpc_agent import MPCAgent
 from policies.bl_smpc_agent import BLSMPCAgent
+from policies.ipopt_smpc_agent import IPOPTSMPCAgent
 
 from rasterizer.agent_history import AgentHistory
 from rasterizer.sem_box_rasterizer import SemBoxRasterizer
@@ -91,6 +92,7 @@ class VehicleParams:
 
     # SMPC specific parameters (ignored for any other policy_type).
     smpc_config : str = "full" # "var_risk", "open_loop", "fixed_risk"
+    solver_backend : str = "gurobi" # "gurobi" or "ipopt_approx"
 
 @dataclass(frozen=True)
 class PredictionParams:
@@ -139,6 +141,17 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform):
                         N_modes=vehicle_params.num_modes,
                         nominal_speed_mps=vehicle_params.nominal_speed)
     elif vehicle_params.policy_type == "smpc":
+        if vehicle_params.solver_backend == "ipopt_approx":
+            return IPOPTSMPCAgent(vehicle_actor, goal_transform.location,
+                                  N=vehicle_params.N,
+                                  dt=vehicle_params.dt,
+                                  N_modes=vehicle_params.num_modes,
+                                  nominal_speed_mps=vehicle_params.nominal_speed,
+                                  approx_config=vehicle_params.smpc_config)
+
+        if vehicle_params.solver_backend != "gurobi":
+            raise ValueError(f"Unsupported solver backend: {vehicle_params.solver_backend}")
+
         if vehicle_params.smpc_config.endswith("OAinner"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
