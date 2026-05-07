@@ -14,6 +14,15 @@ import matplotlib.pyplot as plt
 
 from evaluation.closed_loop_metrics import ScenarioResult, ClosedLoopTrajectory, load_scenario_result
 
+
+def _parse_scenario_dir_name(scenario_dir):
+    base = os.path.basename(scenario_dir.rstrip("/"))
+    if "_ego_init_" not in base:
+        return None
+    scenario_name, tail = base.split("_ego_init_", 1)
+    init_str, policy = tail.split("_", 1)
+    return scenario_name, int(init_str), policy
+
 def get_metric_dataframe(results_dir):
     scenario_dirs = sorted(glob.glob(results_dir + "*scenario_lk*"))
 
@@ -212,6 +221,198 @@ def make_trajectory_viz_plot(results_dir, color1="r", color2="b", plot_init=1, p
     plt.show()
 
     # fig.savefig('traj_viz.png', bbox_inches='tight')
+
+
+def make_trajectory_map_plot(results_dir,
+                             plot_scenario="scenario_01",
+                             plot_init=1,
+                             plot_policies=None,
+                             tv_source_policy="smpc_var_risk",
+                             out_name="trajectory_map"):
+    if plot_policies is None:
+        plot_policies = ["smpc_var_risk", "smpc_open_loop", "smpc_fixed_risk", "notv", "notv_cl"]
+
+    all_dirs = sorted(glob.glob(os.path.join(results_dir, "scenario_*_ego_init_*")))
+    if not all_dirs:
+        raise RuntimeError(f"No scenario result folders found under: {results_dir}")
+
+    matched = {}
+    for d in all_dirs:
+        parsed = _parse_scenario_dir_name(d)
+        if parsed is None:
+            continue
+        scenario_name, init_num, policy = parsed
+        if scenario_name == plot_scenario and init_num == plot_init:
+            matched[policy] = d
+
+    if not matched:
+        raise RuntimeError(f"No matches for {plot_scenario}, ego_init_{plot_init:02d}")
+
+    color_map = {
+        "smpc_var_risk": "#1f77b4",
+        "smpc_open_loop": "#d62728",
+        "smpc_fixed_risk": "#2ca02c",
+        "notv": "#7f7f7f",
+        "notv_cl": "#9467bd",
+    }
+    label_map = {
+        "smpc_var_risk": "Proposed",
+        "smpc_open_loop": "Open-Loop",
+        "smpc_fixed_risk": "Fixed-Risk",
+        "notv": "No-TV",
+        "notv_cl": "Centerline",
+    }
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    plotted_any = False
+
+    for policy in plot_policies:
+        if policy not in matched:
+            continue
+        pkl_path = os.path.join(matched[policy], "scenario_result.pkl")
+        if not os.path.exists(pkl_path):
+            continue
+        sr = load_scenario_result(pkl_path)
+        xy = sr.ego_closed_loop_trajectory.state_trajectory[:, 1:3]
+        ax.plot(xy[:, 0], xy[:, 1],
+                linewidth=2.2,
+                color=color_map.get(policy, None),
+                label=label_map.get(policy, policy))
+        plotted_any = True
+
+    if not plotted_any:
+        raise RuntimeError("No policy trajectories were plotted; check result folders and policy names.")
+
+    if tv_source_policy in matched:
+        pkl_path = os.path.join(matched[tv_source_policy], "scenario_result.pkl")
+        if os.path.exists(pkl_path):
+            sr_tv = load_scenario_result(pkl_path)
+            for idx, tv in enumerate(sr_tv.tv_closed_loop_trajectories):
+                xy = tv.state_trajectory[:, 1:3]
+                ax.plot(xy[:, 0], xy[:, 1], "k--", linewidth=1.2, alpha=0.8,
+                        label="Target vehicle" if idx == 0 else None)
+
+    ax.set_title(f"{plot_scenario}, ego_init_{plot_init:02d}")
+    ax.set_xlabel("x [m]")
+    ax.set_ylabel("y [m]")
+    ax.grid(True, alpha=0.25)
+    ax.axis("equal")
+    ax.legend(loc="best")
+    fig.tight_layout()
+
+    out_png = os.path.join(results_dir, f"{out_name}.png")
+    out_svg = os.path.join(results_dir, f"{out_name}.svg")
+    fig.savefig(out_png, dpi=220, bbox_inches="tight")
+    fig.savefig(out_svg, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved trajectory plots:\n- {out_png}\n- {out_svg}")
+
+
+def _load_policy_data(matched, policy):
+    pkl_path = os.path.join(matched[policy], "scenario_result.pkl")
+    sr = load_scenario_result(pkl_path)
+    return sr
+
+
+def make_paper_timeseries_plot(results_dir,
+                               plot_scenario="scenario_01",
+                               plot_init=1,
+                               proposed_policy="smpc_var_risk",
+                               baseline_policy="smpc_open_loop",
+                               cl_policy="notv_cl",
+                               out_name="paper_timeseries"):
+    all_dirs = sorted(glob.glob(os.path.join(results_dir, "scenario_*_ego_init_*")))
+    if not all_dirs:
+        raise RuntimeError(f"No scenario result folders found under: {results_dir}")
+
+    matched = {}
+    for d in all_dirs:
+        parsed = _parse_scenario_dir_name(d)
+        if parsed is None:
+            continue
+        scenario_name, init_num, policy = parsed
+        if scenario_name == plot_scenario and init_num == plot_init:
+            matched[policy] = d
+
+    required = [proposed_policy, baseline_policy, cl_policy]
+    missing = [p for p in required if p not in matched]
+    if missing:
+        raise RuntimeError(f"Missing required policies for panel plot: {missing}")
+
+    sr_prop = _load_policy_data(matched, proposed_policy)
+    sr_base = _load_policy_data(matched, baseline_policy)
+    sr_cl = _load_policy_data(matched, cl_policy)
+
+    _, s_prop, ey_prop, epsi_prop = sr_prop.compute_ego_frenet_projection(sr_cl)
+    _, s_base, ey_base, epsi_base = sr_base.compute_ego_frenet_projection(sr_cl)
+
+    v_prop = sr_prop.ego_closed_loop_trajectory.state_trajectory[:, -1]
+    v_base = sr_base.ego_closed_loop_trajectory.state_trajectory[:, -1]
+    a_prop = sr_prop.ego_closed_loop_trajectory.input_trajectory[:, 0]
+    a_base = sr_base.ego_closed_loop_trajectory.input_trajectory[:, 0]
+    st_prop = np.degrees(sr_prop.ego_closed_loop_trajectory.input_trajectory[:, -1])
+    st_base = np.degrees(sr_base.ego_closed_loop_trajectory.input_trajectory[:, -1])
+
+    # Align station to start at zero.
+    s_prop = np.array(s_prop) - s_prop[0]
+    s_base = np.array(s_base) - s_base[0]
+
+    # Light smoothing for paper-style curves.
+    def smooth(arr, k):
+        if len(arr) < k:
+            return arr
+        ker = np.ones(k) / float(k)
+        return np.convolve(np.array(arr).squeeze(), ker, mode="same")
+
+    ey_prop_s = smooth(ey_prop, 5)
+    ey_base_s = smooth(ey_base, 5)
+    epsi_prop_s = np.degrees(smooth(epsi_prop, 5))
+    epsi_base_s = np.degrees(smooth(epsi_base, 5))
+    v_prop_s = smooth(v_prop, 20)
+    v_base_s = smooth(v_base, 20)
+    a_prop_s = smooth(a_prop, 20)
+    a_base_s = smooth(a_base, 20)
+    st_prop_s = smooth(st_prop, 5)
+    st_base_s = smooth(st_base, 5)
+
+    fig, axes = plt.subplots(5, 1, figsize=(9, 14), sharex=False)
+
+    axes[0].plot(s_prop, np.ones_like(s_prop) * 3.6, "k--", linewidth=1.3, label=r"$e_y^{ref}$")
+    axes[0].plot(s_prop, ey_prop_s, "b", linewidth=2.1, label="Proposed")
+    axes[0].plot(s_base, ey_base_s, "r--", linewidth=2.1, label="Open-Loop")
+    axes[0].set_ylabel(r"$e_y$ [m]")
+    axes[0].grid(True, alpha=0.25)
+    axes[0].legend(loc="best")
+
+    axes[1].plot(s_prop, epsi_prop_s, "b", linewidth=2.1)
+    axes[1].plot(s_base, epsi_base_s, "r--", linewidth=2.1)
+    axes[1].set_ylabel(r"$e_\psi$ [deg]")
+    axes[1].grid(True, alpha=0.25)
+
+    axes[2].plot(s_prop, v_prop_s, "b", linewidth=2.1)
+    axes[2].plot(s_base, v_base_s, "r--", linewidth=2.1)
+    axes[2].set_ylabel("Speed [m/s]")
+    axes[2].grid(True, alpha=0.25)
+
+    axes[3].plot(s_prop, st_prop_s, "b", linewidth=2.1)
+    axes[3].plot(s_base, st_base_s, "r--", linewidth=2.1)
+    axes[3].set_ylabel("Steer [deg]")
+    axes[3].grid(True, alpha=0.25)
+
+    axes[4].plot(s_prop, a_prop_s, "b", linewidth=2.1)
+    axes[4].plot(s_base, a_base_s, "r--", linewidth=2.1)
+    axes[4].set_ylabel(r"$a$ [m/s$^2$]")
+    axes[4].set_xlabel("Station [m]")
+    axes[4].grid(True, alpha=0.25)
+
+    fig.suptitle(f"{plot_scenario}, ego_init_{plot_init:02d}", y=0.995)
+    fig.tight_layout()
+    out_png = os.path.join(results_dir, f"{out_name}.png")
+    out_svg = os.path.join(results_dir, f"{out_name}.svg")
+    fig.savefig(out_png, dpi=220, bbox_inches="tight")
+    fig.savefig(out_svg, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved paper panel plots:\n- {out_png}\n- {out_svg}")
             
 def normalize_by_notv(df):
     # Compute metrics that involve normalizing by the notv scenario execution.
@@ -265,6 +466,24 @@ if __name__ == '__main__':
     parser.add_argument("--results_dir", default=None, help="Results directory. Defaults to <core>/results.")
     parser.add_argument("--compute_metrics", action="store_true", help="Compute and save csv metrics.")
     parser.add_argument("--make_traj_viz", action="store_true", help="Render trajectory visualization.")
+    parser.add_argument("--make_traj_map", action="store_true", help="Save paper-style XY trajectory map.")
+    parser.add_argument("--make_paper_panel", action="store_true",
+                        help="Save 5-panel paper-style curves (ey/epsi/v/steer/a).")
+    parser.add_argument("--plot_scenario", default="scenario_01", help="Scenario name, e.g. scenario_01.")
+    parser.add_argument("--plot_init", type=int, default=1, help="Init index, e.g. 1 for ego_init_01.")
+    parser.add_argument("--plot_policies", nargs="+",
+                        default=["smpc_var_risk", "smpc_open_loop", "smpc_fixed_risk", "notv", "notv_cl"],
+                        help="Policies to render on trajectory map.")
+    parser.add_argument("--tv_source_policy", default="smpc_var_risk",
+                        help="Which policy result to use for target-vehicle trajectories.")
+    parser.add_argument("--traj_map_name", default="trajectory_map", help="Output filename prefix.")
+    parser.add_argument("--panel_proposed_policy", default="smpc_var_risk",
+                        help="Proposed policy name for paper panel.")
+    parser.add_argument("--panel_baseline_policy", default="smpc_open_loop",
+                        help="Baseline policy name for paper panel.")
+    parser.add_argument("--panel_centerline_policy", default="notv_cl",
+                        help="Centerline/no-TV-CL policy name for Frenet reference.")
+    parser.add_argument("--paper_panel_name", default="paper_panel", help="Paper panel output filename prefix.")
     args = parser.parse_args()
 
     results_dir = (
@@ -287,3 +506,24 @@ if __name__ == '__main__':
 
     if make_traj_viz:
         make_trajectory_viz_plot(results_dir)
+
+    if args.make_traj_map:
+        make_trajectory_map_plot(
+            results_dir=results_dir,
+            plot_scenario=args.plot_scenario,
+            plot_init=args.plot_init,
+            plot_policies=args.plot_policies,
+            tv_source_policy=args.tv_source_policy,
+            out_name=args.traj_map_name,
+        )
+
+    if args.make_paper_panel:
+        make_paper_timeseries_plot(
+            results_dir=results_dir,
+            plot_scenario=args.plot_scenario,
+            plot_init=args.plot_init,
+            proposed_policy=args.panel_proposed_policy,
+            baseline_policy=args.panel_baseline_policy,
+            cl_policy=args.panel_centerline_policy,
+            out_name=args.paper_panel_name,
+        )
