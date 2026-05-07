@@ -151,7 +151,7 @@ class SemanticRasterizer:
             # Plot traffic lights.
             for (tl_id, tl_info) in agent_history.traffic_lights.items():
                 tl_xy = convert_world_coords_to_pixels(np.array(tl_info[:2]).reshape(1,2), world_to_pixel)
-                tl_xy = np.round(tl_xy, 0).astype(np.int).flatten()
+                tl_xy = np.round(tl_xy, 0).astype(int).flatten()
                 cv2.circle(img, tuple(tl_xy), self.tl_radius, self.tl_colors[tl_info[2]], -1) # TL visualized.
 
         # Plot lane centerlines.
@@ -164,8 +164,8 @@ class SemanticRasterizer:
                 angle_px = np.arctan2(-d_px[1], d_px[0]) # minus sign since image coord y-axis is downward facing
                 color = angle_to_color(angle_px)
 
-                start_px = tuple( np.round(start_px, 0).astype(np.int) )
-                end_px   = tuple( np.round(end_px, 0).astype(np.int) )
+                start_px = tuple(np.round(start_px, 0).astype(int))
+                end_px   = tuple(np.round(end_px, 0).astype(int))
                 cv2.line(img, start_px, end_px, color, thickness = 5)
 
         return img

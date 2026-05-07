@@ -9,7 +9,7 @@ CV2_SHIFT_VALUE = 2 ** CV2_SHIFT
 
 def cv2_subpixel(coords):
 	coords = coords * CV2_SHIFT_VALUE
-	return coords.astype(np.int)
+	return coords.astype(int)
 
 def convert_world_coords_to_pixels(world_coords, world_to_pixel):
 	# world_coords: N_pts by 2 matrix of XY coordinates
