@@ -297,7 +297,7 @@ PY
 
 ## 7. 运行论文核心实验（三策略）
 
-# 7.1. 使用gurobi
+### 7.1 使用 Gurobi 原始路径
 
 ```bash
 export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
@@ -307,15 +307,19 @@ python run_all_scenarios.py \
   --scenario_glob "scenario_0*.json" \
   --init_glob "ego_init_*.json" \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
+  --solver_backend gurobi \
   --with_notv \
   --with_notv_cl
 ```
 
-# 7.2. 不使用gurobi
+这是最接近论文原始 `SMPC_MMPreds` 的路径，依赖 CasADi 的 Gurobi conic 插件和有效 Gurobi 许可。
+
+### 7.2 无 Gurobi 近似路径
 
 ```bash
 export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
 
+cd ~/autodl-tmp/Research-Project-IMLS/core/scripts/carla
 python run_all_scenarios.py \
   --scenario_glob "scenario_0*.json" \
   --init_glob "ego_init_*.json" \
@@ -324,6 +328,8 @@ python run_all_scenarios.py \
   --with_notv \
   --with_notv_cl
 ```
+
+`ipopt_approx` 会把三种 SMPC 策略映射到 IPOPT 近似 agent，输出目录会自动带 `_ipopt_approx` 后缀，例如 `scenario_01_ego_init_01_smpc_var_risk_ipopt_approx`。报告中应明确说明该路径保留论文核心思想和趋势对比目标，但不保证与原始 Gurobi 路径逐数值一致。
 
 ---
 
@@ -339,6 +345,30 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py --compute_metrics
 - `core/results/df_full.csv`
 - `core/results/df_norm.csv`
 - `core/results/df_final.csv`
+
+若要给无 Gurobi 结果生成论文风格图，策略名需要使用 `_ipopt_approx` 后缀：
+
+```bash
+cd ~/autodl-tmp/Research-Project-IMLS/core
+
+MPLBACKEND=Agg python scripts/compute_scenario_results.py \
+  --make_traj_map \
+  --plot_scenario scenario_01 \
+  --plot_init 1 \
+  --plot_policies smpc_var_risk_ipopt_approx smpc_open_loop_ipopt_approx smpc_fixed_risk_ipopt_approx notv notv_cl \
+  --tv_source_policy smpc_var_risk_ipopt_approx \
+  --traj_map_name trajectory_map_ipopt_approx
+
+MPLBACKEND=Agg python scripts/compute_scenario_results.py \
+  --make_paper_panel \
+  --plot_scenario scenario_01 \
+  --plot_init 1 \
+  --panel_proposed_policy smpc_var_risk_ipopt_approx \
+  --panel_baseline_policy smpc_open_loop_ipopt_approx \
+  --panel_centerline_policy notv_cl \
+  --paper_panel_name paper_panel_ipopt_approx
+```
+
 
 ---
 
@@ -377,6 +407,7 @@ bash run_modern_reproduction.sh
 | `Version mismatch: Client=0.9.15, Simulator=0.9.14` | `pip install carla==0.9.14`，与服务端版本保持一致             |
 | `import carla` 失败                                   | 确认在 `carla_modern` 环境中，`pip install carla==0.9.14` |
 | 连接超时                                                | CARLA 还没启动完，多等 1~2 分钟后重试                           |
+| `Plugin 'gurobi' is not found`                        | 没有 Gurobi/CasADi 插件；使用 `--solver_backend ipopt_approx`，或安装并配置 Gurobi |
 
 
 ---
