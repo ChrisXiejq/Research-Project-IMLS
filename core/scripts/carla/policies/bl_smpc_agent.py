@@ -34,12 +34,13 @@ class BLSMPCAgent(object):
         self.world   = vehicle.get_world()
         carla_map     = self.world.get_map()
         try:
+            # CARLA >= 0.9.13 constructor takes (map, sampling_resolution).
+            planner = GlobalRoutePlanner(carla_map, 0.5)
+        except TypeError:
+            # Older CARLA versions require a DAO object and explicit setup().
             from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
             planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(carla_map, 0.5))
             planner.setup()
-        except ModuleNotFoundError:
-            # CARLA >= 0.9.13 removed DAO, constructor takes (map, resolution).
-            planner = GlobalRoutePlanner(carla_map, 0.5)
 
         # Get the high-level route using Carla's API (basically A* search over road segments).
         init_waypoint = carla_map.get_waypoint(self.vehicle.get_location(), project_to_road=True, lane_type=(carla.LaneType.Driving))

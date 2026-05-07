@@ -49,12 +49,13 @@ class SMPCAgent(object):
         self.N=N
         self.N_modes=N_modes
         try:
+            # CARLA >= 0.9.13 constructor takes (map, sampling_resolution).
+            self.planner = GlobalRoutePlanner(self.map, 0.5)
+        except TypeError:
+            # Older CARLA versions require a DAO object and explicit setup().
             from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
             self.planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(self.map, 0.5))
             self.planner.setup()
-        except ModuleNotFoundError:
-            # CARLA >= 0.9.13 removed DAO, constructor takes (map, resolution).
-            self.planner = GlobalRoutePlanner(self.map, 0.5)
         self.lf, self.lr = vehicle_name_to_lf_lr(self.vehicle.type_id)
         self._low_level_control = LowLevelControl(vehicle)
         self.time=0

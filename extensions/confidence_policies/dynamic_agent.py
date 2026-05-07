@@ -26,11 +26,11 @@ class DynamicAgent(ABC):
         world = vehicle.get_world()
         carla_map = world.get_map()
         try:
+            planner = GlobalRoutePlanner(carla_map, 0.5)
+        except TypeError:
             from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
             planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(carla_map, 0.5))
             planner.setup()
-        except ModuleNotFoundError:
-            planner = GlobalRoutePlanner(carla_map, 0.5)
 
         # Get the high-level route using Carla's API (basically A* search over road segments).
         init_waypoint = carla_map.get_waypoint(vehicle.get_location(), project_to_road=True, lane_type=(carla.LaneType.Driving))
