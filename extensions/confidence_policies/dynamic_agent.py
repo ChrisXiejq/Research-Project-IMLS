@@ -9,9 +9,8 @@ CARLA_ROOT = os.getenv("CARLA_ROOT")
 if CARLA_ROOT is None:
     raise ValueError("CARLA_ROOT must be defined.")
 
-sys.path.append(CARLA_ROOT + "PythonAPI/carla/agents/")
+sys.path.append(CARLA_ROOT + "/PythonAPI/carla/agents/")
 from navigation.global_route_planner import GlobalRoutePlanner
-from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
 
 scriptdir = os.path.abspath(__file__).split('carla')[0] + 'carla/'
 sys.path.append(scriptdir)
@@ -26,8 +25,12 @@ class DynamicAgent(ABC):
 
         world = vehicle.get_world()
         carla_map = world.get_map()
-        planner = GlobalRoutePlanner( GlobalRoutePlannerDAO(carla_map, sampling_resolution=0.5) )
-        planner.setup()
+        try:
+            from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
+            planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(carla_map, sampling_resolution=0.5))
+            planner.setup()
+        except ModuleNotFoundError:
+            planner = GlobalRoutePlanner(carla_map, 0.5)
 
         # Get the high-level route using Carla's API (basically A* search over road segments).
         init_waypoint = carla_map.get_waypoint(vehicle.get_location(), project_to_road=True, lane_type=(carla.LaneType.Driving))

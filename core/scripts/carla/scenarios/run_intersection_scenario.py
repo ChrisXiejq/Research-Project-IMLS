@@ -41,7 +41,7 @@ class CarlaParams:
     # Carla client settings.
     ip_addr        : str   = "localhost"
     port           : int   = 2000
-    timeout_period : float = 2.0
+    timeout_period : float = 120.0
 
 @dataclass(frozen=True)
 class DroneVizParams:
@@ -452,7 +452,12 @@ class RunIntersectionScenario:
     def _setup_carla_world(self, carla_params):
         client = carla.Client(carla_params.ip_addr, carla_params.port)
         client.set_timeout(carla_params.timeout_period)
-        self.world = client.load_world(carla_params.map_str)
+        try:
+            self.world = client.load_world(carla_params.map_str)
+        except RuntimeError:
+            # In headless/nullrhi mode map loading can be slow on cold start.
+            client.set_timeout(max(carla_params.timeout_period, 300.0))
+            self.world = client.load_world(carla_params.map_str)
         self.world.set_weather(getattr(carla.WeatherParameters, "ClearNoon"))
 
     def _setup_camera(self, drone_viz_params):

@@ -13,7 +13,6 @@ if CARLA_ROOT is None:
 
 sys.path.append(CARLA_ROOT + "/PythonAPI/carla/agents/")
 from navigation.global_route_planner import GlobalRoutePlanner
-from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
 
 scriptdir = os.path.abspath(__file__).split('scripts')[0] + 'scripts/'
 sys.path.append(scriptdir)
@@ -49,8 +48,13 @@ class SMPCAgent(object):
         self.nominal_speed_mps  = nominal_speed_mps
         self.N=N
         self.N_modes=N_modes
-        self.planner = GlobalRoutePlanner( GlobalRoutePlannerDAO(self.map, sampling_resolution=0.5) )
-        self.planner.setup()
+        try:
+            from navigation.global_route_planner_dao import GlobalRoutePlannerDAO
+            self.planner = GlobalRoutePlanner(GlobalRoutePlannerDAO(self.map, sampling_resolution=0.5))
+            self.planner.setup()
+        except ModuleNotFoundError:
+            # CARLA >= 0.9.13 removed DAO, constructor takes (map, resolution).
+            self.planner = GlobalRoutePlanner(self.map, 0.5)
         self.lf, self.lr = vehicle_name_to_lf_lr(self.vehicle.type_id)
         self._low_level_control = LowLevelControl(vehicle)
         self.time=0
