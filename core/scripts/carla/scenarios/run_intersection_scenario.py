@@ -264,7 +264,9 @@ class RunIntersectionScenario:
         try:
             self._setup_carla_world(carla_params)
             self._setup_vehicles(vehicle_params_list, carla_params)
-            self._setup_camera(drone_viz_params)
+            self.use_camera = drone_viz_params.visualize_opencv or drone_viz_params.save_avi
+            if self.use_camera:
+                self._setup_camera(drone_viz_params)
             self._setup_predictions(prediction_params)
         except Exception as e:
             print("Failed to setup the scenario!")
@@ -306,7 +308,8 @@ class RunIntersectionScenario:
                                       "solve_times"      : []}
 
         try:
-            with CarlaSyncMode(self.world, self.drone, fps=self.carla_fps) as sync_mode:
+            sensors = [self.drone] if self.use_camera else []
+            with CarlaSyncMode(self.world, *sensors, fps=self.carla_fps) as sync_mode:
                 # Run simulation a couple steps to allow the initial velocities to be processed.
 
                 # Set initial velocity for all vehicle agents.
@@ -322,7 +325,9 @@ class RunIntersectionScenario:
 
                 # Loop until all vehicles have reached their goal or we've exceeded self.max_iters.
                 for _ in range(self.max_iters):
-                    snap, img = sync_mode.tick(timeout=self.timeout)
+                    tick_data = sync_mode.tick(timeout=self.timeout)
+                    snap = tick_data[0]
+                    img = tick_data[1] if self.use_camera else None
 
                     # Handle predictions.
                     self.agent_history.update(snap, self.world)
@@ -353,38 +358,38 @@ class RunIntersectionScenario:
                             ego_speed = np.linalg.norm([ego_vel.x, ego_vel.y])
                             ego_ctrl  = control
 
-                    # Get drone camera image.
-                    img_drone = np.frombuffer(img.raw_data, dtype=np.uint8)
-                    img_drone = np.reshape(img_drone, (img.height, img.width, 4))
-                    img_drone = img_drone[:, :, :3]
-                    img_drone = cv2.resize(img_drone, (self.viz_params.img_width, self.viz_params.img_height), interpolation = cv2.INTER_AREA)
+                    if self.use_camera:
+                        # Get drone camera image.
+                        img_drone = np.frombuffer(img.raw_data, dtype=np.uint8)
+                        img_drone = np.reshape(img_drone, (img.height, img.width, 4))
+                        img_drone = img_drone[:, :, :3]
+                        img_drone = cv2.resize(img_drone, (self.viz_params.img_width, self.viz_params.img_height), interpolation = cv2.INTER_AREA)
 
-                    # Handle overlays on drone camera image.
-                    if self.viz_params.overlay_ego_info:
-                        ego_str = f"EGO - v:{ego_speed:.3f}, th: {ego_ctrl.throttle:.2f}, bk: {ego_ctrl.brake:.2f}, st: {ego_ctrl.steer:.2f}"
-                        cv2.putText(img_drone, ego_str, (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                        # Handle overlays on drone camera image.
+                        if self.viz_params.overlay_ego_info:
+                            ego_str = f"EGO - v:{ego_speed:.3f}, th: {ego_ctrl.throttle:.2f}, bk: {ego_ctrl.brake:.2f}, st: {ego_ctrl.steer:.2f}"
+                            cv2.putText(img_drone, ego_str, (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-                    if self.viz_params.overlay_gmm:
-                        if tvs_valid_pred[0]: # TODO: generalize this to multiple TVs.
-                            self._viz_gmm(img_drone, tvs_mode_dists)
+                        if self.viz_params.overlay_gmm:
+                            if tvs_valid_pred[0]: # TODO: generalize this to multiple TVs.
+                                self._viz_gmm(img_drone, tvs_mode_dists)
 
-                    if self.viz_params.overlay_traj_hist:
-                        self._viz_traj_hist(img_drone)
+                        if self.viz_params.overlay_traj_hist:
+                            self._viz_traj_hist(img_drone)
 
-                    if self.viz_params.overlay_mode_probs:
-                        if tvs_valid_pred[0]: # TODO: generalize this to multiple TVs.
-                            cv2.putText(img_drone, "Mode probabilities: ", (50,100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                            for prob_idx, mode_prob in enumerate(tvs_mode_probs[0]):
-                                cv2.putText(img_drone, f"{mode_prob:.3f}",
-                                            (360 + prob_idx * 100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, self.mode_rgb_colors[prob_idx], 2)
+                        if self.viz_params.overlay_mode_probs:
+                            if tvs_valid_pred[0]: # TODO: generalize this to multiple TVs.
+                                cv2.putText(img_drone, "Mode probabilities: ", (50,100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                                for prob_idx, mode_prob in enumerate(tvs_mode_probs[0]):
+                                    cv2.putText(img_drone, f"{mode_prob:.3f}",
+                                                (360 + prob_idx * 100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, self.mode_rgb_colors[prob_idx], 2)
 
+                        # Handle visualization / saving to video.
+                        if self.viz_params.visualize_opencv:
+                            cv2.imshow("Drone", img_drone); cv2.waitKey(1)
 
-                    # Handle visualization / saving to video.
-                    if self.viz_params.visualize_opencv:
-                        cv2.imshow("Drone", img_drone); cv2.waitKey(1)
-
-                    if self.viz_params.save_avi:
-                        writer.write(img_drone)
+                        if self.viz_params.save_avi:
+                            writer.write(img_drone)
 
                     if completed:
                         # All cars reached their destinations, end before self.max_iters.
@@ -407,7 +412,8 @@ class RunIntersectionScenario:
                 writer.release()
             for actor in self.vehicle_actors:
                 actor.destroy()
-            self.drone.destroy()
+            if self.use_camera:
+                self.drone.destroy()
             cv2.destroyAllWindows()
 
         return ran_successfully

@@ -6,7 +6,16 @@ import argparse
 
 
 
-def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False):
+def _prepare_drone_viz_params(scenario_dict, enable_camera_viz=False):
+    drone_viz_dict = dict(scenario_dict["drone_viz_params"])
+    if not enable_camera_viz:
+        # Headless AutoDL runs are more stable without RGB camera sensors.
+        drone_viz_dict["visualize_opencv"] = False
+        drone_viz_dict["save_avi"] = False
+    return drone_viz_dict
+
+
+def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, enable_camera_viz=False):
     if scene =="intersection":
         from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
     else:
@@ -14,7 +23,7 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False):
 
 
     carla_params     = CarlaParams(**scenario_dict["carla_params"])
-    drone_viz_params = DroneVizParams(**scenario_dict["drone_viz_params"])
+    drone_viz_params = DroneVizParams(**_prepare_drone_viz_params(scenario_dict, enable_camera_viz))
     pred_params      = PredictionParams()
 
     vehicles_params_list = []
@@ -51,7 +60,7 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False):
     
     runner.run_scenario()
 
-def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir):
+def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir, enable_camera_viz=False):
     if scene =="intersection":
         from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
     else:
@@ -59,7 +68,7 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
     
     
     carla_params     = CarlaParams(**scenario_dict["carla_params"])
-    drone_viz_params = DroneVizParams(**scenario_dict["drone_viz_params"])
+    drone_viz_params = DroneVizParams(**_prepare_drone_viz_params(scenario_dict, enable_camera_viz))
     pred_params      = PredictionParams()
 
     vehicles_params_list = []
@@ -122,6 +131,8 @@ if __name__ == '__main__':
                         help="Also run no-TV reference rollout.")
     parser.add_argument("--with_notv_cl", action="store_true",
                         help="Also run no-TV centerline rollout.")
+    parser.add_argument("--enable_camera_viz", action="store_true",
+                        help="Enable CARLA RGB camera sensor and avi/opencv visualization. Disabled by default for AutoDL stability.")
     args = parser.parse_args()
 
     scenario_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/")
@@ -156,14 +167,14 @@ if __name__ == '__main__':
             if args.with_notv:
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_notv")
                 print(f"Running {scenario_name} {ego_init_name} notv")
-                run_without_tvs(scene, scenario_dict, ego_init_dict, savedir)
+                run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, enable_camera_viz=args.enable_camera_viz)
 
             if args.with_notv_cl:
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_notv_cl")
                 print(f"Running {scenario_name} {ego_init_name} notv_cl")
-                run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=True)
+                run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=True, enable_camera_viz=args.enable_camera_viz)
 
             for ego_policy_config in args.policies:
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_{ego_policy_config}")
                 print(f"Running {scenario_name} {ego_init_name} {ego_policy_config}")
-                run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir)
+                run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir, enable_camera_viz=args.enable_camera_viz)
