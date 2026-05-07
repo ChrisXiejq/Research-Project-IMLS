@@ -7,7 +7,7 @@ dependencies:
   - numpy=1.24.4
   - scipy=1.10.1
   - pandas=2.0.3
-  - matplotlib=3.7.5
+  - matplotlib=3.7.3
   - pip:
       - tensorflow==2.13.1
       - casadi==3.6.5
