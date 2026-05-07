@@ -14,7 +14,7 @@ python run_all_scenarios.py \
 
 echo "[2/3] Computing aggregated metrics..."
 cd "$ROOT_DIR/core"
-python scripts/compute_scenario_results.py
+MPLBACKEND=Agg python scripts/compute_scenario_results.py --compute_metrics
 
 echo "[3/3] Done. Check outputs under:"
 echo "  $ROOT_DIR/core/results"

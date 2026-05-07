@@ -10,16 +10,9 @@ import numpy as np
 import random
 import pickle
 
-CARLA_ROOT = os.getenv("CARLA_ROOT")
-if CARLA_ROOT is None:
-    raise ValueError("CARLA_ROOT must be defined.")
-
-scriptdir = CARLA_ROOT + "/PythonAPI"
-sys.path.append(scriptdir)
-from examples.synchronous_mode import CarlaSyncMode
-
 scriptdir = os.path.abspath(__file__).split('carla')[0] + 'carla/'
 sys.path.append(scriptdir)
+from utils.carla_sync_mode import CarlaSyncMode
 
 from policies.static_agent import StaticAgent
 from policies.smpc_agent import SMPCAgent

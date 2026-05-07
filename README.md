@@ -7,12 +7,13 @@
 
 - `core/`：主实验代码（基于 `SMPC_MMPreds`，含 SMPC 三策略、CARLA 场景、预训练 MultiPath 资产）
 - `extensions/`：来自 `confidence_aware_predictions` 的扩展模块（用于后续校准/预测侧增强）
-- `docs/AutoDL_Environment_Setup.md`：你已验证过的 AutoDL 环境搭建手册
+- `docs/AutoDL_Environment_Setup.md`：保守复现环境手册（旧版依赖）
+- `docs/AutoDL_Modern_Setup.md`：现代稳定版复现入口（推荐）
 - `tools/assemble_from_sources.py`：从源仓重组当前工作区的脚本
 
 ## 复现实验步骤（基础版，完整可跑）
 
-1. 先按 `docs/AutoDL_Environment_Setup.md` 搭好环境（CARLA、conda、Gurobi）。
+1. 先按环境手册搭好环境（推荐 `docs/AutoDL_Modern_Setup.md`）。
 2. 启动 CARLA 服务端（单独终端）：
    - `cd $CARLA_ROOT && ./CarlaUE4.sh -RenderOffScreen -quality-level=Low`
 3. 运行三策略批量实验（客户端终端）：
@@ -31,5 +32,6 @@
 ## 重要说明
 
 - 当前 `core/` 已包含运行实验所需的 MultiPath 部署模型与 anchors。
+- 现代化一键入口：`bash run_modern_reproduction.sh`
 - 若你更新了源仓，执行以下命令重组：
   - `python tools/assemble_from_sources.py`

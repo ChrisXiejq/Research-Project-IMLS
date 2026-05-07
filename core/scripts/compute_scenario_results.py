@@ -1,6 +1,7 @@
 import os
 import re
 import glob
+import argparse
 import numpy as np
 import pandas as pd
 import pdb
@@ -260,9 +261,19 @@ def aggregate(df):
     return pd.DataFrame(df_aggregate)
 
 if __name__ == '__main__':
-    compute_metrics = False
-    make_traj_viz   = True
-    results_dir = os.path.join(os.path.abspath(__file__).split('scripts')[0], 'results/')
+    parser = argparse.ArgumentParser(description="Aggregate CARLA scenario results.")
+    parser.add_argument("--results_dir", default=None, help="Results directory. Defaults to <core>/results.")
+    parser.add_argument("--compute_metrics", action="store_true", help="Compute and save csv metrics.")
+    parser.add_argument("--make_traj_viz", action="store_true", help="Render trajectory visualization.")
+    args = parser.parse_args()
+
+    results_dir = (
+        os.path.join(os.path.abspath(__file__).split('scripts')[0], 'results/')
+        if args.results_dir is None
+        else os.path.abspath(args.results_dir)
+    )
+    compute_metrics = args.compute_metrics
+    make_traj_viz = args.make_traj_viz
 
     if compute_metrics:
         dataframe = get_metric_dataframe(results_dir)
