@@ -19,6 +19,9 @@ CARLA_ROOT = os.getenv("CARLA_ROOT")
 if CARLA_ROOT is None:
     raise ValueError("CARLA_ROOT must be defined.")
 
+# CARLA 0.9.x: global_route_planner does "from agents.navigation...";
+# that requires PythonAPI/carla on sys.path (parent of the agents package).
+sys.path.insert(0, CARLA_ROOT + "/PythonAPI/carla")
 sys.path.append(CARLA_ROOT + "/PythonAPI/carla/agents/")
 from navigation.global_route_planner import GlobalRoutePlanner
 

@@ -116,23 +116,112 @@ PY
 
 ---
 
-## 3. Gurobi 许可检查（SMPC 必需）
+## 3. Gurobi 安装与许可（论文 `gurobi` 路径必需）
+
+本节为 **2026-05-12 在 AutoDL 上已验证成功** 的方案：**Gurobi Optimizer 11.0.3（Linux x64）+ `gurobipy==11.0.3` + WLS 许可文件**，与当前手册中的 **`carla_modern`（Python 3.8）** 一致，无需为 Gurobi 单独再建 Python 3.10 环境。
+
+### 3.1 为何用 11.0.3 而不是 13
+
+- **`carla_modern` 使用 Python 3.8** 时，公共 PyPI 上的 **`gurobipy` 通常最高到 11.0.3**，无法直接 `pip install gurobipy==13.x`。
+- Gurobi **13** 的安装包内往往 **不再自带** `linux64/python` 目录，需从 `https://pypi.gurobi.com/simple` 安装 `gurobipy`；在部分 AutoDL 网络环境下该索引可能解析失败。
+- **结论**：在 Python 3.8 实验环境下，**优先使用 Gurobi 11.0.3 + `gurobipy==11.0.3`**；CasADi 仍通过 `solver("gurobi", ...)` 调用，与论文实现方式一致。
+
+> **许可版本**：请确认你的 `gurobi.lic`（WLS）允许使用 **Gurobi 11**。若许可仅绑定 Gurobi 13，则不能换用 11，应改为 **Python 3.10+ 新环境 + Gurobi 13**。
+
+### 3.2 文件放置（建议放在仓库 `gurobi/` 下，且勿提交密钥到 Git）
+
+在仓库根目录 `Research-Project-IMLS/gurobi/` 中准备：
+
+| 文件 | 说明 |
+|------|------|
+| `gurobi11.0.3_linux64.tar.gz` | 从 [Gurobi 下载页](https://www.gurobi.com/downloads/gurobi-software/) 选择 **Gurobi Optimizer → x64 Linux → 11.0.3** |
+| `gurobi.lic` | 门户生成的 **WLS** 许可文件（含 `WLSACCESSID` / `WLSSECRET` / `LICENSEID` 等，**勿推送到公开仓库**） |
+
+### 3.3 解压与定位 `linux64`
+
+```bash
+export REPO=~/autodl-tmp/Research-Project-IMLS
+cd "$REPO/gurobi"
+tar -xzf gurobi11.0.3_linux64.tar.gz
+find "$REPO/gurobi" -maxdepth 3 -type d -name linux64
+```
+
+常见输出为：`.../gurobi1103/linux64`（以 `find` 实际结果为准，下文用该路径）。
+
+### 3.4 环境变量（每次跑 `--solver_backend gurobi` 前执行）
+
+将 `GUROBI_HOME` 改为上一步 `find` 给出的 **`.../linux64`** 路径：
+
+```bash
+export REPO=~/autodl-tmp/Research-Project-IMLS
+export GUROBI_HOME="$REPO/gurobi/gurobi1103/linux64"
+export PATH="$GUROBI_HOME/bin:$PATH"
+export LD_LIBRARY_PATH="$GUROBI_HOME/lib:${LD_LIBRARY_PATH:-}"
+export GRB_LICENSE_FILE="$REPO/gurobi/gurobi.lic"
+```
+
+### 3.5 安装 Python 接口 `gurobipy`
+
+```bash
+source /root/miniconda3/etc/profile.d/conda.sh
+conda activate carla_modern
+pip install -U pip
+pip install gurobipy==11.0.3 -i https://pypi.org/simple
+```
+
+### 3.6 一键加载脚本（可选，放在持久盘 `autodl-tmp`）
+
+```bash
+cat > /root/autodl-tmp/load_gurobi11.sh <<'EOF'
+#!/usr/bin/env bash
+export REPO=/root/autodl-tmp/Research-Project-IMLS
+export GUROBI_HOME="$REPO/gurobi/gurobi1103/linux64"
+export PATH="$GUROBI_HOME/bin:$PATH"
+export LD_LIBRARY_PATH="$GUROBI_HOME/lib:${LD_LIBRARY_PATH:-}"
+export GRB_LICENSE_FILE="$REPO/gurobi/gurobi.lic"
+EOF
+chmod +x /root/autodl-tmp/load_gurobi11.sh
+```
+
+之后每次实验：
+
+```bash
+source /root/autodl-tmp/load_gurobi11.sh
+conda activate carla_modern
+```
+
+### 3.7 许可与求解自检（成功标志）
 
 ```bash
 python - <<'PY'
 import gurobipy as gp
 from gurobipy import GRB
+print("gurobipy", gp.gurobi.version())
+
 m = gp.Model("smoke")
 x = m.addVar(lb=0.0, name="x")
 m.setObjective(x, GRB.MINIMIZE)
 m.optimize()
 print("status =", m.Status)
-print("sol_count =", m.SolCount)
 print("gurobi_ok")
 PY
 ```
 
-若报 `License expired`，先完成许可证更新，再继续后续步骤（否则 SMPC 无法求解）。
+- 日志中应出现 **Gurobi Optimizer version 11.0.3**，并打印 **Academic license** / **WLS** 相关信息。
+- **`status = 2`** 表示 **`GRB.OPTIMAL`（最优）**，即 Gurobi + 许可 + 动态库均正常。
+- 若报 `License expired` 或许可版本不匹配，需在 Gurobi 门户更新许可或改用与许可一致的 Optimizer 主版本。
+
+### 3.8 与 CARLA 实验衔接
+
+```bash
+source /root/autodl-tmp/load_gurobi11.sh
+conda activate carla_modern
+export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
+cd ~/autodl-tmp/Research-Project-IMLS/core/scripts/carla
+python run_all_scenarios.py ... --solver_backend gurobi
+```
+
+若此时 CasADi 仍报 **`Plugin 'gurobi' is not found`**，属于 **CasADi 与 Gurobi 动态库链接** 问题：确认当前 shell 已 `source load_gurobi11.sh`，且 `LD_LIBRARY_PATH` 含 `$GUROBI_HOME/lib`，再把完整报错贴出排查。
 
 ---
 
