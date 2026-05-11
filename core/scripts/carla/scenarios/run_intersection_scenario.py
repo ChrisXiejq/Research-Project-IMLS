@@ -22,7 +22,7 @@ from policies.ipopt_smpc_agent import IPOPTSMPCAgent
 from rasterizer.agent_history import AgentHistory
 from rasterizer.sem_box_rasterizer import SemBoxRasterizer
 from utils.frenet_trajectory_handler import fix_angle
-from utils.vehicle_geometry_utils import vehicle_name_to_lf_lr
+from utils.vehicle_geometry_utils import vehicle_name_to_lf_lr, resolve_vehicle_blueprint
 
 scriptdir = os.path.abspath(__file__).split('scripts')[0] + 'scripts/'
 sys.path.append(scriptdir)
@@ -552,7 +552,7 @@ class RunIntersectionScenario:
         tv_vehicle_idxs   = []
 
         for idx, vp in enumerate(vehicle_params_list):
-            veh_bp = bp_library.find(vp.vehicle_type)
+            veh_bp = resolve_vehicle_blueprint(vp.vehicle_type, bp_library)
             veh_bp.set_attribute("color", vp.vehicle_color)
             veh_bp.set_attribute("role_name", vp.role)
             self.vehicle_colors.append([int(x) for x in vp.vehicle_color.split(", ")])
