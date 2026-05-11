@@ -12,6 +12,18 @@ GUROBI_UNAVAILABLE_MSG = (
     "approximation path."
 )
 
+
+def _joint_mode_component(joint_index, vehicle_index, n_modes):
+    """Mode index for vehicle `vehicle_index` from flat joint index `joint_index`.
+
+    Joint indices enumerate ``range(n_modes ** n_tv)`` as mixed-radix digits in
+    base ``n_modes`` (vehicle 0 is least significant). The previous
+    ``int(j/N_tv)*(k==1) + (j%N_tv)*(k==0)`` was only valid when ``n_modes == n_tv``,
+    and raises IndexError when ``n_modes != n_tv`` with multiple TVs.
+    """
+    return (joint_index // (n_modes ** vehicle_index)) % n_modes
+
+
 class RefTrajGenerator():
 
     def __init__(self,
@@ -622,7 +634,8 @@ class SMPC_MMPreds():
         self.opti[i].subject_to( self.DF_DOT_MIN-slack<=(-self.u_prev[i][1]+self.df_lin[i][0]+h[0][1,0])*self.fps)
         self.opti[i].subject_to((-self.u_prev[i][1]+self.df_lin[i][0]+h[0][1,0])*self.fps<=slack+self.DF_DOT_MAX)
 
-        mode = lambda m, v: int(m/N_TV)*(v==1) + (m%N_TV)*(v==0) 
+        nm = self.N_modes
+        mode = lambda m, v: _joint_mode_component(m, v, nm)
 
         total_prob=0
 
@@ -1882,7 +1895,8 @@ class SMPC_MMPreds_OL():
         E_block[0:4, 0:4]=E
         H=h[:,0]
 
-        mode = lambda m, v: int(m/N_TV)*(v==1) + (m%N_TV)*(v==0)
+        nm = self.N_modes
+        mode = lambda m, v: _joint_mode_component(m, v, nm)
         for t in range(1,self.N):
             for j in range(self.N_modes**N_TV):
                 oa_ref=[self._oa_ev_ref([self.x_lin[t-1], self.x_lin[t]], [self.y_lin[t-1], self.y_lin[t]], self.Mu_tv[k][mode(j,k)][t-1,0], self.Mu_tv[k][mode(j,k)][t-1,1], self.Q_tv[k][mode(j,k)][t-1]) for k in range(N_TV)]

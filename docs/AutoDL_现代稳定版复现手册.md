@@ -158,6 +158,8 @@ export GUROBI_HOME="$REPO/gurobi/gurobi1103/linux64"
 export PATH="$GUROBI_HOME/bin:$PATH"
 export LD_LIBRARY_PATH="$GUROBI_HOME/lib:${LD_LIBRARY_PATH:-}"
 export GRB_LICENSE_FILE="$REPO/gurobi/gurobi.lic"
+# CasADi Gurobi 插件：需能加载 libgurobi<GUROBI_VERSION>.so（11.0.x 一般为 libgurobi110.so）
+export GUROBI_VERSION=110
 ```
 
 ### 3.5 安装 Python 接口 `gurobipy`
@@ -179,6 +181,7 @@ export GUROBI_HOME="$REPO/gurobi/gurobi1103/linux64"
 export PATH="$GUROBI_HOME/bin:$PATH"
 export LD_LIBRARY_PATH="$GUROBI_HOME/lib:${LD_LIBRARY_PATH:-}"
 export GRB_LICENSE_FILE="$REPO/gurobi/gurobi.lic"
+export GUROBI_VERSION=110
 EOF
 chmod +x /root/autodl-tmp/load_gurobi11.sh
 ```
@@ -221,7 +224,7 @@ cd ~/autodl-tmp/Research-Project-IMLS/core/scripts/carla
 python run_all_scenarios.py ... --solver_backend gurobi
 ```
 
-若此时 CasADi 仍报 **`Plugin 'gurobi' is not found`**，属于 **CasADi 与 Gurobi 动态库链接** 问题：确认当前 shell 已 `source load_gurobi11.sh`，且 `LD_LIBRARY_PATH` 含 `$GUROBI_HOME/lib`，再把完整报错贴出排查。
+若此时 CasADi 仍报 **`Plugin 'gurobi' is not found`** 或警告 **`Failed to load Gurobi adaptor ... GUROBI_VERSION`**：除 `LD_LIBRARY_PATH` 外必须设置 **`export GUROBI_VERSION=110`**（与 `lib/libgurobi110.so` 对应；若你安装的是其他 11.x/12.x，用 `ls $GUROBI_HOME/lib/libgurobi*.so` 看文件名中的数字段）。确认已 `source load_gurobi11.sh` 后再跑实验。
 
 ---
 
@@ -419,6 +422,106 @@ python run_all_scenarios.py \
 ```
 
 `ipopt_approx` 会把三种 SMPC 策略映射到 IPOPT 近似 agent，输出目录会自动带 `_ipopt_approx` 后缀，例如 `scenario_01_ego_init_01_smpc_var_risk_ipopt_approx`。报告中应明确说明该路径保留论文核心思想和趋势对比目标，但不保证与原始 Gurobi 路径逐数值一致。
+
+### 7.3 分阶段验证：三层检查后再全量
+
+建议不要一上来就跑全量 `scenario_0*` × `ego_init_*`，按下面三层逐级放大；**三层都通过**后再用 7.1 / 7.2 中的全量 glob。
+
+**通用前置（Gurobi 路径时）：**
+
+```bash
+export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
+source /root/autodl-tmp/load_gurobi11.sh
+conda activate carla_modern
+cd ~/autodl-tmp/Research-Project-IMLS/core/scripts/carla
+```
+
+终端会打印本次结果根目录，例如：`Saving experiment outputs under: .../core/results/<时间戳>/`。下文用 **`<时间戳>`** 指该目录名。
+
+#### 第一层：最小能跑通（约几分钟级）
+
+**目的**：CARLA、导入、蓝图、预测、**CasADi + Gurobi（或 IPOPT）**整条链不崩。
+
+```bash
+python run_all_scenarios.py \
+  --scenario_glob "scenario_01.json" \
+  --init_glob "ego_init_01.json" \
+  --policies smpc_var_risk \
+  --solver_backend gurobi \
+  --with_notv \
+  --with_notv_cl
+```
+
+**通过标准：**
+
+- 终端无 traceback 退出。
+- 已打印 `Saving experiment outputs under: .../core/results/<时间戳>/`。
+- 该时间戳下每个子目录均有 **`scenario_result.pkl`**：
+
+```bash
+cd ~/autodl-tmp/Research-Project-IMLS/core
+ls results/<时间戳>/*/scenario_result.pkl
+```
+
+#### 第二层：小矩阵三策略（约几十分钟级）
+
+**目的**：`smpc_var_risk` / `smpc_open_loop` / `smpc_fixed_risk` 与 `notv` / `notv_cl` 均能跑完。
+
+```bash
+cd ~/autodl-tmp/Research-Project-IMLS/core/scripts/carla
+python run_all_scenarios.py \
+  --scenario_glob "scenario_01.json" \
+  --init_glob "ego_init_01.json" \
+  --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
+  --solver_backend gurobi \
+  --with_notv \
+  --with_notv_cl
+```
+
+**通过标准：**
+
+- 共 **5** 个子目录：`notv`、`notv_cl`、以及三个策略目录名。
+- 每个目录内 **`scenario_result.pkl` 存在且体积明显非 0**（可用 `ls -lh results/<时间戳>/`）。
+
+#### 第三层：指标与轨迹是否合理（后处理）
+
+**目的**：排除「能跑但结果空/异常」的情况。
+
+```bash
+cd ~/autodl-tmp/Research-Project-IMLS/core
+MPLBACKEND=Agg python scripts/compute_scenario_results.py \
+  --results_dir ./results/<时间戳> \
+  --compute_metrics
+```
+
+**通过标准：** 生成 `df_full.csv`、`df_norm.csv`、`df_final.csv`，打开检查对应 policy 有行、核心列无大面积 NaN。
+
+可选快速看图：
+
+```bash
+MPLBACKEND=Agg python scripts/compute_scenario_results.py \
+  --results_dir ./results/<时间戳> \
+  --make_traj_map \
+  --plot_scenario scenario_01 \
+  --plot_init 1 \
+  --plot_policies smpc_var_risk smpc_open_loop smpc_fixed_risk notv notv_cl \
+  --tv_source_policy smpc_var_risk \
+  --traj_map_name smoke_traj
+```
+
+轨迹应大致合理（无瞬间飞出地图、无整条零轨迹等明显异常）。若使用 `ipopt_approx`，`--plot_policies` 中的策略名需带 `_ipopt_approx` 后缀（与目录名一致）。
+
+#### 再跑全量
+
+仅当上述三层均通过后，再执行 7.1 / 7.2 中的全量命令（`scenario_0*.json`、`ego_init_*.json`）。全量结束后对**新的** `<时间戳>` 目录再运行一次 `--compute_metrics`，并按需加 `--make_traj_map` / `--make_paper_panel`。
+
+#### 实用习惯
+
+| 习惯 | 作用 |
+|------|------|
+| 每次记录 `results/<时间戳>` | 与代码版本、Gurobi / 求解器配置对应，便于追溯 |
+| 小检查固定 `scenario_01` + `ego_init_01` | 可重复、便于对比回归 |
+| 全量前清理残留 CARLA 进程 | 减少端口占用与 spawn 碰撞（见第 10 节） |
 
 ---
 
