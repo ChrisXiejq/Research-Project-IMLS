@@ -133,7 +133,7 @@ class SMPCAgent(object):
                 self.SMPC=smpc.SMPC_MMPreds_OBCA(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag,
                                         L_F=self.lf, L_R=self.lr, fps=self.fps, pol_mode=self.obca_mode)
         else:
-            n_tvm = self._n_tv_max_ol if self._n_tv_max_ol is not None else 1
+            n_tvm = self._n_tv_max_ol if self._n_tv_max_ol is not None else 2
             self.SMPC=smpc.SMPC_MMPreds_OL(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes,
                                           L_F=self.lf, L_R=self.lr, fps=self.fps,
                                           N_TV_MAX=n_tvm)

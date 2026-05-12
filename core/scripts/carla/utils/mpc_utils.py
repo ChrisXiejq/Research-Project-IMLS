@@ -6,13 +6,6 @@ import scipy.stats as stats
 from scipy.stats import norm
 import pdb
 
-GUROBI_UNAVAILABLE_MSG = (
-    "CasADi Gurobi plugin is unavailable. Install/configure Gurobi or run "
-    "`run_all_scenarios.py --solver_backend ipopt_approx` for the no-Gurobi "
-    "approximation path."
-)
-
-
 def _joint_mode_component(joint_index, vehicle_index, n_modes):
     """Per-vehicle GMM mode from a flat joint hypothesis index (product over TVs).
 
@@ -371,10 +364,7 @@ class SMPC_MMPreds():
 
         for i in range((self.t_bar_max)*self.N_TV_max):
             self.opti.append(ca.Opti('conic'))
-            try:
-                self.opti[i].solver("gurobi", p_opts_grb, s_opts_grb)
-            except RuntimeError as exc:
-                raise RuntimeError(GUROBI_UNAVAILABLE_MSG) from exc
+            self.opti[i].solver("gurobi", p_opts_grb, s_opts_grb)
 
 
             N_TV=1+int(i/self.t_bar_max)
@@ -781,9 +771,7 @@ class SMPC_MMPreds():
             eval_oa     = np.array([sol.value(x[0]) for x in self.eval_oa[i]])
 
 
-        except RuntimeError as exc:
-            if "gurobi" in str(exc).lower():
-                raise RuntimeError(GUROBI_UNAVAILABLE_MSG) from exc
+        except:
 
 
             # Suboptimal solution (e.g. timed out).
@@ -1036,10 +1024,7 @@ class SMPC_MMPreds_OBCA():
 
         for i in range((self.t_bar_max)*self.N_TV_max):
             self.opti.append(ca.Opti('conic'))
-            try:
-                self.opti[i].solver("gurobi", s_opts_grb, p_opts_grb)
-            except RuntimeError as exc:
-                raise RuntimeError(GUROBI_UNAVAILABLE_MSG) from exc
+            self.opti[i].solver("gurobi", s_opts_grb, p_opts_grb)
 
 
             N_TV=1+int(i/self.t_bar_max)
@@ -1722,7 +1707,7 @@ class SMPC_MMPreds_OL():
                 DF_DOT_MIN = -0.5,   # min/max front steer angle rate constraint (rad/s)
                 DF_DOT_MAX =  0.5,
                 N_modes_MAX  =  3,
-                N_TV_MAX     =  1,
+                N_TV_MAX     =  2,
                 N_seq_MAX    =  50,
                 T_BAR_MAX    =  4,
                 TIGHTENING   =  1.9, #1.64,
@@ -1761,10 +1746,7 @@ class SMPC_MMPreds_OL():
         
         p_opts_grb = {'error_on_fail':0}
 
-        try:
-            self.opti.solver("gurobi", p_opts_grb, s_opts_grb)
-        except RuntimeError as exc:
-            raise RuntimeError(GUROBI_UNAVAILABLE_MSG) from exc
+        self.opti.solver("gurobi", p_opts_grb, s_opts_grb)
 
 
         self.z_ref=self.opti.parameter(4, self.N+1)
