@@ -1,17 +1,18 @@
 # AutoDL 现代稳定版复现手册
 
-本文档对应你的"现代化优先"目标：尽量使用当前稳定版本栈，跑通论文核心流程（三策略 + intersection 场景）。  
-**本文档所有步骤均经过实际验证可成功执行（2026-05-08）。**
+本文档对应你的"现代化优先"目标：尽量使用当前稳定版本栈，跑通论文核心流程（三策略 + **仅 intersection 路口场景**）。  
+**本文档所有步骤均经过实际验证可成功执行（2026-05-08），且针对 intersection 场景。**
 
 ---
 
-## 0. 适用范围与预期
+## 0. 适用范围与预期（intersection only）
 
 - 目标：跑通 `Proposed (smpc_var_risk)`、`Fixed-Risk (smpc_fixed_risk)`、`Open-Loop (smpc_open_loop)`。
 - 代码仓库：`Research-Project-IMLS`（已集成 `SMPC_MMPreds` 核心代码）。
 - CARLA 服务端版本：**0.9.14**（官方预编译包，经验证稳定）。
 - Python 客户端版本：**carla==0.9.14**。
 - 现实约束：升级到新版后，指标应以"趋势一致"作为主标准，不能承诺逐数值完全一致。
+- **复现范围（重要）**：你当前论文复现**只做 intersection 路口场景**（`run_intersection_scenario.py`、`scenario_0*.json`、`ego_init_*.json`）。车道保持 **LK**（`run_lk_scenario.py`、`scenario_lk*.json`）不在本次复现任务内；下文命令与检查点均按路口场景编写，无需在 AutoDL 上跑 LK。
 
 ### 关键注意事项（血泪教训，必读）
 

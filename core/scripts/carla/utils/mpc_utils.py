@@ -14,12 +14,11 @@ GUROBI_UNAVAILABLE_MSG = (
 
 
 def _joint_mode_component(joint_index, vehicle_index, n_modes):
-    """Mode index for vehicle `vehicle_index` from flat joint index `joint_index`.
+    """Per-vehicle GMM mode from a flat joint hypothesis index (product over TVs).
 
-    Joint indices enumerate ``range(n_modes ** n_tv)`` as mixed-radix digits in
-    base ``n_modes`` (vehicle 0 is least significant). The previous
-    ``int(j/N_tv)*(k==1) + (j%N_tv)*(k==0)`` was only valid when ``n_modes == n_tv``,
-    and raises IndexError when ``n_modes != n_tv`` with multiple TVs.
+    Joint index ``j in 0 .. n_modes**N_TV - 1`` encodes one mode per target vehicle
+    in base ``n_modes`` (vehicle 0 is the least significant digit). This matches the
+    usual multimodal collision-avoidance product structure; it is not a hyperparameter.
     """
     return (joint_index // (n_modes ** vehicle_index)) % n_modes
 
@@ -1723,7 +1722,7 @@ class SMPC_MMPreds_OL():
                 DF_DOT_MIN = -0.5,   # min/max front steer angle rate constraint (rad/s)
                 DF_DOT_MAX =  0.5,
                 N_modes_MAX  =  3,
-                N_TV_MAX     =  2,
+                N_TV_MAX     =  1,
                 N_seq_MAX    =  50,
                 T_BAR_MAX    =  4,
                 TIGHTENING   =  1.9, #1.64,
@@ -2056,6 +2055,7 @@ class SMPC_MMPreds_OL():
                         self.opti.set_value(Q[k][j][t], Q_tv[k][j][t-1])
                     else:
                         self.opti.set_value(Q[k][j][t], Q_tv[k][j][t])
+
 
 
 

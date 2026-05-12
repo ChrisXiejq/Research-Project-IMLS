@@ -124,7 +124,7 @@ def load_intersection(intersection_csv):
 
     return intersection
 
-def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform):
+def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=None):
     if vehicle_params.policy_type == "static":
         return StaticAgent(vehicle_actor, goal_transform.location)
     elif vehicle_params.policy_type == "mpc":
@@ -159,7 +159,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform):
                             N_modes=vehicle_params.num_modes,
                             nominal_speed_mps=vehicle_params.nominal_speed,
                             smpc_config=vehicle_params.smpc_config.split("_OAinner")[0],
-                            OAIA=True)
+                            OAIA=True,
+                            n_tv_max=n_tv_max)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -168,14 +169,16 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform):
                             nominal_speed_mps=vehicle_params.nominal_speed,
                             smpc_config=vehicle_params.smpc_config.split("_obca")[0][:-2],
                             obca=True,
-                            obca_mode=int(vehicle_params.smpc_config.split("_obca")[0][-1]))
+                            obca_mode=int(vehicle_params.smpc_config.split("_obca")[0][-1]),
+                            n_tv_max=n_tv_max)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
                             dt=vehicle_params.dt,
                             N_modes=vehicle_params.num_modes,
                             nominal_speed_mps=vehicle_params.nominal_speed,
-                            smpc_config=vehicle_params.smpc_config)
+                            smpc_config=vehicle_params.smpc_config,
+                            n_tv_max=n_tv_max)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 
@@ -550,6 +553,8 @@ class RunIntersectionScenario:
         self.vehicle_init_speeds = []
         ego_vehicle_idxs  = []
         tv_vehicle_idxs   = []
+        # Must match _make_predictions: one GMM stack per ``role == "target"`` vehicle.
+        n_tv_max_mpc = max(1, sum(1 for vp in vehicle_params_list if vp.role == "target"))
 
         for idx, vp in enumerate(vehicle_params_list):
             veh_bp = resolve_vehicle_blueprint(vp.vehicle_type, bp_library)
@@ -570,7 +575,11 @@ class RunIntersectionScenario:
             goal_transform  = get_intersection_transform(intersection, vp, "goal")
 
             veh_actor  = self.world.spawn_actor(veh_bp, start_transform)
-            veh_policy = get_vehicle_policy(vp, veh_actor, goal_transform)
+            if vp.role == "ego":
+                veh_policy = get_vehicle_policy(
+                    vp, veh_actor, goal_transform, n_tv_max=n_tv_max_mpc)
+            else:
+                veh_policy = get_vehicle_policy(vp, veh_actor, goal_transform)
 
             self.vehicle_actors.append(veh_actor)
             self.vehicle_policies.append(veh_policy)
