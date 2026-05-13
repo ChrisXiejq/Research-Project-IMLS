@@ -377,7 +377,7 @@ rsync -avz -e "ssh ${SSH_OPTS}" --progress \
 ls -la "${LOCAL_RESULTS}/${LATEST_NAME}"   # 使用 7.2 时
 # 若使用 7.3 固定时间戳，则改为： ls -la "${LOCAL_RESULTS}/${STAMP}"
 ```
-应能看到各策略子目录、`scenario_result.pkl`、以及（若已按仓库日志功能跑过）`experiment_run.log`、`batch_subruns.json` 等。
+应能看到各策略子目录、`scenario_result.pkl`、以及（若已按仓库日志功能跑过）`experiment_run.log`、`batch_events.jsonl`、`batch_subruns.json`（含每次 subrun 的 `metrics`）、`batch_summary.txt`（终端摘要表，便于一眼看成功/失败与 ego 可行性）等。
 
 本地聚合指标时（路径按你拉下的目录名替换）：
 

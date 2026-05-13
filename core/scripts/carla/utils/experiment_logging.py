@@ -160,38 +160,6 @@ def batch_dir() -> Optional[str]:
     return _state.get("batch_dir")
 
 
-def collect_savedir_metrics(savedir: str) -> Dict[str, Any]:
-    """
-    Read ``scenario_result.pkl`` under ``savedir`` and return compact stats
-    (feasible_frac, n_steps, solve_time stats per actor). Safe if pkl missing or corrupt.
-    """
-    pkl = os.path.join(savedir, "scenario_result.pkl")
-    out: Dict[str, Any] = {
-        "pkl_path": os.path.abspath(pkl),
-        "pkl_exists": os.path.isfile(pkl),
-    }
-    if not out["pkl_exists"]:
-        return out
-    try:
-        with open(pkl, "rb") as f:
-            results_dict = pickle.load(f)
-        out["actors"] = summarize_results_arrays(results_dict)
-        ego_keys = [k for k in out["actors"] if str(k).startswith("ego")]
-        if ego_keys:
-            # Prefer lowest-index ego (ego_0 before ego_3) for a single headline number.
-            ego_keys_sorted = sorted(ego_keys, key=lambda s: int(str(s).split("_")[-1]) if str(s).split("_")[-1].isdigit() else 0)
-            ek = ego_keys_sorted[0]
-            blk = out["actors"][ek]
-            out["ego_primary_key"] = ek
-            out["ego_n_steps"] = blk.get("n_steps")
-            out["ego_feasible_frac"] = blk.get("feasible_frac")
-            out["ego_solve_time_mean"] = blk.get("solve_time_mean")
-            out["ego_solve_time_nan_frac"] = blk.get("solve_time_nan_frac")
-    except Exception as e:
-        out["pkl_error"] = repr(e)
-    return out
-
-
 def summarize_results_arrays(results_dict: Dict[str, Any]) -> Dict[str, Any]:
     """Lightweight stats from the same structure as ``scenario_result.pkl``."""
     out: Dict[str, Any] = {}
@@ -215,6 +183,41 @@ def summarize_results_arrays(results_dict: Dict[str, Any]) -> Dict[str, Any]:
         if traj is not None and len(traj) > 0:
             block["state_rows"] = int(np.asarray(traj).shape[0])
         out[act_key] = block
+    return out
+
+
+def collect_savedir_metrics(savedir: str) -> Dict[str, Any]:
+    """
+    Read ``scenario_result.pkl`` under ``savedir`` and return compact stats
+    (feasible_frac, n_steps, solve_time stats per actor). Safe if pkl missing or corrupt.
+    """
+    pkl = os.path.join(savedir, "scenario_result.pkl")
+    out: Dict[str, Any] = {
+        "pkl_path": os.path.abspath(pkl),
+        "pkl_exists": os.path.isfile(pkl),
+    }
+    if not out["pkl_exists"]:
+        return out
+    try:
+        with open(pkl, "rb") as f:
+            results_dict = pickle.load(f)
+        out["actors"] = summarize_results_arrays(results_dict)
+        ego_keys = [k for k in out["actors"] if str(k).startswith("ego")]
+        if ego_keys:
+            # Prefer lowest-index ego (ego_0 before ego_3) for a single headline number.
+            ego_keys_sorted = sorted(
+                ego_keys,
+                key=lambda s: int(str(s).split("_")[-1]) if str(s).split("_")[-1].isdigit() else 0,
+            )
+            ek = ego_keys_sorted[0]
+            blk = out["actors"][ek]
+            out["ego_primary_key"] = ek
+            out["ego_n_steps"] = blk.get("n_steps")
+            out["ego_feasible_frac"] = blk.get("feasible_frac")
+            out["ego_solve_time_mean"] = blk.get("solve_time_mean")
+            out["ego_solve_time_nan_frac"] = blk.get("solve_time_nan_frac")
+    except Exception as e:
+        out["pkl_error"] = repr(e)
     return out
 
 
@@ -318,6 +321,18 @@ def log_batch_subrun(
         append_jsonl(bd, rec)
 
 
+def _fmt_opt_float(x: Any) -> str:
+    if x is None:
+        return ""
+    try:
+        xf = float(x)
+    except (TypeError, ValueError):
+        return ""
+    if xf != xf:  # NaN
+        return "nan"
+    return f"{xf:.6f}"
+
+
 def write_batch_summary_txt(batch_dir: str, subruns: List[Dict[str, Any]]) -> str:
     """
     Write ``batch_summary.txt`` with one line per subrun (tab-separated for easy grep).
@@ -326,7 +341,9 @@ def write_batch_summary_txt(batch_dir: str, subruns: List[Dict[str, Any]]) -> st
     path = os.path.join(os.path.abspath(batch_dir), "batch_summary.txt")
     lines = []
     lines.append("# IMLS batch summary (auto-generated)")
-    lines.append("# columns: ok scenario_completed duration_s label ego_n_steps ego_feasible_frac ego_solve_t_mean pkl_exists")
+    lines.append(
+        "# columns: ok scenario_completed duration_s label ego_n_steps ego_feasible_frac ego_solve_t_mean pkl_exists"
+    )
     lines.append("")
     for s in subruns:
         m = s.get("metrics") or {}
@@ -334,12 +351,16 @@ def write_batch_summary_txt(batch_dir: str, subruns: List[Dict[str, Any]]) -> st
             "\t".join(
                 [
                     "1" if s.get("ok") else "0",
-                    "1" if s.get("scenario_completed") is True else ("0" if s.get("scenario_completed") is False else "?"),
+                    "1"
+                    if s.get("scenario_completed") is True
+                    else ("0" if s.get("scenario_completed") is False else "?"),
                     f"{float(s.get('duration_s', 0.0)):.3f}",
                     str(s.get("label", "")),
                     str(m.get("ego_n_steps", "")),
-                    "" if m.get("ego_feasible_frac") is None else f"{float(m['ego_feasible_frac']):.6f}",
-                    "" if m.get("ego_solve_time_mean") is None else f"{float(m['ego_solve_time_mean']):.6f}",
+                    ""
+                    if m.get("ego_feasible_frac") is None
+                    else f"{float(m['ego_feasible_frac']):.6f}",
+                    _fmt_opt_float(m.get("ego_solve_time_mean")),
                     "1" if m.get("pkl_exists") else "0",
                 ]
             )

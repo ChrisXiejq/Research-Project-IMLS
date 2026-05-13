@@ -24,13 +24,23 @@ def _parse_scenario_dir_name(scenario_dir):
     return scenario_name, int(init_str), policy
 
 
+def _intersection_scene_index(scenario_name):
+    """``scenario_01`` -> ``1``; unknown shape -> ``1`` (LK legacy)."""
+    if scenario_name is None:
+        return 1
+    m = re.match(r"scenario_(\d+)$", scenario_name)
+    return int(m.group(1)) if m else 1
+
+
 def _list_metric_scenario_dirs(results_dir):
     """
-    Subdirectories under ``results_dir`` that contain ``scenario_result.pkl`` for a *policy*
-    rollout (excludes ``*_notv`` / ``*_notv_cl`` baselines, which are consumed as references).
+    Subdirectories under ``results_dir`` that contain ``scenario_result.pkl``.
+
+    Includes **notv** / **notv_cl** baselines: ``normalize_by_notv`` requires exactly one
+    ``policy == \"notv\"`` row per (scenario index, initial).
 
     Supports:
-    - **Intersection** layout: ``scenario_*_ego_init_*`` (e.g. ``scenario_01_ego_init_01_smpc_var_risk``)
+    - **Intersection** layout: ``scenario_*_ego_init_*``
     - **LK (legacy)** layout: paths matching ``*scenario_lk*``
     """
     results_dir = os.path.abspath(os.path.expanduser(os.path.normpath(results_dir.rstrip("/"))))
@@ -43,9 +53,6 @@ def _list_metric_scenario_dirs(results_dir):
     seen = set()
     for d in sorted(set(candidates)):
         if not os.path.isdir(d):
-            continue
-        base = os.path.basename(d.rstrip(os.sep))
-        if base.endswith("_notv") or base.endswith("_notv_cl"):
             continue
         pkl_path = os.path.join(d, "scenario_result.pkl")
         if not os.path.isfile(pkl_path):
@@ -62,13 +69,18 @@ def get_metric_dataframe(results_dir):
     if len(scenario_dirs) == 0:
         raise ValueError(f"Could not detect scenario results in directory: {results_dir}")
 
-    # Assumption: format is *scenario_<scene_num>_ego_init_<init_num>_policy
+    # Assumption: format is scenario_<scene>_ego_init_<init>_<policy>
     dataframe = []
     for scenario_dir in scenario_dirs:
-        # pdb.set_trace()
-        scene_num =  1#scenario_dir.split("scenario_")[-1].split("_")[0] 
-        init_num  = int( scenario_dir.split("ego_init_")[-1].split("_")[0])
-        policy    = re.split("ego_init_[0-9]*_", scenario_dir)[-1]
+        parsed = _parse_scenario_dir_name(scenario_dir)
+        if parsed:
+            scenario_name, init_num, policy = parsed
+            scene_num = _intersection_scene_index(scenario_name)
+        else:
+            scenario_name = None
+            scene_num = 1
+            init_num = int(scenario_dir.split("ego_init_")[-1].split("_")[0])
+            policy = re.split("ego_init_[0-9]*_", scenario_dir)[-1]
 
         pkl_path = os.path.join(scenario_dir, "scenario_result.pkl")
 
@@ -76,7 +88,10 @@ def get_metric_dataframe(results_dir):
         if not os.path.exists(pkl_path):
             raise RuntimeError(f"Unable to find a scenario_result.pkl in directory: {scenario_dir}")
 
-        notv_pkl_path = os.path.join(re.split(f"{policy}", scenario_dir)[0] + "notv", "scenario_result.pkl")
+        notv_pkl_path = os.path.join(
+            re.split(re.escape(policy), scenario_dir, maxsplit=1)[0] + "notv",
+            "scenario_result.pkl",
+        )
         if not os.path.exists(notv_pkl_path):
             raise RuntimeError(f"Unable to find a notv scenario_result.pkl in location: {notv_pkl_path}")
 
@@ -104,19 +119,28 @@ def make_trajectory_viz_plot(results_dir, color1="r", color2="b", plot_init=1, p
     if len(scenario_dirs) == 0:
         raise ValueError(f"Could not detect scenario results in directory: {results_dir}")
 
-    # Assumption: format is *scenario_<scene_num>_ego_init_<init_num>_policy
+    # Assumption: format is scenario_<scene>_ego_init_<init>_<policy>
     dataframe = []
     for scenario_dir in scenario_dirs:
-        scene_num = 1#scenario_dir.split("scenario_")[-1].split("_")[0]
-        init_num  = int( scenario_dir.split("ego_init_")[-1].split("_")[0])
-        policy    = re.split("ego_init_[0-9]*_", scenario_dir)[-1]
+        parsed = _parse_scenario_dir_name(scenario_dir)
+        if parsed:
+            scenario_name, init_num, policy = parsed
+            scene_num = _intersection_scene_index(scenario_name)
+        else:
+            scenario_name = None
+            scene_num = 1
+            init_num = int(scenario_dir.split("ego_init_")[-1].split("_")[0])
+            policy = re.split("ego_init_[0-9]*_", scenario_dir)[-1]
 
         pkl_path = os.path.join(scenario_dir, "scenario_result.pkl")
 
         if not os.path.exists(pkl_path):
             raise RuntimeError(f"Unable to find a scenario_result.pkl in directory: {scenario_dir}")
 
-        notv_pkl_path = os.path.join(re.split(f"{policy}", scenario_dir)[0] + "notv", "scenario_result.pkl")
+        notv_pkl_path = os.path.join(
+            re.split(re.escape(policy), scenario_dir, maxsplit=1)[0] + "notv",
+            "scenario_result.pkl",
+        )
         if not os.path.exists(notv_pkl_path):
             raise RuntimeError(f"Unable to find a notv scenario_result.pkl in location: {notv_pkl_path}")
         
