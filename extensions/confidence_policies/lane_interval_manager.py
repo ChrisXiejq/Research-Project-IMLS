@@ -189,7 +189,7 @@ class LaneIntervalManager:
 
         s_occupied_intervals = []
         for t in range(n_steps):
-            s_occupied = np.zeros((len(self.left_lane_boundary)), dtype=np.bool)
+            s_occupied = np.zeros((len(self.left_lane_boundary)), dtype=bool)
 
             for m in range(n_modes):
                 tv_occ_set = tv_occupancy_sets_by_mode[m][t]

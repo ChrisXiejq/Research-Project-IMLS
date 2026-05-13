@@ -235,15 +235,27 @@ if __name__ == '__main__':
                     log.exception("Subrun failed: %s", label)
                     raise
                 finally:
+                    duration_s = time.perf_counter() - t0
+                    metrics = exp_log.collect_savedir_metrics(savedir)
                     exp_log.log_batch_subrun(
                         label,
                         phase="notv",
-                        duration_s=time.perf_counter() - t0,
+                        duration_s=duration_s,
                         ok=ok,
                         error=err,
                         savedir=savedir,
+                        metrics=metrics,
                     )
-                    subrun_status.append({"label": label, "ok": ok, "savedir": savedir, "scenario_completed": scenario_ok})
+                    subrun_status.append(
+                        {
+                            "label": label,
+                            "ok": ok,
+                            "savedir": savedir,
+                            "scenario_completed": scenario_ok,
+                            "duration_s": duration_s,
+                            "metrics": metrics,
+                        }
+                    )
 
             if args.with_notv_cl:
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_notv_cl")
@@ -265,15 +277,27 @@ if __name__ == '__main__':
                     log.exception("Subrun failed: %s", label)
                     raise
                 finally:
+                    duration_s = time.perf_counter() - t0
+                    metrics = exp_log.collect_savedir_metrics(savedir)
                     exp_log.log_batch_subrun(
                         label,
                         phase="notv_cl",
-                        duration_s=time.perf_counter() - t0,
+                        duration_s=duration_s,
                         ok=ok,
                         error=err,
                         savedir=savedir,
+                        metrics=metrics,
                     )
-                    subrun_status.append({"label": label, "ok": ok, "savedir": savedir, "scenario_completed": scenario_ok})
+                    subrun_status.append(
+                        {
+                            "label": label,
+                            "ok": ok,
+                            "savedir": savedir,
+                            "scenario_completed": scenario_ok,
+                            "duration_s": duration_s,
+                            "metrics": metrics,
+                        }
+                    )
 
             for ego_policy_config in args.policies:
                 output_policy_name = _policy_output_name(ego_policy_config, args.solver_backend)
@@ -304,13 +328,16 @@ if __name__ == '__main__':
                     log.exception("Subrun failed: %s", label)
                     raise
                 finally:
+                    duration_s = time.perf_counter() - t0
+                    metrics = exp_log.collect_savedir_metrics(savedir)
                     exp_log.log_batch_subrun(
                         label,
                         phase="smpc",
-                        duration_s=time.perf_counter() - t0,
+                        duration_s=duration_s,
                         ok=ok,
                         error=err,
                         savedir=savedir,
+                        metrics=metrics,
                     )
                     subrun_status.append(
                         {
@@ -319,6 +346,8 @@ if __name__ == '__main__':
                             "savedir": savedir,
                             "policy": ego_policy_config,
                             "scenario_completed": scenario_ok,
+                            "duration_s": duration_s,
+                            "metrics": metrics,
                         }
                     )
 
@@ -334,4 +363,8 @@ if __name__ == '__main__':
         },
     )
     exp_log.write_json(os.path.join(results_folder, "batch_subruns.json"), {"subruns": subrun_status})
-    log.info("Batch finished; logged %d subruns to batch_subruns.json", len(subrun_status))
+    exp_log.write_batch_summary_txt(results_folder, subrun_status)
+    log.info(
+        "Batch finished; logged %d subruns to batch_subruns.json and batch_summary.txt",
+        len(subrun_status),
+    )

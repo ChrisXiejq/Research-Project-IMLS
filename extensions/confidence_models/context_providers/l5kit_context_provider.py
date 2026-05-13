@@ -229,7 +229,7 @@ class L5KitContextProvider(ContextProviderBase):
                         is_red_tl = True
                 is_red_tl_by_state.extend([is_red_tl] * lane_seg_len[ind_token])
 
-            tl_red_arr.append(np.array(is_red_tl_by_state, dtype=np.bool))
+            tl_red_arr.append(np.array(is_red_tl_by_state, dtype=bool))
 
         return tl_red_arr
 

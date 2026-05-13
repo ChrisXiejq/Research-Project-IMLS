@@ -104,7 +104,7 @@ def avg_lateral_jerk(cl_traj : ClosedLoopTrajectory) -> float:
 	return np.mean( np.abs(cl_traj.jerk[:,1]) )
 
 def feasibility_percent(cl_traj : ClosedLoopTrajectory) -> float:
-	feasible_bool = cl_traj.feasibility.astype(np.bool)
+	feasible_bool = cl_traj.feasibility.astype(bool)
 	return np.sum(feasible_bool) / len(feasible_bool)
 
 def get_average_solve_time(cl_traj : ClosedLoopTrajectory) -> float:
