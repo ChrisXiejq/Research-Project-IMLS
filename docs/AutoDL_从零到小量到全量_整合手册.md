@@ -229,6 +229,8 @@ python scripts/render_rollout_video.py \
 
 `--intersection_csv` 可省略，此时视频以轨迹包络为主、道路线可能为空。
 
+**几何对齐预期**：成功跑完 CARLA 子目录后会生成 **`map_viz_snapshot.json`**（从**当前已加载地图**拓扑导出的车道多边形，与 `scenario_result.pkl` 同坐标系）。`render_rollout_video.py` **若发现该文件则优先用它铺底图**，再画车辆；没有该文件时才用路口 CSV 的粗线近似，此时仍可用 **`viz_topdown`** 调节 `road_half_width_m`、`road_arm_extend_m` 等。旧结果目录可重跑一次带 CARLA 的 scenario 以补生成 snapshot。
+
 ---
 
 ## 阶段 5：小量实验检查（三层递进）

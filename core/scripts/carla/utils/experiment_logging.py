@@ -175,10 +175,18 @@ def summarize_results_arrays(results_dict: Dict[str, Any]) -> Dict[str, Any]:
             else:
                 block["feasible_frac"] = float(np.nanmean(arr.astype(float)))
         if st is not None and len(st) > 0:
-            arr = np.asarray(st, dtype=float)
-            block["solve_time_mean"] = float(np.nanmean(arr))
-            block["solve_time_max"] = float(np.nanmax(arr))
-            block["solve_time_nan_frac"] = float(np.mean(np.isnan(arr)))
+            arr = np.asarray(st, dtype=float).ravel()
+            if arr.size > 0:
+                finite = np.isfinite(arr)
+                if np.any(finite):
+                    arr_ok = arr[finite]
+                    block["solve_time_mean"] = float(np.mean(arr_ok))
+                    block["solve_time_max"] = float(np.max(arr_ok))
+                    block["solve_time_nan_frac"] = float(1.0 - np.mean(finite))
+                else:
+                    block["solve_time_mean"] = float("nan")
+                    block["solve_time_max"] = float("nan")
+                    block["solve_time_nan_frac"] = 1.0
         traj = payload.get("state_trajectory")
         if traj is not None and len(traj) > 0:
             block["state_rows"] = int(np.asarray(traj).shape[0])

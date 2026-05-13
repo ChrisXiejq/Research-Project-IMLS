@@ -473,6 +473,12 @@ class RunLKScenario:
                                     "feasibility",
                                     "solve_times"]:
                         self.results_dict[act_key][arr_key] = np.array(self.results_dict[act_key][arr_key])
+                try:
+                    from utils.map_viz_export import try_export_map_viz_snapshot
+
+                    try_export_map_viz_snapshot(self.world, self.results_dict, self.savedir)
+                except Exception as exc:
+                    log.warning("map_viz_snapshot export skipped: %s", exc)
                 pkl_name = os.path.join(self.savedir, "scenario_result.pkl")
                 pickle.dump(self.results_dict, open(pkl_name, "wb"))
                 ran_successfully = True

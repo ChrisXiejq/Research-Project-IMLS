@@ -24,7 +24,8 @@
 	"viz_topdown" : {
 		"road_half_width_m" : 3.7,
 		"dash_len_m"         : 4.0,
-		"dash_gap_m"         : 3.5
+		"dash_gap_m"         : 3.5,
+		"road_arm_extend_m"  : 16.0
 	},
 	"vehicle_params" : [
 		{

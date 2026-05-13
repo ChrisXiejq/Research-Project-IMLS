@@ -4,7 +4,12 @@ Offline top-down rollout video from ``scenario_result.pkl``.
 
 Draws road corridors from intersection CSV segments: each row is stroked as one
 thick line in pixel space and merged into a single mask (clean junction), then
-filled + curb ring + per-arm dashed centerlines. Styled top-down vehicles (shadow,
+filled + curb ring + per-arm dashed centerlines. If ``map_viz_snapshot.json`` exists
+beside the pkl (written when the CARLA scenario finishes), the renderer paints **real
+lane strips from the loaded map** first, then vehicles; otherwise it falls back to
+the intersection CSV thick-line approximation.
+
+Styled top-down vehicles (shadow,
 body, windshield band, wheel hints). Road width and dash spacing default from
 ``scenario_rollout_config.json`` (written on each successful batch subrun from the
 scene JSON ``viz_topdown`` block), then CLI overrides.
@@ -25,7 +30,7 @@ import json
 import math
 import os
 import pickle
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -105,6 +110,47 @@ def _poly_world_to_pix(
     return np.array(out, dtype=np.int32)
 
 
+def _extend_polylines(
+    polylines: List[Tuple[np.ndarray, np.ndarray]],
+    extend_m: float,
+) -> List[Tuple[np.ndarray, np.ndarray]]:
+    """Lengthen each CSV segment from both ends (meters) so paint covers trajectories past nominal endpoints."""
+    if extend_m <= 1e-6 or not polylines:
+        return polylines
+    out: List[Tuple[np.ndarray, np.ndarray]] = []
+    for xarr, yarr in polylines:
+        sx, sy = float(xarr[0]), float(yarr[0])
+        gx, gy = float(xarr[1]), float(yarr[1])
+        dx, dy = gx - sx, gy - sy
+        ln = math.hypot(dx, dy)
+        if ln < 1e-6:
+            out.append((np.array(xarr, copy=True), np.array(yarr, copy=True)))
+            continue
+        ux, uy = dx / ln, dy / ln
+        sx2, sy2 = sx - ux * extend_m, sy - uy * extend_m
+        gx2, gy2 = gx + ux * extend_m, gy + uy * extend_m
+        out.append(
+            (
+                np.array([sx2, gx2], dtype=float),
+                np.array([sy2, gy2], dtype=float),
+            )
+        )
+    return out
+
+
+def _fill_holes_in_road_mask(road_mask: np.ndarray) -> np.ndarray:
+    """Fill interior holes (e.g. hashtag center) where thick strokes do not overlap."""
+    if road_mask.size == 0 or not np.any(road_mask):
+        return road_mask
+    im = road_mask
+    ff = im.copy()
+    h, w = im.shape[:2]
+    flood_mask = np.zeros((h + 2, w + 2), dtype=np.uint8)
+    cv2.floodFill(ff, flood_mask, (0, 0), 255)
+    ff_inv = cv2.bitwise_not(ff)
+    return cv2.bitwise_or(im, ff_inv)
+
+
 def _precompute_road_mask_and_edge(
     polylines: List[Tuple[np.ndarray, np.ndarray]],
     bounds: Tuple[float, float, float, float],
@@ -136,9 +182,11 @@ def _precompute_road_mask_and_edge(
         p1 = _world_to_pixel(gx, gy, bounds, W, H, margin_px)
         cv2.line(road_mask, p0, p1, 255, thick, lineType=cv2.LINE_AA)
 
-    ksz = max(3, min(15, (thick // 3) | 1))
+    ksz = max(5, min(25, max((thick // 2) | 1, (thick // 3) | 1)))
     k_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (ksz, ksz))
     road_mask = cv2.morphologyEx(road_mask, cv2.MORPH_CLOSE, k_close)
+
+    road_mask = _fill_holes_in_road_mask(road_mask)
 
     k_edge = np.ones((3, 3), dtype=np.uint8)
     outer = cv2.dilate(road_mask, k_edge, iterations=2)
@@ -291,15 +339,59 @@ def _draw_vehicle_styled(
     cv2.polylines(frame, [pix], True, (18, 18, 22), 2, lineType=cv2.LINE_AA)
 
 
+def _try_load_map_viz_snapshot(pkl_path: str) -> Optional[Dict[str, Any]]:
+    """Load ``map_viz_snapshot.json`` (CARLA lane polygons) next to the pkl, if present."""
+    jpath = os.path.join(os.path.dirname(os.path.abspath(pkl_path)), "map_viz_snapshot.json")
+    if not os.path.isfile(jpath):
+        return None
+    try:
+        with open(jpath, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+    raw = data.get("lane_polygons") or []
+    arrs: List[np.ndarray] = []
+    for p in raw:
+        arr = np.asarray(p, dtype=np.float32)
+        if arr.ndim == 2 and arr.shape[0] >= 3 and arr.shape[1] >= 2:
+            arrs.append(arr)
+    if not arrs:
+        return None
+    return {
+        "lane_polygons": arrs,
+        "map_name": str(data.get("map_name", "")),
+        "bounds": data.get("bounds"),
+    }
+
+
+def _draw_carla_map_lane_base(
+    frame: np.ndarray,
+    lane_polys_pix: List[np.ndarray],
+    fill_bgr: Tuple[int, int, int],
+    outline_bgr: Tuple[int, int, int],
+) -> None:
+    """Paint exported CARLA lane strips (largest areas first for sensible overlap)."""
+    for pix in lane_polys_pix:
+        cv2.fillPoly(frame, [pix], fill_bgr, lineType=cv2.LINE_AA)
+    for pix in lane_polys_pix:
+        cv2.polylines(frame, [pix], True, outline_bgr, 1, lineType=cv2.LINE_AA)
+
+
 def _viz_topdown_params_for_pkl(
     pkl_path: str,
     *,
     road_half_width_m: Optional[float] = None,
     dash_len_m: Optional[float] = None,
     dash_gap_m: Optional[float] = None,
-) -> Tuple[float, float, float]:
+    road_arm_extend_m: Optional[float] = None,
+) -> Dict[str, float]:
     """Load ``scenario_rollout_config.json`` beside the pkl, then apply CLI overrides."""
-    defaults = {"road_half_width_m": 4.0, "dash_len_m": 4.0, "dash_gap_m": 3.5}
+    defaults = {
+        "road_half_width_m": 4.0,
+        "dash_len_m": 4.0,
+        "dash_gap_m": 3.5,
+        "road_arm_extend_m": 14.0,
+    }
     cfg_path = os.path.join(os.path.dirname(os.path.abspath(pkl_path)), "scenario_rollout_config.json")
     merged = dict(defaults)
     if os.path.isfile(cfg_path):
@@ -315,7 +407,9 @@ def _viz_topdown_params_for_pkl(
         merged["dash_len_m"] = float(dash_len_m)
     if dash_gap_m is not None:
         merged["dash_gap_m"] = float(dash_gap_m)
-    return merged["road_half_width_m"], merged["dash_len_m"], merged["dash_gap_m"]
+    if road_arm_extend_m is not None:
+        merged["road_arm_extend_m"] = float(road_arm_extend_m)
+    return merged
 
 
 def render_topdown_mp4(
@@ -330,16 +424,22 @@ def render_topdown_mp4(
     road_half_width_m: Optional[float] = None,
     dash_len_m: Optional[float] = None,
     dash_gap_m: Optional[float] = None,
+    road_arm_extend_m: Optional[float] = None,
 ) -> str:
     if not os.path.isfile(pkl_path):
         raise FileNotFoundError(pkl_path)
 
-    rhw, dlen, dgap = _viz_topdown_params_for_pkl(
+    viz = _viz_topdown_params_for_pkl(
         pkl_path,
         road_half_width_m=road_half_width_m,
         dash_len_m=dash_len_m,
         dash_gap_m=dash_gap_m,
+        road_arm_extend_m=road_arm_extend_m,
     )
+    rhw = viz["road_half_width_m"]
+    dlen = viz["dash_len_m"]
+    dgap = viz["dash_gap_m"]
+    arm_ext = viz["road_arm_extend_m"]
 
     with open(pkl_path, "rb") as f:
         bundle: Dict[str, dict] = pickle.load(f)
@@ -360,13 +460,26 @@ def render_topdown_mp4(
 
     n_frames = max(t[1].shape[0] for t in trajs)
 
+    snap_map = _try_load_map_viz_snapshot(pkl_path)
+    map_polys_world: List[np.ndarray] = list(snap_map["lane_polygons"]) if snap_map else []
+
     xs: List[float] = []
     ys: List[float] = []
     for _, st, _, _ in trajs:
         xs.extend(st[:, 1].tolist())
         ys.extend(st[:, 2].tolist())
-    polylines = _load_intersection_polylines(intersection_csv) if intersection_csv else []
-    for xarr, yarr in polylines:
+    for poly in map_polys_world:
+        xs.extend(poly[:, 0].tolist())
+        ys.extend(poly[:, 1].tolist())
+    if snap_map and snap_map.get("bounds"):
+        b = snap_map["bounds"]
+        if isinstance(b, (list, tuple)) and len(b) >= 4:
+            xs.extend([float(b[0]), float(b[1])])
+            ys.extend([float(b[2]), float(b[3])])
+
+    polylines_raw = _load_intersection_polylines(intersection_csv) if intersection_csv else []
+    polylines_ext = _extend_polylines(polylines_raw, arm_ext)
+    for xarr, yarr in polylines_ext:
         xs.extend(xarr.tolist())
         ys.extend(yarr.tolist())
         dx = float(xarr[1] - xarr[0])
@@ -382,9 +495,32 @@ def render_topdown_mp4(
     pad = max(10.0, 0.1 * max(xmax - xmin, ymax - ymin, 1.0))
     bounds = (xmin - pad, xmax + pad, ymin - pad, ymax + pad)
 
-    road_mask, edge_mask = _precompute_road_mask_and_edge(
-        polylines, bounds, width, height, margin_px, rhw
-    )
+    use_carla_map = len(map_polys_world) > 0
+    lane_polys_pix: List[np.ndarray] = []
+    polylines: List[Tuple[np.ndarray, np.ndarray]] = []
+    road_mask: np.ndarray
+    edge_mask: np.ndarray
+
+    if use_carla_map:
+        for poly in map_polys_world:
+            n = int(poly.shape[0])
+            pts = np.array(
+                [
+                    _world_to_pixel(float(poly[i, 0]), float(poly[i, 1]), bounds, width, height, margin_px)
+                    for i in range(n)
+                ],
+                dtype=np.int32,
+            )
+            lane_polys_pix.append(pts.reshape(-1, 1, 2))
+        lane_polys_pix.sort(key=lambda p: float(cv2.contourArea(p)), reverse=True)
+        road_mask = np.zeros((height, width), dtype=np.uint8)
+        edge_mask = np.zeros_like(road_mask)
+        polylines = []
+    else:
+        polylines = polylines_ext
+        road_mask, edge_mask = _precompute_road_mask_and_edge(
+            polylines, bounds, width, height, margin_px, rhw
+        )
 
     os.makedirs(os.path.dirname(out_mp4) or ".", exist_ok=True)
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
@@ -400,21 +536,24 @@ def render_topdown_mp4(
         frame = np.zeros((height, width, 3), dtype=np.uint8)
         frame[:, :] = (214, 212, 208)
 
-        _paint_roads_from_masks(
-            frame,
-            road_mask,
-            edge_mask,
-            polylines,
-            bounds,
-            width,
-            height,
-            margin_px,
-            asphalt,
-            curb,
-            yellow_center,
-            dlen,
-            dgap,
-        )
+        if use_carla_map:
+            _draw_carla_map_lane_base(frame, lane_polys_pix, asphalt, (210, 210, 215))
+        else:
+            _paint_roads_from_masks(
+                frame,
+                road_mask,
+                edge_mask,
+                polylines,
+                bounds,
+                width,
+                height,
+                margin_px,
+                asphalt,
+                curb,
+                yellow_center,
+                dlen,
+                dgap,
+            )
 
         order = sorted(range(len(trajs)), key=lambda i: 1 if "ego" in trajs[i][0] else 0)
         for idx in order:
@@ -482,6 +621,12 @@ def main():
         default=None,
         help="Override gap between dashes (m); omitted = from rollout config / default.",
     )
+    ap.add_argument(
+        "--road_arm_extend_m",
+        type=float,
+        default=None,
+        help="Override per-arm extension (m) beyond CSV endpoints for drawing; omitted = from rollout config / default.",
+    )
     args = ap.parse_args()
 
     out = args.out or os.path.join(os.path.dirname(os.path.abspath(args.pkl)), "rollout_topdown.mp4")
@@ -495,6 +640,7 @@ def main():
         road_half_width_m=args.road_half_width_m,
         dash_len_m=args.dash_len_m,
         dash_gap_m=args.dash_gap_m,
+        road_arm_extend_m=args.road_arm_extend_m,
     )
     print(f"Wrote {path}")
 

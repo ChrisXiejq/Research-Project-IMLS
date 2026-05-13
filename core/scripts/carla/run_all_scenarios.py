@@ -30,10 +30,15 @@ def _policy_output_name(policy_name, solver_backend):
 
 def _write_scenario_rollout_config(savedir: str, scenario_dict: dict) -> None:
     """Snapshot carla + top-down viz params next to ``scenario_result.pkl`` for reproducible rendering."""
-    default_viz = {"road_half_width_m": 4.0, "dash_len_m": 4.0, "dash_gap_m": 3.5}
+    default_viz = {
+        "road_half_width_m": 4.0,
+        "dash_len_m": 4.0,
+        "dash_gap_m": 3.5,
+        "road_arm_extend_m": 14.0,
+    }
     user_viz = scenario_dict.get("viz_topdown") or {}
     merged_viz = {**default_viz}
-    for k in ("road_half_width_m", "dash_len_m", "dash_gap_m"):
+    for k in ("road_half_width_m", "dash_len_m", "dash_gap_m", "road_arm_extend_m"):
         if k in user_viz:
             merged_viz[k] = float(user_viz[k])
     exp_log.write_json(
