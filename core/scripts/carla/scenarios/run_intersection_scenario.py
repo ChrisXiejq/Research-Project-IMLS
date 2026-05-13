@@ -69,6 +69,16 @@ class DroneVizParams:
     overlay_mode_probs    : bool = True # add a string with the mode probabilities.
     overlay_traj_hist     : bool = True # add the trajectory history for each agent
 
+    # Photorealistic top-down: RGB camera rigidly attached above ego (needs real rendering,
+    # e.g. ``-RenderOffScreen``; not meaningful with ``-nullrhi``). When True, world-fixed
+    # ``x,y,z`` are ignored for placement; GMM / traj / mode overlays are skipped (wrong frame).
+    attach_to_ego        : bool = False
+    ego_cam_x_offset_m   : float = 0.0
+    ego_cam_y_offset_m   : float = 0.0
+    ego_cam_height_m     : float = 22.0
+    ego_cam_pitch_deg    : float = -90.0
+    ego_cam_yaw_deg      : float = 0.0
+
 @dataclass(frozen=True)
 class VehicleParams:
     # High level vehicle/policy selection.
@@ -433,23 +443,32 @@ class RunIntersectionScenario:
                         img_drone = cv2.resize(img_drone, (self.viz_params.img_width, self.viz_params.img_height), interpolation = cv2.INTER_AREA)
 
                         # Handle overlays on drone camera image.
-                        if self.viz_params.overlay_ego_info:
+                        if self.viz_params.overlay_ego_info and ego_ctrl is not None:
                             ego_str = f"EGO - v:{ego_speed:.3f}, th: {ego_ctrl.throttle:.2f}, bk: {ego_ctrl.brake:.2f}, st: {ego_ctrl.steer:.2f}"
-                            cv2.putText(img_drone, ego_str, (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                            cv2.putText(img_drone, ego_str, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-                        if self.viz_params.overlay_gmm:
-                            if tvs_valid_pred[0]: # TODO: generalize this to multiple TVs.
-                                self._viz_gmm(img_drone, tvs_mode_dists)
+                        # World-fixed drone uses hardcoded world->pixel maps for GMM/traj; skip when camera follows ego.
+                        if not getattr(self, "_ego_follow_cam", False):
+                            if self.viz_params.overlay_gmm:
+                                if tvs_valid_pred[0]:  # TODO: generalize this to multiple TVs.
+                                    self._viz_gmm(img_drone, tvs_mode_dists)
 
-                        if self.viz_params.overlay_traj_hist:
-                            self._viz_traj_hist(img_drone)
+                            if self.viz_params.overlay_traj_hist:
+                                self._viz_traj_hist(img_drone)
 
-                        if self.viz_params.overlay_mode_probs:
-                            if tvs_valid_pred[0]: # TODO: generalize this to multiple TVs.
-                                cv2.putText(img_drone, "Mode probabilities: ", (50,100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                                for prob_idx, mode_prob in enumerate(tvs_mode_probs[0]):
-                                    cv2.putText(img_drone, f"{mode_prob:.3f}",
-                                                (360 + prob_idx * 100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, self.mode_rgb_colors[prob_idx], 2)
+                            if self.viz_params.overlay_mode_probs:
+                                if tvs_valid_pred[0]:  # TODO: generalize this to multiple TVs.
+                                    cv2.putText(img_drone, "Mode probabilities: ", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                                    for prob_idx, mode_prob in enumerate(tvs_mode_probs[0]):
+                                        cv2.putText(
+                                            img_drone,
+                                            f"{mode_prob:.3f}",
+                                            (360 + prob_idx * 100, 100),
+                                            cv2.FONT_HERSHEY_SIMPLEX,
+                                            1,
+                                            self.mode_rgb_colors[prob_idx],
+                                            2,
+                                        )
 
                         # Handle visualization / saving to video.
                         if self.viz_params.visualize_opencv:
@@ -604,31 +623,46 @@ class RunIntersectionScenario:
         bp_library = self.world.get_blueprint_library()
         bp_drone  = bp_library.find('sensor.camera.rgb')
 
-        # TODO: compute these, hardcoded for now.
+        self._ego_follow_cam = bool(getattr(drone_viz_params, "attach_to_ego", False))
+
+        # TODO: compute these, hardcoded for now (world-fixed drone overlay math only).
         self.A_world_to_drone = np.array([[    0., -19.2],
                                           [-19.2,      0.]])
         self.b_world_to_drone = np.array([ 960., 1116.])
-
-        # This is like a top down view of the intersection.  Can tune later.
-        cam_loc = carla.Location(x=drone_viz_params.x,
-                                 y=drone_viz_params.y,
-                                 z=drone_viz_params.z)
-        # cam_loc = carla.Location(x=-10.,
-        #                          y=0.,
-        #                          z=10.)
-        cam_ori = carla.Rotation(roll=drone_viz_params.roll,
-                                 pitch=drone_viz_params.pitch,
-                                 yaw=drone_viz_params.yaw)
-        # cam_ori = carla.Rotation(pitch=-15)
-
-        cam_transform = carla.Transform(cam_loc, cam_ori)
 
         bp_drone.set_attribute('image_size_x', str(drone_viz_params.img_width))
         bp_drone.set_attribute('image_size_y', str(drone_viz_params.img_height))
         bp_drone.set_attribute('fov', str(drone_viz_params.fov))
         bp_drone.set_attribute('role_name', 'drone')
 
-        self.drone = self.world.spawn_actor(bp_drone, cam_transform)
+        if self._ego_follow_cam:
+            ego = self.vehicle_actors[self.ego_vehicle_idx]
+            cam_loc = carla.Location(
+                x=float(drone_viz_params.ego_cam_x_offset_m),
+                y=float(drone_viz_params.ego_cam_y_offset_m),
+                z=float(drone_viz_params.ego_cam_height_m),
+            )
+            cam_ori = carla.Rotation(
+                roll=float(drone_viz_params.roll),
+                pitch=float(drone_viz_params.ego_cam_pitch_deg),
+                yaw=float(drone_viz_params.ego_cam_yaw_deg),
+            )
+            rel_tf = carla.Transform(cam_loc, cam_ori)
+            self.drone = self.world.spawn_actor(
+                bp_drone,
+                rel_tf,
+                attach_to=ego,
+                attachment_type=carla.AttachmentType.Rigid,
+            )
+        else:
+            cam_loc = carla.Location(x=drone_viz_params.x,
+                                     y=drone_viz_params.y,
+                                     z=drone_viz_params.z)
+            cam_ori = carla.Rotation(roll=drone_viz_params.roll,
+                                     pitch=drone_viz_params.pitch,
+                                     yaw=drone_viz_params.yaw)
+            cam_transform = carla.Transform(cam_loc, cam_ori)
+            self.drone = self.world.spawn_actor(bp_drone, cam_transform)
 
     def _setup_vehicles(self, vehicle_params_list, carla_params):
         intersection_fname = os.path.join( os.path.dirname(os.path.abspath(__file__)),
