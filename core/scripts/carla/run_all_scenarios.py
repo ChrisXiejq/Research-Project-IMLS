@@ -28,6 +28,24 @@ def _policy_output_name(policy_name, solver_backend):
     return f"{policy_name}_{solver_backend}"
 
 
+def _write_scenario_rollout_config(savedir: str, scenario_dict: dict) -> None:
+    """Snapshot carla + top-down viz params next to ``scenario_result.pkl`` for reproducible rendering."""
+    default_viz = {"road_half_width_m": 4.0, "dash_len_m": 4.0, "dash_gap_m": 3.5}
+    user_viz = scenario_dict.get("viz_topdown") or {}
+    merged_viz = {**default_viz}
+    for k in ("road_half_width_m", "dash_len_m", "dash_gap_m"):
+        if k in user_viz:
+            merged_viz[k] = float(user_viz[k])
+    exp_log.write_json(
+        os.path.join(savedir, "scenario_rollout_config.json"),
+        {
+            "carla_params": scenario_dict.get("carla_params", {}),
+            "viz_topdown": merged_viz,
+            "vehicle_params": scenario_dict.get("vehicle_params", []),
+        },
+    )
+
+
 def _maybe_render_topdown_mp4(savedir, scenario_dict, log, args):
     """Offline top-down MP4 from ``scenario_result.pkl`` (no CARLA)."""
     if not getattr(args, "render_topdown_mp4", False):
@@ -304,6 +322,7 @@ if __name__ == '__main__':
                         }
                     )
                     if ok and scenario_ok:
+                        _write_scenario_rollout_config(savedir, scenario_dict)
                         _maybe_render_topdown_mp4(savedir, scenario_dict, log, args)
 
             if args.with_notv_cl:
@@ -348,6 +367,7 @@ if __name__ == '__main__':
                         }
                     )
                     if ok and scenario_ok:
+                        _write_scenario_rollout_config(savedir, scenario_dict)
                         _maybe_render_topdown_mp4(savedir, scenario_dict, log, args)
 
             for ego_policy_config in args.policies:
@@ -402,6 +422,7 @@ if __name__ == '__main__':
                         }
                     )
                     if ok and scenario_ok:
+                        _write_scenario_rollout_config(savedir, scenario_dict)
                         _maybe_render_topdown_mp4(savedir, scenario_dict, log, args)
 
     exp_log.append_jsonl(

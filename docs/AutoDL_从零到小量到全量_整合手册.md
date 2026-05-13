@@ -14,12 +14,14 @@
 
 ## 路径约定（避免删错目录）
 
-| 含义 | 路径示例 |
-|------|-----------|
-| 仓库根 | `~/autodl-tmp/Research-Project-IMLS`（持久盘，下文记为 `$REPO`） |
-| CARLA 根 | `~/autodl-tmp/carla_0.9.14`（下文记为 `$CARLA_ROOT`） |
-| 实验脚本目录 | `$REPO/core/scripts/carla` |
-| 结果根目录 | `$REPO/core/results/<时间戳>/`（运行后终端会打印 `Saving experiment outputs under: ...`） |
+
+| 含义      | 路径示例                                                                         |
+| ------- | ---------------------------------------------------------------------------- |
+| 仓库根     | `~/autodl-tmp/Research-Project-IMLS`（持久盘，下文记为 `$REPO`）                       |
+| CARLA 根 | `~/autodl-tmp/carla_0.9.14`（下文记为 `$CARLA_ROOT`）                              |
+| 实验脚本目录  | `$REPO/core/scripts/carla`                                                   |
+| 结果根目录   | `$REPO/core/results/<时间戳>/`（运行后终端会打印 `Saving experiment outputs under: ...`） |
+
 
 **错误示例**：`/core/results/...` 表示磁盘根下的目录，**不是**项目内 `core/results`。
 
@@ -96,7 +98,7 @@ EOF
 chmod +x /root/autodl-tmp/load_gurobi11.sh
 ```
 
-4. 安装 Python 接口：
+1. 安装 Python 接口：
 
 ```bash
 source /root/miniconda3/etc/profile.d/conda.sh
@@ -105,7 +107,7 @@ pip install -U pip
 pip install gurobipy==11.0.3 -i https://pypi.org/simple
 ```
 
-5. **Gurobi 许可与求解自检**（成功应见 version 11.0.3、`status = 2`）：
+1. **Gurobi 许可与求解自检**（成功应见 version 11.0.3、`status = 2`）：
 
 ```bash
 source /root/autodl-tmp/load_gurobi11.sh
@@ -209,14 +211,13 @@ cd "$REPO/core/scripts/carla"
 
 论文或答辩里常需要「道路几何 + 车辆运动」的动图/视频，仓库提供两条路径，可并行使用。
 
-1. **CARLA 无人机视角 `carla_sim.avi`**（仿真**进行中**逐帧写入，真三维 RGB）  
-   在 `run_all_scenarios.py` 中加 **`--enable_camera_viz`**，且场景 JSON 的 `drone_viz_params` 里 **`save_avi` 为 true**（脚本在未加该开关时会强制关掉 `save_avi`，避免无头环境误开相机）。实现上与普通 CARLA **RGB 相机**一致：从 `img.raw_data` 写到 OpenCV `VideoWriter`。  
-   **与 `-nullrhi` 的关系：** 若服务端用 **`CarlaUE4.sh -nullrhi`** 启动，通常**没有完整光栅化**，RGB 传感器往往得到**全黑/无效帧**或行为不稳定，此时 **`carla_sim.avi` 即使生成了也没有可用画面**。要录「真 CARLA 画面」，需要**能渲染**的 CARLA 启动方式（例如带 GPU 的机器上去掉 `-nullrhi`，并按 CARLA 文档配置 Vulkan/离屏渲染等），再开 `--enable_camera_viz`。
-
-2. **离线俯视 `rollout_topdown.mp4`**（**不依赖** CARLA 再渲染，与 **`-nullrhi` 兼容**）  
-   由 `scenario_result.pkl` 中的轨迹与（可选）路口 CSV 折线生成：画道路折线、按朝向画车辆多边形、叠加帧号与仿真时间。  
-   - **批量内自动生成（不是只能事后）**：在 `run_all_scenarios.py` 命令末尾加 **`--render_topdown_mp4`**。每个子仿真 **成功结束并写出 `scenario_result.pkl` 之后**，**同一轮脚本内**会立刻生成该子目录下的 **`rollout_topdown.mp4`**，无需等实验全部跑完再手动跑一遍渲染脚本。可选调整 **`--render_topdown_fps` / `--render_topdown_width` / `--render_topdown_height`**。路口折线由场景 JSON 的 **`carla_params.intersection_csv_loc`** 相对 **`scripts/carla/scenarios/`** 解析；若文件缺失仍会出视频，但可能不画道路线。  
-   - **事后单独生成**（例如只把 pkl 拷到本机、或当时未加开关要补做）：
+1. **CARLA 无人机视角 `carla_sim.avi`**（仿真**进行中**逐帧写入，真三维 RGB）
+  在 `run_all_scenarios.py` 中加 `**--enable_camera_viz`**，且场景 JSON 的 `drone_viz_params` 里 `**save_avi` 为 true**（脚本在未加该开关时会强制关掉 `save_avi`，避免无头环境误开相机）。实现上与普通 CARLA **RGB 相机**一致：从 `img.raw_data` 写到 OpenCV `VideoWriter`。  
+   **与 `-nullrhi` 的关系：** 若服务端用 `**CarlaUE4.sh -nullrhi`** 启动，通常**没有完整光栅化**，RGB 传感器往往得到**全黑/无效帧**或行为不稳定，此时 `**carla_sim.avi` 即使生成了也没有可用画面**。要录「真 CARLA 画面」，需要**能渲染**的 CARLA 启动方式（例如带 GPU 的机器上去掉 `-nullrhi`，并按 CARLA 文档配置 Vulkan/离屏渲染等），再开 `--enable_camera_viz`。
+2. **离线俯视 `rollout_topdown.mp4`**（**不依赖** CARLA 再渲染，与 `**-nullrhi` 兼容**）
+  由 `scenario_result.pkl` 中的轨迹与（可选）路口 CSV 折线生成：画道路折线、按朝向画车辆多边形、叠加帧号与仿真时间。  
+  - **批量内自动生成（不是只能事后）**：在 `run_all_scenarios.py` 命令末尾加 `**--render_topdown_mp4`**。每个子仿真 **成功结束并写出 `scenario_result.pkl` 之后**，**同一轮脚本内**会立刻生成该子目录下的 `**rollout_topdown.mp4`**，无需等实验全部跑完再手动跑一遍渲染脚本。可选调整 `**--render_topdown_fps` / `--render_topdown_width` / `--render_topdown_height**`。路口折线由场景 JSON 的 `**carla_params.intersection_csv_loc**` 相对 `**scripts/carla/scenarios/**` 解析；若文件缺失仍会出视频，但可能不画道路线。  
+  - **事后单独生成**（例如只把 pkl 拷到本机、或当时未加开关要补做）：
 
 ```bash
 cd "$REPO/core"
@@ -232,7 +233,7 @@ python scripts/render_rollout_video.py \
 
 ## 阶段 5：小量实验检查（三层递进）
 
-固定小矩阵：`scenario_01.json` × `ego_init_01.json`。每次运行后记下终端打印的 **`<时间戳>`**，下文用该目录做检查。
+固定小矩阵：`scenario_01.json` × `ego_init_01.json`。每次运行后记下终端打印的 `**<时间戳>**`，下文用该目录做检查。
 
 ### 5.1 第一层（最小冒烟）
 
@@ -250,7 +251,7 @@ python run_all_scenarios.py \
   --render_topdown_mp4
 ```
 
-**通过：** 无 traceback；`core/results/<时间戳>/` 下各子目录均有 `scenario_result.pkl`。若加了 `--render_topdown_mp4`，各成功子目录还应出现 **`rollout_topdown.mp4`**（需本环境已安装 OpenCV 的 `cv2`）。
+**通过：** 无 traceback；`core/results/<时间戳>/` 下各子目录均有 `scenario_result.pkl`。若加了 `--render_topdown_mp4`，各成功子目录还应出现 `**rollout_topdown.mp4`**（需本环境已安装 OpenCV 的 `cv2`）。
 
 ```bash
 ls "$REPO/core/results/<时间戳>"/*/scenario_result.pkl
@@ -267,7 +268,8 @@ python run_all_scenarios.py \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
   --solver_backend gurobi \
   --with_notv \
-  --with_notv_cl
+  --with_notv_cl \
+  --render_topdown_mp4
 ```
 
 **通过：** `results/<时间戳>/` 下共 **5** 个策略目录；`ls -lh` 下各 `scenario_result.pkl` 非空。
@@ -314,10 +316,11 @@ python run_all_scenarios.py \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
   --solver_backend gurobi \
   --with_notv \
-  --with_notv_cl
+  --with_notv_cl \
+  --render_topdown_mp4
 ```
 
-全量时若希望每个成功子目录自动生成 **`rollout_topdown.mp4`**，与 5.1 相同，在命令末尾追加 **`--render_topdown_mp4`**（及可选 `--render_topdown_fps` 等）即可。
+全量时若希望每个成功子目录自动生成 `**rollout_topdown.mp4**`，与 5.1 相同，在命令末尾追加 `**--render_topdown_mp4**`（及可选 `--render_topdown_fps` 等）即可。
 
 ### 6.2 全量无 Gurobi（可选）
 
@@ -328,7 +331,8 @@ python run_all_scenarios.py \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
   --solver_backend ipopt_approx \
   --with_notv \
-  --with_notv_cl
+  --with_notv_cl \
+  --render_topdown_mp4
 ```
 
 ### 6.3 对新时间戳做指标聚合
@@ -346,16 +350,16 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py \
 
 ## 阶段 7：将云端「最新一次」结果拉取到本机仓库（与 `core/results` 对齐）
 
-在**本机 Mac/Linux 终端**执行（不在 AutoDL 容器内）。目标：把远端 **`$REPO/core/results/<最新时间戳>/`** 整目录同步到本机仓库的 **`Research-Project-IMLS/core/results/<同一时间戳>/`**，便于本地跑 `compute_scenario_results.py` 或把 `experiment_run.log`、`batch_subruns.json` 等交给他人审阅。
+在**本机 Mac/Linux 终端**执行（不在 AutoDL 容器内）。目标：把远端 `**$REPO/core/results/<最新时间戳>/`** 整目录同步到本机仓库的 `**Research-Project-IMLS/core/results/<同一时间戳>/**`，便于本地跑 `compute_scenario_results.py` 或把 `experiment_run.log`、`batch_subruns.json` 等交给他人审阅。
 
 ### 7.1 连接参数（按你的实例修改）
 
 - **SSH**：示例为 `ssh -p <端口> root@<主机>`（如 AutoDL / 算力平台自定义端口）。
-- **远端结果根**：与上文路径约定一致，一般为 **`/root/autodl-tmp/Research-Project-IMLS/core/results`**。若仓库不在该路径，在服务器上执行 `pwd` 或 `ls` 确认后再改 `REMOTE_BASE`。
+- **远端结果根**：与上文路径约定一致，一般为 `**/root/autodl-tmp/Research-Project-IMLS/core/results`**。若仓库不在该路径，在服务器上执行 `pwd` 或 `ls` 确认后再改 `REMOTE_BASE`。
 
 ### 7.2 推荐：`rsync` 拉「按修改时间最新」的子目录
 
-**易错点（必读）**：若把 `ssh` 里的远端路径写成 `\${REMOTE_RESULTS}` 且变量**只在本地有定义**，远端 shell 展开为空，`ls …/*/` 会匹配到系统目录（例如误得到 **`run`**），`rsync` 会报 `.../results/run` 不存在。下面命令让 **`REMOTE_BASE` 在本机展开进 ssh 参数字符串**，远端只执行字面路径。
+**易错点（必读）**：若把 `ssh` 里的远端路径写成 `\${REMOTE_RESULTS}` 且变量**只在本地有定义**，远端 shell 展开为空，`ls …/*/` 会匹配到系统目录（例如误得到 `**run`**），`rsync` 会报 `.../results/run` 不存在。下面命令让 `**REMOTE_BASE` 在本机展开进 ssh 参数字符串**，远端只执行字面路径。
 
 ```bash
 # 本机：克隆下来的仓库里 core/results 的绝对路径（请改成你的实际路径）
@@ -383,7 +387,7 @@ rsync -avz -e "ssh ${SSH_OPTS}" --progress \
   "${LOCAL_RESULTS}/${LATEST_NAME}/"
 ```
 
-**端口写法**：`ssh` 用 **`-p`**；`scp` 用 **`-P`**；`rsync` 用 **`-e "ssh -p …"`**。
+**端口写法**：`ssh` 用 `**-p`**；`scp` 用 `**-P**`；`rsync` 用 `**-e "ssh -p …"**`。
 
 ### 7.3 只拉指定时间戳（不自动选最新）
 
@@ -405,6 +409,7 @@ rsync -avz -e "ssh ${SSH_OPTS}" --progress \
 ls -la "${LOCAL_RESULTS}/${LATEST_NAME}"   # 使用 7.2 时
 # 若使用 7.3 固定时间戳，则改为： ls -la "${LOCAL_RESULTS}/${STAMP}"
 ```
+
 应能看到各策略子目录、`scenario_result.pkl`、以及（若已按仓库日志功能跑过）`experiment_run.log`、`batch_events.jsonl`、`batch_subruns.json`（含每次 subrun 的 `metrics`）、`batch_summary.txt`（终端摘要表，便于一眼看成功/失败与 ego 可行性）等。
 
 本地聚合指标时（路径按你拉下的目录名替换）：
@@ -431,15 +436,17 @@ bash run_modern_reproduction.sh
 
 ## 极简排错索引（详情回原文 §10）
 
-| 现象 | 优先处理 |
-|------|-----------|
-| UE4 拒绝 root | `su carlauser -c '...'` 启动 CARLA |
-| `xdg-user-dir` / 秒退 | `apt-get install -y xdg-user-dirs` |
-| `libomp.so.5` | `apt-get install -y libomp5` |
-| 端口占用 | `pkill -9 -f CarlaUE4 && sleep 2` |
-| 客户端与服务端版本不一致 | `pip install carla==0.9.14` |
-| 无 Gurobi 插件 | `--solver_backend ipopt_approx` 或按阶段 2 配置 Gurobi |
+
+| 现象                                     | 优先处理                                                                                                                                                                                                    |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| UE4 拒绝 root                            | `su carlauser -c '...'` 启动 CARLA                                                                                                                                                                        |
+| `xdg-user-dir` / 秒退                    | `apt-get install -y xdg-user-dirs`                                                                                                                                                                      |
+| `libomp.so.5`                          | `apt-get install -y libomp5`                                                                                                                                                                            |
+| 端口占用                                   | `pkill -9 -f CarlaUE4 && sleep 2`                                                                                                                                                                       |
+| 客户端与服务端版本不一致                           | `pip install carla==0.9.14`                                                                                                                                                                             |
+| 无 Gurobi 插件                            | `--solver_backend ipopt_approx` 或按阶段 2 配置 Gurobi                                                                                                                                                        |
 | `GLIBCXX_3.4.29` not found（SciPy 导入失败） | ① 运行前：`export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:${LD_LIBRARY_PATH:-}"`；或 `conda install -c conda-forge "libstdcxx-ng>=12"` 后重装 SciPy。② 仓库已减少对 SciPy 的硬依赖（Frenet 曲率平滑、`mpc_utils` 正态 CDF），**拉最新代码**后再试。 |
+
 
 ## 现代化改造清单与结果对齐建议
 

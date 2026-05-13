@@ -21,6 +21,11 @@
 		"ego_init_03.json",
 		"ego_init_04.json"
 	],
+	"viz_topdown" : {
+		"road_half_width_m" : 3.7,
+		"dash_len_m"         : 4.0,
+		"dash_gap_m"         : 3.5
+	},
 	"vehicle_params" : [
 		{
 			"role"                        : "static",
