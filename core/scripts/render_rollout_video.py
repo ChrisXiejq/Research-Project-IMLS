@@ -2,10 +2,12 @@
 """
 Offline top-down rollout video from ``scenario_result.pkl``.
 
-Draws road corridors from intersection CSV segments (width + lane markings) and
-styled top-down vehicles (shadow, body, windshield band, wheel hints). Road width
-and dash spacing default from ``scenario_rollout_config.json`` (written on each
-successful batch subrun from the scene JSON ``viz_topdown`` block), then CLI overrides.
+Draws road corridors from intersection CSV segments: each row is stroked as one
+thick line in pixel space and merged into a single mask (clean junction), then
+filled + curb ring + per-arm dashed centerlines. Styled top-down vehicles (shadow,
+body, windshield band, wheel hints). Road width and dash spacing default from
+``scenario_rollout_config.json`` (written on each successful batch subrun from the
+scene JSON ``viz_topdown`` block), then CLI overrides.
 
 No CARLA connection required — suitable for headless AutoDL after a successful run.
 
@@ -103,27 +105,48 @@ def _poly_world_to_pix(
     return np.array(out, dtype=np.int32)
 
 
-def _segment_strip_world(sx: float, sy: float, gx: float, gy: float, half_width: float) -> np.ndarray:
-    """Quad in world XY covering the segment [S,G] expanded by half_width perpendicular."""
-    dx, dy = gx - sx, gy - sy
-    ln = math.hypot(dx, dy)
-    if ln < 1e-6:
-        return np.array([[sx, sy], [sx, sy], [sx, sy], [sx, sy]], dtype=np.float32)
-    ux, uy = dx / ln, dy / ln
-    px, py = -uy, ux
-    ox, oy = px * half_width, py * half_width
-    return np.array(
-        [
-            [sx + ox, sy + oy],
-            [gx + ox, gy + oy],
-            [gx - ox, gy - oy],
-            [sx - ox, sy - oy],
-        ],
-        dtype=np.float32,
-    )
+def _precompute_road_mask_and_edge(
+    polylines: List[Tuple[np.ndarray, np.ndarray]],
+    bounds: Tuple[float, float, float, float],
+    W: int,
+    H: int,
+    margin_px: int,
+    half_width_m: float,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Build a single binary road mask by stroking each CSV segment as a thick line in
+    pixel space, then union via max — avoids stacked quads at the intersection hub.
+    ``edge_mask`` is a thin ring outside the pavement for curb paint.
+    """
+    road_mask = np.zeros((H, W), dtype=np.uint8)
+    if not polylines:
+        return road_mask, np.zeros((H, W), dtype=np.uint8)
+
+    mpp = _world_scale_per_pixel(bounds, W, H, margin_px)
+    thick = max(3, int(round(2.0 * half_width_m * mpp)))
+    if thick % 2 == 0:
+        thick += 1
+
+    for xarr, yarr in polylines:
+        sx, sy = float(xarr[0]), float(yarr[0])
+        gx, gy = float(xarr[1]), float(yarr[1])
+        if math.hypot(gx - sx, gy - sy) < 1e-6:
+            continue
+        p0 = _world_to_pixel(sx, sy, bounds, W, H, margin_px)
+        p1 = _world_to_pixel(gx, gy, bounds, W, H, margin_px)
+        cv2.line(road_mask, p0, p1, 255, thick, lineType=cv2.LINE_AA)
+
+    ksz = max(3, min(15, (thick // 3) | 1))
+    k_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (ksz, ksz))
+    road_mask = cv2.morphologyEx(road_mask, cv2.MORPH_CLOSE, k_close)
+
+    k_edge = np.ones((3, 3), dtype=np.uint8)
+    outer = cv2.dilate(road_mask, k_edge, iterations=2)
+    edge_mask = cv2.subtract(outer, road_mask)
+    return road_mask, edge_mask
 
 
-def _draw_road_corridor(
+def _draw_center_dashes_on_segment(
     frame: np.ndarray,
     xarr: np.ndarray,
     yarr: np.ndarray,
@@ -131,33 +154,17 @@ def _draw_road_corridor(
     W: int,
     H: int,
     margin_px: int,
-    half_width_m: float,
-    asphalt: Tuple[int, int, int],
-    edge_bgr: Tuple[int, int, int],
     center_bgr: Tuple[int, int, int],
     dash_len_m: float,
     dash_gap_m: float,
 ) -> None:
     sx, gx = float(xarr[0]), float(xarr[1])
     sy, gy = float(yarr[0]), float(yarr[1])
-    strip = _segment_strip_world(sx, sy, gx, gy, half_width_m)
-    pix = _poly_world_to_pix(strip, bounds, W, H, margin_px)
-    cv2.fillConvexPoly(frame, pix, asphalt, lineType=cv2.LINE_AA)
-
     dx, dy = gx - sx, gy - sy
     ln = math.hypot(dx, dy)
-    if ln < 1e-3:
+    if ln < 1e-6:
         return
     ux, uy = dx / ln, dy / ln
-    px, py = -uy, ux
-    ox, oy = px * half_width_m, py * half_width_m
-    left_a = _world_to_pixel(sx + ox, sy + oy, bounds, W, H, margin_px)
-    left_b = _world_to_pixel(gx + ox, gy + oy, bounds, W, H, margin_px)
-    right_a = _world_to_pixel(sx - ox, sy - oy, bounds, W, H, margin_px)
-    right_b = _world_to_pixel(gx - ox, gy - oy, bounds, W, H, margin_px)
-    cv2.line(frame, left_a, left_b, edge_bgr, 2, lineType=cv2.LINE_AA)
-    cv2.line(frame, right_a, right_b, edge_bgr, 2, lineType=cv2.LINE_AA)
-
     period = max(dash_len_m + dash_gap_m, 0.5)
     t = 0.0
     while t < ln:
@@ -168,6 +175,40 @@ def _draw_road_corridor(
         p1 = _world_to_pixel(cx1, cy1, bounds, W, H, margin_px)
         cv2.line(frame, p0, p1, center_bgr, 3, lineType=cv2.LINE_AA)
         t += period
+
+
+def _paint_roads_from_masks(
+    frame: np.ndarray,
+    road_mask: np.ndarray,
+    edge_mask: np.ndarray,
+    polylines: List[Tuple[np.ndarray, np.ndarray]],
+    bounds: Tuple[float, float, float, float],
+    W: int,
+    H: int,
+    margin_px: int,
+    asphalt: Tuple[int, int, int],
+    edge_bgr: Tuple[int, int, int],
+    center_bgr: Tuple[int, int, int],
+    dash_len_m: float,
+    dash_gap_m: float,
+) -> None:
+    a = np.array(asphalt, dtype=frame.dtype)
+    e = np.array(edge_bgr, dtype=frame.dtype)
+    frame[road_mask > 0] = a
+    frame[edge_mask > 0] = e
+    for xarr, yarr in polylines:
+        _draw_center_dashes_on_segment(
+            frame,
+            xarr,
+            yarr,
+            bounds,
+            W,
+            H,
+            margin_px,
+            center_bgr,
+            dash_len_m,
+            dash_gap_m,
+        )
 
 
 def _actor_body_colors(role_key: str) -> Tuple[Tuple[int, int, int], Tuple[int, int, int], Tuple[int, int, int]]:
@@ -341,6 +382,10 @@ def render_topdown_mp4(
     pad = max(10.0, 0.1 * max(xmax - xmin, ymax - ymin, 1.0))
     bounds = (xmin - pad, xmax + pad, ymin - pad, ymax + pad)
 
+    road_mask, edge_mask = _precompute_road_mask_and_edge(
+        polylines, bounds, width, height, margin_px, rhw
+    )
+
     os.makedirs(os.path.dirname(out_mp4) or ".", exist_ok=True)
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     vw = cv2.VideoWriter(out_mp4, fourcc, float(fps), (width, height))
@@ -355,22 +400,21 @@ def render_topdown_mp4(
         frame = np.zeros((height, width, 3), dtype=np.uint8)
         frame[:, :] = (214, 212, 208)
 
-        for xarr, yarr in polylines:
-            _draw_road_corridor(
-                frame,
-                xarr,
-                yarr,
-                bounds,
-                width,
-                height,
-                margin_px,
-                rhw,
-                asphalt,
-                curb,
-                yellow_center,
-                dlen,
-                dgap,
-            )
+        _paint_roads_from_masks(
+            frame,
+            road_mask,
+            edge_mask,
+            polylines,
+            bounds,
+            width,
+            height,
+            margin_px,
+            asphalt,
+            curb,
+            yellow_center,
+            dlen,
+            dgap,
+        )
 
         order = sorted(range(len(trajs)), key=lambda i: 1 if "ego" in trajs[i][0] else 0)
         for idx in order:
