@@ -4,7 +4,6 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import pdb
-from scipy.signal import filtfilt
 from matplotlib.patches import Ellipse
 
 CARLA_ROOT = os.getenv("CARLA_ROOT")

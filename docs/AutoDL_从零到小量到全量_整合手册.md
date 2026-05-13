@@ -205,6 +205,31 @@ cd "$REPO/core/scripts/carla"
 
 ---
 
+## 可视化视频：CARLA 航拍与离线俯视 MP4
+
+论文或答辩里常需要「道路几何 + 车辆运动」的动图/视频，仓库提供两条路径，可并行使用。
+
+1. **CARLA 无人机视角 `carla_sim.avi`**（仿真**进行中**逐帧写入，真三维 RGB）  
+   在 `run_all_scenarios.py` 中加 **`--enable_camera_viz`**，且场景 JSON 的 `drone_viz_params` 里 **`save_avi` 为 true**（脚本在未加该开关时会强制关掉 `save_avi`，避免无头环境误开相机）。实现上与普通 CARLA **RGB 相机**一致：从 `img.raw_data` 写到 OpenCV `VideoWriter`。  
+   **与 `-nullrhi` 的关系：** 若服务端用 **`CarlaUE4.sh -nullrhi`** 启动，通常**没有完整光栅化**，RGB 传感器往往得到**全黑/无效帧**或行为不稳定，此时 **`carla_sim.avi` 即使生成了也没有可用画面**。要录「真 CARLA 画面」，需要**能渲染**的 CARLA 启动方式（例如带 GPU 的机器上去掉 `-nullrhi`，并按 CARLA 文档配置 Vulkan/离屏渲染等），再开 `--enable_camera_viz`。
+
+2. **离线俯视 `rollout_topdown.mp4`**（**不依赖** CARLA 再渲染，与 **`-nullrhi` 兼容**）  
+   由 `scenario_result.pkl` 中的轨迹与（可选）路口 CSV 折线生成：画道路折线、按朝向画车辆多边形、叠加帧号与仿真时间。  
+   - **批量内自动生成（不是只能事后）**：在 `run_all_scenarios.py` 命令末尾加 **`--render_topdown_mp4`**。每个子仿真 **成功结束并写出 `scenario_result.pkl` 之后**，**同一轮脚本内**会立刻生成该子目录下的 **`rollout_topdown.mp4`**，无需等实验全部跑完再手动跑一遍渲染脚本。可选调整 **`--render_topdown_fps` / `--render_topdown_width` / `--render_topdown_height`**。路口折线由场景 JSON 的 **`carla_params.intersection_csv_loc`** 相对 **`scripts/carla/scenarios/`** 解析；若文件缺失仍会出视频，但可能不画道路线。  
+   - **事后单独生成**（例如只把 pkl 拷到本机、或当时未加开关要补做）：
+
+```bash
+cd "$REPO/core"
+python scripts/render_rollout_video.py \
+  --pkl "./results/<时间戳>/<子目录名>/scenario_result.pkl" \
+  --intersection_csv "./scripts/carla/scenarios/<与场景 JSON 中 intersection_csv_loc 相同的文件名>" \
+  --out "./results/<时间戳>/<子目录名>/rollout_topdown.mp4"
+```
+
+`--intersection_csv` 可省略，此时视频以轨迹包络为主、道路线可能为空。
+
+---
+
 ## 阶段 5：小量实验检查（三层递进）
 
 固定小矩阵：`scenario_01.json` × `ego_init_01.json`。每次运行后记下终端打印的 **`<时间戳>`**，下文用该目录做检查。
@@ -221,10 +246,11 @@ python run_all_scenarios.py \
   --policies smpc_var_risk \
   --solver_backend gurobi \
   --with_notv \
-  --with_notv_cl
+  --with_notv_cl \
+  --render_topdown_mp4
 ```
 
-**通过：** 无 traceback；`core/results/<时间戳>/` 下各子目录均有 `scenario_result.pkl`。
+**通过：** 无 traceback；`core/results/<时间戳>/` 下各子目录均有 `scenario_result.pkl`。若加了 `--render_topdown_mp4`，各成功子目录还应出现 **`rollout_topdown.mp4`**（需本环境已安装 OpenCV 的 `cv2`）。
 
 ```bash
 ls "$REPO/core/results/<时间戳>"/*/scenario_result.pkl
@@ -290,6 +316,8 @@ python run_all_scenarios.py \
   --with_notv \
   --with_notv_cl
 ```
+
+全量时若希望每个成功子目录自动生成 **`rollout_topdown.mp4`**，与 5.1 相同，在命令末尾追加 **`--render_topdown_mp4`**（及可选 `--render_topdown_fps` 等）即可。
 
 ### 6.2 全量无 Gurobi（可选）
 
@@ -411,8 +439,7 @@ bash run_modern_reproduction.sh
 | 端口占用 | `pkill -9 -f CarlaUE4 && sleep 2` |
 | 客户端与服务端版本不一致 | `pip install carla==0.9.14` |
 | 无 Gurobi 插件 | `--solver_backend ipopt_approx` 或按阶段 2 配置 Gurobi |
-
----
+| `GLIBCXX_3.4.29` not found（SciPy 导入失败） | ① 运行前：`export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:${LD_LIBRARY_PATH:-}"`；或 `conda install -c conda-forge "libstdcxx-ng>=12"` 后重装 SciPy。② 仓库已减少对 SciPy 的硬依赖（Frenet 曲率平滑、`mpc_utils` 正态 CDF），**拉最新代码**后再试。 |
 
 ## 现代化改造清单与结果对齐建议
 

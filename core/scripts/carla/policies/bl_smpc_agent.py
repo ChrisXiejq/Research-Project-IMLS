@@ -2,7 +2,6 @@ import carla
 import os
 import sys
 import numpy as np
-from scipy.linalg import sqrtm
 import casadi
 import time
 

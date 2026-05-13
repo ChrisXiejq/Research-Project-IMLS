@@ -5,6 +5,7 @@ import json
 import argparse
 import time
 import traceback
+import importlib.util
 from datetime import datetime
 
 from utils import experiment_logging as exp_log
@@ -25,6 +26,40 @@ def _policy_output_name(policy_name, solver_backend):
     if solver_backend == "gurobi":
         return policy_name
     return f"{policy_name}_{solver_backend}"
+
+
+def _maybe_render_topdown_mp4(savedir, scenario_dict, log, args):
+    """Offline top-down MP4 from ``scenario_result.pkl`` (no CARLA)."""
+    if not getattr(args, "render_topdown_mp4", False):
+        return
+    pkl = os.path.join(savedir, "scenario_result.pkl")
+    if not os.path.isfile(pkl):
+        log.warning("Skip top-down render: missing %s", pkl)
+        return
+    csv_rel = scenario_dict.get("carla_params", {}).get("intersection_csv_loc")
+    carla_dir = os.path.dirname(os.path.abspath(__file__))
+    scenarios_dir = os.path.join(carla_dir, "scenarios")
+    csv_path = os.path.join(scenarios_dir, csv_rel) if csv_rel else None
+    if csv_path and not os.path.isfile(csv_path):
+        log.warning("Intersection CSV not found (%s); video will omit road polylines.", csv_path)
+        csv_path = None
+    outv = os.path.join(savedir, "rollout_topdown.mp4")
+    mod_path = os.path.join(os.path.dirname(carla_dir), "render_rollout_video.py")
+    try:
+        spec = importlib.util.spec_from_file_location("render_rollout_video", mod_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.render_topdown_mp4(
+            pkl,
+            csv_path,
+            outv,
+            fps=float(args.render_topdown_fps),
+            width=int(args.render_topdown_width),
+            height=int(args.render_topdown_height),
+        )
+        log.info("Wrote top-down rollout video: %s", outv)
+    except Exception:
+        log.warning("Top-down video render failed; see traceback.", exc_info=True)
 
 
 def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, enable_camera_viz=False):
@@ -149,6 +184,14 @@ if __name__ == '__main__':
                         help="Also run no-TV centerline rollout.")
     parser.add_argument("--enable_camera_viz", action="store_true",
                         help="Enable CARLA RGB camera sensor and avi/opencv visualization. Disabled by default for AutoDL stability.")
+    parser.add_argument(
+        "--render_topdown_mp4",
+        action="store_true",
+        help="After each successful subrun, write rollout_topdown.mp4 from scenario_result.pkl (OpenCV; no extra CARLA load).",
+    )
+    parser.add_argument("--render_topdown_fps", type=float, default=15.0, help="FPS for offline top-down MP4.")
+    parser.add_argument("--render_topdown_width", type=int, default=1280, help="Width in pixels for offline top-down MP4.")
+    parser.add_argument("--render_topdown_height", type=int, default=720, help="Height in pixels for offline top-down MP4.")
     parser.add_argument("--solver_backend", choices=["gurobi", "ipopt_approx"], default="gurobi",
                         help="Solver backend for SMPC policies. Use ipopt_approx when Gurobi is unavailable.")
     parser.add_argument("--no_console_log", action="store_true",
@@ -184,6 +227,10 @@ if __name__ == '__main__':
             "with_notv": args.with_notv,
             "with_notv_cl": args.with_notv_cl,
             "enable_camera_viz": args.enable_camera_viz,
+            "render_topdown_mp4": args.render_topdown_mp4,
+            "render_topdown_fps": args.render_topdown_fps,
+            "render_topdown_width": args.render_topdown_width,
+            "render_topdown_height": args.render_topdown_height,
             "results_folder": os.path.abspath(results_folder),
         },
     )
@@ -256,6 +303,8 @@ if __name__ == '__main__':
                             "metrics": metrics,
                         }
                     )
+                    if ok and scenario_ok:
+                        _maybe_render_topdown_mp4(savedir, scenario_dict, log, args)
 
             if args.with_notv_cl:
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_notv_cl")
@@ -298,6 +347,8 @@ if __name__ == '__main__':
                             "metrics": metrics,
                         }
                     )
+                    if ok and scenario_ok:
+                        _maybe_render_topdown_mp4(savedir, scenario_dict, log, args)
 
             for ego_policy_config in args.policies:
                 output_policy_name = _policy_output_name(ego_policy_config, args.solver_backend)
@@ -350,6 +401,8 @@ if __name__ == '__main__':
                             "metrics": metrics,
                         }
                     )
+                    if ok and scenario_ok:
+                        _maybe_render_topdown_mp4(savedir, scenario_dict, log, args)
 
     exp_log.append_jsonl(
         results_folder,

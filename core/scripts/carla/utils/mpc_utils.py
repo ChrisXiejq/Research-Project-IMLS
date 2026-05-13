@@ -1,10 +1,14 @@
 import time
+import math
 import casadi as ca
 import numpy as np
 from itertools import product
-import scipy.stats as stats
-from scipy.stats import norm
 import pdb
+
+
+def _standard_normal_cdf(x):
+    """CDF of N(0,1) at x; avoids SciPy (GLIBCXX / wheel issues on some hosts)."""
+    return 0.5 * (1.0 + math.erf(float(x) / math.sqrt(2.0)))
 
 def _joint_mode_component(joint_index, vehicle_index, n_modes):
     """Per-vehicle GMM mode from a flat joint hypothesis index (product over TVs).
@@ -373,7 +377,7 @@ class SMPC_MMPreds():
             self.probs.append(self.opti[i].parameter(self.N_modes**N_TV))
 
             self.c_mmrstd.append(ca.DM([self.tight]*(self.N_modes**N_TV)))
-            self.c_mmrprob.append(ca.DM([norm.cdf(self.tight)]*(self.N_modes**N_TV)))
+            self.c_mmrprob.append(ca.DM([_standard_normal_cdf(self.tight)]*(self.N_modes**N_TV)))
 
             self.z_ref.append(self.opti[i].parameter(4, self.N+1))
             self.u_ref.append(self.opti[i].parameter(2, self.N+1))

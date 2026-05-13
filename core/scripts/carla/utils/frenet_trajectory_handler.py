@@ -1,5 +1,20 @@
 import numpy as np
-from scipy.signal import filtfilt
+
+
+def _smooth_ma_same_length(x, window=3):
+    """
+    Lightweight curvature smoothing (no SciPy). Approximates a short moving-average
+    with symmetric padding so length matches ``x`` (avoids GLIBCXX issues on older
+    host libstdc++ vs conda SciPy wheels).
+    """
+    x = np.asarray(x, dtype=float)
+    if x.size <= window:
+        return x
+    k = np.ones(window, dtype=float) / float(window)
+    y = np.convolve(x, k, mode="same")
+    y = np.convolve(y[::-1], k, mode="same")[::-1]
+    return y
+
 
 def fix_angle( angle ):
 	""" Given an angle, adjusts it to lie within a +/- PI range """
@@ -46,7 +61,7 @@ class FrenetTrajectoryHandler(object):
 		yaw_frenet = np.interp(s_frenet, way_s, np.unwrap(way_yaw))        # unwrap to avoid jumps when interpolating.
 		curv_frenet_raw = np.diff(yaw_frenet) / np.diff(s_frenet)          # hope this stays low due to use of unwrap above
 		if len(curv_frenet_raw) > 10:
-			curv_frenet = filtfilt(np.ones((3,))/3, 1, curv_frenet_raw)   # curvature filtering
+			curv_frenet = _smooth_ma_same_length(curv_frenet_raw, window=3)
 		else:
 			curv_frenet = curv_frenet_raw
 		curv_frenet = np.insert(curv_frenet, len(curv_frenet), 0.0)
