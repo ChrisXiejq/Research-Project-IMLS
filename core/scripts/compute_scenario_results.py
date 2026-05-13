@@ -23,8 +23,41 @@ def _parse_scenario_dir_name(scenario_dir):
     init_str, policy = tail.split("_", 1)
     return scenario_name, int(init_str), policy
 
+
+def _list_metric_scenario_dirs(results_dir):
+    """
+    Subdirectories under ``results_dir`` that contain ``scenario_result.pkl`` for a *policy*
+    rollout (excludes ``*_notv`` / ``*_notv_cl`` baselines, which are consumed as references).
+
+    Supports:
+    - **Intersection** layout: ``scenario_*_ego_init_*`` (e.g. ``scenario_01_ego_init_01_smpc_var_risk``)
+    - **LK (legacy)** layout: paths matching ``*scenario_lk*``
+    """
+    results_dir = os.path.abspath(os.path.expanduser(os.path.normpath(results_dir.rstrip("/"))))
+    if not os.path.isdir(results_dir):
+        raise ValueError(f"Not a directory: {results_dir}")
+    candidates = []
+    candidates.extend(glob.glob(os.path.join(results_dir, "*scenario_lk*")))
+    candidates.extend(glob.glob(os.path.join(results_dir, "scenario_*_ego_init_*")))
+    out = []
+    seen = set()
+    for d in sorted(set(candidates)):
+        if not os.path.isdir(d):
+            continue
+        base = os.path.basename(d.rstrip(os.sep))
+        if base.endswith("_notv") or base.endswith("_notv_cl"):
+            continue
+        pkl_path = os.path.join(d, "scenario_result.pkl")
+        if not os.path.isfile(pkl_path):
+            continue
+        if d not in seen:
+            seen.add(d)
+            out.append(d)
+    return sorted(out)
+
+
 def get_metric_dataframe(results_dir):
-    scenario_dirs = sorted(glob.glob(results_dir + "*scenario_lk*"))
+    scenario_dirs = _list_metric_scenario_dirs(results_dir)
 
     if len(scenario_dirs) == 0:
         raise ValueError(f"Could not detect scenario results in directory: {results_dir}")
@@ -66,7 +99,7 @@ def get_metric_dataframe(results_dir):
     return pd.DataFrame(dataframe)
 
 def make_trajectory_viz_plot(results_dir, color1="r", color2="b", plot_init=1, plot_pol="no_switch"):
-    scenario_dirs = sorted(glob.glob(results_dir + "*scenario*lk*"))
+    scenario_dirs = _list_metric_scenario_dirs(results_dir)
 
     if len(scenario_dirs) == 0:
         raise ValueError(f"Could not detect scenario results in directory: {results_dir}")

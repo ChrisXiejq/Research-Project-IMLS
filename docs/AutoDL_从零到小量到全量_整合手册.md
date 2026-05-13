@@ -316,6 +316,80 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py \
 
 ---
 
+## 阶段 7：将云端「最新一次」结果拉取到本机仓库（与 `core/results` 对齐）
+
+在**本机 Mac/Linux 终端**执行（不在 AutoDL 容器内）。目标：把远端 **`$REPO/core/results/<最新时间戳>/`** 整目录同步到本机仓库的 **`Research-Project-IMLS/core/results/<同一时间戳>/`**，便于本地跑 `compute_scenario_results.py` 或把 `experiment_run.log`、`batch_subruns.json` 等交给他人审阅。
+
+### 7.1 连接参数（按你的实例修改）
+
+- **SSH**：示例为 `ssh -p <端口> root@<主机>`（如 AutoDL / 算力平台自定义端口）。
+- **远端结果根**：与上文路径约定一致，一般为 **`/root/autodl-tmp/Research-Project-IMLS/core/results`**。若仓库不在该路径，在服务器上执行 `pwd` 或 `ls` 确认后再改 `REMOTE_BASE`。
+
+### 7.2 推荐：`rsync` 拉「按修改时间最新」的子目录
+
+**易错点（必读）**：若把 `ssh` 里的远端路径写成 `\${REMOTE_RESULTS}` 且变量**只在本地有定义**，远端 shell 展开为空，`ls …/*/` 会匹配到系统目录（例如误得到 **`run`**），`rsync` 会报 `.../results/run` 不存在。下面命令让 **`REMOTE_BASE` 在本机展开进 ssh 参数字符串**，远端只执行字面路径。
+
+```bash
+# 本机：克隆下来的仓库里 core/results 的绝对路径（请改成你的实际路径）
+LOCAL_RESULTS="/你的路径/Dissertation/Research-Project-IMLS/core/results"
+
+# 远端：与 AutoDL 手册一致的 results 父目录（请按服务器实际路径修改）
+REMOTE_BASE="/root/autodl-tmp/Research-Project-IMLS/core/results"
+
+# SSH（示例：请替换为你的 -p 与主机名）
+SSH_OPTS="-p 45715"
+SSH_HOST="root@connect.cqa1.seetacloud.com"
+
+LATEST_NAME=$(ssh ${SSH_OPTS} ${SSH_HOST} \
+  "basename \"\$(ls -td ${REMOTE_BASE}/*/ 2>/dev/null | head -1)\"")
+
+echo "LATEST_NAME=${LATEST_NAME}"
+# 应输出类似 20260513_212143；若为 run、为空或报错，检查 REMOTE_BASE 与远端是否确有子目录
+
+test -n "${LATEST_NAME}" || { echo "未找到远端时间戳子目录"; exit 1; }
+
+mkdir -p "${LOCAL_RESULTS}"
+
+rsync -avz -e "ssh ${SSH_OPTS}" --progress \
+  "${SSH_HOST}:${REMOTE_BASE}/${LATEST_NAME}/" \
+  "${LOCAL_RESULTS}/${LATEST_NAME}/"
+```
+
+**端口写法**：`ssh` 用 **`-p`**；`scp` 用 **`-P`**；`rsync` 用 **`-e "ssh -p …"`**。
+
+### 7.3 只拉指定时间戳（不自动选最新）
+
+```bash
+STAMP="20260513_212143"
+LOCAL_RESULTS="/你的路径/Dissertation/Research-Project-IMLS/core/results"
+REMOTE_BASE="/root/autodl-tmp/Research-Project-IMLS/core/results"
+SSH_OPTS="-p 45715"
+SSH_HOST="root@connect.cqa1.seetacloud.com"
+
+rsync -avz -e "ssh ${SSH_OPTS}" --progress \
+  "${SSH_HOST}:${REMOTE_BASE}/${STAMP}/" \
+  "${LOCAL_RESULTS}/${STAMP}/"
+```
+
+### 7.4 本机核对
+
+```bash
+ls -la "${LOCAL_RESULTS}/${LATEST_NAME}"   # 使用 7.2 时
+# 若使用 7.3 固定时间戳，则改为： ls -la "${LOCAL_RESULTS}/${STAMP}"
+```
+应能看到各策略子目录、`scenario_result.pkl`、以及（若已按仓库日志功能跑过）`experiment_run.log`、`batch_subruns.json` 等。
+
+本地聚合指标时（路径按你拉下的目录名替换）：
+
+```bash
+cd /你的路径/Dissertation/Research-Project-IMLS/core
+MPLBACKEND=Agg python scripts/compute_scenario_results.py \
+  --results_dir "./results/<时间戳>" \
+  --compute_metrics
+```
+
+---
+
 ## 可选：仓库一键脚本
 
 ```bash
