@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Any, Dict, List, Optional
 
 import carla
 import os
@@ -9,10 +9,12 @@ import cv2
 import numpy as np
 import random
 import pickle
+import traceback
 
 scriptdir = os.path.abspath(__file__).split('carla')[0] + 'carla/'
 sys.path.append(scriptdir)
 from utils.carla_sync_mode import CarlaSyncMode
+from utils import experiment_logging as exp_log
 
 from policies.static_agent import StaticAgent
 from policies.smpc_agent import SMPCAgent
@@ -305,6 +307,30 @@ class RunLKScenario:
     def run_scenario(self):
         # Return flag to indicate if this ran to completion.
         ran_successfully = False
+        rows_buffer: List[Dict[str, Any]] = []
+        run_error: Optional[str] = None
+        log = exp_log.get_logger()
+        policy_types = [type(p).__name__ for p in self.vehicle_policies]
+        log.info(
+            "LK rollout start savedir=%s max_iters=%s fps=%s policies=%s",
+            os.path.abspath(self.savedir),
+            self.max_iters,
+            self.carla_fps,
+            policy_types,
+        )
+        bd = exp_log.batch_dir()
+        if bd:
+            exp_log.append_jsonl(
+                bd,
+                {
+                    "event": "scenario_rollout_start",
+                    "kind": "lk",
+                    "savedir": os.path.abspath(self.savedir),
+                    "policy_types": policy_types,
+                    "ego_N": self.ego_N,
+                    "ego_num_modes": self.ego_num_modes,
+                },
+            )
 
         # Video Setup
         writer = None
@@ -340,7 +366,7 @@ class RunLKScenario:
                     sync_mode.tick(timeout=self.timeout)
 
                 # Loop until all vehicles have reached their goal or we've exceeded self.max_iters.
-                for _ in range(self.max_iters):
+                for loop_step in range(self.max_iters):
                     snap, img = sync_mode.tick(timeout=self.timeout)
 
                     # Handle predictions.
@@ -351,6 +377,9 @@ class RunLKScenario:
                     # Run policies for each agent.
                     t_elapsed = snap.elapsed_seconds
                     completed = True
+                    ego_feasible = None
+                    ego_solve_time = None
+                    ego_control = None
 
                     ev_loc=self.vehicle_actors[self.ego_vehicle_idx].get_location()
                     cam_loc=carla.Location(x=ev_loc.x,y=ev_loc.y,z=ev_loc.z+50.)
@@ -360,6 +389,13 @@ class RunLKScenario:
 
                     for idx_act, (act, policy) in enumerate(zip(self.vehicle_actors, self.vehicle_policies)):
                         control, z0, u0, is_feasible, solve_time = policy.run_step(pred_dict)
+                        if idx_act == self.ego_vehicle_idx:
+                            ego_feasible = bool(is_feasible)
+                            try:
+                                ego_solve_time = float(solve_time)
+                            except (TypeError, ValueError):
+                                ego_solve_time = float("nan")
+                            ego_control = control
                         if not policy.done():
                             z0 = np.append(t_elapsed, z0) # add the Carla timestamp
                             act_key = f"{act.attributes['role_name']}_{idx_act}"
@@ -378,6 +414,20 @@ class RunLKScenario:
                             ego_speed = np.linalg.norm([ego_vel.x, ego_vel.y])
                             ego_ctrl  = control
                             completed = completed and policy.done()
+
+                    pred0 = bool(tvs_valid_pred[0]) if tvs_valid_pred else False
+                    if ego_control is not None:
+                        step_row = {
+                            "step": loop_step,
+                            "sim_time_s": float(t_elapsed),
+                            "ego_feasible": ego_feasible,
+                            "ego_solve_time_s": ego_solve_time,
+                            "ego_throttle": float(ego_control.throttle),
+                            "ego_brake": float(ego_control.brake),
+                            "ego_steer": float(ego_control.steer),
+                            "pred_valid_tv0": pred0,
+                        }
+                        exp_log.append_step_row(self.savedir, rows_buffer, step_row, flush_every=25)
 
                     # Get drone camera image.
                     img_drone = np.frombuffer(img.raw_data, dtype=np.uint8)
@@ -427,8 +477,41 @@ class RunLKScenario:
                 pickle.dump(self.results_dict, open(pkl_name, "wb"))
                 ran_successfully = True
 
-        # Teardown.
+        except Exception:
+            run_error = traceback.format_exc()
+            log.exception("LK scenario failed savedir=%s", os.path.abspath(self.savedir))
+            raise
         finally:
+            exp_log.flush_step_csv(self.savedir, rows_buffer)
+            extra: Dict[str, Any] = {"policy_types": policy_types}
+            try:
+                extra["map"] = self.world.get_map().name
+            except Exception:
+                pass
+            try:
+                exp_log.write_scenario_run_summary(
+                    self.savedir,
+                    scenario_kind="lk",
+                    ran_successfully=ran_successfully,
+                    max_iters=self.max_iters,
+                    carla_fps=self.carla_fps,
+                    results_dict=getattr(self, "results_dict", None),
+                    error=run_error,
+                    extra=extra,
+                )
+            except Exception as exc:
+                log.error("write_scenario_run_summary failed: %s", exc)
+            if bd:
+                exp_log.append_jsonl(
+                    bd,
+                    {
+                        "event": "scenario_rollout_end",
+                        "kind": "lk",
+                        "savedir": os.path.abspath(self.savedir),
+                        "ran_successfully": ran_successfully,
+                        "had_error": run_error is not None,
+                    },
+                )
             if writer:
                 writer.release()
             for actor in self.vehicle_actors:

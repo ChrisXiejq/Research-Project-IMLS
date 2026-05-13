@@ -1,8 +1,13 @@
 import os
+import sys
 import glob
 import json
 import argparse
+import time
+import traceback
 from datetime import datetime
+
+from utils import experiment_logging as exp_log
 
 
 
@@ -66,7 +71,7 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
                                         pred_params,
                                         savedir)
     
-    runner.run_scenario()
+    return runner.run_scenario()
 
 def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
                  enable_camera_viz=False, solver_backend="gurobi"):
@@ -125,7 +130,7 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
                                      vehicles_params_list,
                                      pred_params,
                                      savedir)
-    runner.run_scenario()
+    return runner.run_scenario()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run SMPC experiments in CARLA.")
@@ -146,6 +151,8 @@ if __name__ == '__main__':
                         help="Enable CARLA RGB camera sensor and avi/opencv visualization. Disabled by default for AutoDL stability.")
     parser.add_argument("--solver_backend", choices=["gurobi", "ipopt_approx"], default="gurobi",
                         help="Solver backend for SMPC policies. Use ipopt_approx when Gurobi is unavailable.")
+    parser.add_argument("--no_console_log", action="store_true",
+                        help="Do not duplicate experiment logs to stdout (file + jsonl still written).")
     args = parser.parse_args()
 
     scenario_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/")
@@ -162,6 +169,32 @@ if __name__ == '__main__':
     os.makedirs(results_folder, exist_ok=True)
     print(f"Saving experiment outputs under: {results_folder}")
 
+    log = exp_log.configure_batch_logging(
+        results_folder,
+        console=not args.no_console_log,
+    )
+    exp_log.write_json(
+        os.path.join(results_folder, "batch_config.json"),
+        {
+            "argv": sys.argv,
+            "scenario_glob": args.scenario_glob,
+            "init_glob": args.init_glob,
+            "policies": list(args.policies),
+            "solver_backend": args.solver_backend,
+            "with_notv": args.with_notv,
+            "with_notv_cl": args.with_notv_cl,
+            "enable_camera_viz": args.enable_camera_viz,
+            "results_folder": os.path.abspath(results_folder),
+        },
+    )
+    exp_log.append_jsonl(
+        results_folder,
+        {"event": "batch_start", "n_scenario_files": len(scenarios_list)},
+    )
+    log.info("Matched %d scenario JSON files", len(scenarios_list))
+
+    subrun_status: list = []
+
     for scenario in scenarios_list:
         # Load the scenario and generate parameters.
         scenario_dict = json.load(open(scenario, "r"))
@@ -175,6 +208,8 @@ if __name__ == '__main__':
         if not ego_init_list:
             raise RuntimeError(f"No init files matched: {args.init_glob}")
 
+        log.info("Scenario %s: %d init files", scenario_name, len(ego_init_list))
+
         for ego_init in ego_init_list:
             # Load the ego vehicle parameters.
             ego_init_dict = json.load(open(ego_init, "r"))
@@ -183,17 +218,120 @@ if __name__ == '__main__':
             if args.with_notv:
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_notv")
                 print(f"Running {scenario_name} {ego_init_name} notv")
-                run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, enable_camera_viz=args.enable_camera_viz)
+                label = f"{scenario_name}_{ego_init_name}_notv"
+                t0 = time.perf_counter()
+                err = None
+                ok = False
+                scenario_ok = None
+                try:
+                    exp_log.append_jsonl(
+                        results_folder,
+                        {"event": "subrun_start", "label": label, "savedir": savedir},
+                    )
+                    scenario_ok = run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, enable_camera_viz=args.enable_camera_viz)
+                    ok = bool(scenario_ok)
+                except Exception:
+                    err = traceback.format_exc()
+                    log.exception("Subrun failed: %s", label)
+                    raise
+                finally:
+                    exp_log.log_batch_subrun(
+                        label,
+                        phase="notv",
+                        duration_s=time.perf_counter() - t0,
+                        ok=ok,
+                        error=err,
+                        savedir=savedir,
+                    )
+                    subrun_status.append({"label": label, "ok": ok, "savedir": savedir, "scenario_completed": scenario_ok})
 
             if args.with_notv_cl:
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_notv_cl")
                 print(f"Running {scenario_name} {ego_init_name} notv_cl")
-                run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=True, enable_camera_viz=args.enable_camera_viz)
+                label = f"{scenario_name}_{ego_init_name}_notv_cl"
+                t0 = time.perf_counter()
+                err = None
+                ok = False
+                scenario_ok = None
+                try:
+                    exp_log.append_jsonl(
+                        results_folder,
+                        {"event": "subrun_start", "label": label, "savedir": savedir},
+                    )
+                    scenario_ok = run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=True, enable_camera_viz=args.enable_camera_viz)
+                    ok = bool(scenario_ok)
+                except Exception:
+                    err = traceback.format_exc()
+                    log.exception("Subrun failed: %s", label)
+                    raise
+                finally:
+                    exp_log.log_batch_subrun(
+                        label,
+                        phase="notv_cl",
+                        duration_s=time.perf_counter() - t0,
+                        ok=ok,
+                        error=err,
+                        savedir=savedir,
+                    )
+                    subrun_status.append({"label": label, "ok": ok, "savedir": savedir, "scenario_completed": scenario_ok})
 
             for ego_policy_config in args.policies:
                 output_policy_name = _policy_output_name(ego_policy_config, args.solver_backend)
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_{output_policy_name}")
                 print(f"Running {scenario_name} {ego_init_name} {ego_policy_config} ({args.solver_backend})")
-                run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
-                             enable_camera_viz=args.enable_camera_viz,
-                             solver_backend=args.solver_backend)
+                label = f"{scenario_name}_{ego_init_name}_{ego_policy_config}"
+                t0 = time.perf_counter()
+                err = None
+                ok = False
+                scenario_ok = None
+                try:
+                    exp_log.append_jsonl(
+                        results_folder,
+                        {
+                            "event": "subrun_start",
+                            "label": label,
+                            "savedir": savedir,
+                            "policy": ego_policy_config,
+                            "solver_backend": args.solver_backend,
+                        },
+                    )
+                    scenario_ok = run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
+                                               enable_camera_viz=args.enable_camera_viz,
+                                               solver_backend=args.solver_backend)
+                    ok = bool(scenario_ok)
+                except Exception:
+                    err = traceback.format_exc()
+                    log.exception("Subrun failed: %s", label)
+                    raise
+                finally:
+                    exp_log.log_batch_subrun(
+                        label,
+                        phase="smpc",
+                        duration_s=time.perf_counter() - t0,
+                        ok=ok,
+                        error=err,
+                        savedir=savedir,
+                    )
+                    subrun_status.append(
+                        {
+                            "label": label,
+                            "ok": ok,
+                            "savedir": savedir,
+                            "policy": ego_policy_config,
+                            "scenario_completed": scenario_ok,
+                        }
+                    )
+
+    exp_log.append_jsonl(
+        results_folder,
+        {
+            "event": "batch_end",
+            "n_subruns": len(subrun_status),
+            "all_scenario_flags_true": (
+                len(subrun_status) > 0
+                and all(s.get("scenario_completed") is True for s in subrun_status)
+            ),
+        },
+    )
+    exp_log.write_json(os.path.join(results_folder, "batch_subruns.json"), {"subruns": subrun_status})
+    log.info("Batch finished; logged %d subruns to batch_subruns.json", len(subrun_status))
