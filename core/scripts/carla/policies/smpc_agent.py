@@ -64,6 +64,8 @@ class SMPCAgent(object):
         self.t_ref=0
         self.fps=fps
         self.d_min=1.0
+        # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
+        self._n_tv_max_ol = n_tv_max
 
         self.fixed_risk=False
         self.obca_flag=obca
@@ -125,13 +127,14 @@ class SMPCAgent(object):
         # plt.show()
 
         # MPC initialization (might take a while....)
+        n_tv_mpc = n_tv_max if n_tv_max is not None else 1
         if not self.ol_flag:
             if not self.obca_flag:
                 self.SMPC=smpc.SMPC_MMPreds(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag, fixed_risk=self.fixed_risk,
-                                    L_F=self.lf, L_R=self.lr, fps=self.fps)
+                                    L_F=self.lf, L_R=self.lr, fps=self.fps, N_TV_MAX=n_tv_mpc)
             else:
                 self.SMPC=smpc.SMPC_MMPreds_OBCA(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag,
-                                        L_F=self.lf, L_R=self.lr, fps=self.fps, pol_mode=self.obca_mode)
+                                        L_F=self.lf, L_R=self.lr, fps=self.fps, pol_mode=self.obca_mode, N_TV_MAX=n_tv_mpc)
         else:
             n_tvm = self._n_tv_max_ol if self._n_tv_max_ol is not None else 2
             self.SMPC=smpc.SMPC_MMPreds_OL(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes,

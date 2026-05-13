@@ -8,7 +8,9 @@
 - `core/`：主实验代码（基于 `SMPC_MMPreds`，含 SMPC 三策略、CARLA 场景、预训练 MultiPath 资产）
 - `extensions/`：来自 `confidence_aware_predictions` 的扩展模块（用于后续校准/预测侧增强）
 - `docs/AutoDL_Environment_Setup.md`：保守复现环境手册（旧版依赖）
-- `docs/AutoDL_Modern_Setup.md`：现代稳定版复现入口（推荐）
+- `docs/AutoDL_现代稳定版复现手册.md`：现代稳定版复现（推荐，含 intersection 三层检查）
+- `docs/论文与SMPC_Intersection复现梳理.md`：**论文方法 · SMPC 流程 · 迁移与 intersection 范围**（概念与流程总览）
+- `docs/AutoDL_Modern_Setup.md`：现代稳定版复现入口（旧文件名）
 - `tools/assemble_from_sources.py`：从源仓重组当前工作区的脚本
 
 ## 复现实验步骤（基础版，完整可跑）
