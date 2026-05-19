@@ -213,8 +213,7 @@ cd "$REPO/core/scripts/carla"
 
 1. **CARLA 无人机视角 `carla_sim.avi`**（仿真**进行中**逐帧写入，真三维 RGB）
   在 `run_all_scenarios.py` 中加 `**--enable_camera_viz`**，且场景 JSON 的 `drone_viz_params` 里 `**save_avi` 为 true**（脚本在未加该开关时会强制关掉 `save_avi`，避免无头环境误开相机）。实现上与普通 CARLA **RGB 相机**一致：从 `img.raw_data` 写到 OpenCV `VideoWriter`。  
-   **与 `-nullrhi` 的关系：** 若服务端用 `**CarlaUE4.sh -nullrhi`** 启动，通常**没有完整光栅化**，RGB 传感器往往得到**全黑/无效帧**或行为不稳定，此时 `**carla_sim.avi` 即使生成了也没有可用画面**。要录「真 CARLA 画面」，需要**能渲染**的 CARLA 启动方式（例如带 GPU 的机器上去掉 `-nullrhi`，并按 CARLA 文档配置 Vulkan/离屏渲染等），再开 `--enable_camera_viz`。  
-   **随自车俯视（写实推荐）：** 在 `drone_viz_params` 中设 **`"attach_to_ego": true`**，可调 **`ego_cam_height_m`**（默认约 22）、**`ego_cam_pitch_deg`**（默认 `-90` 垂直向下）等；相机会刚性挂在 ego 上，画面为真实纹理。随动模式下会**关闭**依赖世界固定投影的 GMM/轨迹/模态叠画，仅保留可选 **`overlay_ego_info`** 文本。
+   **与 `-nullrhi` 的关系：** 若服务端用 `**CarlaUE4.sh -nullrhi`** 启动，通常**没有完整光栅化**，RGB 传感器往往得到**全黑/无效帧**或行为不稳定，此时 `**carla_sim.avi` 即使生成了也没有可用画面**。要录「真 CARLA 画面」，需要**能渲染**的 CARLA 启动方式（例如带 GPU 的机器上去掉 `-nullrhi`，并按 CARLA 文档配置 Vulkan/离屏渲染等），再开 `--enable_camera_viz`。
 2. **离线俯视 `rollout_topdown.mp4`**（**不依赖** CARLA 再渲染，与 `**-nullrhi` 兼容**）
   由 `scenario_result.pkl` 中的轨迹与（可选）路口 CSV 折线生成：画道路折线、按朝向画车辆多边形、叠加帧号与仿真时间。  
   - **批量内自动生成（不是只能事后）**：在 `run_all_scenarios.py` 命令末尾加 `**--render_topdown_mp4`**。每个子仿真 **成功结束并写出 `scenario_result.pkl` 之后**，**同一轮脚本内**会立刻生成该子目录下的 `**rollout_topdown.mp4`**，无需等实验全部跑完再手动跑一遍渲染脚本。可选调整 `**--render_topdown_fps` / `--render_topdown_width` / `--render_topdown_height**`。路口折线由场景 JSON 的 `**carla_params.intersection_csv_loc**` 相对 `**scripts/carla/scenarios/**` 解析；若文件缺失仍会出视频，但可能不画道路线。  
@@ -229,8 +228,6 @@ python scripts/render_rollout_video.py \
 ```
 
 `--intersection_csv` 可省略，此时视频以轨迹包络为主、道路线可能为空。
-
-**几何对齐预期**：成功跑完 CARLA 子目录后会生成 **`map_viz_snapshot.json`**（从**当前已加载地图**拓扑导出的车道多边形，与 `scenario_result.pkl` 同坐标系）。`render_rollout_video.py` **若发现该文件则优先用它铺底图**，再画车辆；没有该文件时才用路口 CSV 的粗线近似，此时仍可用 **`viz_topdown`** 调节 `road_half_width_m`、`road_arm_extend_m` 等。旧结果目录可重跑一次带 CARLA 的 scenario 以补生成 snapshot。
 
 ---
 
