@@ -25,13 +25,11 @@ class GMMPrediction:
 		self.sigmas = sigmas
 
 	def get_top_k_mode_labels(self, k=1):
-		# Note: this returns k-1 probable mode first and the least probable  mode.
-		least=np.argsort(self.mode_probabilities)[:1]
-		most=np.argsort(-self.mode_probabilities)[:k-1]
-		return np.concatenate((most, least))
+		# Use the k most likely MultiPath modes for the paper's top-k GMM approximation.
+		return np.argsort(-self.mode_probabilities)[:k]
 
 	def get_top_k_GMM(self, k):
-		assert k > 0 and k < self.n_modes
+		assert k > 0 and k <= self.n_modes
 
 		# Find the top-k most likely modes.
 		top_k_inds = self.get_top_k_mode_labels(k=k)

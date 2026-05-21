@@ -192,8 +192,8 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run SMPC experiments in CARLA.")
-    parser.add_argument("--scenario_glob", default="scenario_0*.json",
-                        help="Glob pattern under scenarios/. Example: scenario_0*.json or scenario_lk.json")
+    parser.add_argument("--scenario_glob", default="scenario_01.json",
+                        help="Glob pattern under scenarios/. Default is the paper's intersection scenario; use scenario_0*.json for all local variants.")
     parser.add_argument("--init_glob", default="ego_init_*.json",
                         help="Glob pattern under scenarios/inits/. Example: ego_init_0*.json")
     parser.add_argument("--results_dir", default=None,

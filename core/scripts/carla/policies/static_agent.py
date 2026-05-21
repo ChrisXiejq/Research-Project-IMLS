@@ -42,7 +42,7 @@ class StaticAgent(object):
         self.static_control.hand_brake = False
         self.static_control.manual_gear_shift = False
         self.static_control.throttle =  0.
-        self.static_control.brake    = -1.
+        self.static_control.brake    =  1.
         self.static_control.steer    =  0.
 
 
@@ -121,13 +121,7 @@ class StaticAgent(object):
         z0 = np.array([x, y, psi, speed]) # current kinematic state
         u0 = np.array([0., 0.])           # acceleration, steering angle setpoint for low-level control
 
-        control =  self._low_level_control.update(speed, # v_curr
-                                                  0., # a_des
-                                                  self.nominal_speed, # v_des
-                                                  psi) # df_des
-
-        # return self.static_control, z0, u0, True, np.nan
-        return control, z0, u0, True, np.nan
+        return self.static_control, z0, u0, True, np.nan
 
     # def run_step(self, pred_dict):
     #     vehicle_loc   = self.vehicle.get_location()

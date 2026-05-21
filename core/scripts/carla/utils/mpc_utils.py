@@ -10,6 +10,11 @@ def _standard_normal_cdf(x):
     """CDF of N(0,1) at x; avoids SciPy (GLIBCXX / wheel issues on some hosts)."""
     return 0.5 * (1.0 + math.erf(float(x) / math.sqrt(2.0)))
 
+PAPER_INTERSECTION_EPSILON = 0.02
+PAPER_INTERSECTION_TARGET_PROB = 1.0 - PAPER_INTERSECTION_EPSILON
+# Hard-coded inverse CDF Phi^{-1}(0.98), avoiding dependency/version changes.
+PAPER_INTERSECTION_TIGHTENING = 2.053748910631823
+
 def _joint_mode_component(joint_index, vehicle_index, n_modes):
     """Per-vehicle GMM mode from a flat joint hypothesis index (product over TVs).
 
@@ -260,7 +265,7 @@ class SMPC_MMPreds():
                 N_TV_MAX     =  1,
                 N_seq_MAX    =  100,
                 T_BAR_MAX    =  6,
-                TIGHTENING   =  1.64,#1.9,
+                TIGHTENING   =  PAPER_INTERSECTION_TIGHTENING,
                 NOISE_STD    =  [0.1, .1, .01, .1, 0.01], # process noise standard deviations in order [w_x, w_y, w_theta, w_v, w_TV]
                 # Q =[0.1*50., 0.005*500, 1*10., 0.1*100.], # weights on x, y, and v.
                 Q =[0.1*50., 0.005*500, 1*10., 0.1*10.], # weights on x, y, and v.
@@ -377,7 +382,7 @@ class SMPC_MMPreds():
             self.probs.append(self.opti[i].parameter(self.N_modes**N_TV))
 
             self.c_mmrstd.append(ca.DM([self.tight]*(self.N_modes**N_TV)))
-            self.c_mmrprob.append(ca.DM([_standard_normal_cdf(self.tight)]*(self.N_modes**N_TV)))
+            self.c_mmrprob.append(ca.DM([PAPER_INTERSECTION_TARGET_PROB]*(self.N_modes**N_TV)))
 
             self.z_ref.append(self.opti[i].parameter(4, self.N+1))
             self.u_ref.append(self.opti[i].parameter(2, self.N+1))
@@ -731,14 +736,14 @@ class SMPC_MMPreds():
         t_bar=i-(N_TV-1)*self.t_bar_max
 
 
-        def _get_mode_collision_prob(sol, m):
-            prob =sol.value(self.probs[i][m])
+        def _get_mode_collision_prob(value_fn, m):
+            prob = value_fn(self.probs[i][m])
             collision_prob = 0
             for t in range(1, self.N):
                 collision_prob_t = 0
                 for k in range(N_TV): 
-                    z= sol.value(self.collision_avoidance[i][m][t][k]['z']).toarray().squeeze()
-                    y = sol.value(self.collision_avoidance[i][m][t][k]['y'])
+                    z = np.asarray(value_fn(self.collision_avoidance[i][m][t][k]['z'])).squeeze()
+                    y = value_fn(self.collision_avoidance[i][m][t][k]['y'])
                     noise_samples = np.random.normal(np.zeros(z.shape[-1]), 1, size=(100, z.shape[-1]))
                     for s in range(100):
                         collision_prob_t += prob/100*int((y+z@noise_samples[s])>0)
@@ -759,7 +764,7 @@ class SMPC_MMPreds():
 
             collision_prob = 0
             for m in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)):
-                collision_prob+=_get_mode_collision_prob(sol, m)
+                collision_prob+=_get_mode_collision_prob(sol.value, m)
 
 
             
@@ -788,7 +793,7 @@ class SMPC_MMPreds():
 
                 collision_prob = 0
                 for m in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)):
-                    collision_prob+=_get_mode_collision_prob(sol, m)
+                    collision_prob+=_get_mode_collision_prob(self.opti[i].debug.value, m)
                 z_lin_ev   = self.opti[i].debug.value(self.z_lin[i])
                 u_lin_ev   = self.opti[i].debug.value(self.u_lin[i])
                 z_ref_ev   = self.opti[i].debug.value(self.z_ref[i])
@@ -935,7 +940,7 @@ class SMPC_MMPreds_OBCA():
                 N_TV_MAX     =  1,
                 N_seq_MAX    =  100,
                 T_BAR_MAX    =  6,
-                TIGHTENING   =  1.5,
+                TIGHTENING   =  PAPER_INTERSECTION_TIGHTENING,
                 NOISE_STD    =  [0.1, .1, .01, .1, .5], # process noise standard deviations in order [w_x, w_y, w_theta, w_v, w_TV]
                 Q =[0.1*50., 0.01*50, 1*10., 0.1*10.], # weights on x, y, and v.
                 R = [10., 1000],       # weights on inputs
@@ -1714,7 +1719,7 @@ class SMPC_MMPreds_OL():
                 N_TV_MAX     =  2,
                 N_seq_MAX    =  50,
                 T_BAR_MAX    =  4,
-                TIGHTENING   =  1.9, #1.64,
+                TIGHTENING   =  PAPER_INTERSECTION_TIGHTENING,
                 NOISE_STD    =  [0.1, .1, .01, .1, 0.01], # process noise standard deviations in order [w_x, w_y, w_theta, w_v, w_TV]
                 Q =[0.1*50., 0.005*500, 1*10., 0.1*100.], # weights on x, y, and v.
                 R = [100., 1000],

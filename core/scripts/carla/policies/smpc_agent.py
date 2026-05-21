@@ -274,6 +274,7 @@ class SMPCAgent(object):
 
         target_vehicle_positions=pred_dict["tvs_positions"]
         target_vehicle_gmm_preds=pred_dict["tvs_mode_dists"]
+        target_vehicle_mode_probs=pred_dict.get("tvs_mode_probs")
 
 
 
@@ -304,6 +305,7 @@ class SMPCAgent(object):
         v_des = np.clip(z0[-1] + self.SMPC.A_MIN * self.SMPC.DT, self.SMPC.V_MIN, self.SMPC.V_MAX)
         is_opt=False
         solve_time=np.nan
+        collision_prob=np.nan
 
 
 
@@ -378,6 +380,15 @@ class SMPCAgent(object):
                          'df_lin': l_inputs[:,1].T,
                          'mus'  : [target_vehicle_gmm_preds[0][k] for k in range(N_TV)],     'sigmas' : [target_vehicle_gmm_preds[1][k] for k in range(N_TV)], 'acc_prev' : self.control_prev[0], 'df_prev' : self.control_prev[1],       'tv_shapes': tv_shape_matrices, 'Rs_ev': Rs_ev }
 
+            if target_vehicle_mode_probs is not None:
+                probs = np.asarray(target_vehicle_mode_probs[:N_TV], dtype=float)
+                if probs.shape == (N_TV, self.N_modes):
+                    probs = probs / np.sum(probs, axis=1, keepdims=True)
+                    joint_probs = probs[0]
+                    for mode_probs in probs[1:]:
+                        joint_probs = np.outer(joint_probs, mode_probs).reshape(-1)
+                    update_dict["probs"] = joint_probs / np.sum(joint_probs)
+
 
 
             if 'ws' in self.warm_start.keys() and self.obca_flag:
@@ -394,6 +405,7 @@ class SMPCAgent(object):
                 v_next    = sol_dict['v_next']
                 is_opt    = sol_dict['optimal']
                 solve_time=sol_dict['solve_time']
+                collision_prob = sol_dict.get('collision_prob', np.nan)
 
 
             else:
@@ -410,6 +422,7 @@ class SMPCAgent(object):
                 v_next    = sol_dict['v_next']
                 is_opt=sol_dict['optimal']
                 solve_time=sol_dict['solve_time']
+                collision_prob = sol_dict.get('collision_prob', np.nan)
                 self.warm_start={}
                 if is_opt and self.obca_flag:
                     self.warm_start={'ws': [sol_dict['h_opt'],sol_dict['K_opt'],sol_dict['M_opt'],sol_dict['lmbd_opt'],sol_dict['nu_opt']]}
@@ -495,4 +508,4 @@ class SMPCAgent(object):
                                                  v_des, # v_des
                                                  u0[1]) # df_des
 
-        return control, z0, u0, is_opt, solve_time
+        return control, z0, u0, is_opt, solve_time, collision_prob

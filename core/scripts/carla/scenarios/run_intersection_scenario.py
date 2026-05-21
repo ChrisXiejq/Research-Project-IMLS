@@ -358,7 +358,8 @@ class RunIntersectionScenario:
                                       "state_trajectory" : [],
                                       "input_trajectory" : [],
                                       "feasibility"      : [],
-                                      "solve_times"      : []}
+                                      "solve_times"      : [],
+                                      "collision_probs"  : []}
 
         try:
             sensors = [self.drone] if self.use_camera else []
@@ -385,7 +386,9 @@ class RunIntersectionScenario:
                     # Handle predictions.
                     self.agent_history.update(snap, self.world)
                     tvs_positions, tvs_mode_probs, tvs_mode_dists, tvs_valid_pred = self._make_predictions()
-                    pred_dict={ "tvs_positions": tvs_positions, "tvs_mode_dists": tvs_mode_dists}
+                    pred_dict={ "tvs_positions": tvs_positions,
+                                "tvs_mode_dists": tvs_mode_dists,
+                                "tvs_mode_probs": tvs_mode_probs}
 
                     # Run policies for each agent.
                     t_elapsed = snap.elapsed_seconds
@@ -395,7 +398,12 @@ class RunIntersectionScenario:
                     ego_control = None
 
                     for idx_act, (act, policy) in enumerate(zip(self.vehicle_actors, self.vehicle_policies)):
-                        control, z0, u0, is_feasible, solve_time = policy.run_step(pred_dict)
+                        policy_result = policy.run_step(pred_dict)
+                        if len(policy_result) == 6:
+                            control, z0, u0, is_feasible, solve_time, collision_prob = policy_result
+                        else:
+                            control, z0, u0, is_feasible, solve_time = policy_result
+                            collision_prob = np.nan
                         if idx_act == self.ego_vehicle_idx:
                             ego_feasible = bool(is_feasible) if not isinstance(is_feasible, (float, np.floating)) else bool(is_feasible)
                             try:
@@ -410,6 +418,7 @@ class RunIntersectionScenario:
                             self.results_dict[act_key]["input_trajectory"].append(u0)
                             self.results_dict[act_key]["feasibility"].append(is_feasible)
                             self.results_dict[act_key]["solve_times"].append(solve_time)
+                            self.results_dict[act_key]["collision_probs"].append(collision_prob)
 
                         # true at the end of the loop only if all agents are done or if iter_ctr>=max_iters
                         completed = completed and policy.done()
@@ -486,7 +495,8 @@ class RunIntersectionScenario:
                     for arr_key in ["state_trajectory",
                                     "input_trajectory",
                                     "feasibility",
-                                    "solve_times"]:
+                                    "solve_times",
+                                    "collision_probs"]:
                         self.results_dict[act_key][arr_key] = np.array(self.results_dict[act_key][arr_key])
                 try:
                     from utils.map_viz_export import try_export_map_viz_snapshot

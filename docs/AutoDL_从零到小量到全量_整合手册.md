@@ -6,7 +6,7 @@
 
 ## 适用范围（与原文一致）
 
-- **仅 intersection**：`scenario_0*.json`、`ego_init_*.json`，`run_all_scenarios.py` + `run_intersection_scenario.py`。
+- **仅 intersection**：论文主复现默认 `scenario_01.json × ego_init_*.json`，入口为 `run_all_scenarios.py` + `run_intersection_scenario.py`；`scenario_0*.json` 仅作为额外 intersection 变体扩展。
 - **三策略**：`smpc_var_risk`、`smpc_open_loop`、`smpc_fixed_risk`。
 - **栈**：CARLA **0.9.14** 服务端 + `carla==0.9.14` 客户端；Python **3.8** 环境 `carla_modern`；论文主路径为 **Gurobi 11.0.3 + gurobipy 11.0.3**（与原文第 3 节一致）。
 
@@ -129,11 +129,11 @@ PY
 
 ---
 
-## 阶段 3：CARLA 0.9.14 服务端（从零）
+## 阶段 3：CARLA 0.9.14 服务端（从零，支持相机/AVI）
 
 ```bash
 apt-get update
-apt-get install -y xdg-user-dirs libomp5
+apt-get install -y xdg-user-dirs libomp5 vulkan-tools
 useradd -m -s /bin/bash carlauser 2>/dev/null || true
 
 cd /root/autodl-tmp
@@ -153,14 +153,17 @@ chown carlauser:carlauser /tmp/runtime-carlauser
 
 **终端 A（保持运行，启动前清理残留）：**
 
+> 重要：若需要 `carla_sim.avi`，不能使用 `-nullrhi`。`-nullrhi` 会禁用渲染硬件接口，CARLA RGB camera 通常只能得到黑帧或无效帧。AutoDL 是无头环境，但仍可用 UE4 的 offscreen 渲染路径：`SDL_VIDEODRIVER=offscreen` + `-RenderOffScreen`。
+
 ```bash
 pkill -9 -f CarlaUE4 2>/dev/null; sleep 2
 su carlauser -c '
   export HOME=/home/carlauser
   export XDG_RUNTIME_DIR=/tmp/runtime-carlauser
+  export SDL_VIDEODRIVER=offscreen
   cd /root/autodl-tmp/carla_0.9.14
   LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/CarlaUE4/Plugins/Carla/CarlaDependencies/lib \
-  ./CarlaUE4.sh -nullrhi -nosound -world-port=2000
+  ./CarlaUE4.sh -RenderOffScreen -nosound -quality-level=Low -world-port=2000
 '
 ```
 
@@ -184,7 +187,31 @@ print("tensorflow", tf.__version__, "casadi", casadi.__version__)
 PY
 ```
 
-参数含义、`-nullrhi` 原因、CARLA 排错表见原文 **§5、§10**。
+**相机烟测（验证不是只连上服务端，而是真的能取 RGB 帧）：**
+
+```bash
+python3 - <<'PY'
+import carla, time
+c = carla.Client("127.0.0.1", 2000)
+c.set_timeout(10.0)
+w = c.get_world()
+bp = w.get_blueprint_library().find("sensor.camera.rgb")
+bp.set_attribute("image_size_x", "320")
+bp.set_attribute("image_size_y", "240")
+bp.set_attribute("fov", "90")
+tf = carla.Transform(carla.Location(x=0, y=0, z=30), carla.Rotation(pitch=-90))
+cam = w.spawn_actor(bp, tf)
+frames = []
+cam.listen(lambda img: frames.append(img.frame))
+for _ in range(20):
+    w.tick() if w.get_settings().synchronous_mode else time.sleep(0.1)
+cam.destroy()
+print("camera_frames:", len(frames))
+assert frames, "RGB camera did not produce frames; do not use -nullrhi, check offscreen/Vulkan setup"
+PY
+```
+
+若 `vulkaninfo --summary` 报找不到 NVIDIA ICD，或 CARLA 日志出现 Vulkan 初始化失败，先检查宿主是否把 NVIDIA Vulkan ICD 挂进容器；`-nullrhi` 只能跑控制结果，不能产出有效 `carla_sim.avi`。
 
 ---
 
@@ -207,13 +234,13 @@ cd "$REPO/core/scripts/carla"
 
 ---
 
-## 可视化视频：CARLA 航拍与离线俯视 MP4
+## 可视化视频：CARLA 航拍 AVI 与离线俯视 MP4
 
 论文或答辩里常需要「道路几何 + 车辆运动」的动图/视频，仓库提供两条路径，可并行使用。
 
 1. **CARLA 无人机视角 `carla_sim.avi`**（仿真**进行中**逐帧写入，真三维 RGB）
-  在 `run_all_scenarios.py` 中加 `**--enable_camera_viz`**，且场景 JSON 的 `drone_viz_params` 里 `**save_avi` 为 true**（脚本在未加该开关时会强制关掉 `save_avi`，避免无头环境误开相机）。实现上与普通 CARLA **RGB 相机**一致：从 `img.raw_data` 写到 OpenCV `VideoWriter`。  
-   **与 `-nullrhi` 的关系：** 若服务端用 `**CarlaUE4.sh -nullrhi`** 启动，通常**没有完整光栅化**，RGB 传感器往往得到**全黑/无效帧**或行为不稳定，此时 `**carla_sim.avi` 即使生成了也没有可用画面**。要录「真 CARLA 画面」，需要**能渲染**的 CARLA 启动方式（例如带 GPU 的机器上去掉 `-nullrhi`，并按 CARLA 文档配置 Vulkan/离屏渲染等），再开 `--enable_camera_viz`。
+  在 `run_all_scenarios.py` 中加 `**--enable_camera_viz`**，且场景 JSON 的 `drone_viz_params.save_avi=true`。本仓库的 intersection 场景默认是高空俯视/跟随 ego 的 drone camera，所以每个成功子目录会生成 `carla_sim.avi`。  
+  **服务端要求：** 必须使用上文 `-RenderOffScreen` 启动；不要用 `-nullrhi`，否则 camera 不会得到有效 RGB。
 2. **离线俯视 `rollout_topdown.mp4`**（**不依赖** CARLA 再渲染，与 `**-nullrhi` 兼容**）
   由 `scenario_result.pkl` 中的轨迹与（可选）路口 CSV 折线生成：画道路折线、按朝向画车辆多边形、叠加帧号与仿真时间。  
   - **批量内自动生成（不是只能事后）**：在 `run_all_scenarios.py` 命令末尾加 `**--render_topdown_mp4`**。每个子仿真 **成功结束并写出 `scenario_result.pkl` 之后**，**同一轮脚本内**会立刻生成该子目录下的 `**rollout_topdown.mp4`**，无需等实验全部跑完再手动跑一遍渲染脚本。可选调整 `**--render_topdown_fps` / `--render_topdown_width` / `--render_topdown_height**`。路口折线由场景 JSON 的 `**carla_params.intersection_csv_loc**` 相对 `**scripts/carla/scenarios/**` 解析；若文件缺失仍会出视频，但可能不画道路线。  
@@ -248,13 +275,16 @@ python run_all_scenarios.py \
   --solver_backend gurobi \
   --with_notv \
   --with_notv_cl \
+  --enable_camera_viz \
   --render_topdown_mp4
 ```
 
-**通过：** 无 traceback；`core/results/<时间戳>/` 下各子目录均有 `scenario_result.pkl`。若加了 `--render_topdown_mp4`，各成功子目录还应出现 `**rollout_topdown.mp4`**（需本环境已安装 OpenCV 的 `cv2`）。
+**通过：** 无 traceback；`core/results/<时间戳>/` 下各子目录均有 `scenario_result.pkl`。各成功子目录还应出现 `carla_sim.avi` 和 `rollout_topdown.mp4`。
 
 ```bash
 ls "$REPO/core/results/<时间戳>"/*/scenario_result.pkl
+ls "$REPO/core/results/<时间戳>"/*/carla_sim.avi
+ls "$REPO/core/results/<时间戳>"/*/rollout_topdown.mp4
 ```
 
 ### 5.2 第二层（小矩阵三策略 + 基线）
@@ -269,10 +299,11 @@ python run_all_scenarios.py \
   --solver_backend gurobi \
   --with_notv \
   --with_notv_cl \
+  --enable_camera_viz \
   --render_topdown_mp4
 ```
 
-**通过：** `results/<时间戳>/` 下共 **5** 个策略目录；`ls -lh` 下各 `scenario_result.pkl` 非空。
+**通过：** `results/<时间戳>/` 下共 **5** 个策略目录；各目录内 `scenario_result.pkl` 非空，并生成 `carla_sim.avi`。
 
 ### 5.3 第三层（指标与轨迹合理性）
 
@@ -306,32 +337,36 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py \
 
 ## 阶段 6：全量实验 + 聚合
 
-### 6.1 全量跑 intersection（Gurobi）
+### 6.1 全量跑论文 intersection（Gurobi）
 
 ```bash
 # 已执行「阶段 4 统一环境块」后：
 python run_all_scenarios.py \
-  --scenario_glob "scenario_0*.json" \
+  --scenario_glob "scenario_01.json" \
   --init_glob "ego_init_*.json" \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
   --solver_backend gurobi \
   --with_notv \
   --with_notv_cl \
+  --enable_camera_viz \
   --render_topdown_mp4
 ```
 
-全量时若希望每个成功子目录自动生成 `**rollout_topdown.mp4**`，与 5.1 相同，在命令末尾追加 `**--render_topdown_mp4**`（及可选 `--render_topdown_fps` 等）即可。
+论文主复现只跑 `scenario_01.json × ego_init_*.json`。若你想额外跑本仓库其他 intersection 变体，再把 `--scenario_glob` 改为 `scenario_0*.json`，但报告中应标注为扩展实验。
+
+全量时每个成功子目录应同时生成 `carla_sim.avi` 和 `rollout_topdown.mp4`。若 `carla_sim.avi` 缺失或全黑，优先检查 CARLA 是否误用 `-nullrhi` 或 offscreen/Vulkan 初始化是否失败。
 
 ### 6.2 全量无 Gurobi（可选）
 
 ```bash
 python run_all_scenarios.py \
-  --scenario_glob "scenario_0*.json" \
+  --scenario_glob "scenario_01.json" \
   --init_glob "ego_init_*.json" \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
   --solver_backend ipopt_approx \
   --with_notv \
   --with_notv_cl \
+  --enable_camera_viz \
   --render_topdown_mp4
 ```
 
@@ -445,6 +480,7 @@ bash run_modern_reproduction.sh
 | 端口占用                                   | `pkill -9 -f CarlaUE4 && sleep 2`                                                                                                                                                                       |
 | 客户端与服务端版本不一致                           | `pip install carla==0.9.14`                                                                                                                                                                             |
 | 无 Gurobi 插件                            | `--solver_backend ipopt_approx` 或按阶段 2 配置 Gurobi                                                                                                                                                        |
+| `carla_sim.avi` 缺失或全黑                    | 确认命令包含 `--enable_camera_viz`，且 CARLA 用 `-RenderOffScreen` 启动；不要用 `-nullrhi`。若 Vulkan 初始化失败，检查 `vulkaninfo --summary` 与 NVIDIA ICD。                                                                 |
 | `GLIBCXX_3.4.29` not found（SciPy 导入失败） | ① 运行前：`export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:${LD_LIBRARY_PATH:-}"`；或 `conda install -c conda-forge "libstdcxx-ng>=12"` 后重装 SciPy。② 仓库已减少对 SciPy 的硬依赖（Frenet 曲率平滑、`mpc_utils` 正态 CDF），**拉最新代码**后再试。 |
 
 
