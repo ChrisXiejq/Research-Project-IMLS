@@ -20,7 +20,7 @@
    - `cd $CARLA_ROOT && ./CarlaUE4.sh -RenderOffScreen -quality-level=Low`
 3. 运行三策略批量实验（客户端终端）：
    - `cd core/scripts/carla`
-   - `python run_all_scenarios.py --scenario_glob "scenario_0*.json" --init_glob "ego_init_*.json" --policies smpc_var_risk smpc_open_loop smpc_fixed_risk --with_notv --with_notv_cl`
+  - `python run_all_scenarios.py --scenario_glob "scenario_01.json" --init_glob "ego_init_*.json" --policies smpc_var_risk smpc_open_loop smpc_fixed_risk --solver_backend gurobi --risk_profile upstream_code --with_notv --with_notv_cl`
 4. 汇总结果：
    - `cd core`
    - `python scripts/compute_scenario_results.py`
@@ -29,7 +29,7 @@
 
 - 先跑 `scenario_0*.json`（intersection）对齐论文核心对比（Proposed/Fixed/Open-loop）。
 - 再跑 `scenario_lk*.json`（lane-change 相关）。
-- 保持论文参数：`N=10`、`dt=0.2`、相同 risk 设定，再做你自己的 ablation。
+- 保持论文参数：`N=10`、`dt=0.2`；主复刻用 `--risk_profile upstream_code` 对齐原仓数值，严格 `epsilon=0.02` 用 `--risk_profile paper_eps_002` 单独作为消融/压力测试。
 
 ## 重要说明
 

@@ -105,6 +105,7 @@ class VehicleParams:
     # SMPC specific parameters (ignored for any other policy_type).
     smpc_config : str = "full" # "var_risk", "open_loop", "fixed_risk"
     solver_backend : str = "gurobi" # "gurobi" or "ipopt_approx"
+    risk_profile : str = "upstream_code" # "upstream_code" or "paper_eps_002"
 
 @dataclass(frozen=True)
 class PredictionParams:
@@ -172,7 +173,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             nominal_speed_mps=vehicle_params.nominal_speed,
                             smpc_config=vehicle_params.smpc_config.split("_OAinner")[0],
                             OAIA=True,
-                            n_tv_max=n_tv_max)
+                            n_tv_max=n_tv_max,
+                            risk_profile=vehicle_params.risk_profile)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -182,7 +184,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             smpc_config=vehicle_params.smpc_config.split("_obca")[0][:-2],
                             obca=True,
                             obca_mode=int(vehicle_params.smpc_config.split("_obca")[0][-1]),
-                            n_tv_max=n_tv_max)
+                            n_tv_max=n_tv_max,
+                            risk_profile=vehicle_params.risk_profile)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -190,7 +193,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             N_modes=vehicle_params.num_modes,
                             nominal_speed_mps=vehicle_params.nominal_speed,
                             smpc_config=vehicle_params.smpc_config,
-                            n_tv_max=n_tv_max)
+                            n_tv_max=n_tv_max,
+                            risk_profile=vehicle_params.risk_profile)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 

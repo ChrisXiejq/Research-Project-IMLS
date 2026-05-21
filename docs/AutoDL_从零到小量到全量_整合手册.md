@@ -9,6 +9,7 @@
 - **仅 intersection**：论文主复现默认 `scenario_01.json × ego_init_*.json`，入口为 `run_all_scenarios.py` + `run_intersection_scenario.py`；`scenario_0*.json` 仅作为额外 intersection 变体扩展。
 - **三策略**：`smpc_var_risk`、`smpc_open_loop`、`smpc_fixed_risk`。
 - **栈**：CARLA **0.9.14** 服务端 + `carla==0.9.14` 客户端；Python **3.8** 环境 `carla_modern`；论文主路径为 **Gurobi 11.0.3 + gurobipy 11.0.3**（与原文第 3 节一致）。
+- **风险口径**：默认 `--risk_profile upstream_code` 对齐原仓 `SMPC_MMPreds` 的数值复刻；`--risk_profile paper_eps_002` 使用论文文字中的 `epsilon=0.02`，更保守，适合作为压力测试或消融说明。
 
 ---
 
@@ -273,6 +274,7 @@ python run_all_scenarios.py \
   --init_glob "ego_init_01.json" \
   --policies smpc_var_risk \
   --solver_backend gurobi \
+  --risk_profile upstream_code \
   --with_notv \
   --with_notv_cl \
   --enable_camera_viz \
@@ -297,6 +299,7 @@ python run_all_scenarios.py \
   --init_glob "ego_init_01.json" \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
   --solver_backend gurobi \
+  --risk_profile upstream_code \
   --with_notv \
   --with_notv_cl \
   --enable_camera_viz \
@@ -346,6 +349,7 @@ python run_all_scenarios.py \
   --init_glob "ego_init_*.json" \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
   --solver_backend gurobi \
+  --risk_profile upstream_code \
   --with_notv \
   --with_notv_cl \
   --enable_camera_viz \

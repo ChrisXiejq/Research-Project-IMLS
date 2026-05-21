@@ -1,9 +1,9 @@
 # AutoDL 现代稳定版复现手册
 
-本文档对应你的"现代化优先"目标：尽量使用当前稳定版本栈，跑通论文核心流程（三策略 + **仅 intersection 路口场景**）。  
+本文档对应你的"现代化优先"目标：尽量使用当前稳定版本栈，跑通论文核心流程（三策略 + **仅 intersection 路口场景**）。\
 **本文档所有步骤均经过实际验证可成功执行（2026-05-08），且针对 intersection 场景。**
 
----
+***
 
 ## 0. 适用范围与预期（intersection only）
 
@@ -16,16 +16,14 @@
 
 ### 关键注意事项（血泪教训，必读）
 
+| 问题                                                | 原因                                       | 解决方案                                                               |
+| ------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------ |
+| AutoDL 容器默认 root，UE4 拒绝以 root 运行                  | UE4 硬编码安全检查                              | 创建普通用户 `carlauser` 运行 CARLA                                        |
+| AutoDL 无头环境需要产出 `carla_sim.avi`                   | camera 需要 CARLA 渲染管线，`-nullrhi` 会禁用渲染    | 写入 `my_nvidia_icd.json`，使用 `VK_ICD_FILENAMES` + `-RenderOffScreen` |
+| CARLA 0.9.15 的 `tiny.carla.org` 下载链接给的是源码仓库而非预编译包 | 包结构不完整，缺少 Engine 内置资源                    | 改用 **0.9.14**，有完整预编译包                                              |
+| `carla_sim.avi` 全黑或没有生成                           | Vulkan ICD 没指到 NVIDIA EGL，或误用 `-nullrhi` | 按 §4.6 和 §5.3 做 ICD 与 camera 非黑帧检查                                 |
 
-| 问题                                                | 原因                              | 解决方案                        |
-| ------------------------------------------------- | ------------------------------- | --------------------------- |
-| AutoDL 容器默认 root，UE4 拒绝以 root 运行                  | UE4 硬编码安全检查                     | 创建普通用户 `carlauser` 运行 CARLA |
-| AutoDL 无头环境需要产出 `carla_sim.avi`                 | camera 需要 CARLA 渲染管线，`-nullrhi` 会禁用渲染 | 使用 `SDL_VIDEODRIVER=offscreen` + `-RenderOffScreen` |
-| CARLA 0.9.15 的 `tiny.carla.org` 下载链接给的是源码仓库而非预编译包 | 包结构不完整，缺少 Engine 内置资源           | 改用 **0.9.14**，有完整预编译包       |
-| `carla_sim.avi` 全黑或没有生成                           | 服务端误用 `-nullrhi` 或 Vulkan/offscreen 初始化失败 | 按第 5 节启动并做 camera 烟测       |
-
-
----
+***
 
 ## 1. 新实例基础检查
 
@@ -40,11 +38,11 @@ df -h
 cd /root/autodl-tmp
 ```
 
----
+***
 
 ## 2. 创建 Python 实验环境
 
-> 这一节是你在 AutoDL 上已经走通的方案，优先使用。  
+> 这一节是你在 AutoDL 上已经走通的方案，优先使用。\
 > 不再推荐 `conda env create -f environment.modern.yml`（在当前网络环境下容易卡在 `Solving environment`）。
 
 ### 2.1 用 `conda create` 分步创建环境
@@ -115,17 +113,17 @@ PY
 - 安装后 `import tensorflow` 失败：通常是包装到了 base 环境。重新 `conda activate carla_modern` 后再 `pip install`。
 - `pip install` 很慢：可先执行 `source /etc/network_turbo` 再安装。
 
----
+***
 
 ## 3. Gurobi 安装与许可（论文 `gurobi` 路径必需）
 
-本节为 **2026-05-12 在 AutoDL 上已验证成功** 的方案：**Gurobi Optimizer 11.0.3（Linux x64）+ `gurobipy==11.0.3` + WLS 许可文件**，与当前手册中的 **`carla_modern`（Python 3.8）** 一致，无需为 Gurobi 单独再建 Python 3.10 环境。
+本节为 **2026-05-12 在 AutoDL 上已验证成功** 的方案：**Gurobi Optimizer 11.0.3（Linux x64）+** **`gurobipy==11.0.3`** **+ WLS 许可文件**，与当前手册中的 **`carla_modern`（Python 3.8）** 一致，无需为 Gurobi 单独再建 Python 3.10 环境。
 
 ### 3.1 为何用 11.0.3 而不是 13
 
-- **`carla_modern` 使用 Python 3.8** 时，公共 PyPI 上的 **`gurobipy` 通常最高到 11.0.3**，无法直接 `pip install gurobipy==13.x`。
+- **`carla_modern`** **使用 Python 3.8** 时，公共 PyPI 上的 **`gurobipy`** **通常最高到 11.0.3**，无法直接 `pip install gurobipy==13.x`。
 - Gurobi **13** 的安装包内往往 **不再自带** `linux64/python` 目录，需从 `https://pypi.gurobi.com/simple` 安装 `gurobipy`；在部分 AutoDL 网络环境下该索引可能解析失败。
-- **结论**：在 Python 3.8 实验环境下，**优先使用 Gurobi 11.0.3 + `gurobipy==11.0.3`**；CasADi 仍通过 `solver("gurobi", ...)` 调用，与论文实现方式一致。
+- **结论**：在 Python 3.8 实验环境下，**优先使用 Gurobi 11.0.3 +** **`gurobipy==11.0.3`**；CasADi 仍通过 `solver("gurobi", ...)` 调用，与论文实现方式一致。
 
 > **许可版本**：请确认你的 `gurobi.lic`（WLS）允许使用 **Gurobi 11**。若许可仅绑定 Gurobi 13，则不能换用 11，应改为 **Python 3.10+ 新环境 + Gurobi 13**。
 
@@ -133,10 +131,10 @@ PY
 
 在仓库根目录 `Research-Project-IMLS/gurobi/` 中准备：
 
-| 文件 | 说明 |
-|------|------|
+| 文件                            | 说明                                                                                                             |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `gurobi11.0.3_linux64.tar.gz` | 从 [Gurobi 下载页](https://www.gurobi.com/downloads/gurobi-software/) 选择 **Gurobi Optimizer → x64 Linux → 11.0.3** |
-| `gurobi.lic` | 门户生成的 **WLS** 许可文件（含 `WLSACCESSID` / `WLSSECRET` / `LICENSEID` 等，**勿推送到公开仓库**） |
+| `gurobi.lic`                  | 门户生成的 **WLS** 许可文件（含 `WLSACCESSID` / `WLSSECRET` / `LICENSEID` 等，**勿推送到公开仓库**）                                 |
 
 ### 3.3 解压与定位 `linux64`
 
@@ -227,23 +225,24 @@ python run_all_scenarios.py ... --solver_backend gurobi
 
 若此时 CasADi 仍报 **`Plugin 'gurobi' is not found`** 或警告 **`Failed to load Gurobi adaptor ... GUROBI_VERSION`**：除 `LD_LIBRARY_PATH` 外必须设置 **`export GUROBI_VERSION=110`**（与 `lib/libgurobi110.so` 对应；若你安装的是其他 11.x/12.x，用 `ls $GUROBI_HOME/lib/libgurobi*.so` 看文件名中的数字段）。确认已 `source load_gurobi11.sh` 后再跑实验。
 
----
+***
 
 ## 4. 安装 CARLA 服务端（经验证可用方案）
 
-> **版本：CARLA 0.9.14**（官方预编译包，含完整 Engine 资源和 `CarlaUE4.sh`）  
+> **版本：CARLA 0.9.14**（官方预编译包，含完整 Engine 资源和 `CarlaUE4.sh`）\
 > 0.9.15 的 tiny.carla.org 链接下载的是源码仓库，**不是预编译包，无法直接运行**，请勿使用。
 
 ### 4.1 安装系统依赖
 
 ```bash
 apt-get update
-apt-get install -y xdg-user-dirs libomp5 vulkan-tools
+apt-get install -y xdg-user-dirs libomp5 vulkan-tools libvulkan1 libsm6 libegl1
 ```
 
 - `xdg-user-dirs`：UE4 启动时必须调用，缺失会导致进程在写日志前直接退出（`EXIT=1`）。
 - `libomp5`：CARLA 0.9.14 二进制依赖的 OpenMP 运行时。
-- `vulkan-tools`：用于 `vulkaninfo --summary` 快速确认无头 offscreen 渲染所需的 Vulkan/驱动可见性。
+- `vulkan-tools` / `libvulkan1`：提供 Vulkan loader 与 `vulkaninfo`，用于验证 CARLA offscreen 渲染是否能看到 NVIDIA GPU。
+- `libsm6` / `libegl1`：补齐无头渲染和 OpenCV/CARLA camera 常见运行库。
 
 ### 4.2 创建运行用户
 
@@ -279,8 +278,8 @@ tar -xzf CARLA_0.9.14.tar.gz -C /root/autodl-tmp/carla_0.9.14
 ls /root/autodl-tmp/carla_0.9.14
 ```
 
-正确的目录结构应包含：`CarlaUE4.sh`、`CarlaUE4/`、`Engine/`、`PythonAPI/` 等。  
-**若没有 `CarlaUE4.sh`，说明下载的不是预编译包，需重新下载。**
+正确的目录结构应包含：`CarlaUE4.sh`、`CarlaUE4/`、`Engine/`、`PythonAPI/` 等。\
+**若没有** **`CarlaUE4.sh`，说明下载的不是预编译包，需重新下载。**
 
 ### 4.5 设置目录权限
 
@@ -299,112 +298,133 @@ mkdir -p /tmp/runtime-carlauser
 chown carlauser:carlauser /tmp/runtime-carlauser
 ```
 
----
+### 4.6 写入并验证 NVIDIA Vulkan ICD（camera/AVI 必需）
 
-## 5. 启动 CARLA 服务端（终端 A，支持相机/AVI）
-
-### 5.1 启动命令（无头 offscreen 渲染，支持 RGB camera）
-
-**每次启动前先清理残留进程：**
+AutoDL 无头环境要生成 CARLA RGB camera 的 `carla_sim.avi`，不能使用 `-nullrhi`，必须让 `-RenderOffScreen` 能加载 NVIDIA Vulkan ICD。下面这组命令是当前机器已跑通的配置：
 
 ```bash
-pkill -9 -f CarlaUE4 2>/dev/null; sleep 2
+# 1) 写入 NVIDIA Vulkan ICD（必须用 libEGL_nvidia，不能用 libGLX_nvidia）
+mkdir -p /etc/vulkan/icd.d
+cat > /etc/vulkan/icd.d/my_nvidia_icd.json <<'EOF'
+{
+    "file_format_version" : "1.0.0",
+    "ICD": {
+        "library_path": "/lib/x86_64-linux-gnu/libEGL_nvidia.so.0",
+        "api_version" : "1.3.277"
+    }
+}
+EOF
+
+# 2) 确认库存在；若不存在，先用 find/ls 找真实路径再改上面的 json
+ls -l /lib/x86_64-linux-gnu/libEGL_nvidia.so.0
+
+# 3) 验证：必须看到 DISCRETE_GPU 和你的 NVIDIA 显卡型号
+export VK_ICD_FILENAMES=/etc/vulkan/icd.d/my_nvidia_icd.json
+vulkaninfo --summary | head -40
+
+# 4) 推荐再看关键行
+vulkaninfo 2>/dev/null | grep -E "deviceType|deviceName|driverName" | head -20
 ```
 
-**启动 CARLA（终端 A，会阻塞，保持运行）：**
+通过标准：输出中应包含 `DISCRETE_GPU`、NVIDIA GPU 型号或 NVIDIA driver 信息。若只看到 `llvmpipe` / `lavapipe` / software rasterizer，则不能满足录制 CARLA RGB AVI 的要求。
 
-> 重要：本次复现要求每个 rollout 生成俯视 `carla_sim.avi`，因此服务端必须保留渲染/camera 能力。不要使用 `-nullrhi`；`-nullrhi` 会绕过渲染硬件接口，RGB camera 通常得到黑帧或无效帧。
+***
+
+## 5. 启动 CARLA 服务端（终端 A，支持 camera/AVI）
+
+### 5.1 写入一键启动脚本（已跑通）
+
+这个启动脚本会强制使用上一步写入的 NVIDIA Vulkan ICD，并以 `-RenderOffScreen` 启动 CARLA。**不要使用** **`-nullrhi`**，否则只能跑数值，不能产出有效 `carla_sim.avi`。
 
 ```bash
+cat > /root/autodl-tmp/start_carla_3d.sh <<'EOF'
+#!/usr/bin/env bash
+export VK_ICD_FILENAMES=/etc/vulkan/icd.d/my_nvidia_icd.json
+pkill -9 -f CarlaUE4 2>/dev/null || true
+sleep 2
 su carlauser -c '
   export HOME=/home/carlauser
   export XDG_RUNTIME_DIR=/tmp/runtime-carlauser
-  export SDL_VIDEODRIVER=offscreen
+  export VK_ICD_FILENAMES=/etc/vulkan/icd.d/my_nvidia_icd.json
   cd /root/autodl-tmp/carla_0.9.14
-  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/CarlaUE4/Plugins/Carla/CarlaDependencies/lib \
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/CarlaUE4/Plugins/Carla/CarlaDependencies/lib
   ./CarlaUE4.sh -RenderOffScreen -nosound -quality-level=Low -world-port=2000
 '
+EOF
+chmod +x /root/autodl-tmp/start_carla_3d.sh
 ```
 
-**参数说明：**
-
-
-| 参数                    | 说明                                            |
-| --------------------- | --------------------------------------------- |
-| `-RenderOffScreen`    | 无窗口渲染模式，保留 CARLA camera/RGB 传感器能力，适合云服务器无头环境 |
-| `-nosound`            | 禁用音频（服务器无声卡）                                  |
-| `-quality-level=Low`  | 降低渲染开销，提高 AutoDL 长时间运行稳定性                       |
-| `-world-port=2000`    | 服务端监听端口（默认 2000）                              |
-| `LD_LIBRARY_PATH=...` | 确保 CARLA 的 Chrono 等依赖库可被找到                    |
-| `SDL_VIDEODRIVER=offscreen` | 告诉 SDL/UE4 使用离屏视频后端，不依赖桌面窗口或 X11 显示器        |
-
-
-> **为什么不用 `-nullrhi`？**  
-> `-nullrhi` 适合只跑控制和状态，不适合录制 `carla_sim.avi`。当前目标要求最终有 CARLA 俯视 AVI，因此必须使用 `-RenderOffScreen`。若 `-RenderOffScreen` 秒退，优先排查 AutoDL 容器是否能看到 NVIDIA Vulkan ICD，而不是退回 `-nullrhi`。
-
-### 5.2 验证服务端已就绪（终端 B）
-
-启动后等待约 **1~2 分钟**，然后在另一个终端检查端口：
+### 5.2 启动 CARLA（终端 A，保持运行）
 
 ```bash
-# 07D0 是 2000 的十六进制，有输出即表示端口已监听
-cat /proc/net/tcp6 | awk '{print $2}' | grep -i "07D0"
+bash /root/autodl-tmp/start_carla_3d.sh
 ```
 
-再用 Python 做连接测试：
+参数说明：
+
+| 参数                                                      | 说明                           |
+| ------------------------------------------------------- | ---------------------------- |
+| `VK_ICD_FILENAMES=/etc/vulkan/icd.d/my_nvidia_icd.json` | 固定使用已验证可用的 NVIDIA Vulkan ICD |
+| `-RenderOffScreen`                                      | 无窗口渲染，保留 CARLA RGB camera 能力 |
+| `-quality-level=Low`                                    | 降低渲染开销，提高 AutoDL 长时间运行稳定性    |
+| `-nosound`                                              | 禁用音频，适合云服务器                  |
+| `-world-port=2000`                                      | 服务端监听端口                      |
+
+### 5.3 验证服务端和 camera 非黑帧（终端 B）
+
+启动后等待约 1～2 分钟，先检查端口，再做 camera 帧检查。该检查不仅确认能连接 CARLA，还会确认 RGB 图像不是黑帧。
 
 ```bash
-source /root/miniconda3/etc/profile.d/conda.sh
-conda activate carla_modern
+cat /proc/net/tcp6 | awk '{print $2}' | grep -i "07D0" || true
 
-python3 -c "
-import carla
-c = carla.Client('127.0.0.1', 2000)
-c.set_timeout(10.0)
-w = c.get_world()
-print('CARLA OK, map:', w.get_map().name)
-print('Actor blueprints:', len(w.get_blueprint_library()))
-"
-```
-
-看到地图名和蓝图数量（如 `203`）即表示完全就绪。
-
-### 5.3 camera 烟测（确认 `carla_sim.avi` 可用）
-
-仅连接成功还不够，`carla_sim.avi` 依赖 RGB camera。启动服务端后建议先运行一次：
-
-```bash
+export VK_ICD_FILENAMES=/etc/vulkan/icd.d/my_nvidia_icd.json
 source /root/miniconda3/etc/profile.d/conda.sh
 conda activate carla_modern
 
 python3 - <<'PY'
-import carla, time
-client = carla.Client("127.0.0.1", 2000)
-client.set_timeout(10.0)
-world = client.get_world()
+import time
+import numpy as np
+import carla
+
+c = carla.Client("127.0.0.1", 2000)
+c.set_timeout(60.0)
+world = c.get_world()
+print("map:", world.get_map().name)
+
 bp = world.get_blueprint_library().find("sensor.camera.rgb")
-bp.set_attribute("image_size_x", "320")
-bp.set_attribute("image_size_y", "240")
-bp.set_attribute("fov", "90")
-tf = carla.Transform(carla.Location(x=0, y=0, z=30), carla.Rotation(pitch=-90))
-cam = world.spawn_actor(bp, tf)
-frames = []
-cam.listen(lambda img: frames.append(img.frame))
-settings = world.get_settings()
-for _ in range(20):
-    if settings.synchronous_mode:
-        world.tick()
-    else:
-        time.sleep(0.1)
+bp.set_attribute("image_size_x", "640")
+bp.set_attribute("image_size_y", "360")
+
+cam = world.spawn_actor(
+    bp,
+    carla.Transform(carla.Location(x=0, y=0, z=40), carla.Rotation(pitch=-90)),
+)
+frame = None
+def grab(img):
+    global frame
+    frame = np.frombuffer(img.raw_data, dtype=np.uint8).reshape((img.height, img.width, 4))
+
+cam.listen(grab)
+for _ in range(300):
+    world.tick()
+    if frame is not None:
+        break
+    time.sleep(0.05)
 cam.destroy()
-print("camera_frames:", len(frames))
-assert frames, "RGB camera did not produce frames; check -RenderOffScreen/Vulkan, do not use -nullrhi"
+
+if frame is None:
+    raise SystemExit("FAIL: no frame")
+m = float(frame[:, :, :3].mean())
+print("mean pixel:", m)
+if m < 1.0:
+    raise SystemExit("FAIL: black image")
+print("OK: 3D rendering works")
 PY
 ```
 
-若失败，先执行 `vulkaninfo --summary` 查看 NVIDIA GPU/ICD 是否可见。`-nullrhi` 可作为“只要数值、不录 AVI”的临时退路，但不满足本手册的最终产出要求。
+通过标准：打印 `OK: 3D rendering works`。如果失败，不要退回 `-nullrhi`；先检查第 4.6 节的 ICD、`libEGL_nvidia.so.0` 路径和 `vulkaninfo` 输出。
 
----
+***
 
 ## 6. 客户端连通与依赖联合检查（终端 B）
 
@@ -426,11 +446,11 @@ print("casadi", casadi.__version__)
 PY
 ```
 
----
+***
 
 ## 7. 运行论文核心实验（三策略）
 
-### 7.1 使用 Gurobi 原始路径
+### 7.1 原始 Gurobi 路径（论文主复现 + camera AVI）
 
 ```bash
 export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
@@ -441,16 +461,15 @@ python run_all_scenarios.py \
   --init_glob "ego_init_*.json" \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
   --solver_backend gurobi \
+  --risk_profile upstream_code \
   --with_notv \
   --with_notv_cl \
-  --enable_camera_viz \
-  --render_topdown_mp4
+  --enable_camera_viz
 ```
 
-这是最接近论文原始 `SMPC_MMPreds` 的路径，依赖 CasADi 的 Gurobi conic 插件和有效 Gurobi 许可。
-论文主复现只跑 `scenario_01.json × ego_init_*.json`。如果需要额外跑仓库中的其他 intersection 变体，可把 `--scenario_glob` 改成 `scenario_0*.json`，但报告中应标注为扩展实验。
+这是最接近论文原始 `SMPC_MMPreds` 代码仓库的路径，依赖 CasADi 的 Gurobi conic 插件和有效 Gurobi 许可。`--risk_profile upstream_code` 使用上游代码中的数值收紧参数（`TIGHTENING=1.64`），用于完成稳定闭环复刻；若要做论文文字中 `epsilon=0.02` 的严格口径压力测试，可改为 `--risk_profile paper_eps_002`，但它比上游代码更保守，可能降低可行率。论文主复现默认只跑 `scenario_01.json × ego_init_*.json`；若要额外跑仓库中的其他 intersection 变体，可改成 `--scenario_glob "scenario_0*.json"`，但报告中应标注为扩展实验。命令中的 `--enable_camera_viz` 会让每个成功子目录写出 `carla_sim.avi`。
 
-### 7.2 无 Gurobi 近似路径
+### 7.2 无 Gurobi 近似路径（可选，仍支持 camera AVI）
 
 ```bash
 export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
@@ -467,18 +486,31 @@ python run_all_scenarios.py \
   --render_topdown_mp4
 ```
 
-`ipopt_approx` 会把三种 SMPC 策略映射到 IPOPT 近似 agent，输出目录会自动带 `_ipopt_approx` 后缀，例如 `scenario_01_ego_init_01_smpc_var_risk_ipopt_approx`。报告中应明确说明该路径保留论文核心思想和趋势对比目标，但不保证与原始 Gurobi 路径逐数值一致。
+`ipopt_approx` 会把三种 SMPC 策略映射到 IPOPT 近似 agent：
+
+- `smpc_var_risk`：保留多模态预测和概率/风险约束思想，作为 Proposed 近似。
+- `smpc_fixed_risk`：使用更保守的固定风险/避障权重，作为 Fixed-Risk 近似。
+- `smpc_open_loop`：弱化风险约束和安全距离，作为 Open-Loop 近似。
+
+该路径的输出目录会自动带 `_ipopt_approx` 后缀，例如：
+
+- `scenario_01_ego_init_01_smpc_var_risk_ipopt_approx`
+- `scenario_01_ego_init_01_smpc_open_loop_ipopt_approx`
+- `scenario_01_ego_init_01_smpc_fixed_risk_ipopt_approx`
+
+报告中应明确说明：`ipopt_approx` 保留论文核心思想和趋势对比目标，但不承诺与原始 Gurobi 路径逐数值一致。
 
 ### 7.3 分阶段验证：三层检查后再全量
 
-建议不要一上来就跑全量 `scenario_01` × `ego_init_*`，按下面三层逐级放大；**三层都通过**后再用 7.1 / 7.2 中的全量命令。
+建议不要一上来就跑全量 `scenario_01 × ego_init_*`，按下面三层逐级放大；**三层都通过**后再用 7.1 / 7.2 中的全量命令。
 
 **通用前置（Gurobi 路径时）：**
 
 ```bash
+source /root/miniconda3/etc/profile.d/conda.sh
+conda activate carla_modern
 export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
 source /root/autodl-tmp/load_gurobi11.sh
-conda activate carla_modern
 cd ~/autodl-tmp/Research-Project-IMLS/core/scripts/carla
 ```
 
@@ -486,7 +518,7 @@ cd ~/autodl-tmp/Research-Project-IMLS/core/scripts/carla
 
 #### 第一层：最小能跑通（约几分钟级）
 
-**目的**：CARLA、导入、蓝图、预测、**CasADi + Gurobi（或 IPOPT）**整条链不崩。
+**目的**：CARLA、导入、蓝图、预测、\*\*CasADi + Gurobi（或 IPOPT）\*\*整条链不崩。
 
 ```bash
 python run_all_scenarios.py \
@@ -494,18 +526,13 @@ python run_all_scenarios.py \
   --init_glob "ego_init_01.json" \
   --policies smpc_var_risk \
   --solver_backend gurobi \
+  --risk_profile upstream_code \
   --with_notv \
   --with_notv_cl \
-  --enable_camera_viz \
-  --render_topdown_mp4
+  --enable_camera_viz
 ```
 
-**通过标准：**
-
-- 终端无 traceback 退出。
-- 已打印 `Saving experiment outputs under: .../core/results/<时间戳>/`。
-- 该时间戳下每个子目录均有 **`scenario_result.pkl`**：
-- 每个成功子目录均有 **`carla_sim.avi`**；若加了 `--render_topdown_mp4`，也应有 **`rollout_topdown.mp4`**：
+**通过标准：** 无 traceback；已打印 `Saving experiment outputs under...`；该时间戳下各子目录均有 `scenario_result.pkl`、`carla_sim.avi` 和 `rollout_topdown.mp4`：
 
 ```bash
 cd ~/autodl-tmp/Research-Project-IMLS/core
@@ -516,7 +543,7 @@ ls results/<时间戳>/*/rollout_topdown.mp4
 
 #### 第二层：小矩阵三策略（约几十分钟级）
 
-**目的**：`smpc_var_risk` / `smpc_open_loop` / `smpc_fixed_risk` 与 `notv` / `notv_cl` 均能跑完。
+**目的**：三种 `smpc_`\* 与 `notv` / `notv_cl` 均能跑完。
 
 ```bash
 cd ~/autodl-tmp/Research-Project-IMLS/core/scripts/carla
@@ -525,20 +552,15 @@ python run_all_scenarios.py \
   --init_glob "ego_init_01.json" \
   --policies smpc_var_risk smpc_open_loop smpc_fixed_risk \
   --solver_backend gurobi \
+  --risk_profile upstream_code \
   --with_notv \
   --with_notv_cl \
-  --enable_camera_viz \
-  --render_topdown_mp4
+  --enable_camera_viz
 ```
 
-**通过标准：**
-
-- 共 **5** 个子目录：`notv`、`notv_cl`、以及三个策略目录名。
-- 每个目录内 **`scenario_result.pkl` 存在且体积明显非 0**，并生成 **`carla_sim.avi`**（可用 `ls -lh results/<时间戳>/*/`）。
+**通过标准：** 共 5 个子目录；每个目录内 `scenario_result.pkl` 存在且体积明显非 0，并生成 `carla_sim.avi`（`ls -lh results/<时间戳>/*/`）。
 
 #### 第三层：指标与轨迹是否合理（后处理）
-
-**目的**：排除「能跑但结果空/异常」的情况。
 
 ```bash
 cd ~/autodl-tmp/Research-Project-IMLS/core
@@ -547,9 +569,9 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py \
   --compute_metrics
 ```
 
-**通过标准：** 生成 `df_full.csv`、`df_norm.csv`、`df_final.csv`，打开检查对应 policy 有行、核心列无大面积 NaN。
+**通过标准：** 生成 `df_full.csv`、`df_norm.csv`、`df_final.csv`，policy 有行、核心列无大面积 NaN。
 
-可选快速看图：
+可选轨迹图：
 
 ```bash
 MPLBACKEND=Agg python scripts/compute_scenario_results.py \
@@ -562,40 +584,36 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py \
   --traj_map_name smoke_traj
 ```
 
-轨迹应大致合理（无瞬间飞出地图、无整条零轨迹等明显异常）。若使用 `ipopt_approx`，`--plot_policies` 中的策略名需带 `_ipopt_approx` 后缀（与目录名一致）。
+若使用 `ipopt_approx`，`--plot_policies` 中策略名需带 `_ipopt_approx` 后缀。
 
 #### 再跑全量
 
-仅当上述三层均通过后，再执行 7.1 / 7.2 中的全量命令（`scenario_01.json`、`ego_init_*.json`）。全量结束后对**新的** `<时间戳>` 目录再运行一次 `--compute_metrics`，并按需加 `--make_traj_map` / `--make_paper_panel`。
+三层均通过后，再执行 7.1 / 7.2 全量命令（`scenario_01.json × ego_init_*.json`）；全量结束后对**新的** `<时间戳>` 再跑 `--compute_metrics` 及所需出图参数。
 
 #### 实用习惯
 
-| 习惯 | 作用 |
-|------|------|
-| 每次记录 `results/<时间戳>` | 与代码版本、Gurobi / 求解器配置对应，便于追溯 |
-| 小检查固定 `scenario_01` + `ego_init_01` | 可重复、便于对比回归 |
-| 全量前清理残留 CARLA 进程 | 减少端口占用与 spawn 碰撞（见第 10 节） |
+| 习惯                                  | 作用                     |
+| ----------------------------------- | ---------------------- |
+| 记录 `results/<时间戳>`                  | 与代码、求解器配置对应            |
+| 小检查固定 `scenario_01` + `ego_init_01` | 可重复对比                  |
+| 全量前清理残留 CARLA                       | 减少 spawn/端口问题（见第 10 节） |
 
----
+***
 
 ## 8. 聚合结果（无图形模式）
 
 ```bash
 cd ~/autodl-tmp/Research-Project-IMLS/core
-MPLBACKEND=Agg python scripts/compute_scenario_results.py \
-  --results_dir ./results/<本次运行时间戳目录> \
-  --compute_metrics
+MPLBACKEND=Agg python scripts/compute_scenario_results.py --compute_metrics
 ```
 
 输出目录：
 
-- `core/results/<YYYYMMDD_HHMMSS>/df_full.csv`
-- `core/results/<YYYYMMDD_HHMMSS>/df_norm.csv`
-- `core/results/<YYYYMMDD_HHMMSS>/df_final.csv`
+- `core/results/df_full.csv`
+- `core/results/df_norm.csv`
+- `core/results/df_final.csv`
 
-说明：`run_all_scenarios.py` 在未显式传入 `--results_dir` 时，会自动保存到 `core/results/YYYYMMDD_HHMMSS/`，用于保留可追溯的多次实验记录。
-
-若要给无 Gurobi 结果生成论文风格图，策略名需要使用 `_ipopt_approx` 后缀：
+若聚合 `ipopt_approx` 结果，CSV 中的策略名会带 `_ipopt_approx` 后缀。生成论文风格轨迹图和 5 面板图时需要显式指定这些策略名：
 
 ```bash
 cd ~/autodl-tmp/Research-Project-IMLS/core
@@ -618,8 +636,7 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py \
   --paper_panel_name paper_panel_ipopt_approx
 ```
 
-
----
+***
 
 ## 9. 一键运行（可选）
 
@@ -630,36 +647,32 @@ cd ~/autodl-tmp/Research-Project-IMLS
 bash run_modern_reproduction.sh
 ```
 
----
+***
 
 ## 10. 常见问题速查
 
 ### CARLA 启动相关
 
-
-| 报错                                                            | 原因               | 解决                                 |
-| ------------------------------------------------------------- | ---------------- | ---------------------------------- |
-| `Refusing to run with the root privileges.`                   | 以 root 运行 UE4    | 用 `su carlauser -c '...'`          |
-| `xdg-user-dir: not found` → 秒退                                | 缺少 xdg 工具        | `apt-get install -y xdg-user-dirs` |
-| `libomp.so.5: cannot open shared object file`                 | 缺少 OpenMP 库      | `apt-get install -y libomp5`       |
-| `WARNING: lavapipe is not a conformant vulkan implementation` | 容器没看到 NVIDIA Vulkan ICD，可能退到 CPU 软件 Vulkan | 若要 AVI，修复 NVIDIA ICD/offscreen 渲染后继续用 `-RenderOffScreen`；不要退回 `-nullrhi` |
-| `bind: Address already in use` → 崩溃                           | 上次 CARLA 进程残留    | `pkill -9 -f CarlaUE4 && sleep 2`  |
-| 日志为空 + `EXIT=1`                                               | 在日志系统初始化前退出      | 通常是上述某个依赖缺失                        |
-| `Failed to find /Engine/EngineResources/...` → Signal 11      | 下载的是源码仓库而非预编译包   | 重新下载 0.9.14 预编译包                   |
-
+| 报错                                                            | 原因                              | 解决                                                                                   |
+| ------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
+| `Refusing to run with the root privileges.`                   | 以 root 运行 UE4                   | 用 `su carlauser -c '...'`                                                            |
+| `xdg-user-dir: not found` → 秒退                                | 缺少 xdg 工具                       | `apt-get install -y xdg-user-dirs`                                                   |
+| `libomp.so.5: cannot open shared object file`                 | 缺少 OpenMP 库                     | `apt-get install -y libomp5`                                                         |
+| `WARNING: lavapipe is not a conformant vulkan implementation` | 走了 CPU 软件 Vulkan，未使用 NVIDIA ICD | 按 §4.6 写入/导出 `VK_ICD_FILENAMES=/etc/vulkan/icd.d/my_nvidia_icd.json`；不要退回 `-nullrhi` |
+| `bind: Address already in use` → 崩溃                           | 上次 CARLA 进程残留                   | `pkill -9 -f CarlaUE4 && sleep 2`                                                    |
+| 日志为空 + `EXIT=1`                                               | 在日志系统初始化前退出                     | 通常是上述某个依赖缺失                                                                          |
+| `Failed to find /Engine/EngineResources/...` → Signal 11      | 下载的是源码仓库而非预编译包                  | 重新下载 0.9.14 预编译包                                                                     |
 
 ### Python 客户端相关
 
+| 现象                                                  | 解决                                                                   |
+| --------------------------------------------------- | -------------------------------------------------------------------- |
+| `Version mismatch: Client=0.9.15, Simulator=0.9.14` | `pip install carla==0.9.14`，与服务端版本保持一致                               |
+| `import carla` 失败                                   | 确认在 `carla_modern` 环境中，`pip install carla==0.9.14`                   |
+| 连接超时                                                | CARLA 还没启动完，多等 1\~2 分钟后重试                                            |
+| `Plugin 'gurobi' is not found`                      | 没有 Gurobi/CasADi 插件；使用 `--solver_backend ipopt_approx`，或安装并配置 Gurobi |
 
-| 现象                                                  | 解决                                                 |
-| --------------------------------------------------- | -------------------------------------------------- |
-| `Version mismatch: Client=0.9.15, Simulator=0.9.14` | `pip install carla==0.9.14`，与服务端版本保持一致             |
-| `import carla` 失败                                   | 确认在 `carla_modern` 环境中，`pip install carla==0.9.14` |
-| 连接超时                                                | CARLA 还没启动完，多等 1~2 分钟后重试                           |
-| `Plugin 'gurobi' is not found`                        | 没有 Gurobi/CasADi 插件；使用 `--solver_backend ipopt_approx`，或安装并配置 Gurobi |
-
-
----
+***
 
 ## 11. 已完成的现代化改造
 
@@ -673,8 +686,9 @@ bash run_modern_reproduction.sh
     - `core/scripts/carla/scenarios/run_lk_scenario.py`
 - 结果脚本支持 CLI 参数并默认适合服务器运行：
   - `core/scripts/compute_scenario_results.py`
+- 新增 `--solver_backend gurobi/ipopt_approx`，可在无 Gurobi 时运行 IPOPT 近似 SMPC 路径。
 
----
+***
 
 ## 12. 结果对齐建议（现代化场景）
 

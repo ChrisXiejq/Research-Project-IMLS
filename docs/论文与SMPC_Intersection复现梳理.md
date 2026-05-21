@@ -37,6 +37,7 @@
 
 - 原文 SMPC 栈使用 **CasADi `Opti("conic")` + Gurobi** 求解锥规划形式。
 - 本工作区在 **`--solver_backend gurobi`** 下保持与 **SMPC_MMPreds** 相同的 **Gurobi 注册方式与参数块**（`p_opts_grb` / `s_opts_grb` 及 OBCA 分支中的参数顺序与上游一致）。  
+- 为避免混淆，本工作区显式区分两种风险数值口径：**`--risk_profile upstream_code`** 对齐原仓代码中的 `TIGHTENING=1.64`，用于稳定复刻闭环实验；**`--risk_profile paper_eps_002`** 对应论文文字中的 `epsilon=0.02`，更保守，可作为压力测试/消融结果单独报告。
 - **`ipopt_approx`** 仅为**无许可证或插件不可用时的近似复现路径**，不属于论文主线的同一求解器配置；写论文结果时应明确区分。
 
 ---
@@ -121,7 +122,7 @@
 ### 4.3 与论文叙述对齐时的表述建议
 
 - 主结果：**Gurobi + CasADi conic + 三策略 + intersection 场景**。  
-- 配置：**默认 `N=10`、`dt=0.2`、`num_modes` 与场景 JSON / `VehicleParams` 一致**；与上游差异仅在「运行环境适配」处说明即可。
+- 配置：**默认 `N=10`、`dt=0.2`、`num_modes` 与场景 JSON / `VehicleParams` 一致**；主复刻建议使用 `--risk_profile upstream_code`，严格论文风险口径使用 `--risk_profile paper_eps_002` 另列说明。
 
 ---
 

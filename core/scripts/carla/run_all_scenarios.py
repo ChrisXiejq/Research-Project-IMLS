@@ -132,7 +132,8 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
     return runner.run_scenario()
 
 def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
-                 enable_camera_viz=False, solver_backend="gurobi"):
+                 enable_camera_viz=False, solver_backend="gurobi",
+                 risk_profile="upstream_code"):
     if scene =="intersection":
         from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
     else:
@@ -171,6 +172,7 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
             vp_dict["policy_type"] = policy_type
             vp_dict["smpc_config"] = policy_config
             vp_dict["solver_backend"] = solver_backend
+            vp_dict["risk_profile"] = risk_profile
             vehicles_params_list.append( VehicleParams(**vp_dict) )
         else:
 
@@ -217,6 +219,8 @@ if __name__ == '__main__':
     parser.add_argument("--render_topdown_height", type=int, default=720, help="Height in pixels for offline top-down MP4.")
     parser.add_argument("--solver_backend", choices=["gurobi", "ipopt_approx"], default="gurobi",
                         help="Solver backend for SMPC policies. Use ipopt_approx when Gurobi is unavailable.")
+    parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002"], default="upstream_code",
+                        help="Gurobi SMPC risk profile: upstream_code matches SMPC_MMPreds numerical settings; paper_eps_002 uses epsilon=0.02.")
     parser.add_argument("--no_console_log", action="store_true",
                         help="Do not duplicate experiment logs to stdout (file + jsonl still written).")
     args = parser.parse_args()
@@ -247,6 +251,7 @@ if __name__ == '__main__':
             "init_glob": args.init_glob,
             "policies": list(args.policies),
             "solver_backend": args.solver_backend,
+            "risk_profile": args.risk_profile,
             "with_notv": args.with_notv,
             "with_notv_cl": args.with_notv_cl,
             "enable_camera_viz": args.enable_camera_viz,
@@ -397,7 +402,8 @@ if __name__ == '__main__':
                     )
                     scenario_ok = run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
                                                enable_camera_viz=args.enable_camera_viz,
-                                               solver_backend=args.solver_backend)
+                                               solver_backend=args.solver_backend,
+                                               risk_profile=args.risk_profile)
                     ok = bool(scenario_ok)
                 except Exception:
                     err = traceback.format_exc()

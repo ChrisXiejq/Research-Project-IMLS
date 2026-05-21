@@ -14,6 +14,22 @@ PAPER_INTERSECTION_EPSILON = 0.02
 PAPER_INTERSECTION_TARGET_PROB = 1.0 - PAPER_INTERSECTION_EPSILON
 # Hard-coded inverse CDF Phi^{-1}(0.98), avoiding dependency/version changes.
 PAPER_INTERSECTION_TIGHTENING = 2.053748910631823
+UPSTREAM_CODE_TIGHTENING = 1.64
+UPSTREAM_CODE_TARGET_PROB = _standard_normal_cdf(UPSTREAM_CODE_TIGHTENING)
+
+
+def _risk_profile_values(risk_profile, tightening_override=None):
+    """Return (tightening, target_prob) for the desired reproduction profile."""
+    if tightening_override is not None:
+        tightening = float(tightening_override)
+        return tightening, _standard_normal_cdf(tightening)
+
+    normalized = (risk_profile or "upstream_code").lower()
+    if normalized in {"upstream", "upstream_code", "smpc_mmpreds"}:
+        return UPSTREAM_CODE_TIGHTENING, UPSTREAM_CODE_TARGET_PROB
+    if normalized in {"paper", "paper_eps_002", "eps_002"}:
+        return PAPER_INTERSECTION_TIGHTENING, PAPER_INTERSECTION_TARGET_PROB
+    raise ValueError(f"Unsupported SMPC risk profile: {risk_profile}")
 
 def _joint_mode_component(joint_index, vehicle_index, n_modes):
     """Per-vehicle GMM mode from a flat joint hypothesis index (product over TVs).
@@ -265,7 +281,7 @@ class SMPC_MMPreds():
                 N_TV_MAX     =  1,
                 N_seq_MAX    =  100,
                 T_BAR_MAX    =  6,
-                TIGHTENING   =  PAPER_INTERSECTION_TIGHTENING,
+                TIGHTENING   =  None,
                 NOISE_STD    =  [0.1, .1, .01, .1, 0.01], # process noise standard deviations in order [w_x, w_y, w_theta, w_v, w_TV]
                 # Q =[0.1*50., 0.005*500, 1*10., 0.1*100.], # weights on x, y, and v.
                 Q =[0.1*50., 0.005*500, 1*10., 0.1*10.], # weights on x, y, and v.
@@ -274,7 +290,8 @@ class SMPC_MMPreds():
                 NS_BL_FLAG=False,
                 fixed_risk=False,
                 inv_cdf      = [np.array([[0.02, 1.35],[0.508, 0.91]]), np.array([[1.35,2.],[0.91, 0.978]])],
-                fps = 20
+                fps = 20,
+                risk_profile = "upstream_code"
                 ):
         self.N=N
         self.DT=DT
@@ -294,7 +311,8 @@ class SMPC_MMPreds():
         self.N_TV_max=N_TV_MAX
         self.N_seq_max=N_seq_MAX
         self.t_bar_max=T_BAR_MAX
-        self.tight=TIGHTENING
+        self.risk_profile = risk_profile
+        self.tight, self.target_prob = _risk_profile_values(risk_profile, TIGHTENING)
         self.noise_std=NOISE_STD
         self.Q = ca.diag(Q)
         self.R = ca.diag(R)
@@ -382,7 +400,7 @@ class SMPC_MMPreds():
             self.probs.append(self.opti[i].parameter(self.N_modes**N_TV))
 
             self.c_mmrstd.append(ca.DM([self.tight]*(self.N_modes**N_TV)))
-            self.c_mmrprob.append(ca.DM([PAPER_INTERSECTION_TARGET_PROB]*(self.N_modes**N_TV)))
+            self.c_mmrprob.append(ca.DM([self.target_prob]*(self.N_modes**N_TV)))
 
             self.z_ref.append(self.opti[i].parameter(4, self.N+1))
             self.u_ref.append(self.opti[i].parameter(2, self.N+1))

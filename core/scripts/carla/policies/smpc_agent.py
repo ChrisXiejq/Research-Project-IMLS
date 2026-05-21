@@ -41,6 +41,7 @@ class SMPCAgent(object):
                  obca_mode=2,
                  fps=5,
                  n_tv_max=None,
+                 risk_profile="upstream_code",
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -65,6 +66,7 @@ class SMPCAgent(object):
         self.d_min=1.0
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
+        self.risk_profile = risk_profile
 
         self.fixed_risk=False
         self.obca_flag=obca
@@ -130,7 +132,8 @@ class SMPCAgent(object):
         if not self.ol_flag:
             if not self.obca_flag:
                 self.SMPC=smpc.SMPC_MMPreds(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag, fixed_risk=self.fixed_risk,
-                                    L_F=self.lf, L_R=self.lr, fps=self.fps, N_TV_MAX=n_tv_mpc)
+                                    L_F=self.lf, L_R=self.lr, fps=self.fps, N_TV_MAX=n_tv_mpc,
+                                    risk_profile=self.risk_profile)
             else:
                 self.SMPC=smpc.SMPC_MMPreds_OBCA(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag,
                                         L_F=self.lf, L_R=self.lr, fps=self.fps, pol_mode=self.obca_mode, N_TV_MAX=n_tv_mpc)
