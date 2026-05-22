@@ -482,8 +482,7 @@ python run_all_scenarios.py \
   --solver_backend ipopt_approx \
   --with_notv \
   --with_notv_cl \
-  --enable_camera_viz \
-  --render_topdown_mp4
+  --enable_camera_viz
 ```
 
 `ipopt_approx` 会把三种 SMPC 策略映射到 IPOPT 近似 agent：
@@ -532,13 +531,12 @@ python run_all_scenarios.py \
   --enable_camera_viz
 ```
 
-**通过标准：** 无 traceback；已打印 `Saving experiment outputs under...`；该时间戳下各子目录均有 `scenario_result.pkl`、`carla_sim.avi` 和 `rollout_topdown.mp4`：
+**通过标准：** 无 traceback；已打印 `Saving experiment outputs under...`；该时间戳下各子目录均有 `scenario_result.pkl` 和 `carla_sim.avi`：
 
 ```bash
 cd ~/autodl-tmp/Research-Project-IMLS/core
 ls results/<时间戳>/*/scenario_result.pkl
 ls results/<时间戳>/*/carla_sim.avi
-ls results/<时间戳>/*/rollout_topdown.mp4
 ```
 
 #### 第二层：小矩阵三策略（约几十分钟级）

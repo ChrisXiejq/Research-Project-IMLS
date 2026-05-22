@@ -752,6 +752,18 @@ class SMPC_MMPreds():
         st = time.time()
         N_TV=1+int(i/self.t_bar_max)
         t_bar=i-(N_TV-1)*self.t_bar_max
+        debug_info = {
+            "problem_id": int(i),
+            "N_TV": int(N_TV),
+            "t_bar": int(t_bar),
+            "t_bar_max": int(self.t_bar_max),
+            "N_modes": int(self.N_modes),
+            "n_joint_modes": int(self.N_modes ** N_TV),
+            "fixed_risk": bool(self.fixed_risk),
+            "risk_profile": getattr(self, "risk_profile", None),
+            "tight": getattr(self, "tight", None),
+            "target_prob": getattr(self, "target_prob", None),
+        }
 
 
         def _get_mode_collision_prob(value_fn, m):
@@ -796,9 +808,29 @@ class SMPC_MMPreds():
 
             z_tv_ref    = np.array([sol.value(self.x_tv_ref[i][0][0]), sol.value(self.y_tv_ref[i][0][0])])
             eval_oa     = np.array([sol.value(x[0]) for x in self.eval_oa[i]])
+            try:
+                debug_info["return_status"] = self.opti[i].stats().get("return_status")
+                debug_info["success"] = self.opti[i].stats().get("success")
+                debug_info["iter_count"] = self.opti[i].stats().get("iter_count")
+            except Exception as exc:
+                debug_info["stats_error"] = repr(exc)
 
 
-        except:
+        except Exception as exc:
+            debug_info["exception_type"] = type(exc).__name__
+            debug_info["exception"] = repr(exc)
+            try:
+                stats = self.opti[i].stats()
+                debug_info["return_status"] = stats.get("return_status")
+                debug_info["success"] = stats.get("success")
+                debug_info["iter_count"] = stats.get("iter_count")
+                debug_info["stats"] = {
+                    key: stats.get(key)
+                    for key in ["return_status", "success", "iter_count", "t_wall_solver"]
+                    if key in stats
+                }
+            except Exception as stats_exc:
+                debug_info["stats_error"] = repr(stats_exc)
 
 
             # Suboptimal solution (e.g. timed out).
@@ -833,6 +865,14 @@ class SMPC_MMPreds():
                     v_tp1      = self.v_next
 
                 is_feas = False
+                debug_info["fallback"] = {
+                    "v_curr": float(self.v_curr),
+                    "v_next_ref": float(self.v_next),
+                    "u_ref_val": np.asarray(self.u_ref_val).reshape(-1).tolist(),
+                    "a_brake": float(self.a_brake),
+                    "u_control": np.asarray(u_control).reshape(-1).tolist(),
+                    "v_tp1": float(v_tp1),
+                }
 
         solve_time = time.time() - st
 
@@ -840,6 +880,7 @@ class SMPC_MMPreds():
         sol_dict['u_control']  = u_control  # control input to apply based on solution
         sol_dict['v_next']     = v_tp1
         sol_dict['optimal']    = is_feas
+        sol_dict['debug']      = debug_info
              # whether the solution is optimal or not
         if not is_feas:
             sol_dict['solve_time'] = np.nan  # how long the solver took in seconds
@@ -1988,6 +2029,12 @@ class SMPC_MMPreds_OL():
 
     def solve(self):
         st = time.time()
+        debug_info = {
+            "problem_id": "open_loop",
+            "N_TV_max": int(getattr(self, "N_TV_max", -1)),
+            "N_modes": int(self.N_modes),
+            "tight": getattr(self, "tight", None),
+        }
 
         try:
             sol = self.opti.solve_limited()
@@ -1996,8 +2043,29 @@ class SMPC_MMPreds_OL():
 
             v_tp1      = sol.value(self.v_lin[1]+self.dz_curr[3]+self.DT*self.policy[0,0])
             is_feas     = True
+            try:
+                stats = self.opti.stats()
+                debug_info["return_status"] = stats.get("return_status")
+                debug_info["success"] = stats.get("success")
+                debug_info["iter_count"] = stats.get("iter_count")
+            except Exception as exc:
+                debug_info["stats_error"] = repr(exc)
 
-        except:
+        except Exception as exc:
+            debug_info["exception_type"] = type(exc).__name__
+            debug_info["exception"] = repr(exc)
+            try:
+                stats = self.opti.stats()
+                debug_info["return_status"] = stats.get("return_status")
+                debug_info["success"] = stats.get("success")
+                debug_info["iter_count"] = stats.get("iter_count")
+                debug_info["stats"] = {
+                    key: stats.get(key)
+                    for key in ["return_status", "success", "iter_count", "t_wall_solver"]
+                    if key in stats
+                }
+            except Exception as stats_exc:
+                debug_info["stats_error"] = repr(stats_exc)
 
             # Suboptimal solution (e.g. timed out).
             if self.opti.stats()['return_status']=='SUBOPTIMAL':
@@ -2014,6 +2082,14 @@ class SMPC_MMPreds_OL():
                     v_tp1      = self.v_next
 
                 is_feas = False
+                debug_info["fallback"] = {
+                    "v_curr": float(self.v_curr),
+                    "v_next_ref": float(self.v_next),
+                    "u_ref_val": np.asarray(self.u_ref_val).reshape(-1).tolist(),
+                    "a_brake": float(self.a_brake),
+                    "u_control": np.asarray(u_control).reshape(-1).tolist(),
+                    "v_tp1": float(v_tp1),
+                }
 
         solve_time = time.time() - st
 
@@ -2021,6 +2097,7 @@ class SMPC_MMPreds_OL():
         sol_dict['u_control']  = u_control  # control input to apply based on solution
         sol_dict['v_next']     = v_tp1
         sol_dict['optimal']    = is_feas      # whether the solution is optimal or not
+        sol_dict['debug']      = debug_info
         if not is_feas:
             sol_dict['solve_time'] = np.nan  # how long the solver took in seconds
         else:

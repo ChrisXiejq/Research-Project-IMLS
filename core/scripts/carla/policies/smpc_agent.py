@@ -1,4 +1,5 @@
 import carla
+import json
 import os
 import sys
 import numpy as np
@@ -96,6 +97,10 @@ class SMPCAgent(object):
         self.reference_regeneration()
 
         self.warm_start={}
+        self.debug_savedir = None
+        self.debug_label = smpc_config
+        self._debug_setup_written = False
+        self._debug_first_failure_written = False
 
         # Debugging: see the reference solution.
 
@@ -145,6 +150,154 @@ class SMPCAgent(object):
 
 
         self.goal_reached = False # flags when the end of the path is reached and agent should stop
+
+    def set_debug_context(self, savedir, label=None):
+        self.debug_savedir = savedir
+        if label is not None:
+            self.debug_label = label
+
+    def _debug_json_safe(self, value):
+        if isinstance(value, np.ndarray):
+            return self._debug_json_safe(value.tolist())
+        if isinstance(value, (np.floating, float)):
+            value = float(value)
+            return value if np.isfinite(value) else None
+        if isinstance(value, (np.integer, int)):
+            return int(value)
+        if isinstance(value, (np.bool_, bool)):
+            return bool(value)
+        if isinstance(value, dict):
+            return {str(k): self._debug_json_safe(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [self._debug_json_safe(v) for v in value]
+        return value
+
+    def _debug_array_summary(self, value, max_items=6):
+        try:
+            arr = np.asarray(value)
+        except Exception as exc:
+            return {"error": repr(exc), "type": type(value).__name__}
+        summary = {
+            "shape": list(arr.shape),
+            "dtype": str(arr.dtype),
+            "size": int(arr.size),
+        }
+        if arr.size == 0:
+            return summary
+        try:
+            finite = np.isfinite(arr.astype(float))
+            summary.update({
+                "finite_frac": float(np.mean(finite)),
+                "nan_count": int(np.isnan(arr.astype(float)).sum()),
+                "min": float(np.nanmin(arr.astype(float))),
+                "max": float(np.nanmax(arr.astype(float))),
+                "mean": float(np.nanmean(arr.astype(float))),
+                "head": arr.reshape(-1)[:max_items].tolist(),
+            })
+        except Exception:
+            summary["head"] = arr.reshape(-1)[:max_items].tolist()
+        return self._debug_json_safe(summary)
+
+    def _debug_write_json(self, filename, payload):
+        if not self.debug_savedir:
+            return
+        try:
+            os.makedirs(self.debug_savedir, exist_ok=True)
+            path = os.path.join(self.debug_savedir, filename)
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(self._debug_json_safe(payload), f, indent=2, sort_keys=True)
+        except Exception:
+            pass
+
+    def _debug_append_jsonl(self, filename, payload):
+        if not self.debug_savedir:
+            return
+        try:
+            os.makedirs(self.debug_savedir, exist_ok=True)
+            path = os.path.join(self.debug_savedir, filename)
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(self._debug_json_safe(payload), sort_keys=True) + "\n")
+        except Exception:
+            pass
+
+    def _debug_write_setup_once(self):
+        if self._debug_setup_written:
+            return
+        self._debug_setup_written = True
+        payload = {
+            "agent": "SMPCAgent",
+            "debug_label": self.debug_label,
+            "ol_flag": self.ol_flag,
+            "fixed_risk": self.fixed_risk,
+            "obca_flag": self.obca_flag,
+            "ns_bl_flag": self.ns_bl_flag,
+            "risk_profile": self.risk_profile,
+            "N": self.N,
+            "N_modes": self.N_modes,
+            "fps": self.fps,
+            "dt": self.dt,
+            "n_tv_max_ol": self._n_tv_max_ol,
+            "vehicle_type": self.vehicle.type_id,
+            "lf": self.lf,
+            "lr": self.lr,
+            "smpc": {
+                "class": type(self.SMPC).__name__,
+                "N": getattr(self.SMPC, "N", None),
+                "DT": getattr(self.SMPC, "DT", None),
+                "N_modes": getattr(self.SMPC, "N_modes", None),
+                "N_TV_max": getattr(self.SMPC, "N_TV_max", None),
+                "t_bar_max": getattr(self.SMPC, "t_bar_max", None),
+                "tight": getattr(self.SMPC, "tight", None),
+                "target_prob": getattr(self.SMPC, "target_prob", None),
+                "A_MIN": getattr(self.SMPC, "A_MIN", None),
+                "A_MAX": getattr(self.SMPC, "A_MAX", None),
+                "V_MIN": getattr(self.SMPC, "V_MIN", None),
+                "V_MAX": getattr(self.SMPC, "V_MAX", None),
+                "DF_MIN": getattr(self.SMPC, "DF_MIN", None),
+                "DF_MAX": getattr(self.SMPC, "DF_MAX", None),
+            },
+        }
+        self._debug_write_json("smpc_debug_setup.json", payload)
+
+    def _debug_prediction_summary(self, positions, preds, probs):
+        payload = {
+            "positions": self._debug_array_summary(positions),
+            "mode_probs": self._debug_array_summary(probs),
+        }
+        try:
+            payload["mus"] = self._debug_array_summary(preds[0])
+            payload["sigmas"] = self._debug_array_summary(preds[1])
+        except Exception as exc:
+            payload["prediction_error"] = repr(exc)
+        return payload
+
+    def _debug_update_summary(self, update_dict):
+        keys = [
+            "dx0", "dy0", "dpsi0", "dv0", "x_tv0", "y_tv0", "x_ref", "y_ref",
+            "psi_ref", "v_ref", "a_ref", "df_ref", "x_lin", "y_lin",
+            "psi_lin", "v_lin", "a_lin", "df_lin", "probs",
+        ]
+        return {key: self._debug_array_summary(update_dict[key])
+                for key in keys if key in update_dict}
+
+    def _debug_solver_summary(self, sol_dict):
+        debug = sol_dict.get("debug", {}) if isinstance(sol_dict, dict) else {}
+        payload = {
+            "optimal": sol_dict.get("optimal") if isinstance(sol_dict, dict) else None,
+            "solve_time": sol_dict.get("solve_time") if isinstance(sol_dict, dict) else None,
+            "v_next": sol_dict.get("v_next") if isinstance(sol_dict, dict) else None,
+            "u_control": self._debug_array_summary(sol_dict.get("u_control")) if isinstance(sol_dict, dict) else None,
+            "debug": debug,
+        }
+        return payload
+
+    def _debug_record_step(self, payload, is_failure=False):
+        self._debug_append_jsonl("smpc_debug_steps.jsonl", payload)
+        if is_failure:
+            self._debug_write_json("smpc_debug_latest_failure.json", payload)
+            if not self._debug_first_failure_written:
+                self._debug_first_failure_written = True
+                self._debug_write_json("smpc_first_failure.json", payload)
 
 
 
@@ -278,6 +431,8 @@ class SMPCAgent(object):
         target_vehicle_positions=pred_dict["tvs_positions"]
         target_vehicle_gmm_preds=pred_dict["tvs_mode_dists"]
         target_vehicle_mode_probs=pred_dict.get("tvs_mode_probs")
+        target_vehicle_valid_pred=pred_dict.get("tvs_valid_pred")
+        self._debug_write_setup_once()
 
 
 
@@ -394,6 +549,59 @@ class SMPCAgent(object):
 
 
 
+            debug_payload = {
+                "agent": "SMPCAgent",
+                "debug_label": self.debug_label,
+                "step": int(self.time),
+                "policy_flags": {
+                    "ol_flag": self.ol_flag,
+                    "fixed_risk": self.fixed_risk,
+                    "obca_flag": self.obca_flag,
+                    "ns_bl_flag": self.ns_bl_flag,
+                },
+                "risk": {
+                    "risk_profile": self.risk_profile,
+                    "tight": getattr(self.SMPC, "tight", None),
+                    "target_prob": getattr(self.SMPC, "target_prob", None),
+                },
+                "vehicle_state": {
+                    "x": x,
+                    "y": y,
+                    "psi": psi,
+                    "speed": speed,
+                    "accel": accel,
+                    "s": s,
+                    "ey": ey,
+                    "epsi": epsi,
+                    "curv": curv,
+                    "speed_limit": speed_limit,
+                    "control_prev": self.control_prev,
+                },
+                "reference": {
+                    "t_ref": self.t_ref,
+                    "t_ref_new": t_ref_new,
+                    "ref_horizon": self.ref_horizon,
+                    "l_states": self._debug_array_summary(l_states),
+                    "l_inputs": self._debug_array_summary(l_inputs),
+                },
+                "prediction": self._debug_prediction_summary(
+                    target_vehicle_positions,
+                    target_vehicle_gmm_preds,
+                    target_vehicle_mode_probs,
+                ),
+                "prediction_valid": target_vehicle_valid_pred,
+                "update": self._debug_update_summary(update_dict),
+            }
+            if N_TV > 0:
+                try:
+                    debug_payload["relative_geometry_tv0"] = {
+                        "dx_ego_minus_tv": x - update_dict["x_tv0"][0],
+                        "dy_ego_minus_tv": y - update_dict["y_tv0"][0],
+                        "distance": float(np.hypot(x - update_dict["x_tv0"][0], y - update_dict["y_tv0"][0])),
+                    }
+                except Exception as exc:
+                    debug_payload["relative_geometry_tv0"] = {"error": repr(exc)}
+
             if 'ws' in self.warm_start.keys() and self.obca_flag:
                 update_dict.update({'ws': self.warm_start['ws']})
 
@@ -401,14 +609,25 @@ class SMPCAgent(object):
 
             if self.ol_flag:
 
-                self.SMPC.update(update_dict)
-                sol_dict=self.SMPC.solve()
+                debug_payload["solver_problem"] = {
+                    "backend_class": type(self.SMPC).__name__,
+                    "problem_id": "open_loop",
+                    "N_TV": N_TV,
+                }
+                try:
+                    self.SMPC.update(update_dict)
+                    sol_dict=self.SMPC.solve()
+                except Exception as exc:
+                    debug_payload["solver"] = {"exception": repr(exc)}
+                    self._debug_record_step(debug_payload, is_failure=True)
+                    raise
 
                 u_control = sol_dict['u_control'] # 2x1 vector, [a_optimal, df_optimal]
                 v_next    = sol_dict['v_next']
                 is_opt    = sol_dict['optimal']
                 solve_time=sol_dict['solve_time']
                 collision_prob = sol_dict.get('collision_prob', np.nan)
+                debug_payload["solver"] = self._debug_solver_summary(sol_dict)
 
 
             else:
@@ -416,8 +635,22 @@ class SMPCAgent(object):
 
                 t_bar=2 # fix robust horizon for policy tree
                 i=(N_TV-1)*(self.SMPC.t_bar_max)+t_bar  # pick correct id# of parameterized MPC problem
-                self.SMPC.update(i, update_dict)
-                sol_dict=self.SMPC.solve(i)
+                debug_payload["solver_problem"] = {
+                    "backend_class": type(self.SMPC).__name__,
+                    "problem_id": i,
+                    "N_TV": N_TV,
+                    "t_bar": t_bar,
+                    "t_bar_max": self.SMPC.t_bar_max,
+                    "n_joint_modes": int(self.N_modes ** N_TV),
+                    "n_active_modes": int(1 + (-1 + self.N_modes ** N_TV) * (t_bar > 0)),
+                }
+                try:
+                    self.SMPC.update(i, update_dict)
+                    sol_dict=self.SMPC.solve(i)
+                except Exception as exc:
+                    debug_payload["solver"] = {"exception": repr(exc)}
+                    self._debug_record_step(debug_payload, is_failure=True)
+                    raise
 
 
 
@@ -426,6 +659,7 @@ class SMPCAgent(object):
                 is_opt=sol_dict['optimal']
                 solve_time=sol_dict['solve_time']
                 collision_prob = sol_dict.get('collision_prob', np.nan)
+                debug_payload["solver"] = self._debug_solver_summary(sol_dict)
                 self.warm_start={}
                 if is_opt and self.obca_flag:
                     self.warm_start={'ws': [sol_dict['h_opt'],sol_dict['K_opt'],sol_dict['M_opt'],sol_dict['lmbd_opt'],sol_dict['nu_opt']]}
@@ -439,6 +673,16 @@ class SMPCAgent(object):
             self.control_prev=np.array([u_control[0]+update_dict['a_lin'][0],u_control[1]+update_dict['df_lin'][0]])
             u0=self.control_prev
             v_des=v_next
+            debug_payload["applied"] = {
+                "is_opt": is_opt,
+                "solve_time": solve_time,
+                "collision_prob": collision_prob,
+                "u0": u0,
+                "u_control": u_control,
+                "v_des": v_des,
+                "control_prev_after": self.control_prev,
+            }
+            self._debug_record_step(debug_payload, is_failure=not bool(is_opt))
 
             
             print(f"\toptimal?: {is_opt}")

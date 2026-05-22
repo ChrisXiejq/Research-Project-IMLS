@@ -293,6 +293,10 @@ class RunIntersectionScenario:
                  vehicle_params_list : List[VehicleParams],
                  prediction_params   : PredictionParams,
                  savedir : str):
+        # Make the output directory available while policies are created so debug
+        # instrumentation can write into the scenario subrun folder.
+        self.savedir = savedir
+        os.makedirs(self.savedir, exist_ok=True)
         try:
             self._setup_carla_world(carla_params)
             self._setup_vehicles(vehicle_params_list, carla_params)
@@ -306,8 +310,6 @@ class RunIntersectionScenario:
             raise e
 
         # For logging results + videos.
-        self.savedir = savedir
-        os.makedirs(self.savedir, exist_ok=True)
 
         # Needed for Sync mode loop.
         self.timeout   = carla_params.timeout_period
@@ -392,7 +394,8 @@ class RunIntersectionScenario:
                     tvs_positions, tvs_mode_probs, tvs_mode_dists, tvs_valid_pred = self._make_predictions()
                     pred_dict={ "tvs_positions": tvs_positions,
                                 "tvs_mode_dists": tvs_mode_dists,
-                                "tvs_mode_probs": tvs_mode_probs}
+                                "tvs_mode_probs": tvs_mode_probs,
+                                "tvs_valid_pred": tvs_valid_pred}
 
                     # Run policies for each agent.
                     t_elapsed = snap.elapsed_seconds
@@ -715,6 +718,11 @@ class RunIntersectionScenario:
             if vp.role == "ego":
                 veh_policy = get_vehicle_policy(
                     vp, veh_actor, goal_transform, n_tv_max=n_tv_max_mpc)
+                if hasattr(veh_policy, "set_debug_context"):
+                    veh_policy.set_debug_context(
+                        self.savedir,
+                        label=getattr(vp, "smpc_config", vp.policy_type),
+                    )
             else:
                 veh_policy = get_vehicle_policy(vp, veh_actor, goal_transform)
 
