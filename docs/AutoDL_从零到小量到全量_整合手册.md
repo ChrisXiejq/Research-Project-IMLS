@@ -1,8 +1,8 @@
 # AutoDL：从零配置 → 小量检查 → 全量检查（整合版）
 
-本文档基于 [AutoDL_现代稳定版复现手册.md](./AutoDL_现代稳定版复现手册.md) 整理，**不替代原文**：原文保留全部背景说明、参数解释与排错细节；本整合版只做三件事——**一条通畅的配置主线**、**去重后的命令**、**小量到全量的递进顺序**。
+本文档基于 [AutoDL\_现代稳定版复现手册.md](./AutoDL_现代稳定版复现手册.md) 整理，**不替代原文**：原文保留全部背景说明、参数解释与排错细节；本整合版只做三件事——**一条通畅的配置主线**、**去重后的命令**、**小量到全量的递进顺序**。
 
----
+***
 
 ## 适用范围（与原文一致）
 
@@ -11,10 +11,9 @@
 - **栈**：CARLA **0.9.14** 服务端 + `carla==0.9.14` 客户端；Python **3.8** 环境 `carla_modern`；论文主路径为 **Gurobi 11.0.3 + gurobipy 11.0.3**（与原文第 3 节一致）。
 - **风险口径**：默认 `--risk_profile upstream_code` 对齐原仓 `SMPC_MMPreds` 的数值复刻；`--risk_profile paper_eps_002` 使用论文文字中的 `epsilon=0.02`，更保守，适合作为压力测试或消融说明。
 
----
+***
 
 ## 路径约定（避免删错目录）
-
 
 | 含义      | 路径示例                                                                         |
 | ------- | ---------------------------------------------------------------------------- |
@@ -23,10 +22,9 @@
 | 实验脚本目录  | `$REPO/core/scripts/carla`                                                   |
 | 结果根目录   | `$REPO/core/results/<时间戳>/`（运行后终端会打印 `Saving experiment outputs under: ...`） |
 
-
 **错误示例**：`/core/results/...` 表示磁盘根下的目录，**不是**项目内 `core/results`。
 
----
+***
 
 ## 阶段 0：新实例基础检查
 
@@ -36,7 +34,7 @@ df -h
 cd /root/autodl-tmp
 ```
 
----
+***
 
 ## 阶段 1：Python 环境（从零）
 
@@ -78,7 +76,7 @@ PY
 
 常见问题：`CommandNotFoundError: conda activate` → 每次新 shell 先 `source /root/miniconda3/etc/profile.d/conda.sh`。`pip` 装到 base → 确认已 `conda activate carla_modern` 再安装。
 
----
+***
 
 ## 阶段 2：Gurobi（论文主路径；与原文 §3 一致）
 
@@ -128,7 +126,7 @@ PY
 
 许可版本与为何选 11.0.3 见原文 **§3.1**。CasADi 报 `Plugin 'gurobi' is not found` / `GUROBI_VERSION` 见原文 **§3.8**。
 
----
+***
 
 ## 阶段 3：CARLA 0.9.14 服务端（从零，支持相机/AVI）
 
@@ -153,6 +151,8 @@ chown carlauser:carlauser /tmp/runtime-carlauser
 ```
 
 **终端 A（保持运行，启动前清理残留）：**
+
+注意⚠️！：启动的时候用base环境，不要用carla\_morden
 
 > 重要：若需要 `carla_sim.avi`，不能使用 `-nullrhi`。`-nullrhi` 会禁用渲染硬件接口，CARLA RGB camera 通常只能得到黑帧或无效帧。AutoDL 是无头环境，但仍可用 UE4 的 offscreen 渲染路径：`SDL_VIDEODRIVER=offscreen` + `-RenderOffScreen`。
 
@@ -214,7 +214,7 @@ PY
 
 若 `vulkaninfo --summary` 报找不到 NVIDIA ICD，或 CARLA 日志出现 Vulkan 初始化失败，先检查宿主是否把 NVIDIA Vulkan ICD 挂进容器；`-nullrhi` 只能跑控制结果，不能产出有效 `carla_sim.avi`。
 
----
+***
 
 ## 阶段 4：每次跑实验前的「统一环境块」（只复制这一段）
 
@@ -233,17 +233,17 @@ cd "$REPO/core/scripts/carla"
 
 **若暂时无 Gurobi**（近似退路，结果目录名会带 `_ipopt_approx`，报告需说明），将上块中 **去掉** `source .../load_gurobi11.sh`，并在下文命令中把 `--solver_backend gurobi` 改为 `--solver_backend ipopt_approx`。
 
----
+***
 
 ## 可视化视频：CARLA 航拍 AVI 与离线俯视 MP4
 
 论文或答辩里常需要「道路几何 + 车辆运动」的动图/视频。已有 `carla_sim.avi` 时，主实验命令只保留 CARLA 航拍 AVI 路径。
 
-1. **CARLA 无人机视角 `carla_sim.avi`**（仿真**进行中**逐帧写入，真三维 RGB）
-  在 `run_all_scenarios.py` 中加 `**--enable_camera_viz`**，且场景 JSON 的 `drone_viz_params.save_avi=true`。本仓库的 intersection 场景默认是高空俯视/跟随 ego 的 drone camera，所以每个成功子目录会生成 `carla_sim.avi`。  
-  **服务端要求：** 必须使用上文 `-RenderOffScreen` 启动；不要用 `-nullrhi`，否则 camera 不会得到有效 RGB。
-2. **离线俯视 `rollout_topdown.mp4`**（可选，已有 AVI 时无需生成）
-  如后续仍想补做俯视 MP4，可事后单独运行：
+1. **CARLA 无人机视角** **`carla_sim.avi`**（仿真**进行中**逐帧写入，真三维 RGB）
+   在 `run_all_scenarios.py` 中加 `**--enable_camera_viz`\*\*，且场景 JSON 的 `drone_viz_params.save_avi=true`。本仓库的 intersection 场景默认是高空俯视/跟随 ego 的 drone camera，所以每个成功子目录会生成 `carla_sim.avi`。\
+   **服务端要求：** 必须使用上文 `-RenderOffScreen` 启动；不要用 `-nullrhi`，否则 camera 不会得到有效 RGB。
+2. **离线俯视** **`rollout_topdown.mp4`**（可选，已有 AVI 时无需生成）
+   如后续仍想补做俯视 MP4，可事后单独运行：
 
 ```bash
 cd "$REPO/core"
@@ -255,7 +255,7 @@ python scripts/render_rollout_video.py \
 
 `--intersection_csv` 可省略，此时视频以轨迹包络为主、道路线可能为空。
 
----
+***
 
 ## 阶段 5：小量实验检查（三层递进）
 
@@ -331,7 +331,7 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py \
 
 **仅当 5.1～5.3 均通过**，再进入全量。
 
----
+***
 
 ## 阶段 6：全量实验 + 聚合
 
@@ -378,20 +378,20 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py \
 
 论文风格图（`ipopt_approx` 时策略名带后缀）见原文 **§8** 中 `--make_traj_map` / `--make_paper_panel` 示例。
 
----
+***
 
 ## 阶段 7：将云端「最新一次」结果拉取到本机仓库（与 `core/results` 对齐）
 
-在**本机 Mac/Linux 终端**执行（不在 AutoDL 容器内）。目标：把远端 `**$REPO/core/results/<最新时间戳>/`** 整目录同步到本机仓库的 `**Research-Project-IMLS/core/results/<同一时间戳>/**`，便于本地跑 `compute_scenario_results.py` 或把 `experiment_run.log`、`batch_subruns.json` 等交给他人审阅。
+在**本机 Mac/Linux 终端**执行（不在 AutoDL 容器内）。目标：把远端 `**$REPO/core/results/<最新时间戳>/`\*\* 整目录同步到本机仓库的 `**Research-Project-IMLS/core/results/<同一时间戳>/**`，便于本地跑 `compute_scenario_results.py` 或把 `experiment_run.log`、`batch_subruns.json` 等交给他人审阅。
 
 ### 7.1 连接参数（按你的实例修改）
 
 - **SSH**：示例为 `ssh -p <端口> root@<主机>`（如 AutoDL / 算力平台自定义端口）。
-- **远端结果根**：与上文路径约定一致，一般为 `**/root/autodl-tmp/Research-Project-IMLS/core/results`**。若仓库不在该路径，在服务器上执行 `pwd` 或 `ls` 确认后再改 `REMOTE_BASE`。
+- **远端结果根**：与上文路径约定一致，一般为 `**/root/autodl-tmp/Research-Project-IMLS/core/results`\*\*。若仓库不在该路径，在服务器上执行 `pwd` 或 `ls` 确认后再改 `REMOTE_BASE`。
 
 ### 7.2 推荐：`rsync` 拉「按修改时间最新」的子目录
 
-**易错点（必读）**：若把 `ssh` 里的远端路径写成 `\${REMOTE_RESULTS}` 且变量**只在本地有定义**，远端 shell 展开为空，`ls …/*/` 会匹配到系统目录（例如误得到 `**run`**），`rsync` 会报 `.../results/run` 不存在。下面命令让 `**REMOTE_BASE` 在本机展开进 ssh 参数字符串**，远端只执行字面路径。
+**易错点（必读）**：若把 `ssh` 里的远端路径写成 `\${REMOTE_RESULTS}` 且变量**只在本地有定义**，远端 shell 展开为空，`ls …/*/` 会匹配到系统目录（例如误得到 `**run`**），`rsync`** **会报** **`.../results/run`** **不存在。下面命令让** **`**REMOTE_BASE`** **在本机展开进 ssh 参数字符串**，远端只执行字面路径。
 
 ```bash
 # 本机：克隆下来的仓库里 core/results 的绝对路径（请改成你的实际路径）
@@ -419,7 +419,7 @@ rsync -avz -e "ssh ${SSH_OPTS}" --progress \
   "${LOCAL_RESULTS}/${LATEST_NAME}/"
 ```
 
-**端口写法**：`ssh` 用 `**-p`**；`scp` 用 `**-P**`；`rsync` 用 `**-e "ssh -p …"**`。
+**端口写法**：`ssh` 用 `**-p`\*\*；`scp` 用 `**-P**`；`rsync` 用 `**-e "ssh -p …"**`。
 
 ### 7.3 只拉指定时间戳（不自动选最新）
 
@@ -453,7 +453,7 @@ MPLBACKEND=Agg python scripts/compute_scenario_results.py \
   --compute_metrics
 ```
 
----
+***
 
 ## 可选：仓库一键脚本
 
@@ -464,10 +464,9 @@ bash run_modern_reproduction.sh
 
 脚本行为以仓库内实际内容为准；若与手动分阶段冲突，**以本文「阶段 4～6」的手动顺序为准**更易排错。
 
----
+***
 
 ## 极简排错索引（详情回原文 §10）
-
 
 | 现象                                     | 优先处理                                                                                                                                                                                                    |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -477,14 +476,13 @@ bash run_modern_reproduction.sh
 | 端口占用                                   | `pkill -9 -f CarlaUE4 && sleep 2`                                                                                                                                                                       |
 | 客户端与服务端版本不一致                           | `pip install carla==0.9.14`                                                                                                                                                                             |
 | 无 Gurobi 插件                            | `--solver_backend ipopt_approx` 或按阶段 2 配置 Gurobi                                                                                                                                                        |
-| `carla_sim.avi` 缺失或全黑                    | 确认命令包含 `--enable_camera_viz`，且 CARLA 用 `-RenderOffScreen` 启动；不要用 `-nullrhi`。若 Vulkan 初始化失败，检查 `vulkaninfo --summary` 与 NVIDIA ICD。                                                                 |
+| `carla_sim.avi` 缺失或全黑                  | 确认命令包含 `--enable_camera_viz`，且 CARLA 用 `-RenderOffScreen` 启动；不要用 `-nullrhi`。若 Vulkan 初始化失败，检查 `vulkaninfo --summary` 与 NVIDIA ICD。                                                                      |
 | `GLIBCXX_3.4.29` not found（SciPy 导入失败） | ① 运行前：`export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:${LD_LIBRARY_PATH:-}"`；或 `conda install -c conda-forge "libstdcxx-ng>=12"` 后重装 SciPy。② 仓库已减少对 SciPy 的硬依赖（Frenet 曲率平滑、`mpc_utils` 正态 CDF），**拉最新代码**后再试。 |
-
 
 ## 现代化改造清单与结果对齐建议
 
 见原文 **§11、§12**（本整合版不重复展开）。
 
----
+***
 
-**文档关系**：详细步骤、血泪注意事项、下载镜像与许可说明 → [AutoDL_现代稳定版复现手册.md](./AutoDL_现代稳定版复现手册.md)。
+**文档关系**：详细步骤、血泪注意事项、下载镜像与许可说明 → [AutoDL\_现代稳定版复现手册.md](./AutoDL_现代稳定版复现手册.md)。

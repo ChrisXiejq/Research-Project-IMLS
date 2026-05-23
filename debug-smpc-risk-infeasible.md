@@ -37,3 +37,27 @@ The intersection reproduction run completes, but `smpc_var_risk` and
 Run the same small matrix and share the new result directory. The first files to
 inspect are `smpc_first_failure.json` under `smpc_var_risk` and
 `smpc_fixed_risk`.
+
+## Evidence From 20260523_120547
+- `smpc_var_risk/smpc_first_failure.json` shows Gurobi/CasADi returned
+  `return_status=OPTIMAL`, `success=1`, but post-processing raised
+  `IndexError('tuple index out of range')`.
+- `smpc_fixed_risk/smpc_first_failure.json` shows the same pattern:
+  `return_status=OPTIMAL`, `success=1`, followed by the same `IndexError`.
+- The exception happens while estimating `collision_prob`, not while solving the
+  optimization problem.
+- `smpc_open_loop/smpc_first_failure.json` shows a separate later failure at
+  step 18 with `return_status=INF_OR_UNBD`.
+
+## Fix Applied
+- Made collision-probability post-processing robust to scalar/1-D collision
+  normal vectors by using `np.atleast_1d(...)` and `z.size`.
+- Guarded collision-probability estimation so a post-processing error cannot
+  overwrite an already successful optimization result.
+
+## Verification Needed
+- Re-run the same small matrix and compare:
+  - `smpc_var_risk` should no longer have `ego_feasible_frac=0.0`.
+  - `smpc_fixed_risk` should no longer have `ego_feasible_frac=0.0`.
+  - Remaining `open_loop` infeasibility, if any, should be treated as a separate
+    solver/model issue.

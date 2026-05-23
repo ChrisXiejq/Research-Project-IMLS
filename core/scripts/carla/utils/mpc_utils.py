@@ -772,9 +772,9 @@ class SMPC_MMPreds():
             for t in range(1, self.N):
                 collision_prob_t = 0
                 for k in range(N_TV): 
-                    z = np.asarray(value_fn(self.collision_avoidance[i][m][t][k]['z'])).squeeze()
+                    z = np.atleast_1d(np.asarray(value_fn(self.collision_avoidance[i][m][t][k]['z'])).squeeze())
                     y = value_fn(self.collision_avoidance[i][m][t][k]['y'])
-                    noise_samples = np.random.normal(np.zeros(z.shape[-1]), 1, size=(100, z.shape[-1]))
+                    noise_samples = np.random.normal(np.zeros(z.size), 1, size=(100, z.size))
                     for s in range(100):
                         collision_prob_t += prob/100*int((y+z@noise_samples[s])>0)
 
@@ -792,9 +792,13 @@ class SMPC_MMPreds():
             v_tp1      = sol.value(self.v_lin[i][1]+self.dz_curr[i][3]+self.DT*self.policy[i][0][0][0,0])
             is_feas     = True
 
-            collision_prob = 0
-            for m in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)):
-                collision_prob+=_get_mode_collision_prob(sol.value, m)
+            collision_prob = np.nan
+            try:
+                collision_prob = 0
+                for m in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)):
+                    collision_prob+=_get_mode_collision_prob(sol.value, m)
+            except Exception as collision_exc:
+                debug_info["collision_prob_error"] = repr(collision_exc)
 
 
             
@@ -841,9 +845,13 @@ class SMPC_MMPreds():
                 v_tp1      = self.opti[i].debug.value(self.v_lin[i][1]+self.dz_curr[i][3]+self.DT*self.policy[i][0][0][0,0])
                 is_feas     = True
 
-                collision_prob = 0
-                for m in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)):
-                    collision_prob+=_get_mode_collision_prob(self.opti[i].debug.value, m)
+                collision_prob = np.nan
+                try:
+                    collision_prob = 0
+                    for m in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)):
+                        collision_prob+=_get_mode_collision_prob(self.opti[i].debug.value, m)
+                except Exception as collision_exc:
+                    debug_info["collision_prob_error"] = repr(collision_exc)
                 z_lin_ev   = self.opti[i].debug.value(self.z_lin[i])
                 u_lin_ev   = self.opti[i].debug.value(self.u_lin[i])
                 z_ref_ev   = self.opti[i].debug.value(self.z_ref[i])

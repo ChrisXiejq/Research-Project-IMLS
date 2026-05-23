@@ -356,6 +356,8 @@ chmod +x /root/autodl-tmp/start_carla_3d.sh
 
 ### 5.2 启动 CARLA（终端 A，保持运行）
 
+注意⚠️！：启动的时候用base环境，不要用carla\_morden
+
 ```bash
 bash /root/autodl-tmp/start_carla_3d.sh
 ```
@@ -697,3 +699,4 @@ bash run_modern_reproduction.sh
 - 若需要更接近论文数值，再做"参数回调"：
   - 固定随机种子、固定地图/天气、统一初始条件
   - 调整 `N`、`dt`、风险阈值到论文同设定
+
