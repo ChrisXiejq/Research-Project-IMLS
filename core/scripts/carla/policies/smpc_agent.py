@@ -105,7 +105,7 @@ class SMPCAgent(object):
         self.completion_s_margin = 6.0
         self.completion_goal_dist = 8.0
         self.completion_lateral_error = 4.0
-        self.reference_regen_max_lateral_error = 2.0
+        self.reference_regen_max_lateral_error = 1.5
 
         # Debugging: see the reference solution.
 
@@ -310,6 +310,7 @@ class SMPCAgent(object):
         goal_dist = float(np.linalg.norm(np.array([x, y], dtype=float) - goal_xy))
         s_to_end = float(end_s - s)
         lateral_ok = bool(ey is not None and abs(float(ey)) <= self.completion_lateral_error)
+        goal_dist_ok = bool(goal_dist <= self.completion_goal_dist)
         return {
             "end_s": end_s,
             "s_to_end": s_to_end,
@@ -320,8 +321,9 @@ class SMPCAgent(object):
             "lateral_ok": lateral_ok,
             "ey": ey,
             "epsi": epsi,
+            "goal_dist_ok": goal_dist_ok,
             "completed_by_s_margin": bool(s >= end_s - self.completion_s_margin and lateral_ok),
-            "completed_by_goal_dist": bool(goal_dist <= self.completion_goal_dist),
+            "completed_by_goal_dist": bool(goal_dist_ok and lateral_ok),
         }
 
 

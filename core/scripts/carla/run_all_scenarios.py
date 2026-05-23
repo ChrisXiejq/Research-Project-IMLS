@@ -6,6 +6,7 @@ import argparse
 import time
 import traceback
 import importlib.util
+import subprocess
 from datetime import datetime
 
 from utils import experiment_logging as exp_log
@@ -83,6 +84,72 @@ def _maybe_render_topdown_mp4(savedir, scenario_dict, log, args):
         log.info("Wrote top-down rollout video: %s", outv)
     except Exception:
         log.warning("Top-down video render failed; see traceback.", exc_info=True)
+
+
+def _infer_plot_init(init_glob):
+    matches = glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/inits/", init_glob))
+    if not matches:
+        return 1
+    name = os.path.basename(sorted(matches)[0])
+    try:
+        return int(name.split("ego_init_")[-1].split(".json")[0])
+    except Exception:
+        return 1
+
+
+def _infer_plot_scenario(scenario_glob):
+    matches = glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/", scenario_glob))
+    if not matches:
+        return "scenario_01"
+    return os.path.basename(sorted(matches)[0]).replace(".json", "")
+
+
+def _run_postprocess(results_folder, args, log):
+    """Run paper-oriented metrics and plots after the batch without masking rollout results."""
+    if getattr(args, "skip_postprocess", False):
+        return {"status": "skipped", "reason": "skip_postprocess"}
+
+    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "compute_scenario_results.py")
+    script_path = os.path.abspath(script_path)
+    plot_init = args.postprocess_plot_init or _infer_plot_init(args.init_glob)
+    plot_scenario = args.postprocess_plot_scenario or _infer_plot_scenario(args.scenario_glob)
+    cmd = [
+        sys.executable,
+        script_path,
+        "--results_dir",
+        os.path.abspath(results_folder),
+        "--compute_metrics",
+    ]
+    if not args.postprocess_no_plots:
+        cmd.extend([
+            "--make_traj_map",
+            "--make_paper_panel",
+            "--plot_scenario",
+            plot_scenario,
+            "--plot_init",
+            str(plot_init),
+        ])
+
+    env = os.environ.copy()
+    env.setdefault("MPLBACKEND", "Agg")
+    started = time.perf_counter()
+    proc = subprocess.run(cmd, cwd=os.path.dirname(script_path), env=env, text=True, capture_output=True)
+    payload = {
+        "status": "ok" if proc.returncode == 0 else "failed",
+        "returncode": proc.returncode,
+        "duration_s": time.perf_counter() - started,
+        "command": cmd,
+        "stdout": proc.stdout[-8000:],
+        "stderr": proc.stderr[-8000:],
+        "plot_scenario": plot_scenario,
+        "plot_init": plot_init,
+    }
+    exp_log.write_json(os.path.join(results_folder, "batch_postprocess.json"), payload)
+    if proc.returncode == 0:
+        log.info("Postprocess metrics/plots completed; see paper_metrics_summary.md and df_*.csv")
+    else:
+        log.warning("Postprocess metrics/plots failed; see batch_postprocess.json")
+    return payload
 
 
 def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, enable_camera_viz=False):
@@ -221,6 +288,14 @@ if __name__ == '__main__':
                         help="Solver backend for SMPC policies. Use ipopt_approx when Gurobi is unavailable.")
     parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002"], default="upstream_code",
                         help="Gurobi SMPC risk profile: upstream_code matches SMPC_MMPreds numerical settings; paper_eps_002 uses epsilon=0.02.")
+    parser.add_argument("--skip_postprocess", action="store_true",
+                        help="Skip automatic paper metrics/plots generation at the end of the batch.")
+    parser.add_argument("--postprocess_no_plots", action="store_true",
+                        help="Only generate df_*.csv and paper_metrics_summary; skip trajectory figures.")
+    parser.add_argument("--postprocess_plot_scenario", default=None,
+                        help="Scenario name for automatic trajectory figures. Default: first matched scenario.")
+    parser.add_argument("--postprocess_plot_init", type=int, default=None,
+                        help="ego_init index for automatic trajectory figures. Default: first matched init.")
     parser.add_argument("--no_console_log", action="store_true",
                         help="Do not duplicate experiment logs to stdout (file + jsonl still written).")
     args = parser.parse_args()
@@ -259,6 +334,10 @@ if __name__ == '__main__':
             "render_topdown_fps": args.render_topdown_fps,
             "render_topdown_width": args.render_topdown_width,
             "render_topdown_height": args.render_topdown_height,
+            "skip_postprocess": args.skip_postprocess,
+            "postprocess_no_plots": args.postprocess_no_plots,
+            "postprocess_plot_scenario": args.postprocess_plot_scenario,
+            "postprocess_plot_init": args.postprocess_plot_init,
             "results_folder": os.path.abspath(results_folder),
         },
     )
@@ -453,3 +532,4 @@ if __name__ == '__main__':
         "Batch finished; logged %d subruns to batch_subruns.json and batch_summary.txt",
         len(subrun_status),
     )
+    _run_postprocess(results_folder, args, log)

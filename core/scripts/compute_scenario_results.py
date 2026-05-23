@@ -2,6 +2,7 @@ import os
 import re
 import glob
 import argparse
+import json
 import numpy as np
 import pandas as pd
 import pdb
@@ -63,6 +64,45 @@ def _list_metric_scenario_dirs(results_dir):
     return sorted(out)
 
 
+def _load_completion_diagnostics(scenario_dir):
+    """Load SMPC completion metadata if the policy produced it."""
+    path = os.path.join(scenario_dir, "smpc_completion.json")
+    empty = {
+        "completion_step": np.nan,
+        "completion_goal_dist": np.nan,
+        "completion_ey": np.nan,
+        "completion_epsi": np.nan,
+        "completion_s_to_end": np.nan,
+        "completion_lateral_ok": np.nan,
+        "completed_by_s_margin": np.nan,
+        "completed_by_goal_dist": np.nan,
+        "completion_valid": np.nan,
+    }
+    if not os.path.isfile(path):
+        return empty
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+        comp = data.get("completion") or {}
+        by_s = bool(comp.get("completed_by_s_margin", False))
+        by_goal = bool(comp.get("completed_by_goal_dist", False))
+        lateral_ok = bool(comp.get("lateral_ok", False))
+        return {
+            "completion_step": data.get("step", np.nan),
+            "completion_goal_dist": comp.get("goal_dist", np.nan),
+            "completion_ey": comp.get("ey", np.nan),
+            "completion_epsi": comp.get("epsi", np.nan),
+            "completion_s_to_end": comp.get("s_to_end", np.nan),
+            "completion_lateral_ok": lateral_ok,
+            "completed_by_s_margin": by_s,
+            "completed_by_goal_dist": by_goal,
+            "completion_valid": bool(lateral_ok and (by_s or by_goal)),
+        }
+    except Exception as exc:
+        empty["completion_error"] = repr(exc)
+        return empty
+
+
 def get_metric_dataframe(results_dir):
     scenario_dirs = _list_metric_scenario_dirs(results_dir)
 
@@ -109,9 +149,62 @@ def get_metric_dataframe(results_dir):
         metrics_dict["scenario"] = scene_num
         metrics_dict["initial"]  = init_num
         metrics_dict["policy"]   = policy
+        metrics_dict.update(_load_completion_diagnostics(scenario_dir))
         dataframe.append(metrics_dict)
 
     return pd.DataFrame(dataframe)
+
+
+def write_paper_summary(results_dir, df_full, df_final):
+    """Write a compact paper-facing summary table and markdown report."""
+    def _to_markdown(df):
+        try:
+            return df.to_markdown(index=False, floatfmt=".4g")
+        except Exception:
+            return df.to_csv(index=False)
+
+    preferred_cols = [
+        "scenario",
+        "policy",
+        "completion_time",
+        "feasibility_percent",
+        "average_solve_time",
+        "dmin_TV",
+        "max_lateral_acceleration",
+        "avg_longitudinal_jerk",
+        "avg_lateral_jerk",
+        "hausdorff_dist_notv",
+        "completion_goal_dist",
+        "completion_ey",
+        "completion_s_to_end",
+        "completion_valid",
+    ]
+    cols = [c for c in preferred_cols if c in df_final.columns]
+    summary = df_final[cols].copy()
+    summary = summary.sort_values(["scenario", "policy"]).reset_index(drop=True)
+    csv_path = os.path.join(results_dir, "paper_metrics_summary.csv")
+    md_path = os.path.join(results_dir, "paper_metrics_summary.md")
+    summary.to_csv(csv_path, index=False)
+
+    with open(md_path, "w") as f:
+        f.write("# Paper Metrics Summary\n\n")
+        f.write("This file is generated automatically after the CARLA batch run.\n\n")
+        f.write("## Aggregate Metrics\n\n")
+        f.write(_to_markdown(summary))
+        f.write("\n\n")
+        if "completion_valid" in df_full.columns:
+            f.write("## Completion Diagnostics\n\n")
+            completion_cols = [
+                c for c in [
+                    "scenario", "initial", "policy", "completion_step",
+                    "completion_goal_dist", "completion_ey", "completion_s_to_end",
+                    "completion_lateral_ok", "completed_by_goal_dist",
+                    "completed_by_s_margin", "completion_valid",
+                ] if c in df_full.columns
+            ]
+            f.write(_to_markdown(df_full[completion_cols]))
+            f.write("\n")
+    print(f"Saved paper metrics summary:\n- {csv_path}\n- {md_path}")
 
 def make_trajectory_viz_plot(results_dir, color1="r", color2="b", plot_init=1, plot_pol="no_switch"):
     scenario_dirs = _list_metric_scenario_dirs(results_dir)
@@ -254,7 +347,7 @@ def make_trajectory_viz_plot(results_dir, color1="r", color2="b", plot_init=1, p
     # ax1.plot(np.array(s_wrt_cl)-s_wrt_cl[0], np.ones(len(s_wrt_cl))*3.5, 'k--', linewidth=1.5, label="$e_y^{ref}$")
     ax2.plot(np.array(s_wrt_cl)[:-64]-s_wrt_cl[0], 180/np.pi*np.array(epsi_wrt_cl)[:-64].squeeze(), 'b', linewidth=2.0, label="Proposed")
     ax2.plot(np.array(s_ol_wrt_cl)[:-2]-s_ol_wrt_cl[0], 180/np.pi*np.array(epsi_ol_wrt_cl).squeeze()[:-2], 'r--', linewidth=2.0, label="OL")
-    ax2.set_ylabel("$e_\psi [deg]$ ")
+    ax2.set_ylabel(r"$e_\psi [deg]$ ")
     plt.grid()
     # plt.legend()
     ax3=plt.subplot(513)
@@ -555,11 +648,13 @@ if __name__ == '__main__':
         dataframe = get_metric_dataframe(results_dir)
         dataframe.to_csv(os.path.join(results_dir, "df_full.csv"), sep=",")
 
+        df_full = dataframe.copy()
         dataframe = normalize_by_notv(dataframe)
         dataframe.to_csv(os.path.join(results_dir, "df_norm.csv"), sep=",")
 
         dataframe  = aggregate(dataframe)
         dataframe.to_csv(os.path.join(results_dir, "df_final.csv"), sep=",")
+        write_paper_summary(results_dir, df_full, dataframe)
 
     if make_traj_viz:
         make_trajectory_viz_plot(results_dir)
