@@ -119,3 +119,37 @@ inspect are `smpc_first_failure.json` under `smpc_var_risk` and
   `ey > 20m` drift and whether a valid `smpc_completion.json` is generated.
 - Treat `smpc_open_loop` `INF_OR_UNBD` as a separate solver/model issue unless
   the indexing change also improves it.
+
+## Evidence From 20260523_142559
+- The run used the upstream single-TV mode-indexing fix: remote `mpc_utils.py`
+  contains `_mode_component(...)` and both closed-loop/open-loop constraints call
+  it.
+- `notv` and `notv_cl` remain healthy baselines: `119/120` steps, feasible
+  fraction `1.0`.
+- `smpc_var_risk` and `smpc_fixed_risk` still run to `600` steps with feasible
+  fraction `1.0`, and no `smpc_completion.json` is generated.
+- Final off-route deviation remains large:
+  - `smpc_var_risk`: `ey=23.43m`, `goal_dist=24.62m`, `s_to_end=8m`.
+  - `smpc_fixed_risk`: `ey=24.31m`, `goal_dist=25.30m`, `s_to_end=7m`.
+- `reference.status` shows the lateral-deviation guard triggered as designed:
+  - `smpc_var_risk`: `restored_global_reference` for `512/600` steps, first at
+    step `88`.
+  - `smpc_fixed_risk`: `restored_global_reference` for `511/600` steps, first at
+    step `89`.
+- However, the controller still continues drifting after the guard starts. Around
+  steps `88-110`, steering stays positive and near `0.23rad`, while `ey` grows
+  from about `2m` to `6m`.
+
+## Fix Applied After 20260523_142559
+- Found that reference restoration only restored `x_ref/y_ref`; when `prev_opt`
+  was true, `l_states` still came from `linearization_traj(...)`, which rolls out
+  the previous already-deviating controls.
+- Because the closed-loop SMPC cost is built around the linearization trajectory,
+  this made the reference-restoration guard too weak: the optimizer still stayed
+  near the previous deviated nominal trajectory.
+- Updated `SMPCAgent` so `restored_global_reference=True` also sets
+  `forced_reference_linearization=True`; in that case `l_states/l_inputs` are
+  sliced from the restored global feasible reference instead of the previous
+  optimal rollout.
+- Next run should check for `reference.status.forced_reference_linearization`
+  and whether `ey` stops growing after the first `|ey| > 2m` event.

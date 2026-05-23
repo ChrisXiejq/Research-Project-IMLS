@@ -529,6 +529,7 @@ class SMPCAgent(object):
             reference_status = {
                 "regenerated": False,
                 "restored_global_reference": False,
+                "forced_reference_linearization": False,
                 "skip_reason": None,
                 "reference_regen_max_lateral_error": self.reference_regen_max_lateral_error,
             }
@@ -537,6 +538,7 @@ class SMPCAgent(object):
                 self.feas_ref_states_new = self.feas_ref_states.copy()
                 self.feas_ref_inputs_new = self.feas_ref_inputs.copy()
                 reference_status["restored_global_reference"] = True
+                reference_status["forced_reference_linearization"] = True
                 reference_status["skip_reason"] = "lateral_error_too_large"
             elif self.time%5==0 and self.ref_horizon>self.t_ref+1:
                 self.reference_regeneration(x,y,psi,speed)
@@ -548,7 +550,7 @@ class SMPCAgent(object):
 
 
             t_ref_new=np.argmin(np.linalg.norm(self.feas_ref_states_new[:,:2]-np.hstack((x,y)), axis=1))
-            if self.prev_opt and self.time%1==0:
+            if self.prev_opt and self.time%1==0 and not reference_status["forced_reference_linearization"]:
                 l_states, l_inputs = self.linearization_traj(x,y,psi,speed)
 
             else:
