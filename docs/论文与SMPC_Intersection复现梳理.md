@@ -20,6 +20,7 @@
 
 - 自车在 **LTV 动力学** 下跟踪参考路径，同时对他车各 **GMM 模态** 施加 **避碰相关约束**（SOC / 风险形式，实现在 `mpc_utils.py` 的 `SMPC_MMPreds` 族中）。
 - **多模态联合假设**：多个 target 时，联合索引覆盖各车模态的乘积空间；实现中通过联合索引解码到每辆车的模态（见 `_joint_mode_component`，与 \(N_{\mathrm{modes}}^{N_{\mathrm{TV}}}\) 的乘积结构一致）。
+- **发布代码复刻边界**：上游 `SMPC_MMPreds` 的 intersection 实验实际只使用 1 个 target vehicle；其历史索引 `int(m/N_TV)*(v==1) + (m%N_TV)*(v==0)` 在 `N_TV=1` 时会把所有 joint mode 映射到 target `mode 0`。本仓库在 `--risk_profile upstream_code` 下保留该行为以贴近发布代码；`paper_eps_002` 等消融口径保留数学 joint-mode 解码。
 
 ### 1.3 三种 SMPC 策略（论文对比的核心）
 
@@ -143,7 +144,7 @@ python Research-Project-IMLS/tools/assemble_from_sources.py
 |------|----------|------------|
 | **思想** | 多模预测 + SMPC 三策略 + intersection 闭环 | 与 SMPC 设计一致 |
 | **方法** | Gurobi 锥规划主路径 | 与 SMPC 对齐；IPOPT 为可选退路 |
-| **配置** | 尽量接近上游 | OL/闭环路默认超参与 SMPC 一致；ego 的 `N`/`dt`/`num_modes` 来自 JSON |
+| **配置** | 尽量接近上游 | OL/闭环路默认超参与 SMPC 一致；`upstream_code` 保留发布代码的单 TV mode indexing；ego 的 `N`/`dt`/`num_modes` 来自 JSON |
 | **环境** | CARLA 0.9.14 + Ubuntu 22 + 现代 Python | 见 AutoDL 手册与 `env_setup` |
 
 更细的命令与排错仍以 **`docs/AutoDL_现代稳定版复现手册.md`** 为操作真值；本文负责**概念—流程—迁移边界**的完整梳理。

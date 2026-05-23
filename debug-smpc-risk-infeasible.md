@@ -79,3 +79,43 @@ inspect are `smpc_first_failure.json` under `smpc_var_risk` and
   600-step crawls.
 - Converted collision-probability post-processing values to dense float arrays
   before scalar/vector arithmetic to remove sparse-matrix debug errors.
+
+## Evidence From 20260523_133921
+- Adding a lateral-error guard to the completion rule removed the false completion
+  seen in `20260523_131925`, but `smpc_var_risk` and `smpc_fixed_risk` again ran
+  to `600` steps.
+- Both risk policies remained solver-feasible for all steps, so the current
+  issue is not the original Gurobi infeasibility diagnosis.
+- Final debug state shows large off-route deviation: `smpc_var_risk` ends around
+  `ey=23.86m`, `goal_dist=24.91m`; `smpc_fixed_risk` ends around `ey=23.65m`,
+  `goal_dist=24.76m`.
+- The latest traces were generated before the reference-regeneration status field,
+  so `reference.status` is absent in `20260523_133921`.
+
+## Upstream-Code Difference Found
+- Upstream `SMPC_MMPreds/scripts/carla/utils/mpc_utils.py` uses
+  `mode = lambda m, v: int(m/N_TV)*(v==1) + (m%N_TV)*(v==0)`.
+- In the published intersection experiment `N_TV=1`; therefore every joint
+  hypothesis maps to target `mode 0`.
+- The migrated code had changed this to mathematical base-`N_modes` joint-mode
+  decoding, so `N_TV=1` used target modes `0/1/2`. That changes the collision
+  constraints and can make the controller avoid a different obstacle envelope,
+  matching the observed large lateral deviation.
+
+## Fix Applied After Upstream Comparison
+- Added `_mode_component(...)` so `--risk_profile upstream_code` preserves the
+  upstream single-TV indexing behavior while other profiles can still use
+  mathematical joint-mode decoding.
+- Updated `SMPC_MMPreds` and `SMPC_MMPreds_OL` collision constraints to use this
+  helper.
+- Added a reference-regeneration guard in `SMPCAgent`: if `|ey| > 2m`, do not
+  regenerate the reference from the already-deviated state; instead restore the
+  global feasible reference and log `reference.status.skip_reason`.
+
+## Next Verification Focus
+- Re-run the same small matrix with `--risk_profile upstream_code`.
+- Confirm `smpc_debug_steps.jsonl` contains `reference.status`.
+- Check whether `smpc_var_risk` and `smpc_fixed_risk` avoid the previous
+  `ey > 20m` drift and whether a valid `smpc_completion.json` is generated.
+- Treat `smpc_open_loop` `INF_OR_UNBD` as a separate solver/model issue unless
+  the indexing change also improves it.

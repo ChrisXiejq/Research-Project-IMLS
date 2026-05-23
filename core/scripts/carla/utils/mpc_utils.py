@@ -41,6 +41,21 @@ def _joint_mode_component(joint_index, vehicle_index, n_modes):
     return (joint_index // (n_modes ** vehicle_index)) % n_modes
 
 
+def _mode_component(joint_index, vehicle_index, n_modes, n_tvs, risk_profile=None):
+    """Mode index used by collision constraints.
+
+    The upstream CARLA intersection code only ever uses one target vehicle in the
+    published experiment. In that case its historical indexing maps every joint
+    mode to target mode 0. Keep that behavior for ``upstream_code`` reproduction,
+    while retaining mathematically correct joint-mode indexing for paper/ablation
+    profiles and multi-TV runs.
+    """
+    normalized = (risk_profile or "upstream_code").lower()
+    if n_tvs == 1 and normalized in {"upstream", "upstream_code", "smpc_mmpreds"}:
+        return 0
+    return _joint_mode_component(joint_index, vehicle_index, n_modes)
+
+
 class RefTrajGenerator():
 
     def __init__(self,
@@ -651,7 +666,7 @@ class SMPC_MMPreds():
         self.opti[i].subject_to((-self.u_prev[i][1]+self.df_lin[i][0]+h[0][1,0])*self.fps<=slack+self.DF_DOT_MAX)
 
         nm = self.N_modes
-        mode = lambda m, v: _joint_mode_component(m, v, nm)
+        mode = lambda m, v: _mode_component(m, v, nm, N_TV, self.risk_profile)
 
         total_prob=0
 
@@ -775,7 +790,7 @@ class SMPC_MMPreds():
             collision_prob = 0
             for t in range(1, self.N):
                 collision_prob_t = 0
-                for k in range(N_TV): 
+                for k in range(N_TV):
                     z = np.atleast_1d(_dense_float(value_fn(self.collision_avoidance[i][m][t][k]['z'])).squeeze())
                     y = float(_dense_float(value_fn(self.collision_avoidance[i][m][t][k]['y'])).squeeze())
                     noise_samples = np.random.normal(np.zeros(z.size), 1, size=(100, z.size))
@@ -783,13 +798,13 @@ class SMPC_MMPreds():
                         collision_prob_t += prob/100*int(float(y + z @ noise_samples[s]) > 0)
 
                 collision_prob =  max(collision_prob, collision_prob_t)
-            
+
             return collision_prob
 
         try:
             # pdb.set_trace()
             sol = self.opti[i].solve()
-         
+
 
             # Optimal solution.
             u_control  = sol.value(self.policy[i][0][0][:2,0])
@@ -1957,7 +1972,9 @@ class SMPC_MMPreds_OL():
         H=h[:,0]
 
         nm = self.N_modes
-        mode = lambda m, v: _joint_mode_component(m, v, nm)
+        mode = lambda m, v: _mode_component(
+            m, v, nm, N_TV, getattr(self, "risk_profile", "upstream_code")
+        )
         for t in range(1,self.N):
             for j in range(self.N_modes**N_TV):
                 oa_ref=[self._oa_ev_ref([self.x_lin[t-1], self.x_lin[t]], [self.y_lin[t-1], self.y_lin[t]], self.Mu_tv[k][mode(j,k)][t-1,0], self.Mu_tv[k][mode(j,k)][t-1,1], self.Q_tv[k][mode(j,k)][t-1]) for k in range(N_TV)]

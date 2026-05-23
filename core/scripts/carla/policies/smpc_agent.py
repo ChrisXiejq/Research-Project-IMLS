@@ -105,6 +105,7 @@ class SMPCAgent(object):
         self.completion_s_margin = 6.0
         self.completion_goal_dist = 8.0
         self.completion_lateral_error = 4.0
+        self.reference_regen_max_lateral_error = 2.0
 
         # Debugging: see the reference solution.
 
@@ -525,8 +526,23 @@ class SMPCAgent(object):
 
         else:
             # Run SMPC Preds.
-            if self.time%5==0 and self.ref_horizon>self.t_ref+1:
+            reference_status = {
+                "regenerated": False,
+                "restored_global_reference": False,
+                "skip_reason": None,
+                "reference_regen_max_lateral_error": self.reference_regen_max_lateral_error,
+            }
+            if abs(ey) > self.reference_regen_max_lateral_error:
+                # Do not let a large lateral deviation become the new reference.
+                self.feas_ref_states_new = self.feas_ref_states.copy()
+                self.feas_ref_inputs_new = self.feas_ref_inputs.copy()
+                reference_status["restored_global_reference"] = True
+                reference_status["skip_reason"] = "lateral_error_too_large"
+            elif self.time%5==0 and self.ref_horizon>self.t_ref+1:
                 self.reference_regeneration(x,y,psi,speed)
+                reference_status["regenerated"] = True
+            elif self.time%5==0:
+                reference_status["skip_reason"] = "near_reference_end"
     
 
 
@@ -628,6 +644,7 @@ class SMPCAgent(object):
                     "t_ref": self.t_ref,
                     "t_ref_new": t_ref_new,
                     "ref_horizon": self.ref_horizon,
+                    "status": reference_status,
                     "l_states": self._debug_array_summary(l_states),
                     "l_inputs": self._debug_array_summary(l_inputs),
                 },
