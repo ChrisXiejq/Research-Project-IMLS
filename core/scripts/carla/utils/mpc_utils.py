@@ -766,17 +766,21 @@ class SMPC_MMPreds():
         }
 
 
+        def _dense_float(value):
+            value = value.toarray() if hasattr(value, "toarray") else value
+            return np.asarray(value, dtype=float)
+
         def _get_mode_collision_prob(value_fn, m):
-            prob = value_fn(self.probs[i][m])
+            prob = float(_dense_float(value_fn(self.probs[i][m])).squeeze())
             collision_prob = 0
             for t in range(1, self.N):
                 collision_prob_t = 0
                 for k in range(N_TV): 
-                    z = np.atleast_1d(np.asarray(value_fn(self.collision_avoidance[i][m][t][k]['z'])).squeeze())
-                    y = value_fn(self.collision_avoidance[i][m][t][k]['y'])
+                    z = np.atleast_1d(_dense_float(value_fn(self.collision_avoidance[i][m][t][k]['z'])).squeeze())
+                    y = float(_dense_float(value_fn(self.collision_avoidance[i][m][t][k]['y'])).squeeze())
                     noise_samples = np.random.normal(np.zeros(z.size), 1, size=(100, z.size))
                     for s in range(100):
-                        collision_prob_t += prob/100*int((y+z@noise_samples[s])>0)
+                        collision_prob_t += prob/100*int(float(y + z @ noise_samples[s]) > 0)
 
                 collision_prob =  max(collision_prob, collision_prob_t)
             

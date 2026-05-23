@@ -61,3 +61,21 @@ inspect are `smpc_first_failure.json` under `smpc_var_risk` and
   - `smpc_fixed_risk` should no longer have `ego_feasible_frac=0.0`.
   - Remaining `open_loop` infeasibility, if any, should be treated as a separate
     solver/model issue.
+
+## Evidence From 20260523_123642
+- The post-processing fix worked: `smpc_var_risk` and `smpc_fixed_risk` both
+  reached `ego_feasible_frac=1.0`, and neither produced `smpc_first_failure.json`.
+- Both risk policies still ran to `600` steps. Debug traces show they approach
+  `s≈40-41m`, slow to near zero, and never satisfy the old completion condition.
+- `smpc_open_loop` still has a real solver failure at step 18 with
+  `return_status=INF_OR_UNBD`.
+
+## Fix Applied After 20260523_123642
+- Added completion diagnostics (`end_s`, `s_to_end`, `goal_dist`) to
+  `smpc_debug_steps.jsonl`.
+- Added `smpc_completion.json` when the SMPC agent marks the goal as reached.
+- Extended the completion rule with a small progress margin and an Euclidean
+  goal-distance fallback to avoid terminal Frenet projection jitter causing
+  600-step crawls.
+- Converted collision-probability post-processing values to dense float arrays
+  before scalar/vector arithmetic to remove sparse-matrix debug errors.

@@ -101,6 +101,8 @@ class SMPCAgent(object):
         self.debug_label = smpc_config
         self._debug_setup_written = False
         self._debug_first_failure_written = False
+        self.completion_s_margin = 6.0
+        self.completion_goal_dist = 8.0
 
         # Debugging: see the reference solution.
 
@@ -299,6 +301,21 @@ class SMPCAgent(object):
                 self._debug_first_failure_written = True
                 self._debug_write_json("smpc_first_failure.json", payload)
 
+    def _completion_metrics(self, s, x, y):
+        goal_xy = np.array([self.goal_location.x, -self.goal_location.y], dtype=float)
+        end_s = float(self.frenet_traj.trajectory[-1, 0])
+        goal_dist = float(np.linalg.norm(np.array([x, y], dtype=float) - goal_xy))
+        s_to_end = float(end_s - s)
+        return {
+            "end_s": end_s,
+            "s_to_end": s_to_end,
+            "goal_dist": goal_dist,
+            "completion_s_margin": self.completion_s_margin,
+            "completion_goal_dist": self.completion_goal_dist,
+            "completed_by_s_margin": bool(s >= end_s - self.completion_s_margin),
+            "completed_by_goal_dist": bool(goal_dist <= self.completion_goal_dist),
+        }
+
 
 
 
@@ -472,9 +489,30 @@ class SMPCAgent(object):
 
 
 
-        if self.goal_reached or self.frenet_traj.reached_trajectory_end(s, resolution=5.):
+        completion_metrics = self._completion_metrics(s, x, y)
+        reached_end = self.frenet_traj.reached_trajectory_end(s, resolution=5.)
+        reached_end = reached_end or completion_metrics["completed_by_s_margin"]
+        reached_end = reached_end or completion_metrics["completed_by_goal_dist"]
+
+        if self.goal_reached or reached_end:
             # Stop if the end of the path is reached and signal completion.
             self.goal_reached = True
+            if self.debug_savedir is not None:
+                self._debug_write_json("smpc_completion.json", {
+                    "agent": "SMPCAgent",
+                    "debug_label": self.debug_label,
+                    "step": int(self.time),
+                    "vehicle_state": {
+                        "x": x,
+                        "y": y,
+                        "psi": psi,
+                        "speed": speed,
+                        "s": s,
+                        "ey": ey,
+                        "epsi": epsi,
+                    },
+                    "completion": completion_metrics,
+                })
 
         else:
             # Run SMPC Preds.
@@ -584,6 +622,7 @@ class SMPCAgent(object):
                     "l_states": self._debug_array_summary(l_states),
                     "l_inputs": self._debug_array_summary(l_inputs),
                 },
+                "completion": completion_metrics,
                 "prediction": self._debug_prediction_summary(
                     target_vehicle_positions,
                     target_vehicle_gmm_preds,
