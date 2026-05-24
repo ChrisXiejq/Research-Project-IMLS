@@ -1874,6 +1874,7 @@ class SMPC_MMPreds_OL():
         self.rot_costs      = [self.opti.parameter(4,4) for t in range(self.N)]
         self.policy=self._return_policy_class()
         self.slacks=self.opti.variable(1)
+        self.collision_slack=self.opti.variable(1)
 
 
         self._add_constraints_and_cost(self.N_TV_max)
@@ -1946,8 +1947,10 @@ class SMPC_MMPreds_OL():
         [A,B,E]=self._get_LTV_EV_dynamics()
         h=self.policy
         slack=self.slacks
-        cost = 100*slack@slack
+        collision_slack=self.collision_slack
+        cost = 100*slack@slack + 10000*collision_slack@collision_slack
         self.opti.subject_to(slack>=0)
+        self.opti.subject_to(collision_slack>=0)
         self.opti.subject_to( self.opti.bounded(self.V_MIN,
                                                       self.v_ref[1]+A[0][3,:]@self.dz_curr+B[0][3,:]@h[:,0],
                                                       self.V_MAX) )
@@ -1985,7 +1988,7 @@ class SMPC_MMPreds_OL():
                 for k in range(N_TV):
 
                     soc_constr=ca.soc(self.tight*(-2*(oa_ref[k]-self.Mu_tv[k][mode(j,k)][t-1,:].T).T@self.Q_tv[k][mode(j,k)][t-1]@ca.horzcat(ca.DM.eye(2),-ca.MX.eye(2))@ca.diagcat(E_block[(t-1)*(4):t*(4)-2,:], self.Sigma_tv_sqrt[k][mode(j,k)][t-1])),
-                                             2*(oa_ref[k]-self.Mu_tv[k][mode(j,k)][t-1,:].T).T@self.Q_tv[k][mode(j,k)][t-1]@(self.z_lin[0:2,t]-oa_ref[k]+A_block[(t-1)*(4):t*(4)-2,:]@self.dz_curr+B_block[(t-1)*(4):t*(4)-2,:2*t]@H))
+                                             2*(oa_ref[k]-self.Mu_tv[k][mode(j,k)][t-1,:].T).T@self.Q_tv[k][mode(j,k)][t-1]@(self.z_lin[0:2,t]-oa_ref[k]+A_block[(t-1)*(4):t*(4)-2,:]@self.dz_curr+B_block[(t-1)*(4):t*(4)-2,:2*t]@H)+collision_slack)
 
 
                     self.opti.subject_to(soc_constr>0)
@@ -2083,6 +2086,8 @@ class SMPC_MMPreds_OL():
                 debug_info["return_status"] = stats.get("return_status")
                 debug_info["success"] = stats.get("success")
                 debug_info["iter_count"] = stats.get("iter_count")
+                debug_info["slack"] = float(sol.value(self.slacks))
+                debug_info["collision_slack"] = float(sol.value(self.collision_slack))
             except Exception as exc:
                 debug_info["stats_error"] = repr(exc)
 
@@ -2109,22 +2114,25 @@ class SMPC_MMPreds_OL():
                 is_feas     = True
 
             else:
-                if self.v_curr> 1:
-                    u_control  = np.array([self.a_brake-self.u_ref_val[0], -self.u_ref_val[1]])
-                    v_tp1      = self.v_curr+self.DT*self.a_brake
-                else:
-                    u_control  = np.array([0., 0.])
-                    v_tp1      = self.v_next
+                # Fall back to the current reference input rather than hard braking;
+                # hard braking caused the open-loop rollout to stall after one infeasible step.
+                u_control  = np.array([0., 0.])
+                v_tp1      = self.v_next
 
                 is_feas = False
                 debug_info["fallback"] = {
                     "v_curr": float(self.v_curr),
                     "v_next_ref": float(self.v_next),
                     "u_ref_val": np.asarray(self.u_ref_val).reshape(-1).tolist(),
-                    "a_brake": float(self.a_brake),
+                    "mode": "reference_input",
                     "u_control": np.asarray(u_control).reshape(-1).tolist(),
                     "v_tp1": float(v_tp1),
                 }
+                try:
+                    debug_info["slack_debug_value"] = float(self.opti.debug.value(self.slacks))
+                    debug_info["collision_slack_debug_value"] = float(self.opti.debug.value(self.collision_slack))
+                except Exception as slack_exc:
+                    debug_info["slack_debug_error"] = repr(slack_exc)
 
         solve_time = time.time() - st
 

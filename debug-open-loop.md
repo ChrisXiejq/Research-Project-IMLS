@@ -59,3 +59,22 @@ Expected post-fix evidence:
 - `smpc_open_loop` debug records should show `risk_profile="upstream_code"`.
 - `smpc_open_loop` debug records should show `tight=1.64` instead of `2.053748910631823`.
 - If the hypothesis is correct, the first `INF_OR_UNBD` step should move later or disappear, and feasibility should improve above `0.743333`.
+
+## 20260524_121954 Result
+
+- Latest run confirmed the risk-profile fix was active: `smpc_debug_setup.json` shows `risk_profile="upstream_code"` and `tight=1.64`.
+- Open-loop still did not complete: `ego_n_steps=600`, `ego_feasible_frac=0.745`, first failure at step 18 with `INF_OR_UNBD`.
+- Therefore the main cause is no longer the risk tightening mismatch. The remaining problem is open-loop feasibility and recovery: when the solver fails once, the previous hard-brake fallback can push the rollout into a stalled/off-route state.
+
+## Second Fix Applied
+
+- Added a separate, heavily penalised `collision_slack` to the open-loop SOC collision constraints. This keeps the constraint nearly hard, but prevents one boundary collision constraint from making the whole open-loop problem immediately `INF_OR_UNBD`.
+- Changed the open-loop fallback from hard braking to the current reference input. This avoids cascading failures where a single infeasible solve causes excessive braking, low speed, and persistent off-route behaviour.
+- Added `slack` and `collision_slack` debug values to open-loop solver output.
+
+Expected post-fix evidence:
+
+- `smpc_open_loop` feasibility should improve from `0.745`.
+- The first `INF_OR_UNBD` should move later or disappear.
+- If `collision_slack` remains near zero on successful solves, the softening is not dominating the result.
+- If `collision_slack` becomes large, the issue is genuinely the open-loop collision constraint geometry rather than fallback alone.
