@@ -338,7 +338,7 @@ class SMPC_MMPreds():
 
         self.fixed_risk=fixed_risk
 
-   
+
 
         self.inv_cdfl=[]
 
@@ -398,8 +398,8 @@ class SMPC_MMPreds():
 
         # s_opts_grb = {'OutputFlag': 0}#, 'FeasibilityTol' : 1e-3, 'PSDTol' : 1e-3}
         s_opts_grb = {'OutputFlag': 0, 'PSDTol' : 1e-2,
-                       'FeasibilityTol' : 1e-2, 
-                       'BarConvTol':1e-2, 
+                       'FeasibilityTol' : 1e-2,
+                       'BarConvTol':1e-2,
                        'BarQCPConvTol':1e-2}
         p_opts_grb = {'error_on_fail':0}
 
@@ -554,7 +554,7 @@ class SMPC_MMPreds():
                         self.opti[i].set_value(self.y_tv_ref[i][k][j][0], y_tv0[k])
                         self.opti[i].set_value(T[k][j][t], np.identity(2))
                         self.opti[i].set_value(c[k][j][t], mu_tv[k][j, t, :]-np.hstack((x_tv0[k],y_tv0[k])))
-                        
+
                         e_val,e_vec= np.linalg.eigh(0.1*sigma_tv[k][j,t,:,:])
                         self.opti[i].set_value(self.Sigma_tv_sqrt[i][k][j][t], e_vec@np.diag(np.sqrt(e_val))@e_vec.T)
                     else:
@@ -681,7 +681,7 @@ class SMPC_MMPreds():
 
 
             for t in range(1,self.N):
-                
+
                 # oa_ref=[self._oa_ev_ref([self.x_ref[i][t-1], self.x_ref[i][t]], [self.y_ref[i][t-1], self.y_ref[i][t]], self.x_tv_ref[i][k][mode(j,k)][t], self.y_tv_ref[i][k][mode(j,k)][t], self.Q_tv[i][k][mode(j,k)][t-1]) for k in range(N_TV)]
                 try:
                     oa_ref=[self._oa_ev_ref([self.x_lin[i][t-1], self.x_lin[i][t]], [self.y_lin[i][t-1], self.y_lin[i][t]], self.x_tv_ref[i][k][mode(j,k)][t], self.y_tv_ref[i][k][mode(j,k)][t], self.Q_tv[i][k][mode(j,k)][t-1]) for k in range(N_TV)]
@@ -820,7 +820,7 @@ class SMPC_MMPreds():
                 debug_info["collision_prob_error"] = repr(collision_exc)
 
 
-            
+
 
             z_lin_ev   = sol.value(self.z_lin[i])
             u_lin_ev   = sol.value(self.u_lin[i])
@@ -948,7 +948,7 @@ class SMPC_MMPreds():
 
 
     def _update_ev_initial_condition(self, i, dx0, dy0, dpsi0, dvel0):
-   
+
 
         self.opti[i].set_value(self.dz_curr[i], ca.DM([dx0, dy0, dpsi0, dvel0]))
 
@@ -1669,7 +1669,7 @@ class SMPC_MMPreds_OBCA():
         self.v_next=update_dict['v_ref'][1]
         self.update_dict=update_dict
 
-        
+
 
 
         N_TV=1+int(i/self.t_bar_max)
@@ -1805,11 +1805,12 @@ class SMPC_MMPreds_OL():
                 N_TV_MAX     =  2,
                 N_seq_MAX    =  50,
                 T_BAR_MAX    =  4,
-                TIGHTENING   =  PAPER_INTERSECTION_TIGHTENING,
+                TIGHTENING   =  None,
                 NOISE_STD    =  [0.1, .1, .01, .1, 0.01], # process noise standard deviations in order [w_x, w_y, w_theta, w_v, w_TV]
                 Q =[0.1*50., 0.005*500, 1*10., 0.1*100.], # weights on x, y, and v.
                 R = [100., 1000],
-                fps = 20
+                fps = 20,
+                risk_profile = "upstream_code"
                 ):
         self.N=N
         self.DT=DT
@@ -1830,15 +1831,17 @@ class SMPC_MMPreds_OL():
         self.N_seq_max=N_seq_MAX
         self.t_bar_max=T_BAR_MAX
         self.fps=fps
-        self.tight=TIGHTENING
+        self.risk_profile = risk_profile
+        self.tight, self.target_prob = _risk_profile_values(risk_profile, TIGHTENING)
         self.noise_std=NOISE_STD
         self.Q = ca.diag(Q)
         self.R = ca.diag(R)
         self.a_brake=-4.0
+        self._debug_last_update = {}
 
         self.opti=ca.Opti("conic")
         s_opts_grb = {'OutputFlag': 0, 'PSDTol' : 1e-3}
-        
+
         p_opts_grb = {'error_on_fail':0}
 
         self.opti.solver("gurobi", p_opts_grb, s_opts_grb)
@@ -2062,7 +2065,10 @@ class SMPC_MMPreds_OL():
             "problem_id": "open_loop",
             "N_TV_max": int(getattr(self, "N_TV_max", -1)),
             "N_modes": int(self.N_modes),
+            "risk_profile": getattr(self, "risk_profile", None),
             "tight": getattr(self, "tight", None),
+            "target_prob": getattr(self, "target_prob", None),
+            "last_update": getattr(self, "_debug_last_update", {}),
         }
 
         try:
@@ -2147,6 +2153,19 @@ class SMPC_MMPreds_OL():
         self.u_ref_val=np.hstack((update_dict['a_ref'][0],update_dict['df_ref'][0]))
         self.v_curr=update_dict['dv0']+update_dict['v_ref'][0]        # pdb.set_trace()
         self.v_next=update_dict['v_ref'][1]
+        self._debug_last_update = {
+            "dx0": float(update_dict['dx0']),
+            "dy0": float(update_dict['dy0']),
+            "dpsi0": float(update_dict['dpsi0']),
+            "dv0": float(update_dict['dv0']),
+            "v_ref0": float(update_dict['v_ref'][0]),
+            "v_ref1": float(update_dict['v_ref'][1]),
+            "a_ref0": float(update_dict['a_ref'][0]),
+            "df_ref0": float(update_dict['df_ref'][0]),
+            "v_curr": float(self.v_curr),
+            "v_next": float(self.v_next),
+            "u_ref_val": np.asarray(self.u_ref_val).reshape(-1).tolist(),
+        }
 
     def _update_ev_initial_condition(self, dx0, dy0, dpsi0, dvel0):
         self.opti.set_value(self.dz_curr, ca.DM([dx0, dy0, dpsi0, dvel0]))

@@ -151,7 +151,8 @@ class SMPCAgent(object):
             n_tvm = self._n_tv_max_ol if self._n_tv_max_ol is not None else 2
             self.SMPC=smpc.SMPC_MMPreds_OL(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes,
                                           L_F=self.lf, L_R=self.lr, fps=self.fps,
-                                          N_TV_MAX=n_tvm)
+                                          N_TV_MAX=n_tvm,
+                                          risk_profile=self.risk_profile)
 
 
         self.goal_reached = False # flags when the end of the path is reached and agent should stop
@@ -411,7 +412,7 @@ class SMPCAgent(object):
 
             self.feas_ref_states_new=np.vstack((self.feas_ref_states_new, np.array([self.feas_ref_states_new[-1,:]]*(self.N+1))))
             self.feas_ref_inputs_new=self.feas_ref_dict['u_opt']
-            
+
             if len(self.feas_ref_inputs_new.shape)!=1:
                 self.feas_ref_inputs_new=np.vstack((self.feas_ref_inputs_new, np.array([self.feas_ref_inputs_new[-1,:]]*(self.N+1)))).reshape((-1,2))
             else:
@@ -466,7 +467,7 @@ class SMPCAgent(object):
         N_TV=len(target_vehicle_positions)
 
 
-     
+
 
         # Get the vehicle's current pose in a RH coordinate system.
         x, y = vehicle_loc.x, -vehicle_loc.y
@@ -547,7 +548,7 @@ class SMPCAgent(object):
                 reference_status["regenerated"] = True
             elif self.time%5==0:
                 reference_status["skip_reason"] = "near_reference_end"
-    
+
 
 
 
@@ -585,10 +586,10 @@ class SMPCAgent(object):
             else:
                 tv_shape_matrices = tv_R
 
-           
 
-            
-            
+
+
+
             update_dict={  'dx0':x-l_states[0,0],     'dy0':y-l_states[0,1],         'dpsi0':psi-l_states[0,2],       'dv0':speed-l_states[0,3],
                          'x_tv0': [target_vehicle_positions[k][0] for k in range(N_TV)],        'y_tv0': [target_vehicle_positions[k][1] for k in range(N_TV)],
                          'x_ref': self.feas_ref_states_new[t_ref_new:t_ref_new+self.SMPC.N+1,0].T,
@@ -732,7 +733,7 @@ class SMPCAgent(object):
                 self.warm_start={}
                 if is_opt and self.obca_flag:
                     self.warm_start={'ws': [sol_dict['h_opt'],sol_dict['K_opt'],sol_dict['M_opt'],sol_dict['lmbd_opt'],sol_dict['nu_opt']]}
-                
+
                 self.prev_opt=is_opt
                 if self.prev_opt:
                     self.prev_nom_inputs=sol_dict['nom_u_ev']
@@ -753,13 +754,13 @@ class SMPCAgent(object):
             }
             self._debug_record_step(debug_payload, is_failure=not bool(is_opt))
 
-            
+
             print(f"\toptimal?: {is_opt}")
             print(f"\tv_next: {v_next}")
             print(f"\tsteering: {u0[1]}")
             print(f"state: {z0}")
             print(f"control: {u0}")
-            
+
 
 
 

@@ -95,7 +95,7 @@
 | 类别 | 说明 |
 |------|------|
 | **CARLA 0.9.14** | Python API 路径、`GlobalRoutePlanner` 构造兼容、蓝图解析（`resolve_vehicle_blueprint`）等 |
-| **Ubuntu 22.04 / 驱动** | 无头渲染、`-nullrhi` 等见 `docs/AutoDL_现代稳定版复现手册.md` |
+| **Ubuntu 22.04 / 驱动** | 无头渲染、`-nullrhi` 等见 `docs/guides/AutoDL_现代稳定版复现手册.md` |
 | **Python / Conda** | `environment.modern.yml`、`requirements.modern.txt` 等 |
 | **场景与 OL 规模** | `n_tv_max` 由场景中 `target` 数量注入，使 **预测列表长度与 OL 中 \(N_{\mathrm{TV}}\)** 一致（intersection 典型为 1） |
 | **无 Gurobi 时的可选路径** | `--solver_backend ipopt_approx` + `ipopt_smpc_agent.py`（论文主结果仍应以 Gurobi 为准） |
@@ -106,7 +106,7 @@
 
 ### 4.1 环境与 CARLA
 
-按 **`docs/AutoDL_现代稳定版复现手册.md`**（或 `AutoDL_Modern_Setup.md`）完成：
+按 **`docs/guides/AutoDL_现代稳定版复现手册.md`**（或 `AutoDL_Modern_Setup.md`）完成：
 
 - `CARLA_ROOT` 指向 **0.9.14** 客户端与 **同版本** 服务端；
 - Conda 环境（如 `carla_modern`）、Gurobi 许可与 `GUROBI_VERSION` 等与手册一致。
@@ -147,4 +147,4 @@ python Research-Project-IMLS/tools/assemble_from_sources.py
 | **配置** | 尽量接近上游 | OL/闭环路默认超参与 SMPC 一致；`upstream_code` 保留发布代码的单 TV mode indexing；ego 的 `N`/`dt`/`num_modes` 来自 JSON |
 | **环境** | CARLA 0.9.14 + Ubuntu 22 + 现代 Python | 见 AutoDL 手册与 `env_setup` |
 
-更细的命令与排错仍以 **`docs/AutoDL_现代稳定版复现手册.md`** 为操作真值；本文负责**概念—流程—迁移边界**的完整梳理。
+更细的命令与排错仍以 **`docs/guides/AutoDL_现代稳定版复现手册.md`** 为操作真值；本文负责**概念—流程—迁移边界**的完整梳理。
