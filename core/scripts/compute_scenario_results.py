@@ -103,6 +103,67 @@ def _load_completion_diagnostics(scenario_dir):
         return empty
 
 
+def _load_smpc_debug_metrics(scenario_dir):
+    """Summarise optional SMPC debug JSONL fields for paper-facing diagnostics."""
+    path = os.path.join(scenario_dir, "smpc_debug_steps.jsonl")
+    empty = {
+        "solver_failure_count": np.nan,
+        "solver_failure_frac": np.nan,
+        "collision_slack_max": np.nan,
+        "collision_slack_mean": np.nan,
+        "collision_slack_active_count": np.nan,
+        "collision_slack_active_frac": np.nan,
+        "solver_slack_max": np.nan,
+        "solver_slack_mean": np.nan,
+    }
+    if not os.path.isfile(path):
+        return empty
+
+    n_rows = 0
+    n_fail = 0
+    collision_slacks = []
+    solver_slacks = []
+    try:
+        with open(path, "r") as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                n_rows += 1
+                row = json.loads(line)
+                solver = row.get("solver") or {}
+                debug = solver.get("debug") or {}
+                optimal = solver.get("optimal")
+                if optimal is not None and not bool(optimal):
+                    n_fail += 1
+                if debug.get("collision_slack") is not None:
+                    collision_slacks.append(float(debug["collision_slack"]))
+                if debug.get("slack") is not None:
+                    solver_slacks.append(float(debug["slack"]))
+
+        def _max(values):
+            return np.nan if not values else float(np.max(values))
+
+        def _mean(values):
+            return np.nan if not values else float(np.mean(values))
+
+        return {
+            "solver_failure_count": n_fail,
+            "solver_failure_frac": np.nan if n_rows == 0 else float(n_fail / n_rows),
+            "collision_slack_max": _max(collision_slacks),
+            "collision_slack_mean": _mean(collision_slacks),
+            "collision_slack_active_count": sum(abs(v) > 1e-6 for v in collision_slacks),
+            "collision_slack_active_frac": (
+                np.nan if not collision_slacks
+                else float(sum(abs(v) > 1e-6 for v in collision_slacks) / len(collision_slacks))
+            ),
+            "solver_slack_max": _max(solver_slacks),
+            "solver_slack_mean": _mean(solver_slacks),
+        }
+    except Exception as exc:
+        empty["smpc_debug_error"] = repr(exc)
+        return empty
+
+
 def get_metric_dataframe(results_dir):
     scenario_dirs = _list_metric_scenario_dirs(results_dir)
 
@@ -150,6 +211,7 @@ def get_metric_dataframe(results_dir):
         metrics_dict["initial"]  = init_num
         metrics_dict["policy"]   = policy
         metrics_dict.update(_load_completion_diagnostics(scenario_dir))
+        metrics_dict.update(_load_smpc_debug_metrics(scenario_dir))
         dataframe.append(metrics_dict)
 
     return pd.DataFrame(dataframe)
@@ -178,6 +240,11 @@ def write_paper_summary(results_dir, df_full, df_final):
         "completion_ey",
         "completion_s_to_end",
         "completion_valid",
+        "solver_failure_frac",
+        "collision_slack_max",
+        "collision_slack_mean",
+        "collision_slack_active_frac",
+        "solver_slack_max",
     ]
     cols = [c for c in preferred_cols if c in df_final.columns]
     summary = df_final[cols].copy()
@@ -200,6 +267,10 @@ def write_paper_summary(results_dir, df_full, df_final):
                     "completion_goal_dist", "completion_ey", "completion_s_to_end",
                     "completion_lateral_ok", "completed_by_goal_dist",
                     "completed_by_s_margin", "completion_valid",
+                    "solver_failure_count", "solver_failure_frac",
+                    "collision_slack_max", "collision_slack_mean",
+                    "collision_slack_active_count", "collision_slack_active_frac",
+                    "solver_slack_max",
                 ] if c in df_full.columns
             ]
             f.write(_to_markdown(df_full[completion_cols]))
