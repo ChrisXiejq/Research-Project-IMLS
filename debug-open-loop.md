@@ -83,8 +83,8 @@ Expected post-fix evidence:
 
 - The second fix made open-loop complete successfully in the single-init pilot: `ego_n_steps=107`, `ego_feasible_frac=1.0`, and all solver records report `OPTIMAL`.
 - Completion is valid under the tightened completion diagnostic: `completion_step=107`, `completion_ey=-0.5923`, `completion_goal_dist=7.9792`, and `completion_s_to_end=6.0`.
-- The improvement is not a fully hard-constraint result yet. `collision_slack` is active in all 107 solver records, with `max=2.1516`, `mean=0.1747`, and 16 records above `0.05`.
-- The largest `collision_slack` values occur at steps 18-25, which matches the old first-failure region. This strongly suggests the open-loop SOC collision geometry is still the bottleneck.
+- The improvement is not a fully hard-constraint result yet. `collision_slack` has `max=2.1516`, `mean=0.1747`, and 16 records above `0.05` (`significant_frac=0.1495`).
+- The peak `collision_slack` occurs at step 22, and the largest values are concentrated at steps 18-25. This matches the old first-failure region and strongly suggests the open-loop SOC collision geometry is still the bottleneck.
 - Automatic paper-style evaluation now needs to report `solver_failure_frac`, `collision_slack_max`, `collision_slack_mean`, and `solver_slack_max` so future summaries distinguish hard feasibility from soft-constraint-assisted feasibility.
 
 Current assessment:

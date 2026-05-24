@@ -113,6 +113,9 @@ def _load_smpc_debug_metrics(scenario_dir):
         "collision_slack_mean": np.nan,
         "collision_slack_active_count": np.nan,
         "collision_slack_active_frac": np.nan,
+        "collision_slack_significant_count": np.nan,
+        "collision_slack_significant_frac": np.nan,
+        "collision_slack_peak_step": np.nan,
         "solver_slack_max": np.nan,
         "solver_slack_mean": np.nan,
     }
@@ -122,6 +125,7 @@ def _load_smpc_debug_metrics(scenario_dir):
     n_rows = 0
     n_fail = 0
     collision_slacks = []
+    collision_slack_steps = []
     solver_slacks = []
     try:
         with open(path, "r") as f:
@@ -137,6 +141,7 @@ def _load_smpc_debug_metrics(scenario_dir):
                     n_fail += 1
                 if debug.get("collision_slack") is not None:
                     collision_slacks.append(float(debug["collision_slack"]))
+                    collision_slack_steps.append(row.get("step", n_rows - 1))
                 if debug.get("slack") is not None:
                     solver_slacks.append(float(debug["slack"]))
 
@@ -146,16 +151,30 @@ def _load_smpc_debug_metrics(scenario_dir):
         def _mean(values):
             return np.nan if not values else float(np.mean(values))
 
+        active_count = sum(abs(v) > 1e-6 for v in collision_slacks)
+        significant_count = sum(abs(v) > 0.05 for v in collision_slacks)
+        if collision_slacks:
+            peak_idx = int(np.argmax(np.abs(collision_slacks)))
+            peak_step = collision_slack_steps[peak_idx]
+        else:
+            peak_step = np.nan
+
         return {
             "solver_failure_count": n_fail,
             "solver_failure_frac": np.nan if n_rows == 0 else float(n_fail / n_rows),
             "collision_slack_max": _max(collision_slacks),
             "collision_slack_mean": _mean(collision_slacks),
-            "collision_slack_active_count": sum(abs(v) > 1e-6 for v in collision_slacks),
+            "collision_slack_active_count": active_count,
             "collision_slack_active_frac": (
                 np.nan if not collision_slacks
-                else float(sum(abs(v) > 1e-6 for v in collision_slacks) / len(collision_slacks))
+                else float(active_count / len(collision_slacks))
             ),
+            "collision_slack_significant_count": significant_count,
+            "collision_slack_significant_frac": (
+                np.nan if not collision_slacks
+                else float(significant_count / len(collision_slacks))
+            ),
+            "collision_slack_peak_step": peak_step,
             "solver_slack_max": _max(solver_slacks),
             "solver_slack_mean": _mean(solver_slacks),
         }
@@ -244,6 +263,8 @@ def write_paper_summary(results_dir, df_full, df_final):
         "collision_slack_max",
         "collision_slack_mean",
         "collision_slack_active_frac",
+        "collision_slack_significant_frac",
+        "collision_slack_peak_step",
         "solver_slack_max",
     ]
     cols = [c for c in preferred_cols if c in df_final.columns]
@@ -270,6 +291,8 @@ def write_paper_summary(results_dir, df_full, df_final):
                     "solver_failure_count", "solver_failure_frac",
                     "collision_slack_max", "collision_slack_mean",
                     "collision_slack_active_count", "collision_slack_active_frac",
+                    "collision_slack_significant_count", "collision_slack_significant_frac",
+                    "collision_slack_peak_step",
                     "solver_slack_max",
                 ] if c in df_full.columns
             ]
