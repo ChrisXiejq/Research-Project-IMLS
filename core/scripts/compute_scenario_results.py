@@ -118,6 +118,11 @@ def _load_smpc_debug_metrics(scenario_dir):
         "collision_slack_peak_step": np.nan,
         "solver_slack_max": np.nan,
         "solver_slack_mean": np.nan,
+        "max_abs_ey_debug": np.nan,
+        "forced_reference_linearization_count": np.nan,
+        "forced_reference_linearization_frac": np.nan,
+        "restored_global_reference_count": np.nan,
+        "restored_global_reference_frac": np.nan,
     }
     if not os.path.isfile(path):
         return empty
@@ -127,6 +132,9 @@ def _load_smpc_debug_metrics(scenario_dir):
     collision_slacks = []
     collision_slack_steps = []
     solver_slacks = []
+    abs_ey_values = []
+    forced_reference_count = 0
+    restored_reference_count = 0
     try:
         with open(path, "r") as f:
             for line in f:
@@ -144,6 +152,14 @@ def _load_smpc_debug_metrics(scenario_dir):
                     collision_slack_steps.append(row.get("step", n_rows - 1))
                 if debug.get("slack") is not None:
                     solver_slacks.append(float(debug["slack"]))
+                vehicle_state = row.get("vehicle_state") or {}
+                if vehicle_state.get("ey") is not None:
+                    abs_ey_values.append(abs(float(vehicle_state["ey"])))
+                reference_status = (row.get("reference") or {}).get("status") or {}
+                if reference_status.get("forced_reference_linearization"):
+                    forced_reference_count += 1
+                if reference_status.get("restored_global_reference"):
+                    restored_reference_count += 1
 
         def _max(values):
             return np.nan if not values else float(np.max(values))
@@ -177,6 +193,15 @@ def _load_smpc_debug_metrics(scenario_dir):
             "collision_slack_peak_step": peak_step,
             "solver_slack_max": _max(solver_slacks),
             "solver_slack_mean": _mean(solver_slacks),
+            "max_abs_ey_debug": _max(abs_ey_values),
+            "forced_reference_linearization_count": forced_reference_count,
+            "forced_reference_linearization_frac": (
+                np.nan if n_rows == 0 else float(forced_reference_count / n_rows)
+            ),
+            "restored_global_reference_count": restored_reference_count,
+            "restored_global_reference_frac": (
+                np.nan if n_rows == 0 else float(restored_reference_count / n_rows)
+            ),
         }
     except Exception as exc:
         empty["smpc_debug_error"] = repr(exc)
@@ -259,6 +284,8 @@ def write_paper_summary(results_dir, df_full, df_final):
         "completion_ey",
         "completion_s_to_end",
         "completion_valid",
+        "max_abs_ey_debug",
+        "forced_reference_linearization_frac",
         "solver_failure_frac",
         "collision_slack_max",
         "collision_slack_mean",
@@ -288,6 +315,9 @@ def write_paper_summary(results_dir, df_full, df_final):
                     "completion_goal_dist", "completion_ey", "completion_s_to_end",
                     "completion_lateral_ok", "completed_by_goal_dist",
                     "completed_by_s_margin", "completion_valid",
+                    "max_abs_ey_debug",
+                    "forced_reference_linearization_count", "forced_reference_linearization_frac",
+                    "restored_global_reference_count", "restored_global_reference_frac",
                     "solver_failure_count", "solver_failure_frac",
                     "collision_slack_max", "collision_slack_mean",
                     "collision_slack_active_count", "collision_slack_active_frac",
