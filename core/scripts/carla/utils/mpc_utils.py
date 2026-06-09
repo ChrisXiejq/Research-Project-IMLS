@@ -856,10 +856,10 @@ class SMPC_MMPreds():
                 debug_info["stats_error"] = repr(stats_exc)
 
 
-            # Suboptimal solution (e.g. timed out).
-
-
-            if self.opti[i].stats()['return_status']=='SUBOPTIMAL':
+            # Suboptimal solution (e.g. timed out).  CasADi may not expose
+            # stats if solve() failed before the Opti stack was marked solved.
+            return_status = debug_info.get("return_status")
+            if return_status == 'SUBOPTIMAL':
                 u_control  = self.opti[i].debug.value(self.policy[i][0][0][:2,0])
                 v_tp1      = self.opti[i].debug.value(self.v_lin[i][1]+self.dz_curr[i][3]+self.DT*self.policy[i][0][0][0,0])
                 is_feas     = True
@@ -1589,9 +1589,13 @@ class SMPC_MMPreds_OBCA():
         except:
 
 
-            # Suboptimal solution (e.g. timed out).
-
-            if self.opti[i].stats()['return_status']=='SUBOPTIMAL':
+            # Suboptimal solution (e.g. timed out).  Avoid calling stats()
+            # again when CasADi reports that solve() never completed.
+            try:
+                return_status = self.opti[i].stats().get('return_status')
+            except Exception:
+                return_status = None
+            if return_status == 'SUBOPTIMAL':
                 u_control  = self.opti[i].debug.value(self.policy[i][0][:,0])
                 v_tp1      = self.opti[i].debug.value(self.v_lin[i][1]+self.dz_curr[i][3]+self.DT*self.policy[i][0][0,0])
                 is_feas     = True
@@ -2107,8 +2111,10 @@ class SMPC_MMPreds_OL():
             except Exception as stats_exc:
                 debug_info["stats_error"] = repr(stats_exc)
 
-            # Suboptimal solution (e.g. timed out).
-            if self.opti.stats()['return_status']=='SUBOPTIMAL':
+            # Suboptimal solution (e.g. timed out).  CasADi may not expose
+            # stats if solve_limited() failed before a solved state existed.
+            return_status = debug_info.get("return_status")
+            if return_status == 'SUBOPTIMAL':
                 u_control  = self.opti.debug.value(self.policy[:,0])
                 v_tp1      = self.opti.debug.value(self.v_lin[1]+self.dz_curr[3]+self.DT*self.policy[0,0])
                 is_feas     = True
