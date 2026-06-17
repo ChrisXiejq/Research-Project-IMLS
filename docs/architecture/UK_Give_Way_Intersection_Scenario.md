@@ -101,15 +101,31 @@ The step-level logs now record `traffic_control`, `side_of_road`, `priority_rule
 
 ## 7. Recommended Test Command
 
-Before starting CARLA, run the lightweight pre-CARLA validation:
+Before starting CARLA, run the lightweight pre-CARLA validation locally:
 
 ```bash
-cd /root/autodl-tmp/Research-Project-IMLS/core
+cd /Users/bytedance/my/Dissertation/Research-Project-IMLS
 
-python scripts/precarla_validate_uk_give_way.py
+python3 -m venv .venv-precarla
+.venv-precarla/bin/python -m pip install -r core/env_setup/requirements.precarla.txt
+.venv-precarla/bin/python core/scripts/precarla_validate_uk_give_way.py
 ```
 
-This script reads the same `scenario_uk_give_way.json` and `intersection_01.csv` files as the CARLA experiment. It checks the scenario semantics and runs a simplified kinematic timing test. The expected result is that:
+For a more complete local gate before using CARLA, run:
+
+```bash
+.venv-precarla/bin/python core/scripts/precarla_comprehensive_eval.py
+```
+
+This writes detailed JSON and Markdown reports to `core/results/precarla_comprehensive_eval/`. The comprehensive evaluation checks the base scenario, Gymnasium API compliance, nominal conflict timing, speed perturbations, and safety-gap sensitivity. The CARLA run should only be started when the comprehensive gate has no `FAIL` outcomes.
+
+The same script can still be run without the virtual environment by adding `--skip_gym_check`; that mode uses only the Python standard library:
+
+```bash
+python3 core/scripts/precarla_validate_uk_give_way.py --skip_gym_check
+```
+
+This script reads the same `scenario_uk_give_way.json` and `intersection_01.csv` files as the CARLA experiment. It checks the scenario semantics, runs a simplified kinematic timing test, and, when Gymnasium is installed, validates the simplified environment with Gymnasium's `check_env`. The expected result is that:
 
 - the scenario is declared `unsignalised`,
 - the side of road is `left`,
@@ -117,6 +133,7 @@ This script reads the same `scenario_uk_give_way.json` and `intersection_01.csv`
 - target is the priority oncoming straight vehicle,
 - target reaches the conflict point before ego,
 - a simple give-way delay increases the minimum separation.
+- the Gymnasium rollout confirms that the give-way action improves minimum separation compared with the no-yield action.
 
 This is not a replacement for CARLA, MultiPath, or SMPC. It is a fast sanity check to confirm that the experimental setup is geometrically and behaviourally meaningful before running the expensive CARLA simulation.
 

@@ -26,9 +26,13 @@ from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 try:
     import gymnasium as gym
     from gymnasium import spaces
+    from gymnasium.utils.env_checker import check_env
+    import numpy as np
 except Exception:  # pragma: no cover - optional dependency
     gym = None
     spaces = None
+    check_env = None
+    np = None
 
 
 Point = Tuple[float, float]
@@ -318,7 +322,7 @@ def validate_scenario(scenario_path: str, safety_time_gap_s: float = 2.0) -> Tup
     return passed, failed, report
 
 
-if gym is not None:
+if gym is not None and spaces is not None and np is not None:
 
     class UKGiveWayKinematicEnv(gym.Env):
         """Tiny Gymnasium wrapper for pre-CARLA UK give-way timing checks."""
@@ -330,18 +334,13 @@ if gym is not None:
             self.scenario_path = scenario_path
             self.safety_time_gap_s = safety_time_gap_s
             self.action_space = spaces.Discrete(2)  # 0: no yield, 1: give-way delay
-            self.observation_space = spaces.Box(low=-1000.0, high=1000.0, shape=(4,), dtype=float)
+            self.observation_space = spaces.Box(low=-1000.0, high=1000.0, shape=(4,), dtype=np.float32)
             self._report: Optional[ConflictReport] = None
 
         def reset(self, *, seed: Optional[int] = None, options: Optional[Dict] = None):
             super().reset(seed=seed)
             _, _, self._report = validate_scenario(self.scenario_path, self.safety_time_gap_s)
-            obs = [
-                self._report.ego_ttc_s,
-                self._report.target_ttc_s,
-                self._report.time_gap_s,
-                self._report.no_yield_min_distance_m,
-            ]
+            obs = self._observation(self._report.no_yield_min_distance_m)
             return obs, {}
 
         def step(self, action: int):
@@ -353,13 +352,47 @@ if gym is not None:
                 else self._report.give_way_min_distance_m
             )
             reward = min_dist
-            obs = [
-                self._report.ego_ttc_s,
-                self._report.target_ttc_s,
-                self._report.time_gap_s,
-                min_dist,
-            ]
+            obs = self._observation(min_dist)
             return obs, reward, True, False, {"min_distance_m": min_dist}
+
+        def _observation(self, min_distance_m: float):
+            return np.array(
+                [
+                    self._report.ego_ttc_s,
+                    self._report.target_ttc_s,
+                    self._report.time_gap_s,
+                    min_distance_m,
+                ],
+                dtype=np.float32,
+            )
+
+
+def run_gymnasium_check(scenario_path: str, safety_time_gap_s: float) -> Tuple[bool, List[str]]:
+    messages: List[str] = []
+    if gym is None or check_env is None or np is None:
+        messages.append("SKIP: Gymnasium is not installed; standard-library validation still ran.")
+        return True, messages
+
+    env = UKGiveWayKinematicEnv(scenario_path, safety_time_gap_s)
+    check_env(env, skip_render_check=True)
+    obs, _ = env.reset(seed=0)
+    no_yield_obs, no_yield_reward, no_yield_done, _, no_yield_info = env.step(0)
+    obs, _ = env.reset(seed=0)
+    give_way_obs, give_way_reward, give_way_done, _, give_way_info = env.step(1)
+
+    no_yield_min = float(no_yield_info["min_distance_m"])
+    give_way_min = float(give_way_info["min_distance_m"])
+    ok = bool(no_yield_done and give_way_done and give_way_min > no_yield_min)
+
+    messages.append("PASS: Gymnasium environment passes check_env")
+    messages.append(f"PASS: reset observation is inside observation_space = {env.observation_space.contains(obs)}")
+    messages.append(f"PASS: no-yield action min_distance = {no_yield_min:.2f} m")
+    messages.append(f"PASS: give-way action min_distance = {give_way_min:.2f} m")
+    if ok:
+        messages.append("PASS: Gymnasium rollout confirms give-way action improves minimum separation")
+    else:
+        messages.append("FAIL: Gymnasium rollout did not improve minimum separation")
+    return ok, messages
 
 
 def print_report(passed: Iterable[str], failed: Iterable[str], report: ConflictReport) -> None:
@@ -381,6 +414,13 @@ def print_report(passed: Iterable[str], failed: Iterable[str], report: ConflictR
     print(f"- give_way_min_distance: {report.give_way_min_distance_m:.2f} m")
 
 
+def print_gymnasium_report(messages: Iterable[str]) -> None:
+    print("\nGymnasium validation")
+    print("=" * 38)
+    for message in messages:
+        print(message)
+
+
 def main() -> int:
     default_scenario = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
@@ -391,11 +431,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scenario", default=default_scenario, help="Path to scenario JSON.")
     parser.add_argument("--safety_time_gap_s", type=float, default=2.0, help="Desired minimum time gap after the target clears the conflict point.")
+    parser.add_argument("--skip_gym_check", action="store_true", help="Skip optional Gymnasium environment validation.")
     args = parser.parse_args()
 
     passed, failed, report = validate_scenario(args.scenario, args.safety_time_gap_s)
     print_report(passed, failed, report)
-    return 1 if failed else 0
+
+    gym_ok = True
+    if not args.skip_gym_check:
+        gym_ok, gym_messages = run_gymnasium_check(args.scenario, args.safety_time_gap_s)
+        print_gymnasium_report(gym_messages)
+
+    return 1 if failed or not gym_ok else 0
 
 
 if __name__ == "__main__":
