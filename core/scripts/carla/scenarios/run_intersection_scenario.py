@@ -46,6 +46,12 @@ class CarlaParams:
     port           : int   = 2000
     timeout_period : float = 120.0
 
+    # Scenario semantics.  These fields are logged and used to make the
+    # traffic-control interpretation explicit for reproduction reports.
+    side_of_road    : str = "left"          # "left" for UK-style traffic, "right" otherwise
+    traffic_control : str = "unsignalised"  # "unsignalised" or "signalised"
+    priority_rule   : str = ""              # e.g. "turning_gives_way_to_oncoming_straight"
+
 @dataclass(frozen=True)
 class DroneVizParams:
     # Parameters for the "drone": camera used to capture Carla scene.
@@ -107,6 +113,13 @@ class VehicleParams:
     solver_backend : str = "gurobi" # "gurobi" or "ipopt_approx"
     risk_profile : str = "upstream_code" # "upstream_code" or "paper_eps_002"
 
+    # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
+    # enables an optional safety override for signalised scenarios; the UK give-way
+    # scenario leaves this disabled so that yielding comes from SMPC risk constraints.
+    traffic_role : str = ""
+    obey_traffic_lights : bool = False
+    stop_for_yellow : bool = True
+
 @dataclass(frozen=True)
 class PredictionParams:
     # Model parameter locations, given relative to <ROOTDIR>/scripts/models/
@@ -114,7 +127,7 @@ class PredictionParams:
     model_anchors         : str = "l5kit_clusters_16.npy"
 
     # Flag to render traffic lights on rasterized image for prediction.
-    render_traffic_lights : bool = False # set by default to false since agents ignore lights at the moment.
+    render_traffic_lights : bool = False
 
     # TODO: future work includes things like how often to update preds (if not at the Carla fps).
 
@@ -298,6 +311,9 @@ class RunIntersectionScenario:
         self.savedir = savedir
         os.makedirs(self.savedir, exist_ok=True)
         try:
+            self.side_of_road = carla_params.side_of_road
+            self.traffic_control = carla_params.traffic_control
+            self.priority_rule = carla_params.priority_rule
             self._setup_carla_world(carla_params)
             self._setup_vehicles(vehicle_params_list, carla_params)
             self.use_camera = drone_viz_params.visualize_opencv or drone_viz_params.save_avi
@@ -319,6 +335,30 @@ class RunIntersectionScenario:
         # Needed for OpenCV/Carla world visualization.
         self.viz_params = drone_viz_params
         self.mode_rgb_colors = [(255, 0, 255), (255, 255, 0), (0, 255, 255)] # TODO: autogenerate
+
+    def _traffic_light_state_name(self, actor):
+        """Return a compact CARLA traffic-light state string, if one applies."""
+        try:
+            if not actor.is_at_traffic_light():
+                return None
+            traffic_light = actor.get_traffic_light()
+            if traffic_light is None:
+                return None
+            return str(traffic_light.get_state()).split(".")[-1]
+        except Exception:
+            return "unknown"
+
+    def _apply_optional_traffic_light_rule(self, actor, control, vehicle_params):
+        """Optional red/yellow stop override for explicitly signalised scenarios."""
+        state = self._traffic_light_state_name(actor)
+        forced_stop = False
+        if vehicle_params.obey_traffic_lights and state in {"Red", "Yellow"}:
+            if state == "Red" or vehicle_params.stop_for_yellow:
+                control.throttle = 0.0
+                control.brake = 1.0
+                control.hand_brake = False
+                forced_stop = True
+        return control, state, forced_stop
 
     def run_scenario(self):
         # Return flag to indicate if this ran to completion.
@@ -403,6 +443,8 @@ class RunIntersectionScenario:
                     ego_feasible = None
                     ego_solve_time = None
                     ego_control = None
+                    ego_traffic_light_state = None
+                    ego_traffic_light_forced_stop = False
 
                     for idx_act, (act, policy) in enumerate(zip(self.vehicle_actors, self.vehicle_policies)):
                         policy_result = policy.run_step(pred_dict)
@@ -411,6 +453,11 @@ class RunIntersectionScenario:
                         else:
                             control, z0, u0, is_feasible, solve_time = policy_result
                             collision_prob = np.nan
+                        control, traffic_light_state, traffic_light_forced_stop = self._apply_optional_traffic_light_rule(
+                            act,
+                            control,
+                            self.vehicle_params_list[idx_act],
+                        )
                         if idx_act == self.ego_vehicle_idx:
                             ego_feasible = bool(is_feasible) if not isinstance(is_feasible, (float, np.floating)) else bool(is_feasible)
                             try:
@@ -418,6 +465,8 @@ class RunIntersectionScenario:
                             except (TypeError, ValueError):
                                 ego_solve_time = float("nan")
                             ego_control = control
+                            ego_traffic_light_state = traffic_light_state
+                            ego_traffic_light_forced_stop = traffic_light_forced_stop
                         if not policy.done():
                             z0 = np.append(t_elapsed, z0) # add the Carla timestamp
                             act_key = f"{act.attributes['role_name']}_{idx_act}"
@@ -447,6 +496,11 @@ class RunIntersectionScenario:
                             "ego_throttle": float(ego_control.throttle),
                             "ego_brake": float(ego_control.brake),
                             "ego_steer": float(ego_control.steer),
+                            "ego_traffic_light_state": ego_traffic_light_state,
+                            "ego_traffic_light_forced_stop": bool(ego_traffic_light_forced_stop),
+                            "traffic_control": self.traffic_control,
+                            "side_of_road": self.side_of_road,
+                            "priority_rule": self.priority_rule,
                             "pred_valid_tv0": pred0,
                         }
                         exp_log.append_step_row(self.savedir, rows_buffer, step_row, flush_every=25)
@@ -689,6 +743,7 @@ class RunIntersectionScenario:
 
         self.vehicle_actors   = []
         self.vehicle_policies = []
+        self.vehicle_params_list = list(vehicle_params_list)
         self.vehicle_colors   = []
         self.vehicle_init_speeds = []
         ego_vehicle_idxs  = []

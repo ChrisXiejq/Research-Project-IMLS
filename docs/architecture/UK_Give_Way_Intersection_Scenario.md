@@ -4,16 +4,24 @@ This note explains the current intersection scenario and the new UK give-way sce
 
 ## 1. Is the Current Scenario Signalised?
 
-The current CARLA intersection experiment should be treated as **unsignalised** from the controller's perspective.
+The UK give-way experiment should be treated as **unsignalised** from the controller's perspective.
 
 Evidence from the code:
 
 - `PredictionParams.render_traffic_lights` is `False` by default.
-- `run_intersection_scenario.py` comments that traffic lights are ignored by agents.
-- The code can read CARLA traffic-light actors for rasterisation, but there is no policy logic that makes ego or target vehicles obey red/green lights.
+- `scenario_uk_give_way.json` sets `traffic_control` to `unsignalised`.
+- Both the ego vehicle and target vehicle set `obey_traffic_lights` to `false`.
 - Vehicle behaviour is controlled by the policy assigned to each actor, such as `mpc`, `smpc`, `blsmpc`, or `static`, not by a traffic-light phase.
 
 Therefore, if the supervisor describes the experiment as an **unsignalised intersection**, that is a reasonable interpretation.
+
+The code now also supports an optional signalised interpretation for future experiments:
+
+- `VehicleParams.obey_traffic_lights` enables a red/yellow stop override per vehicle.
+- `RunIntersectionScenario._apply_optional_traffic_light_rule(...)` checks CARLA's current traffic-light state and forces full braking on red, or on yellow if `stop_for_yellow` is enabled.
+- `run_all_scenarios.py` enables traffic-light rasterisation by default when a scenario declares `traffic_control` as `signalised`.
+
+This optional support is deliberately disabled in `scenario_uk_give_way.json`, because the dissertation experiment should test whether SMPC yields from prediction and collision-risk constraints, not from a hard-coded traffic-light stop.
 
 ## 2. What Does `intersection_01.csv` Represent?
 
@@ -89,7 +97,28 @@ Instead, the expected yielding behaviour should emerge from:
 
 This is useful for the dissertation because the experiment can be described as testing whether risk-aware SMPC can produce appropriate give-way behaviour in an unsignalised UK-style intersection.
 
+The step-level logs now record `traffic_control`, `side_of_road`, `priority_rule`, `ego_traffic_light_state`, and whether a traffic-light stop override was applied. For the UK give-way scenario, `ego_traffic_light_forced_stop` should remain `false`; if the ego yields, that behaviour comes from the SMPC decision process.
+
 ## 7. Recommended Test Command
+
+Before starting CARLA, run the lightweight pre-CARLA validation:
+
+```bash
+cd /root/autodl-tmp/Research-Project-IMLS/core
+
+python scripts/precarla_validate_uk_give_way.py
+```
+
+This script reads the same `scenario_uk_give_way.json` and `intersection_01.csv` files as the CARLA experiment. It checks the scenario semantics and runs a simplified kinematic timing test. The expected result is that:
+
+- the scenario is declared `unsignalised`,
+- the side of road is `left`,
+- ego is the turning give-way vehicle,
+- target is the priority oncoming straight vehicle,
+- target reaches the conflict point before ego,
+- a simple give-way delay increases the minimum separation.
+
+This is not a replacement for CARLA, MultiPath, or SMPC. It is a fast sanity check to confirm that the experimental setup is geometrically and behaviourally meaningful before running the expensive CARLA simulation.
 
 For a quick single-initialisation test:
 
@@ -148,4 +177,3 @@ Key metrics:
 Suggested wording:
 
 > I checked the implementation and the current agents do not obey traffic lights, so the experiment is best interpreted as an unsignalised intersection. I have therefore added a clearer UK-style give-way scenario, where the ego vehicle is the turning vehicle and the target vehicle is the priority straight-going vehicle. The aim is to test whether the risk-aware SMPC controller can generate appropriate yielding behaviour from prediction and collision-risk constraints, rather than from a hard-coded traffic-light rule.
-

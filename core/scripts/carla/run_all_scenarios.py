@@ -45,11 +45,25 @@ def _write_scenario_rollout_config(savedir: str, scenario_dict: dict) -> None:
     exp_log.write_json(
         os.path.join(savedir, "scenario_rollout_config.json"),
         {
+            "scenario_description": scenario_dict.get("scenario_description", {}),
             "carla_params": scenario_dict.get("carla_params", {}),
+            "prediction_params": scenario_dict.get("prediction_params", {}),
             "viz_topdown": merged_viz,
             "vehicle_params": scenario_dict.get("vehicle_params", []),
         },
     )
+
+
+def _prepare_prediction_params(scenario_dict):
+    pred_dict = dict(scenario_dict.get("prediction_params", {}))
+    traffic_control = (
+        scenario_dict.get("carla_params", {}).get("traffic_control")
+        or scenario_dict.get("scenario_description", {}).get("traffic_control", "")
+    )
+    traffic_control_norm = str(traffic_control).lower().strip()
+    if traffic_control_norm.startswith("signalised"):
+        pred_dict.setdefault("render_traffic_lights", True)
+    return pred_dict
 
 
 def _maybe_render_topdown_mp4(savedir, scenario_dict, log, args):
@@ -161,7 +175,7 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
 
     carla_params     = CarlaParams(**scenario_dict["carla_params"])
     drone_viz_params = DroneVizParams(**_prepare_drone_viz_params(scenario_dict, enable_camera_viz))
-    pred_params      = PredictionParams()
+    pred_params      = PredictionParams(**_prepare_prediction_params(scenario_dict))
 
     vehicles_params_list = []
 
@@ -209,7 +223,7 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
     
     carla_params     = CarlaParams(**scenario_dict["carla_params"])
     drone_viz_params = DroneVizParams(**_prepare_drone_viz_params(scenario_dict, enable_camera_viz))
-    pred_params      = PredictionParams()
+    pred_params      = PredictionParams(**_prepare_prediction_params(scenario_dict))
 
     vehicles_params_list = []
 
