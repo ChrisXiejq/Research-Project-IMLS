@@ -51,6 +51,9 @@ class SMPCAgent(object):
                  yield_stop_speed=0.2,
                  yield_stop_decel=-3.0,
                  yield_conflict_radius=4.0,
+                 yield_stop_buffer_distance=10.0,
+                 yield_wait_steer_lookahead_distance=6.0,
+                 yield_wait_steer_gain=1.0,
                  yield_ttc_margin=0.8,
                  yield_activation_distance=18.0,
                  yield_hold_distance=8.0,
@@ -91,6 +94,9 @@ class SMPCAgent(object):
         self.yield_stop_speed = float(yield_stop_speed)
         self.yield_stop_decel = float(yield_stop_decel)
         self.yield_conflict_radius = float(yield_conflict_radius)
+        self.yield_stop_buffer_distance = float(yield_stop_buffer_distance)
+        self.yield_wait_steer_lookahead_distance = float(yield_wait_steer_lookahead_distance)
+        self.yield_wait_steer_gain = float(yield_wait_steer_gain)
         self.yield_ttc_margin = float(yield_ttc_margin)
         self.yield_activation_distance = float(yield_activation_distance)
         self.yield_hold_distance = float(yield_hold_distance)
@@ -118,6 +124,15 @@ class SMPCAgent(object):
             raise ValueError(f"yield_stop_speed must be non-negative, got {self.yield_stop_speed}")
         if self.yield_conflict_radius <= 0.0:
             raise ValueError(f"yield_conflict_radius must be positive, got {self.yield_conflict_radius}")
+        if self.yield_stop_buffer_distance <= 0.0:
+            raise ValueError(
+                f"yield_stop_buffer_distance must be positive, got {self.yield_stop_buffer_distance}"
+            )
+        if self.yield_wait_steer_lookahead_distance < 0.0:
+            raise ValueError(
+                "yield_wait_steer_lookahead_distance must be non-negative, "
+                f"got {self.yield_wait_steer_lookahead_distance}"
+            )
         if not 0.0 <= self.yield_steer_damping <= 1.0:
             raise ValueError(f"yield_steer_damping must be in [0, 1], got {self.yield_steer_damping}")
         if self.yield_recovery_steps < 0:
@@ -167,6 +182,7 @@ class SMPCAgent(object):
         self._yield_stop_seen = False
         self._yield_stop_active_prev = False
         self._yield_recovery_steps_remaining = 0
+        self._yield_geometry = None
         self.reference_regeneration()
 
         self.warm_start={}
@@ -331,6 +347,9 @@ class SMPCAgent(object):
                 "stop_speed": self.yield_stop_speed,
                 "decel": self.yield_stop_decel,
                 "conflict_radius": self.yield_conflict_radius,
+                "stop_buffer_distance": self.yield_stop_buffer_distance,
+                "wait_steer_lookahead_distance": self.yield_wait_steer_lookahead_distance,
+                "wait_steer_gain": self.yield_wait_steer_gain,
                 "ttc_margin": self.yield_ttc_margin,
                 "activation_distance": self.yield_activation_distance,
                 "hold_distance": self.yield_hold_distance,
@@ -562,6 +581,71 @@ class SMPCAgent(object):
             return None, None
         return int(inside[0]), int(inside[-1])
 
+    def _path_cumulative_distance(self, xy_path):
+        xy_path = np.asarray(xy_path, dtype=float)
+        if len(xy_path) == 0:
+            return np.array([], dtype=float)
+        if len(xy_path) == 1:
+            return np.array([0.0], dtype=float)
+        diffs = np.diff(xy_path, axis=0)
+        seg = np.linalg.norm(diffs, axis=1)
+        return np.concatenate(([0.0], np.cumsum(seg)))
+
+    def _index_at_path_distance(self, cumulative_distance, target_distance):
+        if len(cumulative_distance) == 0:
+            return 0
+        idx = int(np.searchsorted(cumulative_distance, float(target_distance), side="left"))
+        return int(np.clip(idx, 0, len(cumulative_distance) - 1))
+
+    def _route_defined_yield_geometry(self, target_path):
+        ego_global_path = np.asarray(self.feas_ref_states[:self.ref_horizon + 1, :2], dtype=float)
+        target_path = np.asarray(target_path, dtype=float)
+        if len(ego_global_path) < 2 or len(target_path) < 2:
+            return None
+
+        if self._yield_geometry is None:
+            diffs = ego_global_path[:, None, :] - target_path[None, :, :]
+            dist2 = np.sum(diffs * diffs, axis=2)
+            ego_conflict_idx, target_conflict_idx = np.unravel_index(int(np.argmin(dist2)), dist2.shape)
+            min_dist = float(np.sqrt(dist2[ego_conflict_idx, target_conflict_idx]))
+            cumulative = self._path_cumulative_distance(ego_global_path)
+            conflict_s = float(cumulative[ego_conflict_idx])
+            stop_s = max(0.0, conflict_s - self.yield_stop_buffer_distance)
+            stop_idx = self._index_at_path_distance(cumulative, stop_s)
+            steer_s = min(
+                conflict_s,
+                float(cumulative[stop_idx]) + self.yield_wait_steer_lookahead_distance,
+            )
+            steer_idx = self._index_at_path_distance(cumulative, steer_s)
+            input_idx = int(min(steer_idx, len(self.feas_ref_inputs) - 1))
+            self._yield_geometry = {
+                "source": "global_route_fixed",
+                "conflict_point": ego_global_path[ego_conflict_idx].copy(),
+                "conflict_index": int(ego_conflict_idx),
+                "target_conflict_index_at_init": int(target_conflict_idx),
+                "stop_point": ego_global_path[stop_idx].copy(),
+                "stop_index": int(stop_idx),
+                "steer_index": int(steer_idx),
+                "conflict_s": conflict_s,
+                "stop_s": float(cumulative[stop_idx]),
+                "stop_buffer_distance": self.yield_stop_buffer_distance,
+                "wait_steer_ref": float(self.feas_ref_inputs[input_idx, 1]),
+                "init_min_path_distance": min_dist,
+            }
+
+        geometry = dict(self._yield_geometry)
+        conflict_point = np.asarray(geometry["conflict_point"], dtype=float)
+        target_dist = np.linalg.norm(target_path - conflict_point, axis=1)
+        target_conflict_idx = int(np.argmin(target_dist))
+        geometry["target_conflict_index"] = target_conflict_idx
+        geometry["min_path_distance"] = float(target_dist[target_conflict_idx])
+        geometry["target_enter_index"], geometry["target_exit_index"] = self._zone_interval_from_path(
+            target_path,
+            conflict_point,
+            self.yield_conflict_radius,
+        )
+        return geometry
+
     def _yield_stop_supervisor(
         self,
         x,
@@ -589,18 +673,18 @@ class SMPCAgent(object):
             status["reason"] = "no_target_prediction"
             return status
 
-        ego_path = np.asarray(
-            self.feas_ref_states_new[t_ref_new:t_ref_new + self.N + 1, :2],
-            dtype=float,
-        )
-        if len(ego_path) < 2:
-            status["reason"] = "short_ego_reference"
-            return status
-
         means_all = np.asarray(target_vehicle_gmm_preds[0])
         if means_all.size == 0:
             status["reason"] = "empty_target_prediction"
             return status
+
+        ego_global_path = np.asarray(self.feas_ref_states[:self.ref_horizon + 1, :2], dtype=float)
+        ego_global_s = self._path_cumulative_distance(ego_global_path)
+        if len(ego_global_path) < 2 or len(ego_global_s) < 2:
+            status["reason"] = "short_global_ego_reference"
+            return status
+        ego_global_idx = int(np.argmin(np.linalg.norm(ego_global_path - np.array([x, y], dtype=float), axis=1)))
+        ego_route_s = float(ego_global_s[ego_global_idx])
 
         best = None
         for k in range(min(N_TV, len(means_all))):
@@ -616,11 +700,10 @@ class SMPCAgent(object):
             target_path = np.asarray(target_modes[mode, :, :2], dtype=float)
             if len(target_path) < 2:
                 continue
-            diffs = ego_path[:, None, :] - target_path[None, :, :]
-            dist2 = np.sum(diffs * diffs, axis=2)
-            ego_idx, target_idx = np.unravel_index(int(np.argmin(dist2)), dist2.shape)
-            min_dist = float(np.sqrt(dist2[ego_idx, target_idx]))
-            candidate = (min_dist, k, mode, ego_idx, target_idx, target_path)
+            geometry = self._route_defined_yield_geometry(target_path)
+            if geometry is None:
+                continue
+            candidate = (geometry["min_path_distance"], k, mode, target_path, geometry)
             if best is None or candidate[0] < best[0]:
                 best = candidate
 
@@ -628,49 +711,71 @@ class SMPCAgent(object):
             status["reason"] = "no_valid_target_path"
             return status
 
-        min_dist, target_idx, mode, ego_conflict_idx, target_conflict_idx, target_path = best
-        conflict_point = 0.5 * (ego_path[ego_conflict_idx] + target_path[target_conflict_idx])
-        target_enter_idx, target_exit_idx = self._zone_interval_from_path(
-            target_path,
-            conflict_point,
-            self.yield_conflict_radius,
-        )
-        ego_dist_to_conflict = self._path_distance_to_index(ego_path, ego_conflict_idx)
-        ego_ttc = ego_dist_to_conflict / max(float(speed), max(self.yield_stop_speed, 0.2))
+        min_dist, target_idx, mode, target_path, geometry = best
+        conflict_point = np.asarray(geometry["conflict_point"], dtype=float)
+        stop_point = np.asarray(geometry["stop_point"], dtype=float)
+        conflict_s = float(geometry["conflict_s"])
+        stop_s = float(geometry["stop_s"])
+        target_conflict_idx = int(geometry["target_conflict_index"])
+        target_enter_idx = geometry["target_enter_index"]
+        target_exit_idx = geometry["target_exit_index"]
+        ego_dist_to_stop = stop_s - ego_route_s
+        ego_dist_to_conflict = conflict_s - ego_route_s
+        ego_ttc_to_stop = max(ego_dist_to_stop, 0.0) / max(float(speed), max(self.yield_stop_speed, 0.2))
+        ego_ttc_to_conflict = max(ego_dist_to_conflict, 0.0) / max(float(speed), max(self.yield_stop_speed, 0.2))
         if target_enter_idx is None:
-            target_enter_time = float(target_conflict_idx) * self.dt
-            target_exit_time = target_enter_time
+            target_enter_time = 0.0
+            target_exit_time = 0.0
+            target_has_priority = False
         else:
             target_enter_time = float(target_enter_idx) * self.dt
             target_exit_time = float(target_exit_idx) * self.dt
+            target_has_priority = target_exit_time > self.yield_release_time
 
         overlap_risk = (
-            target_enter_time <= ego_ttc + self.yield_ttc_margin
-            and target_exit_time >= ego_ttc - self.yield_ttc_margin
+            target_has_priority
+            and target_enter_time <= ego_ttc_to_conflict + self.yield_ttc_margin
+            and target_exit_time >= ego_ttc_to_stop - self.yield_ttc_margin
         )
         close_hold = (
-            ego_dist_to_conflict <= self.yield_hold_distance
-            and target_exit_time > self.yield_release_time
+            target_has_priority
+            and ego_dist_to_stop <= self.yield_hold_distance
         )
+        approaching_stop_line = ego_dist_to_stop <= self.yield_activation_distance
+        not_far_past_conflict = ego_dist_to_conflict >= -self.yield_conflict_radius
         active = (
-            min_dist <= self.yield_conflict_radius
-            and ego_dist_to_conflict <= self.yield_activation_distance
+            target_has_priority
+            and min_dist <= self.yield_conflict_radius
+            and approaching_stop_line
+            and not_far_past_conflict
             and (overlap_risk or close_hold)
         )
 
         status.update({
             "active": bool(active),
-            "reason": "target_has_priority_in_conflict_zone" if active else "no_active_yield_needed",
+            "reason": "target_has_priority_before_stop_line" if active else "no_active_yield_needed",
             "target_index": int(target_idx),
             "target_mode": int(mode),
             "min_path_distance": min_dist,
             "conflict_point": conflict_point.tolist(),
-            "ego_conflict_index": int(ego_conflict_idx),
+            "stop_point": stop_point.tolist(),
+            "yield_geometry_source": geometry["source"],
+            "ego_global_index": int(ego_global_idx),
+            "ego_route_s": ego_route_s,
+            "ego_conflict_index": int(geometry["conflict_index"]),
+            "ego_stop_index": int(geometry["stop_index"]),
             "target_conflict_index": int(target_conflict_idx),
+            "wait_steer_index": int(geometry["steer_index"]),
+            "wait_steer_ref": float(geometry["wait_steer_ref"]),
+            "stop_s": stop_s,
+            "conflict_s": conflict_s,
+            "ego_distance_to_stop": ego_dist_to_stop,
             "ego_distance_to_conflict": ego_dist_to_conflict,
-            "ego_ttc": ego_ttc,
+            "ego_ttc": ego_ttc_to_conflict,
+            "ego_ttc_to_stop": ego_ttc_to_stop,
             "target_enter_time": target_enter_time,
             "target_exit_time": target_exit_time,
+            "target_has_priority": bool(target_has_priority),
             "overlap_risk": bool(overlap_risk),
             "close_hold": bool(close_hold),
         })
@@ -1011,9 +1116,19 @@ class SMPCAgent(object):
             if yield_status.get("active"):
                 u0_flat = np.asarray(u0, dtype=float).reshape(-1)
                 v_des_float = float(np.asarray(v_des, dtype=float).reshape(-1)[0])
+                distance_to_stop = max(float(yield_status.get("ego_distance_to_stop", 0.0)), 0.5)
+                required_stop_decel = -(float(speed) ** 2) / (2.0 * distance_to_stop)
+                a_des = max(
+                    self.yield_stop_decel,
+                    min(float(u0_flat[0]), required_stop_decel),
+                )
+                wait_steer_ref = float(yield_status.get("wait_steer_ref", 0.0)) * self.yield_wait_steer_gain
+                wait_steer_ref = float(np.clip(wait_steer_ref, self.SMPC.DF_MIN, self.SMPC.DF_MAX))
+                damped_steer = self.yield_steer_damping * float(u0_flat[1])
+                df_des = wait_steer_ref if abs(wait_steer_ref) >= 0.03 else damped_steer
                 u0 = np.array([
-                    min(float(u0_flat[0]), self.yield_stop_decel),
-                    self.yield_steer_damping * float(u0_flat[1]),
+                    a_des,
+                    df_des,
                 ], dtype=float)
                 v_des = min(v_des_float, self.yield_stop_speed)
                 self.control_prev = u0
@@ -1021,6 +1136,9 @@ class SMPCAgent(object):
                     "a_des": float(u0[0]),
                     "df_des": float(u0[1]),
                     "v_des": float(v_des),
+                    "required_stop_decel": float(required_stop_decel),
+                    "wait_steer_ref": float(wait_steer_ref),
+                    "damped_steer": float(damped_steer),
                 }
                 self._yield_stop_seen = True
                 self._yield_stop_active_prev = True
