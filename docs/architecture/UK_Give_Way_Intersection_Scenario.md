@@ -48,7 +48,7 @@ The previous main scenario, `scenario_01.json`, uses:
 | Vehicle | Route | Meaning |
 |---|---|---|
 | Target vehicle | `2 -> 2` | Oncoming straight-going vehicle |
-| Ego vehicle | `0 -> 3` | Turning vehicle crossing the oncoming straight path |
+| Ego vehicle | `0 -> 3` | Earlier turning route, later rejected after video inspection because it appears as the wrong visual turn direction |
 
 This already creates a conflict between a turning ego vehicle and a straight-going target vehicle. However, the timing was inherited from the original reproduction setting, and the target vehicle could start relatively far from the conflict region. As a result, the interaction did not always clearly show the turning vehicle yielding to the straight-going vehicle.
 
@@ -63,7 +63,7 @@ This keeps the original paper-style intersection geometry but makes the traffic-
 | Vehicle | Route | Role |
 |---|---|---|
 | Target vehicle | `2 -> 2` | Priority oncoming straight-going vehicle |
-| Ego vehicle | `0 -> 3` | Turning vehicle that should give way |
+| Ego vehicle | `0 -> 1` | Turning vehicle that should give way |
 
 This is intended to mimic the supervisor-style sketch:
 
@@ -72,19 +72,18 @@ This is intended to mimic the supervisor-style sketch:
                     |
                     |
 west arm  EV --->   +   <--- TV  east arm
-             right turn |
-                       v
-                  south arm
+             right turn toward the opposite vertical exit
 ```
 
 In code, that sketch is represented as:
 
-- EV / ego: `intersection_start_node_idx = 0`, `intersection_goal_node_idx = 3`.
-  The ego vehicle comes from the left/west approach and right-turns toward the lower/south exit.
+- EV / ego: `intersection_start_node_idx = 0`, `intersection_goal_node_idx = 1`.
+  The ego vehicle comes from the left/west approach and takes the right-turn branch in the CARLA video view.
 - TV / target: `intersection_start_node_idx = 2`, `intersection_goal_node_idx = 2`.
   The target vehicle comes from the right/east approach and continues straight through the junction.
-- Both moving vehicles use `start_left_offset = 1.85` and `goal_left_offset = 1.85`.
-  With `side_of_road = "left"`, this places each vehicle on the visually left-hand lane for its own travel direction.
+- The moving vehicles use lane-centre-scale lateral offsets rather than the old full half-road-width offset:
+  `ego = +1.85m`, `target = -1.85m`.
+  This keeps the vehicles in the intended CARLA-view lanes and avoids placing the ego on the kerb.
 
 The new scenario is explicitly documented as:
 
@@ -99,14 +98,15 @@ The main change is the target-vehicle timing:
 | Setting | `scenario_01.json` | `scenario_uk_give_way.json` | Purpose |
 |---|---:|---:|---|
 | Target start longitudinal offset | `-15.0` | `0.0` | Bring the straight-going target closer to the conflict zone |
-| Target nominal speed | `10.0` | `5.0` | Keep the priority vehicle in the conflict zone long enough for a UK give-way interaction |
-| Target init speed | `12.0` | `5.0` | Match the target's initial motion to the slower priority-vehicle timing |
-| Ego nominal speed | `10.0` | `8.0` | Keep the turning ego active enough that it must plan around the oncoming vehicle |
-| Moving vehicle lateral offset | `3.7` | `1.85` | Place vehicles near the lane centre rather than on the kerb/road edge |
+| Ego route | `0 -> 3` | `0 -> 1` | Match the CARLA video view where the ego should right-turn rather than left-turn |
+| Target nominal speed | `10.0` | `6.0` | Keep the priority vehicle in the conflict zone long enough for a UK give-way interaction |
+| Target init speed | `12.0` | `6.0` | Match the target's initial motion to the slower priority-vehicle timing |
+| Ego nominal speed | `10.0` | `6.0` | Make the simplified timing gate produce a clear no-yield conflict and a safe give-way alternative |
+| Moving vehicle lateral offset | `3.7` | `ego +1.85`, `target -1.85` | Place vehicles near the intended lane centres rather than on the kerb/road edge |
 
-The route relation is intentionally kept similar to the original scenario so that the new experiment remains close to the paper reproduction setting while becoming more appropriate for a UK give-way interpretation.
+The route relation is intentionally kept close to the original intersection setting, but the ego exit is changed after inspecting the CARLA video: route `0 -> 3` looked like a left turn in the recorded view, while the intended experiment needs the ego to right-turn from the left/west approach.
 
-The CARLA transform now uses `side_of_road="left"` to place positive lateral offsets on the visually left-hand lane in Town05. The scenario uses `1.85m` rather than the previous `3.7m` full half-road-width offset, because `3.7m` can push the vehicle to the road edge or kerb in the CARLA view.
+The CARLA transform now uses `side_of_road="left"` and lane-centre-scale offsets. The scenario uses `1.85m` rather than the previous `3.7m` full half-road-width offset, because `3.7m` can push the vehicle to the road edge or kerb in the CARLA view.
 
 ## 6. Important Limitation
 

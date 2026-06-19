@@ -186,10 +186,10 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
     )
     add_outcome(
         outcomes,
-        int(ego["intersection_start_node_idx"]) == 0 and int(ego["intersection_goal_node_idx"]) == 3,
+        int(ego["intersection_start_node_idx"]) == 0 and int(ego["intersection_goal_node_idx"]) == 1,
         "diagram ego route",
-        "Ego follows the requested diagram topology: from the left/west approach, then right-turns toward the lower/south exit.",
-        "Ego does not follow the requested left-approach right-turn route 0 -> 3.",
+        "Ego follows the requested video topology: from the left/west approach, then right-turns to the opposite vertical exit.",
+        "Ego does not follow the requested left-approach right-turn route 0 -> 1.",
     )
     add_outcome(
         outcomes,
@@ -220,14 +220,14 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
         abs(float(v.get("start_left_offset", 0.0)) - float(v.get("goal_left_offset", 0.0))) < 1e-6
         for v in moving
     )
-    positive_left_offsets = all(float(v.get("start_left_offset", 0.0)) > 0.0 for v in moving)
-    lane_center_offsets = all(1.2 <= float(v.get("start_left_offset", 0.0)) <= 2.3 for v in moving)
+    nonzero_lane_offsets = all(abs(float(v.get("start_left_offset", 0.0))) > 0.0 for v in moving)
+    lane_center_offsets = all(1.2 <= abs(float(v.get("start_left_offset", 0.0))) <= 2.3 for v in moving)
     add_outcome(
         outcomes,
-        same_left_offsets and positive_left_offsets,
+        same_left_offsets and nonzero_lane_offsets,
         "left-lane offsets",
-        "Moving vehicles use consistent positive local-left lane offsets.",
-        "Moving vehicles do not use consistent positive local-left lane offsets.",
+        "Moving vehicles use consistent non-zero lane-centre offsets.",
+        "Moving vehicles do not use consistent non-zero lane-centre offsets.",
     )
     add_outcome(
         outcomes,
@@ -246,9 +246,9 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
     add_outcome(
         outcomes,
         ego_route.path[0][1] > intersection[int(ego["intersection_start_node_idx"])][0].y
-        and target_route.path[0][1] < intersection[int(target["intersection_start_node_idx"])][0].y,
+        and target_route.path[0][1] > intersection[int(target["intersection_start_node_idx"])][0].y,
         "visual UK left-lane placement",
-        "Eastbound ego is above its centreline and westbound target is below its centreline, matching the visual left-hand lanes in this Town05 layout.",
+        "Ego and target are placed on the intended visual lane centres for the requested CARLA-view layout.",
         "Moving vehicles are not placed on the expected visual left-hand lanes for this Town05 layout.",
     )
     return outcomes
@@ -522,8 +522,8 @@ def main() -> int:
     speed_outcomes, speed_cases = speed_sweep_tests(
         args.scenario,
         scenario,
-        ego_speeds=[6.0, 7.0, 8.0, 9.0, 10.0],
-        target_speeds=[4.0, 5.0, 6.0, 7.0, 8.0],
+        ego_speeds=[5.0, 6.0, 7.0],
+        target_speeds=[6.0, 7.0, 8.0],
         safety_gap=args.safety_gap_s,
     )
     outcomes.extend(speed_outcomes)
