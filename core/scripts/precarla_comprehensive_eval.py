@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Comprehensive local pre-CARLA evaluation for the UK give-way scenario.
+"""Comprehensive local pre-CARLA evaluation for the give-way scenario.
 
 This is a stricter test battery than ``precarla_validate_uk_give_way.py``.  It
 does not replace CARLA, MultiPath, or SMPC, but it catches scenario-design
@@ -144,10 +144,10 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
     )
     add_outcome(
         outcomes,
-        str(carla_params.get("side_of_road", "")).lower() == "left",
-        "UK left-hand declaration",
-        "Scenario declares left-hand traffic.",
-        "Scenario does not declare left-hand traffic.",
+        str(carla_params.get("side_of_road", "")).lower() == "right",
+        "right-hand traffic declaration",
+        "Scenario declares conventional right-hand traffic.",
+        "Scenario does not declare conventional right-hand traffic.",
     )
     add_outcome(
         outcomes,
@@ -186,10 +186,10 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
     )
     add_outcome(
         outcomes,
-        int(ego["intersection_start_node_idx"]) == 0 and int(ego["intersection_goal_node_idx"]) == 1,
+        int(ego["intersection_start_node_idx"]) == 0 and int(ego["intersection_goal_node_idx"]) == 3,
         "diagram ego route",
-        "Ego follows the requested video topology: from the left/west approach, then right-turns to the opposite vertical exit.",
-        "Ego does not follow the requested left-approach right-turn route 0 -> 1.",
+        "Ego follows the requested conventional layout: from the left/west approach, then left-turns across the oncoming straight path.",
+        "Ego does not follow the requested left-approach left-turn route 0 -> 3.",
     )
     add_outcome(
         outcomes,
@@ -225,7 +225,7 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
     add_outcome(
         outcomes,
         same_left_offsets and nonzero_lane_offsets,
-        "left-lane offsets",
+        "lane-centre offsets",
         "Moving vehicles use consistent non-zero lane-centre offsets.",
         "Moving vehicles do not use consistent non-zero lane-centre offsets.",
     )
@@ -245,11 +245,11 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
     )
     add_outcome(
         outcomes,
-        ego_route.path[0][1] > intersection[int(ego["intersection_start_node_idx"])][0].y
+        ego_route.path[0][1] < intersection[int(ego["intersection_start_node_idx"])][0].y
         and target_route.path[0][1] > intersection[int(target["intersection_start_node_idx"])][0].y,
-        "visual UK left-lane placement",
-        "Ego and target are placed on the intended visual lane centres for the requested CARLA-view layout.",
-        "Moving vehicles are not placed on the expected visual left-hand lanes for this Town05 layout.",
+        "visual right-hand lane placement",
+        "Ego and target are placed on the intended visual right-hand lane centres for the requested CARLA-view layout.",
+        "Moving vehicles are not placed on the expected visual right-hand lanes for this Town05 layout.",
     )
     return outcomes
 

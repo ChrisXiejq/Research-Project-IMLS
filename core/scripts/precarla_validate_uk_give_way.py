@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Pre-CARLA sanity check for the UK give-way intersection scenario.
+"""Pre-CARLA sanity check for the unsignalised give-way intersection scenario.
 
 This script intentionally avoids CARLA, TensorFlow, Gurobi, and NumPy.  It reads
 the same scenario JSON and intersection CSV used by the CARLA runner, then checks
 whether the simplified geometry is consistent with:
 
 1. unsignalised traffic control,
-2. UK left-hand lane offsets,
-3. a turning ego vehicle yielding to an oncoming straight target vehicle.
+2. conventional right-hand lane offsets,
+3. a left-turning ego vehicle yielding to an oncoming straight target vehicle.
 
 If gymnasium is installed, the same logic is also exposed through a small
 Gymnasium-compatible environment class.  The command-line validation does not
@@ -465,7 +465,7 @@ def validate_scenario(scenario_path: str, safety_time_gap_s: float = 2.0) -> Tup
     carla_params = scenario.get("carla_params", {})
     pred_params = scenario.get("prediction_params", {})
     check(str(carla_params.get("traffic_control", "")).lower() == "unsignalised", "scenario declares unsignalised traffic control")
-    check(str(carla_params.get("side_of_road", "")).lower() == "left", "scenario declares UK left-hand traffic")
+    check(str(carla_params.get("side_of_road", "")).lower() == "right", "scenario declares right-hand traffic")
     check(not bool(pred_params.get("render_traffic_lights", False)), "traffic lights are not rendered for the default predictor input")
     check(not ego.obey_traffic_lights and not target.obey_traffic_lights, "ego and target do not obey traffic-light overrides in this scenario")
     check(ego.traffic_role == "turning_give_way_vehicle", "ego is marked as the turning give-way vehicle")
@@ -482,8 +482,8 @@ def validate_scenario(scenario_path: str, safety_time_gap_s: float = 2.0) -> Tup
 
 if gym is not None and spaces is not None and np is not None:
 
-    class UKGiveWayKinematicEnv(gym.Env):
-        """Tiny Gymnasium wrapper for pre-CARLA UK give-way timing checks."""
+    class GiveWayKinematicEnv(gym.Env):
+        """Tiny Gymnasium wrapper for pre-CARLA give-way timing checks."""
 
         metadata = {"render_modes": []}
 
@@ -548,7 +548,7 @@ def run_gymnasium_check(scenario_path: str, safety_time_gap_s: float) -> Tuple[b
         messages.append("SKIP: Gymnasium is not installed; standard-library validation still ran.")
         return True, messages
 
-    env = UKGiveWayKinematicEnv(scenario_path, safety_time_gap_s)
+    env = GiveWayKinematicEnv(scenario_path, safety_time_gap_s)
     check_env(env, skip_render_check=True)
     obs, _ = env.reset(seed=0)
     no_yield_obs, no_yield_reward, no_yield_done, _, no_yield_info = env.step(0)
@@ -584,7 +584,7 @@ def run_gymnasium_check(scenario_path: str, safety_time_gap_s: float) -> Tuple[b
 
 
 def print_report(passed: Iterable[str], failed: Iterable[str], report: ConflictReport) -> None:
-    print("Pre-CARLA UK give-way validation")
+    print("Pre-CARLA give-way validation")
     print("=" * 38)
     for item in passed:
         print(f"PASS: {item}")

@@ -1,10 +1,10 @@
 {
 	"scenario_description" : {
-		"name" : "UK unsignalised turning-gives-way intersection",
-		"purpose" : "Ego is the turning vehicle in a UK left-hand-traffic layout; target is the priority oncoming straight-going vehicle.",
+                "name" : "Unsignalised left-turn-gives-way intersection",
+                "purpose" : "Ego is the turning vehicle in a conventional right-hand-traffic layout; target is the priority oncoming straight-going vehicle.",
                 "traffic_control" : "unsignalised",
-                "side_of_road" : "left",
-                "priority_rule" : "turning vehicle should give way to oncoming straight-going vehicle",
+                "side_of_road" : "right",
+                "priority_rule" : "left-turning vehicle should give way to oncoming straight-going vehicle",
                 "enforcement" : "No hard-coded yield brake is used; expected yielding comes from target prediction and SMPC collision-risk constraints."
 	},
 	"carla_params" : {
@@ -12,7 +12,7 @@
 		"weather_str"          : "ClearNoon",
 		"fps"                  : 20,
                 "intersection_csv_loc" : "intersection_01.csv",
-                "side_of_road"         : "left",
+                "side_of_road"         : "right",
                 "traffic_control"      : "unsignalised",
                 "priority_rule"        : "turning_gives_way_to_oncoming_straight"
 	},
@@ -89,8 +89,8 @@
                         "obey_traffic_lights"          : false,
 			"intersection_start_node_idx" :     2,
 			"intersection_goal_node_idx"  :     2,
-                        "start_left_offset"           :  -1.85,
-                        "goal_left_offset"            :  -1.85,
+                        "start_left_offset"           :   1.85,
+                        "goal_left_offset"            :   1.85,
 			"start_longitudinal_offset"   :   0.0,
 			"goal_longitudinal_offset"    :  25.0,
                         "nominal_speed"               :   6.0,
@@ -103,7 +103,7 @@
                         "traffic_role"                 : "turning_give_way_vehicle",
                         "obey_traffic_lights"          : false,
 			"intersection_start_node_idx" :    0,
-                        "intersection_goal_node_idx"  :    1,
+                        "intersection_goal_node_idx"  :    3,
                         "start_left_offset"           :  1.85,
                         "goal_left_offset"            :  1.85,
 			"goal_longitudinal_offset"    : 20.0,

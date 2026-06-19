@@ -1,10 +1,10 @@
-# UK Give-Way Intersection Scenario Notes
+# Give-Way Intersection Scenario Notes
 
-This note explains the current intersection scenario and the new UK give-way scenario configuration.
+This note explains the current intersection scenario and the revised give-way scenario configuration. The experiment has been simplified to a conventional right-hand-traffic setting: the ego vehicle left-turns across an oncoming straight-going target vehicle.
 
 ## 1. Is the Current Scenario Signalised?
 
-The UK give-way experiment should be treated as **unsignalised** from the controller's perspective.
+The give-way experiment should be treated as **unsignalised** from the controller's perspective.
 
 Evidence from the code:
 
@@ -34,10 +34,10 @@ The file `core/scripts/carla/scenarios/intersection_01.csv` defines four directe
 | `2` | East to west | Straight lane from east approach |
 | `3` | North to south | Straight lane from north approach |
 
-The lane layout is consistent with a **left-hand-traffic / UK-style** interpretation:
+The revised scenario uses a **right-hand-traffic** interpretation:
 
-- Eastbound traffic uses the northern lane.
-- Westbound traffic uses the southern lane.
+- Eastbound traffic uses the southern lane.
+- Westbound traffic uses the northern lane.
 - Northbound traffic uses the western lane.
 - Southbound traffic uses the eastern lane.
 
@@ -48,7 +48,7 @@ The previous main scenario, `scenario_01.json`, uses:
 | Vehicle | Route | Meaning |
 |---|---|---|
 | Target vehicle | `2 -> 2` | Oncoming straight-going vehicle |
-| Ego vehicle | `0 -> 3` | Earlier turning route, later rejected after video inspection because it appears as the wrong visual turn direction |
+| Ego vehicle | `0 -> 3` | Turning vehicle crossing the oncoming straight path |
 
 This already creates a conflict between a turning ego vehicle and a straight-going target vehicle. However, the timing was inherited from the original reproduction setting, and the target vehicle could start relatively far from the conflict region. As a result, the interaction did not always clearly show the turning vehicle yielding to the straight-going vehicle.
 
@@ -63,7 +63,7 @@ This keeps the original paper-style intersection geometry but makes the traffic-
 | Vehicle | Route | Role |
 |---|---|---|
 | Target vehicle | `2 -> 2` | Priority oncoming straight-going vehicle |
-| Ego vehicle | `0 -> 1` | Turning vehicle that should give way |
+| Ego vehicle | `0 -> 3` | Left-turning vehicle that should give way |
 
 This is intended to mimic the supervisor-style sketch:
 
@@ -72,24 +72,24 @@ This is intended to mimic the supervisor-style sketch:
                     |
                     |
 west arm  EV --->   +   <--- TV  east arm
-             right turn toward the opposite vertical exit
+             left turn across the oncoming path
 ```
 
 In code, that sketch is represented as:
 
-- EV / ego: `intersection_start_node_idx = 0`, `intersection_goal_node_idx = 1`.
-  The ego vehicle comes from the left/west approach and takes the right-turn branch in the CARLA video view.
+- EV / ego: `intersection_start_node_idx = 0`, `intersection_goal_node_idx = 3`.
+  The ego vehicle comes from the left/west approach and left-turns across the oncoming straight-going target path.
 - TV / target: `intersection_start_node_idx = 2`, `intersection_goal_node_idx = 2`.
   The target vehicle comes from the right/east approach and continues straight through the junction.
 - The moving vehicles use lane-centre-scale lateral offsets rather than the old full half-road-width offset:
-  `ego = +1.85m`, `target = -1.85m`.
+  `ego = +1.85m`, `target = +1.85m`.
   This keeps the vehicles in the intended CARLA-view lanes and avoids placing the ego on the kerb.
 
 The new scenario is explicitly documented as:
 
-- UK left-hand-traffic style.
+- Conventional right-hand-traffic style.
 - Unsignalised.
-- Turning vehicle should give way to the straight-going vehicle.
+- Left-turning vehicle should give way to the straight-going vehicle.
 
 ## 5. What Changed Compared With `scenario_01.json`?
 
@@ -98,15 +98,15 @@ The main change is the target-vehicle timing:
 | Setting | `scenario_01.json` | `scenario_uk_give_way.json` | Purpose |
 |---|---:|---:|---|
 | Target start longitudinal offset | `-15.0` | `0.0` | Bring the straight-going target closer to the conflict zone |
-| Ego route | `0 -> 3` | `0 -> 1` | Match the CARLA video view where the ego should right-turn rather than left-turn |
-| Target nominal speed | `10.0` | `6.0` | Keep the priority vehicle in the conflict zone long enough for a UK give-way interaction |
+| Ego route | `0 -> 3` | `0 -> 3` | Keep the visual left-turn branch that was clearly visible in CARLA |
+| Target nominal speed | `10.0` | `6.0` | Keep the priority vehicle in the conflict zone long enough for a give-way interaction |
 | Target init speed | `12.0` | `6.0` | Match the target's initial motion to the slower priority-vehicle timing |
 | Ego nominal speed | `10.0` | `6.0` | Make the simplified timing gate produce a clear no-yield conflict and a safe give-way alternative |
-| Moving vehicle lateral offset | `3.7` | `ego +1.85`, `target -1.85` | Place vehicles near the intended lane centres rather than on the kerb/road edge |
+| Moving vehicle lateral offset | `3.7` | `ego +1.85`, `target +1.85` | Place vehicles near the intended right-hand lane centres rather than on the kerb/road edge |
 
-The route relation is intentionally kept close to the original intersection setting, but the ego exit is changed after inspecting the CARLA video: route `0 -> 3` looked like a left turn in the recorded view, while the intended experiment needs the ego to right-turn from the left/west approach.
+The route relation is intentionally kept close to the original intersection setting. After inspecting the CARLA video, the experiment is simplified to the visual left-turn case rather than continuing to force a UK-style right-turn interpretation.
 
-The CARLA transform now uses `side_of_road="left"` and lane-centre-scale offsets. The scenario uses `1.85m` rather than the previous `3.7m` full half-road-width offset, because `3.7m` can push the vehicle to the road edge or kerb in the CARLA view.
+The CARLA transform now uses `side_of_road="right"` and lane-centre-scale offsets. The scenario uses `1.85m` rather than the previous `3.7m` full half-road-width offset, because `3.7m` can push the vehicle to the road edge or kerb in the CARLA view.
 
 ## 6. Important Limitation
 
@@ -119,9 +119,9 @@ Instead, the expected yielding behaviour should emerge from:
 - risk allocation,
 - ego control optimisation.
 
-This is useful for the dissertation because the experiment can be described as testing whether risk-aware SMPC can produce appropriate give-way behaviour in an unsignalised UK-style intersection.
+This is useful for the dissertation because the experiment can be described as testing whether risk-aware SMPC can produce appropriate give-way behaviour in an unsignalised intersection.
 
-The step-level logs now record `traffic_control`, `side_of_road`, `priority_rule`, `ego_traffic_light_state`, and whether a traffic-light stop override was applied. For the UK give-way scenario, `ego_traffic_light_forced_stop` should remain `false`; if the ego yields, that behaviour comes from the SMPC decision process.
+The step-level logs now record `traffic_control`, `side_of_road`, `priority_rule`, `ego_traffic_light_state`, and whether a traffic-light stop override was applied. For this give-way scenario, `ego_traffic_light_forced_stop` should remain `false`; if the ego yields, that behaviour comes from the SMPC decision process.
 
 ## 7. Recommended Test Command
 
@@ -221,4 +221,4 @@ Key metrics:
 
 Suggested wording:
 
-> I checked the implementation and the current agents do not obey traffic lights, so the experiment is best interpreted as an unsignalised intersection. I have therefore added a clearer UK-style give-way scenario, where the ego vehicle is the turning vehicle and the target vehicle is the priority straight-going vehicle. The aim is to test whether the risk-aware SMPC controller can generate appropriate yielding behaviour from prediction and collision-risk constraints, rather than from a hard-coded traffic-light rule.
+> I checked the implementation and the current agents do not obey traffic lights, so the experiment is best interpreted as an unsignalised intersection. I have therefore simplified the scenario to a conventional right-hand-traffic give-way case, where the ego vehicle left-turns across the priority straight-going target vehicle. The aim is to test whether the risk-aware SMPC controller can generate appropriate yielding behaviour from prediction and collision-risk constraints, rather than from a hard-coded traffic-light rule.
