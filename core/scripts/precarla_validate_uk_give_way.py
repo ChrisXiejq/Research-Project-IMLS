@@ -38,6 +38,17 @@ except Exception:  # pragma: no cover - optional dependency
 Point = Tuple[float, float]
 
 
+# Approximate CARLA vehicle footprints.  The local gate cannot query CARLA
+# blueprints, so we use conservative dimensions close to the visual models and
+# inflate them with a safety margin in the footprint-distance check.
+VEHICLE_FOOTPRINTS_M: Dict[str, Tuple[float, float]] = {
+    "vehicle.mercedes-benz.coupe": (4.70, 1.86),
+    "vehicle.audi.tt": (4.18, 1.83),
+}
+DEFAULT_VEHICLE_FOOTPRINT_M: Tuple[float, float] = (4.70, 1.90)
+FOOTPRINT_SAFETY_MARGIN_M = 0.25
+
+
 @dataclass(frozen=True)
 class Pose:
     x: float
@@ -52,6 +63,9 @@ class RouteGeometry:
     path: List[Point]
     nominal_speed: float
     obey_traffic_lights: bool
+    vehicle_type: str
+    length_m: float
+    width_m: float
 
 
 @dataclass(frozen=True)
@@ -65,6 +79,10 @@ class ConflictReport:
     time_gap_s: float
     no_yield_min_distance_m: float
     give_way_min_distance_m: float
+    no_yield_min_footprint_separation_m: float
+    give_way_min_footprint_separation_m: float
+    no_yield_footprint_collision: bool
+    give_way_footprint_collision: bool
 
 
 def load_intersection(intersection_csv: str) -> List[Tuple[Pose, Pose]]:
@@ -118,6 +136,98 @@ def path_point_at_distance(path: Sequence[Point], s: float) -> Point:
             return (a[0] + alpha * (b[0] - a[0]), a[1] + alpha * (b[1] - a[1]))
         remaining -= seg_len
     return path[-1]
+
+
+def path_pose_at_distance(path: Sequence[Point], s: float) -> Tuple[Point, float]:
+    """Return position and path heading at arc length s."""
+    if s <= 0.0:
+        a, b = path[0], path[1]
+        return path[0], math.atan2(b[1] - a[1], b[0] - a[0])
+
+    remaining = s
+    last_heading = 0.0
+    for a, b in zip(path[:-1], path[1:]):
+        seg_len = distance(a, b)
+        if seg_len <= 1e-9:
+            continue
+        last_heading = math.atan2(b[1] - a[1], b[0] - a[0])
+        if remaining <= seg_len:
+            alpha = remaining / seg_len
+            return (a[0] + alpha * (b[0] - a[0]), a[1] + alpha * (b[1] - a[1])), last_heading
+        remaining -= seg_len
+    if len(path) >= 2:
+        a, b = path[-2], path[-1]
+        last_heading = math.atan2(b[1] - a[1], b[0] - a[0])
+    return path[-1], last_heading
+
+
+def vehicle_dimensions(vehicle_type: str) -> Tuple[float, float]:
+    return VEHICLE_FOOTPRINTS_M.get(vehicle_type, DEFAULT_VEHICLE_FOOTPRINT_M)
+
+
+def rectangle_corners(center: Point, yaw: float, length: float, width: float, margin: float) -> List[Point]:
+    half_l = length / 2.0 + margin
+    half_w = width / 2.0 + margin
+    forward = (math.cos(yaw), math.sin(yaw))
+    left = (-math.sin(yaw), math.cos(yaw))
+    corners: List[Point] = []
+    for sx, sy in [(1, 1), (1, -1), (-1, -1), (-1, 1)]:
+        corners.append(
+            (
+                center[0] + sx * half_l * forward[0] + sy * half_w * left[0],
+                center[1] + sx * half_l * forward[1] + sy * half_w * left[1],
+            )
+        )
+    return corners
+
+
+def polygon_axes(poly: Sequence[Point]) -> List[Point]:
+    axes: List[Point] = []
+    for a, b in zip(poly, list(poly[1:]) + [poly[0]]):
+        edge = (b[0] - a[0], b[1] - a[1])
+        normal = (-edge[1], edge[0])
+        norm = math.hypot(normal[0], normal[1])
+        if norm > 1e-9:
+            axes.append((normal[0] / norm, normal[1] / norm))
+    return axes
+
+
+def project_polygon(poly: Sequence[Point], axis: Point) -> Tuple[float, float]:
+    vals = [p[0] * axis[0] + p[1] * axis[1] for p in poly]
+    return min(vals), max(vals)
+
+
+def polygons_intersect(poly_a: Sequence[Point], poly_b: Sequence[Point]) -> bool:
+    for axis in polygon_axes(poly_a) + polygon_axes(poly_b):
+        min_a, max_a = project_polygon(poly_a, axis)
+        min_b, max_b = project_polygon(poly_b, axis)
+        if max_a < min_b or max_b < min_a:
+            return False
+    return True
+
+
+def point_segment_distance(p: Point, a: Point, b: Point) -> float:
+    ab = (b[0] - a[0], b[1] - a[1])
+    seg_len_sq = ab[0] * ab[0] + ab[1] * ab[1]
+    if seg_len_sq <= 1e-12:
+        return distance(p, a)
+    ap = (p[0] - a[0], p[1] - a[1])
+    alpha = max(0.0, min(1.0, (ap[0] * ab[0] + ap[1] * ab[1]) / seg_len_sq))
+    proj = (a[0] + alpha * ab[0], a[1] + alpha * ab[1])
+    return distance(p, proj)
+
+
+def polygon_distance(poly_a: Sequence[Point], poly_b: Sequence[Point]) -> float:
+    if polygons_intersect(poly_a, poly_b):
+        return 0.0
+    best = float("inf")
+    edges_a = list(zip(poly_a, list(poly_a[1:]) + [poly_a[0]]))
+    edges_b = list(zip(poly_b, list(poly_b[1:]) + [poly_b[0]]))
+    for p in poly_a:
+        best = min(best, *(point_segment_distance(p, a, b) for a, b in edges_b))
+    for p in poly_b:
+        best = min(best, *(point_segment_distance(p, a, b) for a, b in edges_a))
+    return best
 
 
 def distance_along_path_to_point(path: Sequence[Point], point: Point) -> float:
@@ -225,6 +335,9 @@ def build_route_geometry(scenario: Dict, intersection: Sequence[Tuple[Pose, Pose
         path=path,
         nominal_speed=float(vehicle.get("nominal_speed", vehicle.get("init_speed", 0.0))),
         obey_traffic_lights=bool(vehicle.get("obey_traffic_lights", False)),
+        vehicle_type=str(vehicle.get("vehicle_type", "")),
+        length_m=vehicle_dimensions(str(vehicle.get("vehicle_type", "")))[0],
+        width_m=vehicle_dimensions(str(vehicle.get("vehicle_type", "")))[1],
     )
 
 
@@ -246,6 +359,30 @@ def simulate_min_distance(
         target_pos = path_point_at_distance(target_path, target_s)
         min_dist = min(min_dist, distance(ego_pos, target_pos))
     return min_dist
+
+
+def simulate_min_footprint_separation(
+    ego: RouteGeometry,
+    target: RouteGeometry,
+    ego_wait_s: float = 0.0,
+    dt: float = 0.05,
+    horizon_s: float = 8.0,
+    margin_m: float = FOOTPRINT_SAFETY_MARGIN_M,
+) -> Tuple[float, bool]:
+    min_sep = float("inf")
+    collision = False
+    for k in range(int(horizon_s / dt) + 1):
+        t = k * dt
+        ego_s = max(0.0, t - ego_wait_s) * ego.nominal_speed
+        target_s = t * target.nominal_speed
+        ego_pos, ego_yaw = path_pose_at_distance(ego.path, ego_s)
+        target_pos, target_yaw = path_pose_at_distance(target.path, target_s)
+        ego_poly = rectangle_corners(ego_pos, ego_yaw, ego.length_m, ego.width_m, margin_m)
+        target_poly = rectangle_corners(target_pos, target_yaw, target.length_m, target.width_m, margin_m)
+        sep = polygon_distance(ego_poly, target_poly)
+        min_sep = min(min_sep, sep)
+        collision = collision or sep <= 1e-9
+    return min_sep, collision
 
 
 def validate_scenario(scenario_path: str, safety_time_gap_s: float = 2.0) -> Tuple[List[str], List[str], ConflictReport]:
@@ -289,6 +426,16 @@ def validate_scenario(scenario_path: str, safety_time_gap_s: float = 2.0) -> Tup
         target.nominal_speed,
         ego_wait_s=ego_wait_s,
     )
+    no_yield_footprint_sep, no_yield_footprint_collision = simulate_min_footprint_separation(
+        ego,
+        target,
+        ego_wait_s=0.0,
+    )
+    give_way_footprint_sep, give_way_footprint_collision = simulate_min_footprint_separation(
+        ego,
+        target,
+        ego_wait_s=ego_wait_s,
+    )
 
     report = ConflictReport(
         conflict_point=conflict,
@@ -300,6 +447,10 @@ def validate_scenario(scenario_path: str, safety_time_gap_s: float = 2.0) -> Tup
         time_gap_s=time_gap,
         no_yield_min_distance_m=no_yield_min_dist,
         give_way_min_distance_m=give_way_min_dist,
+        no_yield_min_footprint_separation_m=no_yield_footprint_sep,
+        give_way_min_footprint_separation_m=give_way_footprint_sep,
+        no_yield_footprint_collision=no_yield_footprint_collision,
+        give_way_footprint_collision=give_way_footprint_collision,
     )
 
     passed: List[str] = []
@@ -322,6 +473,9 @@ def validate_scenario(scenario_path: str, safety_time_gap_s: float = 2.0) -> Tup
     check(target_arrives_first, "target reaches the conflict point before ego under nominal speeds")
     check(0.0 < time_gap < safety_time_gap_s, "nominal timing creates a meaningful give-way interaction")
     check(give_way_min_dist > no_yield_min_dist, "simple give-way delay increases the minimum separation")
+    check(no_yield_footprint_collision, "no-yield rollout creates a footprint-level conflict")
+    check(not give_way_footprint_collision, "give-way rollout avoids footprint overlap")
+    check(give_way_footprint_sep > no_yield_footprint_sep, "give-way rollout improves footprint separation")
 
     return passed, failed, report
 
@@ -338,7 +492,7 @@ if gym is not None and spaces is not None and np is not None:
             self.scenario_path = scenario_path
             self.safety_time_gap_s = safety_time_gap_s
             self.action_space = spaces.Discrete(2)  # 0: no yield, 1: give-way delay
-            self.observation_space = spaces.Box(low=-1000.0, high=1000.0, shape=(4,), dtype=np.float32)
+            self.observation_space = spaces.Box(low=-1000.0, high=1000.0, shape=(5,), dtype=np.float32)
             self._report: Optional[ConflictReport] = None
 
         def reset(self, *, seed: Optional[int] = None, options: Optional[Dict] = None):
@@ -355,17 +509,34 @@ if gym is not None and spaces is not None and np is not None:
                 if action == 0
                 else self._report.give_way_min_distance_m
             )
-            reward = min_dist
-            obs = self._observation(min_dist)
-            return obs, reward, True, False, {"min_distance_m": min_dist}
+            footprint_sep = (
+                self._report.no_yield_min_footprint_separation_m
+                if action == 0
+                else self._report.give_way_min_footprint_separation_m
+            )
+            footprint_collision = (
+                self._report.no_yield_footprint_collision
+                if action == 0
+                else self._report.give_way_footprint_collision
+            )
+            reward = footprint_sep - (10.0 if footprint_collision else 0.0)
+            obs = self._observation(min_dist, footprint_sep)
+            return obs, reward, True, False, {
+                "min_distance_m": min_dist,
+                "min_footprint_separation_m": footprint_sep,
+                "footprint_collision": footprint_collision,
+            }
 
-        def _observation(self, min_distance_m: float):
+        def _observation(self, min_distance_m: float, footprint_separation_m: Optional[float] = None):
+            if footprint_separation_m is None:
+                footprint_separation_m = self._report.no_yield_min_footprint_separation_m
             return np.array(
                 [
                     self._report.ego_ttc_s,
                     self._report.target_ttc_s,
                     self._report.time_gap_s,
                     min_distance_m,
+                    footprint_separation_m,
                 ],
                 dtype=np.float32,
             )
@@ -386,12 +557,25 @@ def run_gymnasium_check(scenario_path: str, safety_time_gap_s: float) -> Tuple[b
 
     no_yield_min = float(no_yield_info["min_distance_m"])
     give_way_min = float(give_way_info["min_distance_m"])
-    ok = bool(no_yield_done and give_way_done and give_way_min > no_yield_min)
+    no_yield_footprint_sep = float(no_yield_info["min_footprint_separation_m"])
+    give_way_footprint_sep = float(give_way_info["min_footprint_separation_m"])
+    no_yield_collision = bool(no_yield_info["footprint_collision"])
+    give_way_collision = bool(give_way_info["footprint_collision"])
+    ok = bool(
+        no_yield_done
+        and give_way_done
+        and give_way_min > no_yield_min
+        and no_yield_collision
+        and not give_way_collision
+        and give_way_footprint_sep > no_yield_footprint_sep
+    )
 
     messages.append("PASS: Gymnasium environment passes check_env")
     messages.append(f"PASS: reset observation is inside observation_space = {env.observation_space.contains(obs)}")
     messages.append(f"PASS: no-yield action min_distance = {no_yield_min:.2f} m")
     messages.append(f"PASS: give-way action min_distance = {give_way_min:.2f} m")
+    messages.append(f"PASS: no-yield footprint_collision = {no_yield_collision}, separation = {no_yield_footprint_sep:.2f} m")
+    messages.append(f"PASS: give-way footprint_collision = {give_way_collision}, separation = {give_way_footprint_sep:.2f} m")
     if ok:
         messages.append("PASS: Gymnasium rollout confirms give-way action improves minimum separation")
     else:
@@ -416,6 +600,10 @@ def print_report(passed: Iterable[str], failed: Iterable[str], report: ConflictR
     print(f"- ego_minus_target_ttc: {report.time_gap_s:.2f} s")
     print(f"- no_yield_min_distance: {report.no_yield_min_distance_m:.2f} m")
     print(f"- give_way_min_distance: {report.give_way_min_distance_m:.2f} m")
+    print(f"- no_yield_min_footprint_separation: {report.no_yield_min_footprint_separation_m:.2f} m")
+    print(f"- give_way_min_footprint_separation: {report.give_way_min_footprint_separation_m:.2f} m")
+    print(f"- no_yield_footprint_collision: {report.no_yield_footprint_collision}")
+    print(f"- give_way_footprint_collision: {report.give_way_footprint_collision}")
 
 
 def print_gymnasium_report(messages: Iterable[str]) -> None:

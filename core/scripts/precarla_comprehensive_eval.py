@@ -20,6 +20,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 from precarla_validate_uk_give_way import (
     ConflictReport,
     build_route_geometry,
+    intersection_center,
     load_intersection,
     run_gymnasium_check,
     validate_scenario,
@@ -43,6 +44,10 @@ class SweepCase:
     time_gap: float
     no_yield_min_distance: float
     give_way_min_distance: float
+    no_yield_footprint_separation: float
+    give_way_footprint_separation: float
+    no_yield_footprint_collision: bool
+    give_way_footprint_collision: bool
     status: str
 
 
@@ -128,6 +133,7 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
     intersection = load_intersection(intersection_path)
     ego_route = build_route_geometry(scenario, intersection, ego)
     target_route = build_route_geometry(scenario, intersection, target)
+    center = intersection_center(intersection)
 
     add_outcome(
         outcomes,
@@ -180,10 +186,33 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
     )
     add_outcome(
         outcomes,
+        int(ego["intersection_start_node_idx"]) == 0 and int(ego["intersection_goal_node_idx"]) == 3,
+        "diagram ego route",
+        "Ego follows the requested diagram topology: from the left/west approach, then right-turns toward the lower/south exit.",
+        "Ego does not follow the requested left-approach right-turn route 0 -> 3.",
+    )
+    add_outcome(
+        outcomes,
         int(target["intersection_start_node_idx"]) == int(target["intersection_goal_node_idx"]),
         "target straight route",
         "Target route keeps the same road arm, so it is straight-going.",
         "Target route is not straight-going.",
+    )
+    add_outcome(
+        outcomes,
+        int(target["intersection_start_node_idx"]) == 2 and int(target["intersection_goal_node_idx"]) == 2,
+        "diagram target route",
+        "Target follows the requested diagram topology: from the right/east approach, straight through the junction.",
+        "Target does not follow the requested right-approach straight route 2 -> 2.",
+    )
+    add_outcome(
+        outcomes,
+        ego_route.path[0][0] < center[0]
+        and target_route.path[0][0] > center[0]
+        and target_route.path[-1][0] < target_route.path[0][0],
+        "diagram approach directions",
+        "Ego starts to the left of the junction and target starts to the right, with the target moving westbound.",
+        "Ego/target start positions do not match the requested left-vs-right approach layout.",
     )
 
     moving = moving_vehicles(scenario)
@@ -192,12 +221,20 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
         for v in moving
     )
     positive_left_offsets = all(float(v.get("start_left_offset", 0.0)) > 0.0 for v in moving)
+    lane_center_offsets = all(1.2 <= float(v.get("start_left_offset", 0.0)) <= 2.3 for v in moving)
     add_outcome(
         outcomes,
         same_left_offsets and positive_left_offsets,
         "left-lane offsets",
         "Moving vehicles use consistent positive local-left lane offsets.",
         "Moving vehicles do not use consistent positive local-left lane offsets.",
+    )
+    add_outcome(
+        outcomes,
+        lane_center_offsets,
+        "lane-centre offset magnitude",
+        "Moving vehicle offsets are near lane-centre scale, avoiding the road-edge/kerb placement caused by full half-road-width offsets.",
+        "Moving vehicle offsets are too small or too large for the intended lane centre; this can place vehicles on lane markings or kerbs.",
     )
     add_warning(
         outcomes,
@@ -242,10 +279,24 @@ def nominal_timing_tests(report: ConflictReport) -> List[TestOutcome]:
     )
     add_warning(
         outcomes,
-        report.no_yield_min_distance_m < 2.5,
+        report.no_yield_footprint_collision,
         "nominal conflict is non-trivial",
-        f"No-yield min distance is tight enough to be a useful test: {report.no_yield_min_distance_m:.2f}m.",
-        f"No-yield min distance may be too large to stress SMPC: {report.no_yield_min_distance_m:.2f}m.",
+        f"No-yield inflated vehicle footprints overlap; center distance is {report.no_yield_min_distance_m:.2f}m.",
+        f"No-yield inflated footprints do not overlap; center distance is {report.no_yield_min_distance_m:.2f}m.",
+    )
+    add_outcome(
+        outcomes,
+        not report.give_way_footprint_collision,
+        "nominal give-way footprint safety",
+        f"Give-way avoids inflated footprint overlap with {report.give_way_min_footprint_separation_m:.2f}m separation.",
+        "Give-way still has inflated footprint overlap.",
+    )
+    add_outcome(
+        outcomes,
+        report.give_way_min_footprint_separation_m > report.no_yield_min_footprint_separation_m,
+        "nominal footprint-separation benefit",
+        f"Give-way improves footprint separation from {report.no_yield_min_footprint_separation_m:.2f}m to {report.give_way_min_footprint_separation_m:.2f}m.",
+        f"Give-way does not improve footprint separation: {report.no_yield_min_footprint_separation_m:.2f}m -> {report.give_way_min_footprint_separation_m:.2f}m.",
     )
     return outcomes
 
@@ -286,8 +337,12 @@ def speed_sweep_tests(
             target_first_count += int(report.target_arrives_first)
             is_risky = report.target_arrives_first and 0.0 < report.time_gap_s < safety_gap
             improved = report.give_way_min_distance_m > report.no_yield_min_distance_m
+            footprint_improved = (
+                report.give_way_min_footprint_separation_m > report.no_yield_min_footprint_separation_m
+                and not report.give_way_footprint_collision
+            )
             risky_cases += int(is_risky)
-            risky_improved += int(is_risky and improved)
+            risky_improved += int(is_risky and improved and footprint_improved)
             cases.append(
                 SweepCase(
                     ego_speed=ego_speed,
@@ -298,7 +353,11 @@ def speed_sweep_tests(
                     time_gap=report.time_gap_s,
                     no_yield_min_distance=report.no_yield_min_distance_m,
                     give_way_min_distance=report.give_way_min_distance_m,
-                    status="PASS" if (not is_risky or improved) else "FAIL",
+                    no_yield_footprint_separation=report.no_yield_min_footprint_separation_m,
+                    give_way_footprint_separation=report.give_way_min_footprint_separation_m,
+                    no_yield_footprint_collision=report.no_yield_footprint_collision,
+                    give_way_footprint_collision=report.give_way_footprint_collision,
+                    status="PASS" if (not is_risky or (improved and footprint_improved)) else "FAIL",
                 )
             )
 
@@ -340,6 +399,10 @@ def safety_gap_tests(
                 time_gap=report.time_gap_s,
                 no_yield_min_distance=report.no_yield_min_distance_m,
                 give_way_min_distance=report.give_way_min_distance_m,
+                no_yield_footprint_separation=report.no_yield_min_footprint_separation_m,
+                give_way_footprint_separation=report.give_way_min_footprint_separation_m,
+                no_yield_footprint_collision=report.no_yield_footprint_collision,
+                give_way_footprint_collision=report.give_way_footprint_collision,
                 status="PASS",
             )
         )
@@ -392,18 +455,28 @@ def write_reports(
         f.write(f"- Ego minus target TTC: `{nominal_report.time_gap_s:.2f}s`\n")
         f.write(f"- No-yield min distance: `{nominal_report.no_yield_min_distance_m:.2f}m`\n")
         f.write(f"- Give-way min distance: `{nominal_report.give_way_min_distance_m:.2f}m`\n\n")
+        f.write(f"- No-yield footprint collision: `{nominal_report.no_yield_footprint_collision}`\n")
+        f.write(f"- Give-way footprint collision: `{nominal_report.give_way_footprint_collision}`\n")
+        f.write(f"- No-yield footprint separation: `{nominal_report.no_yield_min_footprint_separation_m:.2f}m`\n")
+        f.write(f"- Give-way footprint separation: `{nominal_report.give_way_min_footprint_separation_m:.2f}m`\n\n")
         f.write("## Speed Sweep\n\n")
-        f.write("| Ego Speed | Target Speed | Time Gap | No-Yield Min Dist | Give-Way Min Dist | Status |\n")
-        f.write("|---:|---:|---:|---:|---:|---|\n")
+        f.write("| Ego Speed | Target Speed | Time Gap | No-Yield Center | Give-Way Center | No-Yield Footprint Collision | Give-Way Footprint Collision | Give-Way Footprint Sep | Status |\n")
+        f.write("|---:|---:|---:|---:|---:|---|---|---:|---|\n")
         for case in speed_cases:
             f.write(
                 f"| {case.ego_speed:.1f} | {case.target_speed:.1f} | {case.time_gap:.2f} | "
-                f"{case.no_yield_min_distance:.2f} | {case.give_way_min_distance:.2f} | {case.status} |\n"
+                f"{case.no_yield_min_distance:.2f} | {case.give_way_min_distance:.2f} | "
+                f"{case.no_yield_footprint_collision} | {case.give_way_footprint_collision} | "
+                f"{case.give_way_footprint_separation:.2f} | {case.status} |\n"
             )
         f.write("\n## Safety Gap Sweep\n\n")
-        f.write("| Safety Gap | No-Yield Min Dist | Give-Way Min Dist |\n|---:|---:|---:|\n")
+        f.write("| Safety Gap | No-Yield Center | Give-Way Center | Give-Way Footprint Collision | Give-Way Footprint Sep |\n|---:|---:|---:|---|---:|\n")
         for case in gap_cases:
-            f.write(f"| {case.safety_gap:.1f} | {case.no_yield_min_distance:.2f} | {case.give_way_min_distance:.2f} |\n")
+            f.write(
+                f"| {case.safety_gap:.1f} | {case.no_yield_min_distance:.2f} | "
+                f"{case.give_way_min_distance:.2f} | {case.give_way_footprint_collision} | "
+                f"{case.give_way_footprint_separation:.2f} |\n"
+            )
     return json_path, md_path
 
 

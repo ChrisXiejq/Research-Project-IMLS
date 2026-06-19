@@ -65,6 +65,27 @@ This keeps the original paper-style intersection geometry but makes the traffic-
 | Target vehicle | `2 -> 2` | Priority oncoming straight-going vehicle |
 | Ego vehicle | `0 -> 3` | Turning vehicle that should give way |
 
+This is intended to mimic the supervisor-style sketch:
+
+```text
+                 north arm
+                    |
+                    |
+west arm  EV --->   +   <--- TV  east arm
+             right turn |
+                       v
+                  south arm
+```
+
+In code, that sketch is represented as:
+
+- EV / ego: `intersection_start_node_idx = 0`, `intersection_goal_node_idx = 3`.
+  The ego vehicle comes from the left/west approach and right-turns toward the lower/south exit.
+- TV / target: `intersection_start_node_idx = 2`, `intersection_goal_node_idx = 2`.
+  The target vehicle comes from the right/east approach and continues straight through the junction.
+- Both moving vehicles use `start_left_offset = 1.85` and `goal_left_offset = 1.85`.
+  With `side_of_road = "left"`, this places each vehicle on the visually left-hand lane for its own travel direction.
+
 The new scenario is explicitly documented as:
 
 - UK left-hand-traffic style.
@@ -81,10 +102,11 @@ The main change is the target-vehicle timing:
 | Target nominal speed | `10.0` | `5.0` | Keep the priority vehicle in the conflict zone long enough for a UK give-way interaction |
 | Target init speed | `12.0` | `5.0` | Match the target's initial motion to the slower priority-vehicle timing |
 | Ego nominal speed | `10.0` | `8.0` | Keep the turning ego active enough that it must plan around the oncoming vehicle |
+| Moving vehicle lateral offset | `3.7` | `1.85` | Place vehicles near the lane centre rather than on the kerb/road edge |
 
 The route relation is intentionally kept similar to the original scenario so that the new experiment remains close to the paper reproduction setting while becoming more appropriate for a UK give-way interpretation.
 
-The CARLA transform now uses `side_of_road="left"` to place positive lateral offsets on the visually left-hand lane in Town05. This matters because the legacy `yaw - pi/2` offset placed vehicles on the visually right-hand lane for this intersection.
+The CARLA transform now uses `side_of_road="left"` to place positive lateral offsets on the visually left-hand lane in Town05. The scenario uses `1.85m` rather than the previous `3.7m` full half-road-width offset, because `3.7m` can push the vehicle to the road edge or kerb in the CARLA view.
 
 ## 6. Important Limitation
 
@@ -121,6 +143,8 @@ For a more complete local gate before using CARLA, run:
 
 This writes detailed JSON and Markdown reports to `core/results/precarla_comprehensive_eval/`. The comprehensive evaluation checks the base scenario, Gymnasium API compliance, nominal conflict timing, speed perturbations, and safety-gap sensitivity. The CARLA run should only be started when the comprehensive gate has no `FAIL` outcomes.
 
+The Python/Gymnasium gate is footprint-aware. It uses conservative CARLA-like rectangles for the moving vehicle body, inflates them with a small safety margin, and then checks for oriented-rectangle overlap. This matters because two vehicle centres can be several metres apart while their bodies still overlap visually in CARLA.
+
 The same script can still be run without the virtual environment by adding `--skip_gym_check`; that mode uses only the Python standard library:
 
 ```bash
@@ -134,8 +158,10 @@ This script reads the same `scenario_uk_give_way.json` and `intersection_01.csv`
 - ego is the turning give-way vehicle,
 - target is the priority oncoming straight vehicle,
 - target reaches the conflict point before ego,
-- a simple give-way delay increases the minimum separation.
-- the Gymnasium rollout confirms that the give-way action improves minimum separation compared with the no-yield action.
+- a simple give-way delay increases the centre-point minimum separation,
+- the no-yield rollout creates an inflated-footprint conflict,
+- the give-way rollout avoids inflated-footprint overlap,
+- the Gymnasium rollout confirms that the give-way action improves both centre-point distance and footprint separation compared with the no-yield action.
 
 This is not a replacement for CARLA, MultiPath, or SMPC. It is a fast sanity check to confirm that the experimental setup is geometrically and behaviourally meaningful before running the expensive CARLA simulation.
 
