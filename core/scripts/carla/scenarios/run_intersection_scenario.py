@@ -112,6 +112,9 @@ class VehicleParams:
     smpc_config : str = "full" # "var_risk", "open_loop", "fixed_risk"
     solver_backend : str = "gurobi" # "gurobi" or "ipopt_approx"
     risk_profile : str = "upstream_code" # "upstream_code" or "paper_eps_002"
+    collision_d_min : float = 1.5
+    collision_ellipse_half_length : float = 3.8
+    collision_ellipse_half_width : float = 1.8
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way
@@ -185,9 +188,12 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             N_modes=vehicle_params.num_modes,
                             nominal_speed_mps=vehicle_params.nominal_speed,
                             smpc_config=vehicle_params.smpc_config.split("_OAinner")[0],
-                            OAIA=True,
+                            CAIA=True,
                             n_tv_max=n_tv_max,
-                            risk_profile=vehicle_params.risk_profile)
+                            risk_profile=vehicle_params.risk_profile,
+                            collision_d_min=vehicle_params.collision_d_min,
+                            collision_ellipse_half_length=vehicle_params.collision_ellipse_half_length,
+                            collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -198,7 +204,10 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             obca=True,
                             obca_mode=int(vehicle_params.smpc_config.split("_obca")[0][-1]),
                             n_tv_max=n_tv_max,
-                            risk_profile=vehicle_params.risk_profile)
+                            risk_profile=vehicle_params.risk_profile,
+                            collision_d_min=vehicle_params.collision_d_min,
+                            collision_ellipse_half_length=vehicle_params.collision_ellipse_half_length,
+                            collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -207,7 +216,10 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             nominal_speed_mps=vehicle_params.nominal_speed,
                             smpc_config=vehicle_params.smpc_config,
                             n_tv_max=n_tv_max,
-                            risk_profile=vehicle_params.risk_profile)
+                            risk_profile=vehicle_params.risk_profile,
+                            collision_d_min=vehicle_params.collision_d_min,
+                            collision_ellipse_half_length=vehicle_params.collision_ellipse_half_length,
+                            collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 

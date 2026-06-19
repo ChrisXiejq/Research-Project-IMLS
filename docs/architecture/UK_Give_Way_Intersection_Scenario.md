@@ -103,6 +103,7 @@ The main change is the target-vehicle timing:
 | Target init speed | `12.0` | `6.0` | Match the target's initial motion to the slower priority-vehicle timing |
 | Ego nominal speed | `10.0` | `6.0` | Make the simplified timing gate produce a clear no-yield conflict and a safe give-way alternative |
 | Moving vehicle lateral offset | `3.7` | `ego +1.85`, `target +1.85` | Place vehicles near the intended right-hand lane centres rather than on the kerb/road edge |
+| Ego SMPC collision envelope | upstream hard-coded ellipse | `half_length=3.8m`, `half_width=1.8m`, `d_min=1.5m` | Make the chance-constraint vehicle body approximation more conservative than the CARLA-like footprint check |
 
 The route relation is intentionally kept close to the original intersection setting. After inspecting the CARLA video, the experiment is simplified to the visual left-turn case rather than continuing to force a UK-style right-turn interpretation.
 
@@ -141,7 +142,7 @@ For a more complete local gate before using CARLA, run:
 .venv-precarla/bin/python core/scripts/precarla_comprehensive_eval.py
 ```
 
-This writes detailed JSON and Markdown reports to `core/results/precarla_comprehensive_eval/`. The comprehensive evaluation checks the base scenario, Gymnasium API compliance, nominal conflict timing, speed perturbations, and safety-gap sensitivity. The CARLA run should only be started when the comprehensive gate has no `FAIL` outcomes.
+This writes detailed JSON and Markdown reports to `core/results/precarla_comprehensive_eval/`. The comprehensive evaluation checks the base scenario, Gymnasium API compliance, nominal conflict timing, speed perturbations, safety-gap sensitivity, and whether the SMPC collision envelope covers the conservative CARLA-like vehicle footprint. The CARLA run should only be started when the comprehensive gate has no `FAIL` outcomes.
 
 The Python/Gymnasium gate is footprint-aware. It uses conservative CARLA-like rectangles for the moving vehicle body, inflates them with a small safety margin, and then checks for oriented-rectangle overlap. This matters because two vehicle centres can be several metres apart while their bodies still overlap visually in CARLA.
 
@@ -154,7 +155,7 @@ python3 core/scripts/precarla_validate_uk_give_way.py --skip_gym_check
 This script reads the same `scenario_uk_give_way.json` and `intersection_01.csv` files as the CARLA experiment. It checks the scenario semantics, runs a simplified kinematic timing test, and, when Gymnasium is installed, validates the simplified environment with Gymnasium's `check_env`. The expected result is that:
 
 - the scenario is declared `unsignalised`,
-- the side of road is `left`,
+- the side of road is `right`,
 - ego is the turning give-way vehicle,
 - target is the priority oncoming straight vehicle,
 - target reaches the conflict point before ego,

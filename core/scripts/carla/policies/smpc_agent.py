@@ -43,6 +43,9 @@ class SMPCAgent(object):
                  fps=5,
                  n_tv_max=None,
                  risk_profile="upstream_code",
+                 collision_d_min=1.5,
+                 collision_ellipse_half_length=3.8,
+                 collision_ellipse_half_width=1.8,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -64,7 +67,16 @@ class SMPCAgent(object):
         self.time=0
         self.t_ref=0
         self.fps=fps
-        self.d_min=1.0
+        self.d_min=float(collision_d_min)
+        self.collision_ellipse_half_length=float(collision_ellipse_half_length)
+        self.collision_ellipse_half_width=float(collision_ellipse_half_width)
+        if self.d_min < 0.0:
+            raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
+        if self.collision_ellipse_half_length <= 0.0 or self.collision_ellipse_half_width <= 0.0:
+            raise ValueError(
+                "collision_ellipse_half_length and collision_ellipse_half_width must be positive, "
+                f"got {self.collision_ellipse_half_length}, {self.collision_ellipse_half_width}"
+            )
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
         self.risk_profile = risk_profile
@@ -246,6 +258,11 @@ class SMPCAgent(object):
             "vehicle_type": self.vehicle.type_id,
             "lf": self.lf,
             "lr": self.lr,
+            "collision_envelope": {
+                "d_min": self.d_min,
+                "ellipse_half_length": self.collision_ellipse_half_length,
+                "ellipse_half_width": self.collision_ellipse_half_width,
+            },
             "smpc": {
                 "class": type(self.SMPC).__name__,
                 "N": getattr(self.SMPC, "N", None),
@@ -568,19 +585,21 @@ class SMPCAgent(object):
 
             tv_theta=[[np.arctan2(np.diff(target_vehicle_gmm_preds[0][k][j,:,1]), np.diff(target_vehicle_gmm_preds[0][k][j,:,0])) for j in range(self.N_modes)] for k in range(N_TV)]
             tv_R=[[[np.array([[np.cos(tv_theta[k][j][i]), np.sin(tv_theta[k][j][i])],[-np.sin(tv_theta[k][j][i]), np.cos(tv_theta[k][j][i])]]) for i in range(self.N-1)] for j in range(self.N_modes)] for k in range(N_TV)]
+            collision_Q=np.array([
+                [1.0 / (self.collision_ellipse_half_length + self.d_min) ** 2, 0.0],
+                [0.0, 1.0 / (self.collision_ellipse_half_width + self.d_min) ** 2],
+            ])
             if self.CA_inner_approx:
-                tv_Q=np.array([[1./(3.6+self.d_min)**2, 0.],[0., 1./(1.2+self.d_min)**2]])
-                tv_shape_matrices=[[[ tv_R[k][j][i].T@tv_Q@tv_R[k][j][i] for i in range(self.N-1)] for j in range(self.N_modes)] for k in range(N_TV)]
+                tv_shape_matrices=[[[ tv_R[k][j][i].T@collision_Q@tv_R[k][j][i] for i in range(self.N-1)] for j in range(self.N_modes)] for k in range(N_TV)]
             elif not self.obca_flag:
-                v_Q=np.array([[1./(2.1)**2, 0.],[0., 1./(1.1)**2]])
                 tv_shape_matrices=[[[ np.identity(2) for i in range(self.N-1)] for j in range(self.N_modes)] for k in range(N_TV)]
                 for k in range(N_TV):
                     for j in range(self.N_modes):
                         for i in range(self.N-1):
-                            m_eval, m_evec= np.linalg.eigh(Rs_ev[i].T@v_Q@Rs_ev[i])
+                            m_eval, m_evec= np.linalg.eigh(Rs_ev[i].T@collision_Q@Rs_ev[i])
                             m_sqrt=m_evec@np.diag(np.sqrt(m_eval))@m_evec.T
                             m_sqrt_inv=m_evec@np.diag(np.sqrt(m_eval)**(-1))@m_evec.T
-                            s_eval, s_evec= np.linalg.eigh(m_sqrt_inv@tv_R[k][j][i].T@v_Q@tv_R[k][j][i]@m_sqrt_inv)
+                            s_eval, s_evec= np.linalg.eigh(m_sqrt_inv@tv_R[k][j][i].T@collision_Q@tv_R[k][j][i]@m_sqrt_inv)
                             temp=s_evec@np.diag(np.power(np.sqrt(s_eval)**(-1)+1., 2)**(-1))@s_evec.T
                             tv_shape_matrices[k][j][i]=m_sqrt@temp@m_sqrt
             else:
@@ -631,6 +650,11 @@ class SMPCAgent(object):
                     "risk_profile": self.risk_profile,
                     "tight": getattr(self.SMPC, "tight", None),
                     "target_prob": getattr(self.SMPC, "target_prob", None),
+                },
+                "collision_envelope": {
+                    "d_min": self.d_min,
+                    "ellipse_half_length": self.collision_ellipse_half_length,
+                    "ellipse_half_width": self.collision_ellipse_half_width,
                 },
                 "vehicle_state": {
                     "x": x,

@@ -19,11 +19,13 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 from precarla_validate_uk_give_way import (
     ConflictReport,
+    FOOTPRINT_SAFETY_MARGIN_M,
     build_route_geometry,
     intersection_center,
     load_intersection,
     run_gymnasium_check,
     validate_scenario,
+    vehicle_dimensions,
 )
 
 
@@ -250,6 +252,41 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
         "visual right-hand lane placement",
         "Ego and target are placed on the intended visual right-hand lane centres for the requested CARLA-view layout.",
         "Moving vehicles are not placed on the expected visual right-hand lanes for this Town05 layout.",
+    )
+    return outcomes
+
+
+def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
+    outcomes: List[TestOutcome] = []
+    ego = get_vehicle(scenario, "ego")
+    length_m, width_m = vehicle_dimensions(str(ego.get("vehicle_type", "")))
+    required_half_length = 0.5 * length_m + FOOTPRINT_SAFETY_MARGIN_M
+    required_half_width = 0.5 * width_m + FOOTPRINT_SAFETY_MARGIN_M
+    half_length = float(ego.get("collision_ellipse_half_length", 0.0))
+    half_width = float(ego.get("collision_ellipse_half_width", 0.0))
+    d_min = float(ego.get("collision_d_min", 0.0))
+
+    add_outcome(
+        outcomes,
+        half_length >= required_half_length and half_width >= required_half_width,
+        "SMPC footprint envelope covers CARLA-like vehicle body",
+        (
+            f"SMPC envelope half axes ({half_length:.2f}m, {half_width:.2f}m) cover "
+            f"the inflated {ego.get('vehicle_type')} footprint requirement "
+            f"({required_half_length:.2f}m, {required_half_width:.2f}m)."
+        ),
+        (
+            f"SMPC envelope half axes ({half_length:.2f}m, {half_width:.2f}m) are smaller "
+            f"than the inflated {ego.get('vehicle_type')} footprint requirement "
+            f"({required_half_length:.2f}m, {required_half_width:.2f}m)."
+        ),
+    )
+    add_outcome(
+        outcomes,
+        d_min >= 1.0,
+        "SMPC collision margin",
+        f"SMPC collision margin is conservative for the CARLA sanity gate: d_min={d_min:.2f}m.",
+        f"SMPC collision margin is too small for this CARLA sanity gate: d_min={d_min:.2f}m.",
     )
     return outcomes
 
@@ -516,6 +553,7 @@ def main() -> int:
 
     outcomes: List[TestOutcome] = []
     outcomes.extend(semantic_and_geometry_tests(args.scenario, scenario))
+    outcomes.extend(controller_envelope_tests(scenario))
     outcomes.extend(nominal_timing_tests(nominal_report))
     outcomes.extend(gymnasium_tests(args.scenario, args.safety_gap_s))
 
