@@ -125,6 +125,12 @@ class VehicleParams:
     yield_hold_distance : float = 8.0
     yield_release_time : float = 0.3
     yield_steer_damping : float = 0.25
+    yield_recovery_enabled : bool = True
+    yield_recovery_steps : int = 240
+    yield_recovery_regen_period : int = 2
+    yield_recovery_max_lateral_error : float = 12.0
+    yield_recovery_speed : float = 3.0
+    yield_recovery_accel : float = 1.0
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way
@@ -213,7 +219,13 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             yield_activation_distance=vehicle_params.yield_activation_distance,
                             yield_hold_distance=vehicle_params.yield_hold_distance,
                             yield_release_time=vehicle_params.yield_release_time,
-                            yield_steer_damping=vehicle_params.yield_steer_damping)
+                            yield_steer_damping=vehicle_params.yield_steer_damping,
+                            yield_recovery_enabled=vehicle_params.yield_recovery_enabled,
+                            yield_recovery_steps=vehicle_params.yield_recovery_steps,
+                            yield_recovery_regen_period=vehicle_params.yield_recovery_regen_period,
+                            yield_recovery_max_lateral_error=vehicle_params.yield_recovery_max_lateral_error,
+                            yield_recovery_speed=vehicle_params.yield_recovery_speed,
+                            yield_recovery_accel=vehicle_params.yield_recovery_accel)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -237,7 +249,13 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             yield_activation_distance=vehicle_params.yield_activation_distance,
                             yield_hold_distance=vehicle_params.yield_hold_distance,
                             yield_release_time=vehicle_params.yield_release_time,
-                            yield_steer_damping=vehicle_params.yield_steer_damping)
+                            yield_steer_damping=vehicle_params.yield_steer_damping,
+                            yield_recovery_enabled=vehicle_params.yield_recovery_enabled,
+                            yield_recovery_steps=vehicle_params.yield_recovery_steps,
+                            yield_recovery_regen_period=vehicle_params.yield_recovery_regen_period,
+                            yield_recovery_max_lateral_error=vehicle_params.yield_recovery_max_lateral_error,
+                            yield_recovery_speed=vehicle_params.yield_recovery_speed,
+                            yield_recovery_accel=vehicle_params.yield_recovery_accel)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -259,7 +277,13 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             yield_activation_distance=vehicle_params.yield_activation_distance,
                             yield_hold_distance=vehicle_params.yield_hold_distance,
                             yield_release_time=vehicle_params.yield_release_time,
-                            yield_steer_damping=vehicle_params.yield_steer_damping)
+                            yield_steer_damping=vehicle_params.yield_steer_damping,
+                            yield_recovery_enabled=vehicle_params.yield_recovery_enabled,
+                            yield_recovery_steps=vehicle_params.yield_recovery_steps,
+                            yield_recovery_regen_period=vehicle_params.yield_recovery_regen_period,
+                            yield_recovery_max_lateral_error=vehicle_params.yield_recovery_max_lateral_error,
+                            yield_recovery_speed=vehicle_params.yield_recovery_speed,
+                            yield_recovery_accel=vehicle_params.yield_recovery_accel)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 

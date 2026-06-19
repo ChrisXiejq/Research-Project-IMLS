@@ -109,6 +109,7 @@ This config currently owns the main fine-tuning knobs:
 - `collision_ellipse_half_width`,
 - `reference_regen_max_lateral_error`,
 - yield-stop supervisor parameters (`yield_stop_*`),
+- post-yield recovery parameters (`yield_recovery_*`),
 - post-CARLA gate thresholds used to judge the result.
 
 `run_all_scenarios.py` automatically applies the scenario-level `tuning_config` path unless `--no_tuning_config` is provided. Every batch result writes `applied_tuning_configs.json`, and every subrun directory writes `fine_tune_config.json`, so each CARLA rollout can be traced back to the exact parameter config used.
@@ -128,6 +129,7 @@ The main change is the target-vehicle timing:
 | Ego SMPC collision envelope | upstream hard-coded ellipse | `half_length=3.8m`, `half_width=1.8m`, `d_min=0.5m` | Keep the chance-constraint vehicle body approximation conservative while reducing the over-yielding seen with `d_min=1.0m` and `d_min=1.5m` |
 | SMPC reference-regeneration guard | `1.5m` internal default | `1.5m` | Safety-first setting after `2.5m` and `4.0m` allowed unsafe conflict-zone behaviour in CARLA |
 | Ego yield-stop supervisor | not present | enabled, `yield_stop_speed=0.2m/s` | Permit the turning ego to slow almost to a stop while the straight-going target clears the conflict zone, instead of forcing continuous turn tracking |
+| Ego post-yield recovery | not present | enabled, `yield_recovery_speed=3.0m/s` | After the priority target clears the conflict zone, temporarily relax reference regeneration and resume the turn instead of remaining stuck near the yield point |
 
 The route relation is intentionally kept close to the original intersection setting. After inspecting the CARLA video, the experiment is simplified to the visual left-turn case rather than continuing to force a UK-style right-turn interpretation.
 
@@ -135,7 +137,7 @@ The CARLA transform now uses `side_of_road="right"` and lane-centre-scale offset
 
 ## 6. Important Limitation
 
-The scenario configuration alone does **not** hard-code a traffic-light rule. The controller does include a safety supervisor for this unsignalised give-way experiment: if the straight-going target is predicted to occupy the conflict zone while ego approaches it, the ego may brake to a near stop and damp steering until the target clears.
+The scenario configuration alone does **not** hard-code a traffic-light rule. The controller does include a safety supervisor for this unsignalised give-way experiment: if the straight-going target is predicted to occupy the conflict zone while ego approaches it, the ego may brake to a near stop and damp steering until the target clears. After that clearance, a bounded post-yield recovery window lets the ego regenerate a local reference from its stopped pose and resume the turn.
 
 Instead, the expected yielding behaviour should emerge from:
 
@@ -144,6 +146,7 @@ Instead, the expected yielding behaviour should emerge from:
 - risk allocation,
 - ego control optimisation,
 - the yield-stop supervisor that preserves the right-of-way rule when the optimiser would otherwise keep moving through the turn.
+- the post-yield recovery supervisor that prevents a safe near-stop yield from becoming a deadlock.
 
 This is useful for the dissertation because the experiment can be described as testing whether risk-aware SMPC, with a minimal rule-preserving safety layer, can produce appropriate give-way behaviour in an unsignalised intersection.
 

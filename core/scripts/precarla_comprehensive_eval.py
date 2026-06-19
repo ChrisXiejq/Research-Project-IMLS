@@ -274,6 +274,10 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
     yield_stop_decel = float(ego.get("yield_stop_decel", 0.0))
     yield_conflict_radius = float(ego.get("yield_conflict_radius", 0.0))
     yield_steer_damping = float(ego.get("yield_steer_damping", -1.0))
+    yield_recovery_enabled = bool(ego.get("yield_recovery_enabled", False))
+    yield_recovery_speed = float(ego.get("yield_recovery_speed", 0.0))
+    yield_recovery_max_lateral_error = float(ego.get("yield_recovery_max_lateral_error", 0.0))
+    yield_recovery_regen_period = int(ego.get("yield_recovery_regen_period", 0))
 
     add_outcome(
         outcomes,
@@ -343,6 +347,27 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
         (
             f"Yield-stop geometry parameters are invalid: conflict_radius={yield_conflict_radius:.2f}m, "
             f"steer_damping={yield_steer_damping:.2f}."
+        ),
+    )
+    add_outcome(
+        outcomes,
+        (
+            yield_recovery_enabled
+            and yield_recovery_speed > yield_stop_speed
+            and yield_recovery_max_lateral_error >= reference_regen_guard
+            and yield_recovery_regen_period > 0
+        ),
+        "SMPC post-yield recovery supervisor",
+        (
+            f"Post-yield recovery is enabled with recovery_speed={yield_recovery_speed:.2f}m/s, "
+            f"recovery_guard={yield_recovery_max_lateral_error:.2f}m, "
+            f"regen_period={yield_recovery_regen_period}."
+        ),
+        (
+            f"Post-yield recovery is not configured consistently: enabled={yield_recovery_enabled}, "
+            f"recovery_speed={yield_recovery_speed:.2f}m/s, stop_speed={yield_stop_speed:.2f}m/s, "
+            f"recovery_guard={yield_recovery_max_lateral_error:.2f}m, "
+            f"reference_guard={reference_regen_guard:.2f}m, regen_period={yield_recovery_regen_period}."
         ),
     )
     return outcomes

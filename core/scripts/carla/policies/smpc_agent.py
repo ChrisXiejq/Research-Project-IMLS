@@ -56,6 +56,12 @@ class SMPCAgent(object):
                  yield_hold_distance=8.0,
                  yield_release_time=0.3,
                  yield_steer_damping=0.25,
+                 yield_recovery_enabled=True,
+                 yield_recovery_steps=240,
+                 yield_recovery_regen_period=2,
+                 yield_recovery_max_lateral_error=12.0,
+                 yield_recovery_speed=3.0,
+                 yield_recovery_accel=1.0,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -90,6 +96,12 @@ class SMPCAgent(object):
         self.yield_hold_distance = float(yield_hold_distance)
         self.yield_release_time = float(yield_release_time)
         self.yield_steer_damping = float(yield_steer_damping)
+        self.yield_recovery_enabled = bool(yield_recovery_enabled)
+        self.yield_recovery_steps = int(yield_recovery_steps)
+        self.yield_recovery_regen_period = int(yield_recovery_regen_period)
+        self.yield_recovery_max_lateral_error = float(yield_recovery_max_lateral_error)
+        self.yield_recovery_speed = float(yield_recovery_speed)
+        self.yield_recovery_accel = float(yield_recovery_accel)
         if self.d_min < 0.0:
             raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
         if self.collision_ellipse_half_length <= 0.0 or self.collision_ellipse_half_width <= 0.0:
@@ -108,6 +120,21 @@ class SMPCAgent(object):
             raise ValueError(f"yield_conflict_radius must be positive, got {self.yield_conflict_radius}")
         if not 0.0 <= self.yield_steer_damping <= 1.0:
             raise ValueError(f"yield_steer_damping must be in [0, 1], got {self.yield_steer_damping}")
+        if self.yield_recovery_steps < 0:
+            raise ValueError(f"yield_recovery_steps must be non-negative, got {self.yield_recovery_steps}")
+        if self.yield_recovery_regen_period <= 0:
+            raise ValueError(
+                f"yield_recovery_regen_period must be positive, got {self.yield_recovery_regen_period}"
+            )
+        if self.yield_recovery_max_lateral_error < self.reference_regen_max_lateral_error:
+            raise ValueError(
+                "yield_recovery_max_lateral_error must be >= reference_regen_max_lateral_error, "
+                f"got {self.yield_recovery_max_lateral_error} < {self.reference_regen_max_lateral_error}"
+            )
+        if self.yield_recovery_speed < self.yield_stop_speed:
+            raise ValueError(
+                f"yield_recovery_speed must be >= yield_stop_speed, got {self.yield_recovery_speed}"
+            )
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
         self.risk_profile = risk_profile
@@ -137,6 +164,9 @@ class SMPCAgent(object):
         self.control_prev = np.zeros((2,1))
         self.prev_opt=False
         self.prev_nom_inputs=[]
+        self._yield_stop_seen = False
+        self._yield_stop_active_prev = False
+        self._yield_recovery_steps_remaining = 0
         self.reference_regeneration()
 
         self.warm_start={}
@@ -306,6 +336,12 @@ class SMPCAgent(object):
                 "hold_distance": self.yield_hold_distance,
                 "release_time": self.yield_release_time,
                 "steer_damping": self.yield_steer_damping,
+                "recovery_enabled": self.yield_recovery_enabled,
+                "recovery_steps": self.yield_recovery_steps,
+                "recovery_regen_period": self.yield_recovery_regen_period,
+                "recovery_max_lateral_error": self.yield_recovery_max_lateral_error,
+                "recovery_speed": self.yield_recovery_speed,
+                "recovery_accel": self.yield_recovery_accel,
             },
             "smpc": {
                 "class": type(self.SMPC).__name__,
@@ -727,18 +763,39 @@ class SMPCAgent(object):
                 "forced_reference_linearization": False,
                 "skip_reason": None,
                 "reference_regen_max_lateral_error": self.reference_regen_max_lateral_error,
+                "post_yield_recovery": {
+                    "active": bool(self.yield_recovery_enabled and self._yield_recovery_steps_remaining > 0),
+                    "steps_remaining": int(self._yield_recovery_steps_remaining),
+                    "max_lateral_error": self.yield_recovery_max_lateral_error,
+                    "regen_period": self.yield_recovery_regen_period,
+                },
             }
-            if abs(ey) > self.reference_regen_max_lateral_error:
+            recovery_active_for_reference = bool(
+                self.yield_recovery_enabled and self._yield_recovery_steps_remaining > 0
+            )
+            active_reference_guard = (
+                self.yield_recovery_max_lateral_error
+                if recovery_active_for_reference
+                else self.reference_regen_max_lateral_error
+            )
+            reference_status["active_lateral_error_guard"] = active_reference_guard
+            should_regenerate_reference = (
+                recovery_active_for_reference
+                and self.time % self.yield_recovery_regen_period == 0
+            ) or self.time % 5 == 0
+            if abs(ey) > active_reference_guard:
                 # Do not let a large lateral deviation become the new reference.
                 self.feas_ref_states_new = self.feas_ref_states.copy()
                 self.feas_ref_inputs_new = self.feas_ref_inputs.copy()
                 reference_status["restored_global_reference"] = True
                 reference_status["forced_reference_linearization"] = True
                 reference_status["skip_reason"] = "lateral_error_too_large"
-            elif self.time%5==0 and self.ref_horizon>self.t_ref+1:
+            elif should_regenerate_reference and self.ref_horizon>self.t_ref+1:
                 self.reference_regeneration(x,y,psi,speed)
                 reference_status["regenerated"] = True
-            elif self.time%5==0:
+                if recovery_active_for_reference:
+                    reference_status["skip_reason"] = "post_yield_recovery_regen"
+            elif should_regenerate_reference:
                 reference_status["skip_reason"] = "near_reference_end"
 
 
@@ -965,8 +1022,58 @@ class SMPCAgent(object):
                     "df_des": float(u0[1]),
                     "v_des": float(v_des),
                 }
+                self._yield_stop_seen = True
+                self._yield_stop_active_prev = True
+                self._yield_recovery_steps_remaining = 0
             else:
                 yield_status["applied"] = None
+                recovery_started = False
+                if (
+                    self.yield_recovery_enabled
+                    and self._yield_stop_seen
+                    and self._yield_stop_active_prev
+                    and self.yield_recovery_steps > 0
+                ):
+                    self._yield_recovery_steps_remaining = max(
+                        self._yield_recovery_steps_remaining,
+                        self.yield_recovery_steps,
+                    )
+                    recovery_started = True
+
+                recovery_active_for_control = bool(
+                    self.yield_recovery_enabled and self._yield_recovery_steps_remaining > 0
+                )
+                recovery_status = {
+                    "enabled": self.yield_recovery_enabled,
+                    "started": recovery_started,
+                    "active": recovery_active_for_control,
+                    "steps_remaining_before": int(self._yield_recovery_steps_remaining),
+                    "speed": self.yield_recovery_speed,
+                    "accel": self.yield_recovery_accel,
+                }
+                if recovery_active_for_control:
+                    u0_flat = np.asarray(u0, dtype=float).reshape(-1)
+                    v_des_float = float(np.asarray(v_des, dtype=float).reshape(-1)[0])
+                    u0 = np.array([
+                        max(float(u0_flat[0]), self.yield_recovery_accel),
+                        float(u0_flat[1]),
+                    ], dtype=float)
+                    v_des = max(v_des_float, self.yield_recovery_speed)
+                    self.control_prev = u0
+                    self._yield_recovery_steps_remaining = max(
+                        0,
+                        self._yield_recovery_steps_remaining - 1,
+                    )
+                    recovery_status["applied"] = {
+                        "a_des": float(u0[0]),
+                        "df_des": float(u0[1]),
+                        "v_des": float(v_des),
+                    }
+                else:
+                    recovery_status["applied"] = None
+                recovery_status["steps_remaining_after"] = int(self._yield_recovery_steps_remaining)
+                self._yield_stop_active_prev = False
+                yield_status["recovery"] = recovery_status
             debug_payload["yield_stop_supervisor"] = yield_status
             debug_payload["applied"] = {
                 "is_opt": is_opt,

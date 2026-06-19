@@ -20,7 +20,13 @@
       "yield_activation_distance": 18.0,
       "yield_hold_distance": 8.0,
       "yield_release_time": 0.3,
-      "yield_steer_damping": 0.25
+      "yield_steer_damping": 0.25,
+      "yield_recovery_enabled": true,
+      "yield_recovery_steps": 240,
+      "yield_recovery_regen_period": 2,
+      "yield_recovery_max_lateral_error": 12.0,
+      "yield_recovery_speed": 3.0,
+      "yield_recovery_accel": 1.0
     },
     "target": {
       "nominal_speed": 6.0,
@@ -54,6 +60,12 @@
     "yield_hold_distance": "Distance close to the conflict point where the ego should continue holding until the target has cleared.",
     "yield_release_time": "Minimum predicted target-clearance time needed before releasing the near-stop hold.",
     "yield_steer_damping": "Steering damping factor applied while near-stopped so the ego does not keep turning sharply during the yield hold.",
+    "yield_recovery_enabled": "Enables post-yield recovery after the straight-going target has cleared the conflict zone.",
+    "yield_recovery_steps": "Maximum number of controller steps in which the ego may recover from near-stop yielding.",
+    "yield_recovery_regen_period": "Reference regeneration period during post-yield recovery. A shorter period helps the ego rebuild a feasible local reference after stopping.",
+    "yield_recovery_max_lateral_error": "Temporary lateral-error guard used only after a completed yield, preventing stale-reference lock while still bounding recovery reference generation.",
+    "yield_recovery_speed": "Minimum desired speed during post-yield recovery so the ego resumes the turn after safely yielding.",
+    "yield_recovery_accel": "Minimum desired acceleration during post-yield recovery.",
     "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target."
   }
 }
