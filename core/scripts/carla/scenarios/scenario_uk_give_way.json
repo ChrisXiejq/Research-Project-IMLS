@@ -108,7 +108,7 @@
                         "goal_left_offset"            :  1.85,
 			"goal_longitudinal_offset"    : 20.0,
                         "nominal_speed"               : 6.0,
-                        "collision_d_min"             : 1.5,
+                        "collision_d_min"             : 1.0,
                         "collision_ellipse_half_length": 3.8,
                         "collision_ellipse_half_width" : 1.8
 		}

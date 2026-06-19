@@ -103,7 +103,7 @@ The main change is the target-vehicle timing:
 | Target init speed | `12.0` | `6.0` | Match the target's initial motion to the slower priority-vehicle timing |
 | Ego nominal speed | `10.0` | `6.0` | Make the simplified timing gate produce a clear no-yield conflict and a safe give-way alternative |
 | Moving vehicle lateral offset | `3.7` | `ego +1.85`, `target +1.85` | Place vehicles near the intended right-hand lane centres rather than on the kerb/road edge |
-| Ego SMPC collision envelope | upstream hard-coded ellipse | `half_length=3.8m`, `half_width=1.8m`, `d_min=1.5m` | Make the chance-constraint vehicle body approximation more conservative than the CARLA-like footprint check |
+| Ego SMPC collision envelope | upstream hard-coded ellipse | `half_length=3.8m`, `half_width=1.8m`, `d_min=1.0m` | Keep the chance-constraint vehicle body approximation conservative while reducing the over-yielding seen with `d_min=1.5m` |
 
 The route relation is intentionally kept close to the original intersection setting. After inspecting the CARLA video, the experiment is simplified to the visual left-turn case rather than continuing to force a UK-style right-turn interpretation.
 
@@ -136,13 +136,13 @@ python3 -m venv .venv-precarla
 .venv-precarla/bin/python core/scripts/precarla_validate_uk_give_way.py
 ```
 
-For a more complete local gate before using CARLA, run:
+For a more complete local pre-CARLA scenario gate before using CARLA, run:
 
 ```bash
 .venv-precarla/bin/python core/scripts/precarla_comprehensive_eval.py
 ```
 
-This writes detailed JSON and Markdown reports to `core/results/precarla_comprehensive_eval/`. The comprehensive evaluation checks the base scenario, Gymnasium API compliance, nominal conflict timing, speed perturbations, safety-gap sensitivity, and whether the SMPC collision envelope covers the conservative CARLA-like vehicle footprint. The CARLA run should only be started when the comprehensive gate has no `FAIL` outcomes.
+This writes detailed JSON and Markdown reports to `core/results/precarla_comprehensive_eval/`. The comprehensive evaluation checks the base scenario, Gymnasium API compliance, nominal conflict timing, speed perturbations, safety-gap sensitivity, and whether the SMPC collision envelope covers the conservative CARLA-like vehicle footprint. This gate only proves that the scenario has a reasonable give-way solution; it does **not** prove that the closed-loop SMPC controller will find or execute that solution.
 
 The Python/Gymnasium gate is footprint-aware. It uses conservative CARLA-like rectangles for the moving vehicle body, inflates them with a small safety margin, and then checks for oriented-rectangle overlap. This matters because two vehicle centres can be several metres apart while their bodies still overlap visually in CARLA.
 
@@ -199,6 +199,26 @@ python run_all_scenarios.py \
 
 For the first validation run, it is better to omit `--enable_camera_viz` unless a video is needed, because video recording slows down the experiment.
 
+After pulling a CARLA result directory back to the local machine, run the post-CARLA trajectory gate:
+
+```bash
+.venv-precarla/bin/python core/scripts/postcarla_trajectory_gate.py core/results/<timestamp>
+```
+
+This is the hard safety gate for deciding whether to move from a 1-init sanity check to a 5-init preliminary pilot. It reads each `scenario_result.pkl`, interpolates the ego and target trajectories onto a common time grid, and replays conservative CARLA-like oriented rectangle footprints. The required default policies are `smpc_var_risk` and `smpc_fixed_risk`; both must:
+
+- complete validly,
+- avoid footprint-level collision with every target vehicle,
+- keep `solver_failure_frac <= 0.05`,
+- log `collision_envelope` in `smpc_debug_setup.json`, so stale server code/config is caught.
+
+The script writes:
+
+- `postcarla_trajectory_gate.json`
+- `postcarla_trajectory_gate.md`
+
+under the same CARLA timestamp result directory.
+
 ## 8. What to Check in the Results
 
 The key question is whether the ego turning vehicle slows or adjusts its trajectory before crossing the path of the straight-going target vehicle.
@@ -213,6 +233,7 @@ Useful outputs:
 Key metrics:
 
 - `dmin_TV`: should not become too small.
+- `postcarla_trajectory_gate.md`: authoritative footprint-level pass/fail after CARLA.
 - `completion_valid`: should remain true.
 - `solver_failure_frac`: should remain close to zero.
 - `max_abs_ey_debug`: should not grow too large.
