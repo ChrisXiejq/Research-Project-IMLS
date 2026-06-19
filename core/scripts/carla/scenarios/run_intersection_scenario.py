@@ -211,7 +211,7 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 
-def get_intersection_transform(intersection, vehicle_params, endpoint_str, spawn_height=1.0):
+def get_intersection_transform(intersection, vehicle_params, endpoint_str, spawn_height=1.0, side_of_road="right"):
     node_idx            = None
     endpoint_idx        = None
     left_offset         = None
@@ -239,10 +239,14 @@ def get_intersection_transform(intersection, vehicle_params, endpoint_str, spawn
     x += longitudinal_offset * np.cos(yaw_rad)
     y += longitudinal_offset * np.sin(yaw_rad)
 
-    # Translate the pose given the lateral/left offset.
-    left_dir_yaw = yaw_rad - np.pi/2.
-    x += left_offset * np.cos( left_dir_yaw )
-    y += left_offset * np.sin( left_dir_yaw )
+    # Translate the pose laterally.  The legacy reproduction used yaw-pi/2,
+    # which places vehicles on the right-hand lane in the Town05 intersection
+    # used here.  For the UK scenario, side_of_road="left" intentionally flips
+    # that sign so positive offsets select the visually left-hand lane.
+    lateral_sign = 1.0 if str(side_of_road).lower() == "left" else -1.0
+    lateral_dir_yaw = yaw_rad + lateral_sign * np.pi/2.
+    x += left_offset * np.cos( lateral_dir_yaw )
+    y += left_offset * np.sin( lateral_dir_yaw )
 
     # Make the Carla transform.
     loc = carla.Location(x = x, y = y, z = spawn_height)
@@ -766,8 +770,8 @@ class RunIntersectionScenario:
             else:
                 raise ValueError(f"Invalid vehicle role selection : {vp.role}")
 
-            start_transform = get_intersection_transform(intersection, vp, "start")
-            goal_transform  = get_intersection_transform(intersection, vp, "goal")
+            start_transform = get_intersection_transform(intersection, vp, "start", side_of_road=carla_params.side_of_road)
+            goal_transform  = get_intersection_transform(intersection, vp, "goal", side_of_road=carla_params.side_of_road)
 
             veh_actor  = self.world.spawn_actor(veh_bp, start_transform)
             if vp.role == "ego":

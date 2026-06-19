@@ -19,6 +19,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 from precarla_validate_uk_give_way import (
     ConflictReport,
+    build_route_geometry,
     load_intersection,
     run_gymnasium_check,
     validate_scenario,
@@ -125,6 +126,8 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
         carla_params["intersection_csv_loc"],
     )
     intersection = load_intersection(intersection_path)
+    ego_route = build_route_geometry(scenario, intersection, ego)
+    target_route = build_route_geometry(scenario, intersection, target)
 
     add_outcome(
         outcomes,
@@ -202,6 +205,14 @@ def semantic_and_geometry_tests(scenario_path: str, scenario: Dict[str, Any]) ->
         "intersection arm count",
         "Intersection file has four directed arms.",
         f"Intersection file has {len(intersection)} arms; expected four for this test.",
+    )
+    add_outcome(
+        outcomes,
+        ego_route.path[0][1] > intersection[int(ego["intersection_start_node_idx"])][0].y
+        and target_route.path[0][1] < intersection[int(target["intersection_start_node_idx"])][0].y,
+        "visual UK left-lane placement",
+        "Eastbound ego is above its centreline and westbound target is below its centreline, matching the visual left-hand lanes in this Town05 layout.",
+        "Moving vehicles are not placed on the expected visual left-hand lanes for this Town05 layout.",
     )
     return outcomes
 
@@ -438,8 +449,8 @@ def main() -> int:
     speed_outcomes, speed_cases = speed_sweep_tests(
         args.scenario,
         scenario,
-        ego_speeds=[5.0, 6.0, 7.0, 8.0, 9.0],
-        target_speeds=[9.0, 10.0, 11.0, 12.0, 13.0],
+        ego_speeds=[6.0, 7.0, 8.0, 9.0, 10.0],
+        target_speeds=[4.0, 5.0, 6.0, 7.0, 8.0],
         safety_gap=args.safety_gap_s,
     )
     outcomes.extend(speed_outcomes)

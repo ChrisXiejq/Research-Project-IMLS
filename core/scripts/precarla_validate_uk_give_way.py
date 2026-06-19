@@ -83,15 +83,16 @@ def load_intersection(intersection_csv: str) -> List[Tuple[Pose, Pose]]:
     return routes
 
 
-def transform_pose(raw_pose: Pose, left_offset: float, longitudinal_offset: float) -> Point:
+def transform_pose(raw_pose: Pose, left_offset: float, longitudinal_offset: float, side_of_road: str = "right") -> Point:
     """Replicate run_intersection_scenario.get_intersection_transform XY logic."""
     yaw_rad = math.radians(raw_pose.yaw_deg)
     x = raw_pose.x + longitudinal_offset * math.cos(yaw_rad)
     y = raw_pose.y + longitudinal_offset * math.sin(yaw_rad)
 
-    left_dir_yaw = yaw_rad - math.pi / 2.0
-    x += left_offset * math.cos(left_dir_yaw)
-    y += left_offset * math.sin(left_dir_yaw)
+    lateral_sign = 1.0 if str(side_of_road).lower() == "left" else -1.0
+    lateral_dir_yaw = yaw_rad + lateral_sign * math.pi / 2.0
+    x += left_offset * math.cos(lateral_dir_yaw)
+    y += left_offset * math.sin(lateral_dir_yaw)
     return (x, y)
 
 
@@ -194,6 +195,7 @@ def intersection_center(intersection: Sequence[Tuple[Pose, Pose]]) -> Point:
 
 
 def build_route_geometry(scenario: Dict, intersection: Sequence[Tuple[Pose, Pose]], vehicle: Dict) -> RouteGeometry:
+    side_of_road = scenario.get("carla_params", {}).get("side_of_road", "right")
     start_idx = int(vehicle["intersection_start_node_idx"])
     goal_idx = int(vehicle["intersection_goal_node_idx"])
     raw_start = intersection[start_idx][0]
@@ -203,11 +205,13 @@ def build_route_geometry(scenario: Dict, intersection: Sequence[Tuple[Pose, Pose
         raw_start,
         float(vehicle.get("start_left_offset", 0.0)),
         float(vehicle.get("start_longitudinal_offset", 0.0)),
+        side_of_road,
     )
     goal = transform_pose(
         raw_goal,
         float(vehicle.get("goal_left_offset", 0.0)),
         float(vehicle.get("goal_longitudinal_offset", 0.0)),
+        side_of_road,
     )
 
     if start_idx == goal_idx:

@@ -93,8 +93,8 @@
 			"goal_left_offset"            :   3.7,
 			"start_longitudinal_offset"   :   0.0,
 			"goal_longitudinal_offset"    :  25.0,
-			"nominal_speed"               :  11.0,
-			"init_speed"                  :  11.0
+                        "nominal_speed"               :   5.0,
+                        "init_speed"                  :   5.0
 		},
 		{
 			"role"                        : "ego",
@@ -107,7 +107,7 @@
 			"start_left_offset"           :  3.7,
 			"goal_left_offset"            :  3.7,
 			"goal_longitudinal_offset"    : 20.0,
-			"nominal_speed"               : 7.0
+                        "nominal_speed"               : 8.0
 		}
 	]
 }

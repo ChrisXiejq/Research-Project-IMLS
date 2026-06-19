@@ -78,11 +78,13 @@ The main change is the target-vehicle timing:
 | Setting | `scenario_01.json` | `scenario_uk_give_way.json` | Purpose |
 |---|---:|---:|---|
 | Target start longitudinal offset | `-15.0` | `0.0` | Bring the straight-going target closer to the conflict zone |
-| Target nominal speed | `10.0` | `11.0` | Make the priority vehicle interaction more visible |
-| Target init speed | `12.0` | `11.0` | Keep a consistent straight-going priority vehicle speed |
-| Ego nominal speed | `10.0` | `7.0` | Encourage the turning ego to plan more cautiously |
+| Target nominal speed | `10.0` | `5.0` | Keep the priority vehicle in the conflict zone long enough for a UK give-way interaction |
+| Target init speed | `12.0` | `5.0` | Match the target's initial motion to the slower priority-vehicle timing |
+| Ego nominal speed | `10.0` | `8.0` | Keep the turning ego active enough that it must plan around the oncoming vehicle |
 
 The route relation is intentionally kept similar to the original scenario so that the new experiment remains close to the paper reproduction setting while becoming more appropriate for a UK give-way interpretation.
+
+The CARLA transform now uses `side_of_road="left"` to place positive lateral offsets on the visually left-hand lane in Town05. This matters because the legacy `yaw - pi/2` offset placed vehicles on the visually right-hand lane for this intersection.
 
 ## 6. Important Limitation
 
