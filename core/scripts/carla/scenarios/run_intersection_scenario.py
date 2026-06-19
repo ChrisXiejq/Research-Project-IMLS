@@ -115,6 +115,7 @@ class VehicleParams:
     collision_d_min : float = 0.5
     collision_ellipse_half_length : float = 3.8
     collision_ellipse_half_width : float = 1.8
+    reference_regen_max_lateral_error : float = 4.0
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way
@@ -193,7 +194,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             risk_profile=vehicle_params.risk_profile,
                             collision_d_min=vehicle_params.collision_d_min,
                             collision_ellipse_half_length=vehicle_params.collision_ellipse_half_length,
-                            collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width)
+                            collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width,
+                            reference_regen_max_lateral_error=vehicle_params.reference_regen_max_lateral_error)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -207,7 +209,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             risk_profile=vehicle_params.risk_profile,
                             collision_d_min=vehicle_params.collision_d_min,
                             collision_ellipse_half_length=vehicle_params.collision_ellipse_half_length,
-                            collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width)
+                            collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width,
+                            reference_regen_max_lateral_error=vehicle_params.reference_regen_max_lateral_error)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -219,7 +222,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             risk_profile=vehicle_params.risk_profile,
                             collision_d_min=vehicle_params.collision_d_min,
                             collision_ellipse_half_length=vehicle_params.collision_ellipse_half_length,
-                            collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width)
+                            collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width,
+                            reference_regen_max_lateral_error=vehicle_params.reference_regen_max_lateral_error)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 

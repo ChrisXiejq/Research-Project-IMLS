@@ -46,6 +46,7 @@ class SMPCAgent(object):
                  collision_d_min=0.5,
                  collision_ellipse_half_length=3.8,
                  collision_ellipse_half_width=1.8,
+                 reference_regen_max_lateral_error=4.0,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -70,12 +71,18 @@ class SMPCAgent(object):
         self.d_min=float(collision_d_min)
         self.collision_ellipse_half_length=float(collision_ellipse_half_length)
         self.collision_ellipse_half_width=float(collision_ellipse_half_width)
+        self.reference_regen_max_lateral_error = float(reference_regen_max_lateral_error)
         if self.d_min < 0.0:
             raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
         if self.collision_ellipse_half_length <= 0.0 or self.collision_ellipse_half_width <= 0.0:
             raise ValueError(
                 "collision_ellipse_half_length and collision_ellipse_half_width must be positive, "
                 f"got {self.collision_ellipse_half_length}, {self.collision_ellipse_half_width}"
+            )
+        if self.reference_regen_max_lateral_error <= 0.0:
+            raise ValueError(
+                "reference_regen_max_lateral_error must be positive, "
+                f"got {self.reference_regen_max_lateral_error}"
             )
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
@@ -117,7 +124,6 @@ class SMPCAgent(object):
         self.completion_s_margin = 6.0
         self.completion_goal_dist = 8.0
         self.completion_lateral_error = 4.0
-        self.reference_regen_max_lateral_error = 1.5
 
         # Debugging: see the reference solution.
 
@@ -262,6 +268,9 @@ class SMPCAgent(object):
                 "d_min": self.d_min,
                 "ellipse_half_length": self.collision_ellipse_half_length,
                 "ellipse_half_width": self.collision_ellipse_half_width,
+            },
+            "reference_regeneration": {
+                "max_lateral_error": self.reference_regen_max_lateral_error,
             },
             "smpc": {
                 "class": type(self.SMPC).__name__,

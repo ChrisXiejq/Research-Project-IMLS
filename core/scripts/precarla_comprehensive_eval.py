@@ -265,6 +265,8 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
     half_length = float(ego.get("collision_ellipse_half_length", 0.0))
     half_width = float(ego.get("collision_ellipse_half_width", 0.0))
     d_min = float(ego.get("collision_d_min", 0.0))
+    reference_regen_guard = float(ego.get("reference_regen_max_lateral_error", 0.0))
+    completion_lateral_error = 4.0
 
     add_outcome(
         outcomes,
@@ -293,6 +295,20 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
         (
             f"SMPC collision margin is below the tuned CARLA sanity range: "
             f"d_min={d_min:.2f}m, minimum={min_margin:.2f}m."
+        ),
+    )
+    add_outcome(
+        outcomes,
+        reference_regen_guard >= completion_lateral_error,
+        "SMPC reference-regeneration lateral guard",
+        (
+            f"Reference-regeneration guard covers the completion lateral tolerance: "
+            f"guard={reference_regen_guard:.2f}m, completion={completion_lateral_error:.2f}m."
+        ),
+        (
+            f"Reference-regeneration guard is tighter than the completion lateral tolerance, "
+            f"which can force stale global-reference linearization: "
+            f"guard={reference_regen_guard:.2f}m, completion={completion_lateral_error:.2f}m."
         ),
     )
     return outcomes
