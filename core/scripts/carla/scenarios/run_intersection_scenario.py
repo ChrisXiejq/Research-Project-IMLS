@@ -112,7 +112,7 @@ class VehicleParams:
     smpc_config : str = "full" # "var_risk", "open_loop", "fixed_risk"
     solver_backend : str = "gurobi" # "gurobi" or "ipopt_approx"
     risk_profile : str = "upstream_code" # "upstream_code" or "paper_eps_002"
-    collision_d_min : float = 1.0
+    collision_d_min : float = 0.5
     collision_ellipse_half_length : float = 3.8
     collision_ellipse_half_width : float = 1.8
 

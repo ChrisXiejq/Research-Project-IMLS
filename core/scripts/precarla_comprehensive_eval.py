@@ -281,12 +281,19 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
             f"({required_half_length:.2f}m, {required_half_width:.2f}m)."
         ),
     )
+    min_margin = 0.5
     add_outcome(
         outcomes,
-        d_min >= 1.0,
+        d_min >= min_margin,
         "SMPC collision margin",
-        f"SMPC collision margin is conservative for the CARLA sanity gate: d_min={d_min:.2f}m.",
-        f"SMPC collision margin is too small for this CARLA sanity gate: d_min={d_min:.2f}m.",
+        (
+            f"SMPC collision margin remains within the tuned CARLA sanity range: "
+            f"d_min={d_min:.2f}m, minimum={min_margin:.2f}m."
+        ),
+        (
+            f"SMPC collision margin is below the tuned CARLA sanity range: "
+            f"d_min={d_min:.2f}m, minimum={min_margin:.2f}m."
+        ),
     )
     return outcomes
 

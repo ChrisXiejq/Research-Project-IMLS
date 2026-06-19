@@ -43,7 +43,7 @@ class SMPCAgent(object):
                  fps=5,
                  n_tv_max=None,
                  risk_profile="upstream_code",
-                 collision_d_min=1.0,
+                 collision_d_min=0.5,
                  collision_ellipse_half_length=3.8,
                  collision_ellipse_half_width=1.8,
                  ):
