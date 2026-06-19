@@ -46,7 +46,7 @@ class SMPCAgent(object):
                  collision_d_min=0.5,
                  collision_ellipse_half_length=3.8,
                  collision_ellipse_half_width=1.8,
-                 reference_regen_max_lateral_error=4.0,
+                 reference_regen_max_lateral_error=2.5,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()

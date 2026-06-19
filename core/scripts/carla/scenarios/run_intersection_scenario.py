@@ -115,7 +115,7 @@ class VehicleParams:
     collision_d_min : float = 0.5
     collision_ellipse_half_length : float = 3.8
     collision_ellipse_half_width : float = 1.8
-    reference_regen_max_lateral_error : float = 4.0
+    reference_regen_max_lateral_error : float = 2.5
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way

@@ -266,7 +266,8 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
     half_width = float(ego.get("collision_ellipse_half_width", 0.0))
     d_min = float(ego.get("collision_d_min", 0.0))
     reference_regen_guard = float(ego.get("reference_regen_max_lateral_error", 0.0))
-    completion_lateral_error = 4.0
+    reference_guard_min = 2.0
+    reference_guard_max = 3.0
 
     add_outcome(
         outcomes,
@@ -299,16 +300,17 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
     )
     add_outcome(
         outcomes,
-        reference_regen_guard >= completion_lateral_error,
+        reference_guard_min <= reference_regen_guard <= reference_guard_max,
         "SMPC reference-regeneration lateral guard",
         (
-            f"Reference-regeneration guard covers the completion lateral tolerance: "
-            f"guard={reference_regen_guard:.2f}m, completion={completion_lateral_error:.2f}m."
+            f"Reference-regeneration guard is within the tuned range: "
+            f"guard={reference_regen_guard:.2f}m, range=[{reference_guard_min:.2f}, {reference_guard_max:.2f}]m."
         ),
         (
-            f"Reference-regeneration guard is tighter than the completion lateral tolerance, "
-            f"which can force stale global-reference linearization: "
-            f"guard={reference_regen_guard:.2f}m, completion={completion_lateral_error:.2f}m."
+            f"Reference-regeneration guard is outside the tuned range. "
+            f"Too small can force stale global-reference linearization; too large can regenerate "
+            f"an unsafe conflict-zone reference: "
+            f"guard={reference_regen_guard:.2f}m, range=[{reference_guard_min:.2f}, {reference_guard_max:.2f}]m."
         ),
     )
     return outcomes

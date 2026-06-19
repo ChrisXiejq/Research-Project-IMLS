@@ -104,7 +104,7 @@ The main change is the target-vehicle timing:
 | Ego nominal speed | `10.0` | `6.0` | Make the simplified timing gate produce a clear no-yield conflict and a safe give-way alternative |
 | Moving vehicle lateral offset | `3.7` | `ego +1.85`, `target +1.85` | Place vehicles near the intended right-hand lane centres rather than on the kerb/road edge |
 | Ego SMPC collision envelope | upstream hard-coded ellipse | `half_length=3.8m`, `half_width=1.8m`, `d_min=0.5m` | Keep the chance-constraint vehicle body approximation conservative while reducing the over-yielding seen with `d_min=1.0m` and `d_min=1.5m` |
-| SMPC reference-regeneration guard | `1.5m` internal default | `4.0m` | Allow the valid give-way trajectory to regenerate a local reference instead of forcing global-reference linearization during the left-turn yield |
+| SMPC reference-regeneration guard | `1.5m` internal default | `2.5m` | Compromise between `1.5m` being too strict for solver stability and `4.0m` being too loose, which allowed unsafe conflict-zone reference regeneration |
 
 The route relation is intentionally kept close to the original intersection setting. After inspecting the CARLA video, the experiment is simplified to the visual left-turn case rather than continuing to force a UK-style right-turn interpretation.
 
