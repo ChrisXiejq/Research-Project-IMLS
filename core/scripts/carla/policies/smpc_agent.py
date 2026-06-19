@@ -46,7 +46,16 @@ class SMPCAgent(object):
                  collision_d_min=0.5,
                  collision_ellipse_half_length=3.8,
                  collision_ellipse_half_width=1.8,
-                 reference_regen_max_lateral_error=2.5,
+                 reference_regen_max_lateral_error=1.5,
+                 yield_stop_enabled=True,
+                 yield_stop_speed=0.2,
+                 yield_stop_decel=-3.0,
+                 yield_conflict_radius=4.0,
+                 yield_ttc_margin=0.8,
+                 yield_activation_distance=18.0,
+                 yield_hold_distance=8.0,
+                 yield_release_time=0.3,
+                 yield_steer_damping=0.25,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -72,6 +81,15 @@ class SMPCAgent(object):
         self.collision_ellipse_half_length=float(collision_ellipse_half_length)
         self.collision_ellipse_half_width=float(collision_ellipse_half_width)
         self.reference_regen_max_lateral_error = float(reference_regen_max_lateral_error)
+        self.yield_stop_enabled = bool(yield_stop_enabled)
+        self.yield_stop_speed = float(yield_stop_speed)
+        self.yield_stop_decel = float(yield_stop_decel)
+        self.yield_conflict_radius = float(yield_conflict_radius)
+        self.yield_ttc_margin = float(yield_ttc_margin)
+        self.yield_activation_distance = float(yield_activation_distance)
+        self.yield_hold_distance = float(yield_hold_distance)
+        self.yield_release_time = float(yield_release_time)
+        self.yield_steer_damping = float(yield_steer_damping)
         if self.d_min < 0.0:
             raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
         if self.collision_ellipse_half_length <= 0.0 or self.collision_ellipse_half_width <= 0.0:
@@ -84,6 +102,12 @@ class SMPCAgent(object):
                 "reference_regen_max_lateral_error must be positive, "
                 f"got {self.reference_regen_max_lateral_error}"
             )
+        if self.yield_stop_speed < 0.0:
+            raise ValueError(f"yield_stop_speed must be non-negative, got {self.yield_stop_speed}")
+        if self.yield_conflict_radius <= 0.0:
+            raise ValueError(f"yield_conflict_radius must be positive, got {self.yield_conflict_radius}")
+        if not 0.0 <= self.yield_steer_damping <= 1.0:
+            raise ValueError(f"yield_steer_damping must be in [0, 1], got {self.yield_steer_damping}")
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
         self.risk_profile = risk_profile
@@ -271,6 +295,17 @@ class SMPCAgent(object):
             },
             "reference_regeneration": {
                 "max_lateral_error": self.reference_regen_max_lateral_error,
+            },
+            "yield_stop_supervisor": {
+                "enabled": self.yield_stop_enabled,
+                "stop_speed": self.yield_stop_speed,
+                "decel": self.yield_stop_decel,
+                "conflict_radius": self.yield_conflict_radius,
+                "ttc_margin": self.yield_ttc_margin,
+                "activation_distance": self.yield_activation_distance,
+                "hold_distance": self.yield_hold_distance,
+                "release_time": self.yield_release_time,
+                "steer_damping": self.yield_steer_damping,
             },
             "smpc": {
                 "class": type(self.SMPC).__name__,
@@ -473,6 +508,137 @@ class SMPCAgent(object):
 
     def done(self):
         return self.goal_reached
+
+    def _path_distance_to_index(self, xy_path, idx):
+        if idx <= 0 or len(xy_path) < 2:
+            return 0.0
+        idx = int(min(idx, len(xy_path) - 1))
+        diffs = np.diff(np.asarray(xy_path[:idx + 1], dtype=float), axis=0)
+        return float(np.sum(np.linalg.norm(diffs, axis=1)))
+
+    def _zone_interval_from_path(self, xy_path, center_xy, radius):
+        xy_path = np.asarray(xy_path, dtype=float)
+        if xy_path.size == 0:
+            return None, None
+        dist = np.linalg.norm(xy_path - np.asarray(center_xy, dtype=float), axis=1)
+        inside = np.flatnonzero(dist <= radius)
+        if len(inside) == 0:
+            return None, None
+        return int(inside[0]), int(inside[-1])
+
+    def _yield_stop_supervisor(
+        self,
+        x,
+        y,
+        speed,
+        t_ref_new,
+        target_vehicle_gmm_preds,
+        target_vehicle_mode_probs,
+        N_TV,
+    ):
+        status = {
+            "enabled": self.yield_stop_enabled,
+            "active": False,
+            "reason": None,
+            "target_index": None,
+            "target_mode": None,
+        }
+        if not self.yield_stop_enabled:
+            status["reason"] = "disabled"
+            return status
+        if self.ol_flag:
+            status["reason"] = "open_loop_policy"
+            return status
+        if N_TV <= 0 or target_vehicle_gmm_preds is None:
+            status["reason"] = "no_target_prediction"
+            return status
+
+        ego_path = np.asarray(
+            self.feas_ref_states_new[t_ref_new:t_ref_new + self.N + 1, :2],
+            dtype=float,
+        )
+        if len(ego_path) < 2:
+            status["reason"] = "short_ego_reference"
+            return status
+
+        means_all = np.asarray(target_vehicle_gmm_preds[0])
+        if means_all.size == 0:
+            status["reason"] = "empty_target_prediction"
+            return status
+
+        best = None
+        for k in range(min(N_TV, len(means_all))):
+            target_modes = np.asarray(means_all[k])
+            if target_modes.ndim < 3:
+                continue
+            if target_vehicle_mode_probs is not None:
+                probs = np.asarray(target_vehicle_mode_probs[k], dtype=float)
+                mode = int(np.nanargmax(probs)) if probs.size else 0
+                mode = min(mode, target_modes.shape[0] - 1)
+            else:
+                mode = 0
+            target_path = np.asarray(target_modes[mode, :, :2], dtype=float)
+            if len(target_path) < 2:
+                continue
+            diffs = ego_path[:, None, :] - target_path[None, :, :]
+            dist2 = np.sum(diffs * diffs, axis=2)
+            ego_idx, target_idx = np.unravel_index(int(np.argmin(dist2)), dist2.shape)
+            min_dist = float(np.sqrt(dist2[ego_idx, target_idx]))
+            candidate = (min_dist, k, mode, ego_idx, target_idx, target_path)
+            if best is None or candidate[0] < best[0]:
+                best = candidate
+
+        if best is None:
+            status["reason"] = "no_valid_target_path"
+            return status
+
+        min_dist, target_idx, mode, ego_conflict_idx, target_conflict_idx, target_path = best
+        conflict_point = 0.5 * (ego_path[ego_conflict_idx] + target_path[target_conflict_idx])
+        target_enter_idx, target_exit_idx = self._zone_interval_from_path(
+            target_path,
+            conflict_point,
+            self.yield_conflict_radius,
+        )
+        ego_dist_to_conflict = self._path_distance_to_index(ego_path, ego_conflict_idx)
+        ego_ttc = ego_dist_to_conflict / max(float(speed), max(self.yield_stop_speed, 0.2))
+        if target_enter_idx is None:
+            target_enter_time = float(target_conflict_idx) * self.dt
+            target_exit_time = target_enter_time
+        else:
+            target_enter_time = float(target_enter_idx) * self.dt
+            target_exit_time = float(target_exit_idx) * self.dt
+
+        overlap_risk = (
+            target_enter_time <= ego_ttc + self.yield_ttc_margin
+            and target_exit_time >= ego_ttc - self.yield_ttc_margin
+        )
+        close_hold = (
+            ego_dist_to_conflict <= self.yield_hold_distance
+            and target_exit_time > self.yield_release_time
+        )
+        active = (
+            min_dist <= self.yield_conflict_radius
+            and ego_dist_to_conflict <= self.yield_activation_distance
+            and (overlap_risk or close_hold)
+        )
+
+        status.update({
+            "active": bool(active),
+            "reason": "target_has_priority_in_conflict_zone" if active else "no_active_yield_needed",
+            "target_index": int(target_idx),
+            "target_mode": int(mode),
+            "min_path_distance": min_dist,
+            "conflict_point": conflict_point.tolist(),
+            "ego_conflict_index": int(ego_conflict_idx),
+            "target_conflict_index": int(target_conflict_idx),
+            "ego_distance_to_conflict": ego_dist_to_conflict,
+            "ego_ttc": ego_ttc,
+            "target_enter_time": target_enter_time,
+            "target_exit_time": target_exit_time,
+            "overlap_risk": bool(overlap_risk),
+            "close_hold": bool(close_hold),
+        })
+        return status
 
     def run_step(self, pred_dict):
         vehicle_loc   = self.vehicle.get_location()
@@ -776,6 +942,32 @@ class SMPCAgent(object):
             self.control_prev=np.array([u_control[0]+update_dict['a_lin'][0],u_control[1]+update_dict['df_lin'][0]])
             u0=self.control_prev
             v_des=v_next
+            yield_status = self._yield_stop_supervisor(
+                x,
+                y,
+                speed,
+                t_ref_new,
+                target_vehicle_gmm_preds,
+                target_vehicle_mode_probs,
+                N_TV,
+            )
+            if yield_status.get("active"):
+                u0_flat = np.asarray(u0, dtype=float).reshape(-1)
+                v_des_float = float(np.asarray(v_des, dtype=float).reshape(-1)[0])
+                u0 = np.array([
+                    min(float(u0_flat[0]), self.yield_stop_decel),
+                    self.yield_steer_damping * float(u0_flat[1]),
+                ], dtype=float)
+                v_des = min(v_des_float, self.yield_stop_speed)
+                self.control_prev = u0
+                yield_status["applied"] = {
+                    "a_des": float(u0[0]),
+                    "df_des": float(u0[1]),
+                    "v_des": float(v_des),
+                }
+            else:
+                yield_status["applied"] = None
+            debug_payload["yield_stop_supervisor"] = yield_status
             debug_payload["applied"] = {
                 "is_opt": is_opt,
                 "solve_time": solve_time,

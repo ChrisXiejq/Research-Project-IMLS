@@ -11,6 +11,10 @@ from datetime import datetime
 
 from utils import experiment_logging as exp_log
 
+script_root = os.path.abspath(__file__).split("carla")[0]
+if script_root not in sys.path:
+    sys.path.append(script_root)
+from experiment_tuning import apply_tuning_config, load_scenario_with_tuning, tuning_snapshot_payload
 
 
 
@@ -27,6 +31,14 @@ def _policy_output_name(policy_name, solver_backend):
     if solver_backend == "gurobi":
         return policy_name
     return f"{policy_name}_{solver_backend}"
+
+
+def _write_fine_tune_config_snapshot(savedir: str, scenario_dict: dict) -> None:
+    os.makedirs(savedir, exist_ok=True)
+    exp_log.write_json(
+        os.path.join(savedir, "fine_tune_config.json"),
+        tuning_snapshot_payload(scenario_dict),
+    )
 
 
 def _write_scenario_rollout_config(savedir: str, scenario_dict: dict) -> None:
@@ -50,6 +62,7 @@ def _write_scenario_rollout_config(savedir: str, scenario_dict: dict) -> None:
             "prediction_params": scenario_dict.get("prediction_params", {}),
             "viz_topdown": merged_viz,
             "vehicle_params": scenario_dict.get("vehicle_params", []),
+            "fine_tune_config": tuning_snapshot_payload(scenario_dict),
         },
     )
 
@@ -302,6 +315,19 @@ if __name__ == '__main__':
                         help="Solver backend for SMPC policies. Use ipopt_approx when Gurobi is unavailable.")
     parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002"], default="upstream_code",
                         help="Gurobi SMPC risk profile: upstream_code matches SMPC_MMPreds numerical settings; paper_eps_002 uses epsilon=0.02.")
+    parser.add_argument(
+        "--tuning_config",
+        default=None,
+        help=(
+            "Optional fine-tuning config JSON. If omitted, each scenario may provide "
+            "its own tuning_config path relative to the scenario file."
+        ),
+    )
+    parser.add_argument(
+        "--no_tuning_config",
+        action="store_true",
+        help="Ignore scenario-level tuning_config and run only with values in the scenario JSON.",
+    )
     parser.add_argument("--skip_postprocess", action="store_true",
                         help="Skip automatic paper metrics/plots generation at the end of the batch.")
     parser.add_argument("--postprocess_no_plots", action="store_true",
@@ -341,6 +367,8 @@ if __name__ == '__main__':
             "policies": list(args.policies),
             "solver_backend": args.solver_backend,
             "risk_profile": args.risk_profile,
+            "tuning_config": args.tuning_config,
+            "no_tuning_config": args.no_tuning_config,
             "with_notv": args.with_notv,
             "with_notv_cl": args.with_notv_cl,
             "enable_camera_viz": args.enable_camera_viz,
@@ -362,11 +390,27 @@ if __name__ == '__main__':
     log.info("Matched %d scenario JSON files", len(scenarios_list))
 
     subrun_status: list = []
+    applied_tuning_configs = {}
 
     for scenario in scenarios_list:
         # Load the scenario and generate parameters.
-        scenario_dict = json.load(open(scenario, "r"))
+        if args.no_tuning_config:
+            scenario_dict = json.load(open(scenario, "r"))
+            scenario_dict.pop("tuning_config", None)
+            scenario_dict, tuning_metadata = apply_tuning_config(scenario_dict, scenario_path=scenario, tuning_config_path=None)
+        else:
+            scenario_dict, tuning_metadata = load_scenario_with_tuning(scenario, args.tuning_config)
         scenario_name = scenario.split("/")[-1].split('.json')[0]
+        applied_tuning_configs[scenario_name] = tuning_metadata
+        exp_log.write_json(
+            os.path.join(results_folder, "applied_tuning_configs.json"),
+            applied_tuning_configs,
+        )
+        log.info(
+            "Scenario %s tuning config: %s",
+            scenario_name,
+            tuning_metadata.get("source_path") if tuning_metadata.get("applied") else "none",
+        )
         if "lk" in scenario_name:
             scene = "highway"
         else:
@@ -392,6 +436,7 @@ if __name__ == '__main__':
                 ok = False
                 scenario_ok = None
                 try:
+                    _write_fine_tune_config_snapshot(savedir, scenario_dict)
                     exp_log.append_jsonl(
                         results_folder,
                         {"event": "subrun_start", "label": label, "savedir": savedir},
@@ -437,6 +482,7 @@ if __name__ == '__main__':
                 ok = False
                 scenario_ok = None
                 try:
+                    _write_fine_tune_config_snapshot(savedir, scenario_dict)
                     exp_log.append_jsonl(
                         results_folder,
                         {"event": "subrun_start", "label": label, "savedir": savedir},
@@ -483,6 +529,7 @@ if __name__ == '__main__':
                 ok = False
                 scenario_ok = None
                 try:
+                    _write_fine_tune_config_snapshot(savedir, scenario_dict)
                     exp_log.append_jsonl(
                         results_folder,
                         {

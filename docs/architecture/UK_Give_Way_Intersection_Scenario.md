@@ -91,11 +91,33 @@ The new scenario is explicitly documented as:
 - Unsignalised.
 - Left-turning vehicle should give way to the straight-going vehicle.
 
+## 4.1 Fine-Tuning Configuration
+
+The scenario file defines the traffic semantics and route topology. Numeric parameters that are expected to change during CARLA tuning are centralised in:
+
+```text
+core/scripts/carla/scenarios/tuning_configs/give_way_smpc_tuning.json
+```
+
+This config currently owns the main fine-tuning knobs:
+
+- ego nominal speed,
+- target nominal/init speed,
+- SMPC horizon `N`, discretisation `dt`, and `num_modes`,
+- `collision_d_min`,
+- `collision_ellipse_half_length`,
+- `collision_ellipse_half_width`,
+- `reference_regen_max_lateral_error`,
+- yield-stop supervisor parameters (`yield_stop_*`),
+- post-CARLA gate thresholds used to judge the result.
+
+`run_all_scenarios.py` automatically applies the scenario-level `tuning_config` path unless `--no_tuning_config` is provided. Every batch result writes `applied_tuning_configs.json`, and every subrun directory writes `fine_tune_config.json`, so each CARLA rollout can be traced back to the exact parameter config used.
+
 ## 5. What Changed Compared With `scenario_01.json`?
 
 The main change is the target-vehicle timing:
 
-| Setting | `scenario_01.json` | `scenario_uk_give_way.json` | Purpose |
+| Setting | `scenario_01.json` | Current scenario + fine-tune config | Purpose |
 |---|---:|---:|---|
 | Target start longitudinal offset | `-15.0` | `0.0` | Bring the straight-going target closer to the conflict zone |
 | Ego route | `0 -> 3` | `0 -> 3` | Keep the visual left-turn branch that was clearly visible in CARLA |
@@ -104,7 +126,8 @@ The main change is the target-vehicle timing:
 | Ego nominal speed | `10.0` | `6.0` | Make the simplified timing gate produce a clear no-yield conflict and a safe give-way alternative |
 | Moving vehicle lateral offset | `3.7` | `ego +1.85`, `target +1.85` | Place vehicles near the intended right-hand lane centres rather than on the kerb/road edge |
 | Ego SMPC collision envelope | upstream hard-coded ellipse | `half_length=3.8m`, `half_width=1.8m`, `d_min=0.5m` | Keep the chance-constraint vehicle body approximation conservative while reducing the over-yielding seen with `d_min=1.0m` and `d_min=1.5m` |
-| SMPC reference-regeneration guard | `1.5m` internal default | `2.5m` | Compromise between `1.5m` being too strict for solver stability and `4.0m` being too loose, which allowed unsafe conflict-zone reference regeneration |
+| SMPC reference-regeneration guard | `1.5m` internal default | `1.5m` | Safety-first setting after `2.5m` and `4.0m` allowed unsafe conflict-zone behaviour in CARLA |
+| Ego yield-stop supervisor | not present | enabled, `yield_stop_speed=0.2m/s` | Permit the turning ego to slow almost to a stop while the straight-going target clears the conflict zone, instead of forcing continuous turn tracking |
 
 The route relation is intentionally kept close to the original intersection setting. After inspecting the CARLA video, the experiment is simplified to the visual left-turn case rather than continuing to force a UK-style right-turn interpretation.
 
@@ -112,16 +135,17 @@ The CARLA transform now uses `side_of_road="right"` and lane-centre-scale offset
 
 ## 6. Important Limitation
 
-The scenario configuration alone does **not** hard-code a traffic-law rule such as "ego must stop and yield".
+The scenario configuration alone does **not** hard-code a traffic-light rule. The controller does include a safety supervisor for this unsignalised give-way experiment: if the straight-going target is predicted to occupy the conflict zone while ego approaches it, the ego may brake to a near stop and damp steering until the target clears.
 
 Instead, the expected yielding behaviour should emerge from:
 
 - target-vehicle prediction,
 - SMPC collision-avoidance constraints,
 - risk allocation,
-- ego control optimisation.
+- ego control optimisation,
+- the yield-stop supervisor that preserves the right-of-way rule when the optimiser would otherwise keep moving through the turn.
 
-This is useful for the dissertation because the experiment can be described as testing whether risk-aware SMPC can produce appropriate give-way behaviour in an unsignalised intersection.
+This is useful for the dissertation because the experiment can be described as testing whether risk-aware SMPC, with a minimal rule-preserving safety layer, can produce appropriate give-way behaviour in an unsignalised intersection.
 
 The step-level logs now record `traffic_control`, `side_of_road`, `priority_rule`, `ego_traffic_light_state`, and whether a traffic-light stop override was applied. For this give-way scenario, `ego_traffic_light_forced_stop` should remain `false`; if the ego yields, that behaviour comes from the SMPC decision process.
 
@@ -210,8 +234,13 @@ This is the hard safety gate for deciding whether to move from a 1-init sanity c
 
 - complete validly,
 - avoid footprint-level collision with every target vehicle,
+- respect turning-gives-way semantics: the straight-going target must clear the inferred conflict zone before the turning ego enters it,
 - keep `solver_failure_frac <= 0.05`,
 - log `collision_envelope` in `smpc_debug_setup.json`, so stale server code/config is caught.
+
+Temporary ego slowing or stopping before the conflict zone is allowed and should not be treated as a failure. The rule is about priority and safety: the turning vehicle must not force itself into the conflict zone ahead of the straight-going vehicle.
+
+If the pulled result contains `applied_tuning_configs.json` or per-subrun `fine_tune_config.json`, the post-CARLA gate reads the `postcarla_gate` thresholds from that config. Command-line arguments still override the config when an explicit sensitivity check is needed.
 
 The script writes:
 
@@ -222,7 +251,7 @@ under the same CARLA timestamp result directory.
 
 ## 8. What to Check in the Results
 
-The key question is whether the ego turning vehicle slows or adjusts its trajectory before crossing the path of the straight-going target vehicle.
+The key question is whether the ego turning vehicle slows, stops, or adjusts its trajectory before crossing the path of the straight-going target vehicle. Maintaining motion is not required; yielding priority is required.
 
 Useful outputs:
 

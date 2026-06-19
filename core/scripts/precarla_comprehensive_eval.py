@@ -27,6 +27,7 @@ from precarla_validate_uk_give_way import (
     validate_scenario,
     vehicle_dimensions,
 )
+from experiment_tuning import load_scenario_with_tuning, tuning_snapshot_payload
 
 
 @dataclass(frozen=True)
@@ -63,8 +64,8 @@ def default_scenario_path() -> str:
 
 
 def load_json(path: str) -> Dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    scenario, _ = load_scenario_with_tuning(path)
+    return scenario
 
 
 def write_json(path: str, data: Dict[str, Any]) -> None:
@@ -266,8 +267,13 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
     half_width = float(ego.get("collision_ellipse_half_width", 0.0))
     d_min = float(ego.get("collision_d_min", 0.0))
     reference_regen_guard = float(ego.get("reference_regen_max_lateral_error", 0.0))
-    reference_guard_min = 2.0
-    reference_guard_max = 3.0
+    reference_guard_min = 1.0
+    reference_guard_max = 2.0
+    yield_stop_enabled = bool(ego.get("yield_stop_enabled", False))
+    yield_stop_speed = float(ego.get("yield_stop_speed", 999.0))
+    yield_stop_decel = float(ego.get("yield_stop_decel", 0.0))
+    yield_conflict_radius = float(ego.get("yield_conflict_radius", 0.0))
+    yield_steer_damping = float(ego.get("yield_steer_damping", -1.0))
 
     add_outcome(
         outcomes,
@@ -311,6 +317,32 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
             f"Too small can force stale global-reference linearization; too large can regenerate "
             f"an unsafe conflict-zone reference: "
             f"guard={reference_regen_guard:.2f}m, range=[{reference_guard_min:.2f}, {reference_guard_max:.2f}]m."
+        ),
+    )
+    add_outcome(
+        outcomes,
+        yield_stop_enabled and yield_stop_speed <= 0.5 and yield_stop_decel < 0.0,
+        "SMPC yield-stop supervisor braking",
+        (
+            f"Yield-stop supervisor is enabled with near-stop speed {yield_stop_speed:.2f}m/s "
+            f"and decel {yield_stop_decel:.2f}m/s^2."
+        ),
+        (
+            f"Yield-stop supervisor is not configured for near-stop yielding: "
+            f"enabled={yield_stop_enabled}, speed={yield_stop_speed:.2f}m/s, decel={yield_stop_decel:.2f}m/s^2."
+        ),
+    )
+    add_outcome(
+        outcomes,
+        yield_conflict_radius > 0.0 and 0.0 <= yield_steer_damping <= 1.0,
+        "SMPC yield-stop supervisor geometry",
+        (
+            f"Yield-stop conflict radius {yield_conflict_radius:.2f}m and steering damping "
+            f"{yield_steer_damping:.2f} are in a valid range."
+        ),
+        (
+            f"Yield-stop geometry parameters are invalid: conflict_radius={yield_conflict_radius:.2f}m, "
+            f"steer_damping={yield_steer_damping:.2f}."
         ),
     )
     return outcomes
@@ -497,6 +529,7 @@ def write_reports(
         "outcomes": [asdict(o) for o in outcomes],
         "speed_sweep_cases": [asdict(c) for c in speed_cases],
         "safety_gap_cases": [asdict(c) for c in gap_cases],
+        "fine_tune_config": tuning_snapshot_payload(load_json(scenario_path)),
     }
     json_path = os.path.join(output_dir, "precarla_comprehensive_eval.json")
     md_path = os.path.join(output_dir, "precarla_comprehensive_eval.md")
@@ -506,6 +539,11 @@ def write_reports(
         f.write("# Pre-CARLA Comprehensive Evaluation\n\n")
         f.write(f"- Scenario: `{scenario_path}`\n")
         f.write(f"- Generated: `{payload['generated_at']}`\n\n")
+        fine_tune = payload["fine_tune_config"]
+        if fine_tune.get("applied"):
+            f.write(f"- Fine-tune config: `{fine_tune.get('source_path')}`\n\n")
+        else:
+            f.write("- Fine-tune config: `none`\n\n")
         f.write("## Gate Outcomes\n\n")
         f.write("| Status | Test | Detail |\n|---|---|---|\n")
         for outcome in outcomes:

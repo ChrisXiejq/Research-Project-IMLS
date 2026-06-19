@@ -115,7 +115,16 @@ class VehicleParams:
     collision_d_min : float = 0.5
     collision_ellipse_half_length : float = 3.8
     collision_ellipse_half_width : float = 1.8
-    reference_regen_max_lateral_error : float = 2.5
+    reference_regen_max_lateral_error : float = 1.5
+    yield_stop_enabled : bool = True
+    yield_stop_speed : float = 0.2
+    yield_stop_decel : float = -3.0
+    yield_conflict_radius : float = 4.0
+    yield_ttc_margin : float = 0.8
+    yield_activation_distance : float = 18.0
+    yield_hold_distance : float = 8.0
+    yield_release_time : float = 0.3
+    yield_steer_damping : float = 0.25
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way
@@ -195,7 +204,16 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             collision_d_min=vehicle_params.collision_d_min,
                             collision_ellipse_half_length=vehicle_params.collision_ellipse_half_length,
                             collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width,
-                            reference_regen_max_lateral_error=vehicle_params.reference_regen_max_lateral_error)
+                            reference_regen_max_lateral_error=vehicle_params.reference_regen_max_lateral_error,
+                            yield_stop_enabled=vehicle_params.yield_stop_enabled,
+                            yield_stop_speed=vehicle_params.yield_stop_speed,
+                            yield_stop_decel=vehicle_params.yield_stop_decel,
+                            yield_conflict_radius=vehicle_params.yield_conflict_radius,
+                            yield_ttc_margin=vehicle_params.yield_ttc_margin,
+                            yield_activation_distance=vehicle_params.yield_activation_distance,
+                            yield_hold_distance=vehicle_params.yield_hold_distance,
+                            yield_release_time=vehicle_params.yield_release_time,
+                            yield_steer_damping=vehicle_params.yield_steer_damping)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -210,7 +228,16 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             collision_d_min=vehicle_params.collision_d_min,
                             collision_ellipse_half_length=vehicle_params.collision_ellipse_half_length,
                             collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width,
-                            reference_regen_max_lateral_error=vehicle_params.reference_regen_max_lateral_error)
+                            reference_regen_max_lateral_error=vehicle_params.reference_regen_max_lateral_error,
+                            yield_stop_enabled=vehicle_params.yield_stop_enabled,
+                            yield_stop_speed=vehicle_params.yield_stop_speed,
+                            yield_stop_decel=vehicle_params.yield_stop_decel,
+                            yield_conflict_radius=vehicle_params.yield_conflict_radius,
+                            yield_ttc_margin=vehicle_params.yield_ttc_margin,
+                            yield_activation_distance=vehicle_params.yield_activation_distance,
+                            yield_hold_distance=vehicle_params.yield_hold_distance,
+                            yield_release_time=vehicle_params.yield_release_time,
+                            yield_steer_damping=vehicle_params.yield_steer_damping)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -223,7 +250,16 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             collision_d_min=vehicle_params.collision_d_min,
                             collision_ellipse_half_length=vehicle_params.collision_ellipse_half_length,
                             collision_ellipse_half_width=vehicle_params.collision_ellipse_half_width,
-                            reference_regen_max_lateral_error=vehicle_params.reference_regen_max_lateral_error)
+                            reference_regen_max_lateral_error=vehicle_params.reference_regen_max_lateral_error,
+                            yield_stop_enabled=vehicle_params.yield_stop_enabled,
+                            yield_stop_speed=vehicle_params.yield_stop_speed,
+                            yield_stop_decel=vehicle_params.yield_stop_decel,
+                            yield_conflict_radius=vehicle_params.yield_conflict_radius,
+                            yield_ttc_margin=vehicle_params.yield_ttc_margin,
+                            yield_activation_distance=vehicle_params.yield_activation_distance,
+                            yield_hold_distance=vehicle_params.yield_hold_distance,
+                            yield_release_time=vehicle_params.yield_release_time,
+                            yield_steer_damping=vehicle_params.yield_steer_damping)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 

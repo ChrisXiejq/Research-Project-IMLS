@@ -7,6 +7,7 @@
                 "priority_rule" : "left-turning vehicle should give way to oncoming straight-going vehicle",
                 "enforcement" : "No hard-coded yield brake is used; expected yielding comes from target prediction and SMPC collision-risk constraints."
 	},
+        "tuning_config" : "tuning_configs/give_way_smpc_tuning.json",
 	"carla_params" : {
 		"map_str"              : "Town05",
 		"weather_str"          : "ClearNoon",
@@ -107,11 +108,7 @@
                         "start_left_offset"           :  1.85,
                         "goal_left_offset"            :  1.85,
 			"goal_longitudinal_offset"    : 20.0,
-                        "nominal_speed"               : 6.0,
-                        "collision_d_min"             : 0.5,
-                        "collision_ellipse_half_length": 3.8,
-                        "collision_ellipse_half_width" : 1.8,
-                        "reference_regen_max_lateral_error": 2.5
+                        "nominal_speed"               : 6.0
 		}
 	]
 }

@@ -1,0 +1,59 @@
+{
+  "config_name": "give_way_smpc_tuning",
+  "version": 1,
+  "description": "Central fine-tuning parameters for the unsignalised right-hand traffic give-way experiment. Scenario JSON keeps the route and traffic semantics; this file owns numeric parameters that may change between CARLA trials.",
+  "vehicle_role_overrides": {
+    "ego": {
+      "nominal_speed": 6.0,
+      "N": 10,
+      "dt": 0.2,
+      "num_modes": 3,
+      "collision_d_min": 0.5,
+      "collision_ellipse_half_length": 3.8,
+      "collision_ellipse_half_width": 1.8,
+      "reference_regen_max_lateral_error": 1.5,
+      "yield_stop_enabled": true,
+      "yield_stop_speed": 0.2,
+      "yield_stop_decel": -3.0,
+      "yield_conflict_radius": 4.0,
+      "yield_ttc_margin": 0.8,
+      "yield_activation_distance": 18.0,
+      "yield_hold_distance": 8.0,
+      "yield_release_time": 0.3,
+      "yield_steer_damping": 0.25
+    },
+    "target": {
+      "nominal_speed": 6.0,
+      "init_speed": 6.0
+    }
+  },
+  "postcarla_gate": {
+    "required_policies": [
+      "smpc_var_risk",
+      "smpc_fixed_risk"
+    ],
+    "footprint_margin_m": 0.25,
+    "conflict_radius_m": 4.0,
+    "clearance_tolerance_s": 0.2,
+    "max_solver_failure_frac": 0.05,
+    "require_completion_valid": true,
+    "require_collision_envelope_log": true,
+    "require_turning_gives_way": true
+  },
+  "tuning_rationale": {
+    "collision_d_min": "Minimum additional clearance around the configured collision ellipse. Current value keeps the 20260619_203644 no-footprint-collision behavior while avoiding the overly conservative d_min=1.0/1.5 failures.",
+    "collision_ellipse_half_length": "Ellipse half-length used by SMPC chance constraints; must cover the CARLA-like vehicle footprint plus margin.",
+    "collision_ellipse_half_width": "Ellipse half-width used by SMPC chance constraints; must cover the CARLA-like vehicle footprint plus margin.",
+    "reference_regen_max_lateral_error": "Guard for regenerating the local reference. After 2.5/4.0 allowed unsafe conflict-zone behavior in CARLA, the safety-first setting returns to the conservative 1.5m guard.",
+    "yield_stop_enabled": "Enables a safety supervisor for the turning ego vehicle. When the straight-going target is predicted to occupy the conflict zone, the supervisor permits near-stop yielding instead of forcing the ego to keep tracking the turn at speed.",
+    "yield_stop_speed": "Near-stop target speed used while yielding to the straight-going target.",
+    "yield_stop_decel": "Desired deceleration applied by the supervisor while yielding.",
+    "yield_conflict_radius": "Radius around the predicted path intersection used to estimate target conflict-zone occupancy.",
+    "yield_ttc_margin": "Time margin for deciding whether ego and target would overlap in the conflict zone.",
+    "yield_activation_distance": "Maximum ego path distance to the conflict point at which the supervisor may activate.",
+    "yield_hold_distance": "Distance close to the conflict point where the ego should continue holding until the target has cleared.",
+    "yield_release_time": "Minimum predicted target-clearance time needed before releasing the near-stop hold.",
+    "yield_steer_damping": "Steering damping factor applied while near-stopped so the ego does not keep turning sharply during the yield hold.",
+    "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target."
+  }
+}

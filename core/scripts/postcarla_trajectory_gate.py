@@ -48,6 +48,18 @@ class PairSafety:
 
 
 @dataclass(frozen=True)
+class YieldRule:
+    target_key: str
+    conflict_point_xy: Point
+    conflict_radius_m: float
+    ego_enter_time_s: Optional[float]
+    ego_exit_time_s: Optional[float]
+    target_enter_time_s: Optional[float]
+    target_exit_time_s: Optional[float]
+    target_clears_before_ego_enters: Optional[bool]
+
+
+@dataclass(frozen=True)
 class PolicySafety:
     scenario_dir: str
     policy: str
@@ -59,6 +71,7 @@ class PolicySafety:
     ego_key: Optional[str]
     target_keys: List[str]
     pair_safety: List[PairSafety]
+    yield_rules: List[YieldRule]
     errors: List[str]
     warnings: List[str]
 
@@ -161,6 +174,55 @@ def _common_time_grid(ego: np.ndarray, target: np.ndarray, default_dt: float = 0
     return np.arange(start, end + 0.5 * dt, dt)
 
 
+def _trajectory_conflict_point(ego: np.ndarray, target: np.ndarray) -> Point:
+    ego_xy = ego[:, 1:3]
+    target_xy = target[:, 1:3]
+    # Trajectories are short in this gate, so the direct pairwise distance matrix
+    # is clearer than a dependency on scipy/k-d trees.
+    diffs = ego_xy[:, None, :] - target_xy[None, :, :]
+    dist2 = np.sum(diffs * diffs, axis=2)
+    ego_idx, target_idx = np.unravel_index(int(np.argmin(dist2)), dist2.shape)
+    point = 0.5 * (ego_xy[ego_idx] + target_xy[target_idx])
+    return float(point[0]), float(point[1])
+
+
+def _zone_interval(traj: np.ndarray, center: Point, radius_m: float) -> Tuple[Optional[float], Optional[float]]:
+    center_xy = np.asarray(center, dtype=float)
+    dist = np.linalg.norm(traj[:, 1:3] - center_xy, axis=1)
+    inside = np.flatnonzero(dist <= radius_m)
+    if len(inside) == 0:
+        return None, None
+    return float(traj[inside[0], 0]), float(traj[inside[-1], 0])
+
+
+def _yield_rule(
+    target_key: str,
+    ego_payload: Dict[str, Any],
+    target_payload: Dict[str, Any],
+    conflict_radius_m: float,
+    clearance_tolerance_s: float,
+) -> YieldRule:
+    ego = np.asarray(ego_payload["state_trajectory"], dtype=float)
+    target = np.asarray(target_payload["state_trajectory"], dtype=float)
+    conflict_point = _trajectory_conflict_point(ego, target)
+    ego_enter, ego_exit = _zone_interval(ego, conflict_point, conflict_radius_m)
+    target_enter, target_exit = _zone_interval(target, conflict_point, conflict_radius_m)
+    if ego_enter is None or target_exit is None:
+        target_first = None
+    else:
+        target_first = bool(target_exit <= ego_enter + clearance_tolerance_s)
+    return YieldRule(
+        target_key=target_key,
+        conflict_point_xy=conflict_point,
+        conflict_radius_m=float(conflict_radius_m),
+        ego_enter_time_s=ego_enter,
+        ego_exit_time_s=ego_exit,
+        target_enter_time_s=target_enter,
+        target_exit_time_s=target_exit,
+        target_clears_before_ego_enters=target_first,
+    )
+
+
 def _pair_safety(
     ego_key: str,
     ego_payload: Dict[str, Any],
@@ -250,10 +312,27 @@ def _list_scenario_dirs(results_dir: str) -> List[str]:
     return out
 
 
+def _load_postcarla_gate_config(results_dir: str) -> Dict[str, Any]:
+    root_configs = _load_json(os.path.join(results_dir, "applied_tuning_configs.json")) or {}
+    for metadata in root_configs.values():
+        config = metadata.get("config") if isinstance(metadata, dict) else None
+        if isinstance(config, dict) and isinstance(config.get("postcarla_gate"), dict):
+            return dict(config["postcarla_gate"])
+
+    for scenario_dir in _list_scenario_dirs(results_dir):
+        metadata = _load_json(os.path.join(scenario_dir, "fine_tune_config.json")) or {}
+        config = metadata.get("config") if isinstance(metadata, dict) else None
+        if isinstance(config, dict) and isinstance(config.get("postcarla_gate"), dict):
+            return dict(config["postcarla_gate"])
+    return {}
+
+
 def evaluate_scenario_dir(
     scenario_dir: str,
     required_policies: Sequence[str],
     footprint_margin_m: float,
+    conflict_radius_m: float,
+    clearance_tolerance_s: float,
     require_collision_envelope: bool,
     max_solver_failure_frac: float,
 ) -> PolicySafety:
@@ -262,6 +341,7 @@ def evaluate_scenario_dir(
     errors: List[str] = []
     warnings: List[str] = []
     pair_results: List[PairSafety] = []
+    yield_rules: List[YieldRule] = []
 
     rollout_config = _load_json(os.path.join(scenario_dir, "scenario_rollout_config.json"))
     completion_valid = _completion_valid(scenario_dir)
@@ -292,11 +372,33 @@ def evaluate_scenario_dir(
             )
             pair_results.append(pair)
             if pair.footprint_collision:
-                errors.append(
+                message = (
                     f"Footprint collision with {target_key}: "
                     f"{pair.collision_duration_s:.2f}s, "
                     f"center dmin={pair.min_center_distance_m:.3f}m"
                 )
+                if is_required:
+                    errors.append(message)
+                else:
+                    warnings.append(message)
+            yield_rule = _yield_rule(
+                target_key,
+                result[ego_key],
+                result[target_key],
+                conflict_radius_m,
+                clearance_tolerance_s,
+            )
+            yield_rules.append(yield_rule)
+            if yield_rule.target_clears_before_ego_enters is False:
+                message = (
+                    f"Turning vehicle did not give way to {target_key}: "
+                    f"target_exit={yield_rule.target_exit_time_s:.2f}s, "
+                    f"ego_enter={yield_rule.ego_enter_time_s:.2f}s"
+                )
+                if is_required:
+                    errors.append(message)
+                else:
+                    warnings.append(message)
 
     if is_required:
         if completion_valid is not True:
@@ -328,12 +430,13 @@ def evaluate_scenario_dir(
         ego_key=ego_key,
         target_keys=target_keys,
         pair_safety=pair_results,
+        yield_rules=yield_rules,
         errors=errors,
         warnings=warnings,
     )
 
 
-def write_reports(results_dir: str, evaluations: List[PolicySafety]) -> Tuple[str, str]:
+def write_reports(results_dir: str, evaluations: List[PolicySafety], gate_settings: Dict[str, Any]) -> Tuple[str, str]:
     json_path = os.path.join(results_dir, "postcarla_trajectory_gate.json")
     md_path = os.path.join(results_dir, "postcarla_trajectory_gate.md")
     payload = {
@@ -342,6 +445,7 @@ def write_reports(results_dir: str, evaluations: List[PolicySafety]) -> Tuple[st
         "overall_status": "FAIL" if any(e.status == "FAIL" for e in evaluations) else (
             "WARN" if any(e.status == "WARN" for e in evaluations) else "PASS"
         ),
+        "gate_settings": gate_settings,
         "evaluations": [asdict(e) for e in evaluations],
     }
     with open(json_path, "w", encoding="utf-8") as f:
@@ -352,15 +456,23 @@ def write_reports(results_dir: str, evaluations: List[PolicySafety]) -> Tuple[st
         f.write(f"- Generated: `{payload['generated_at']}`\n")
         f.write(f"- Results dir: `{results_dir}`\n")
         f.write(f"- Overall status: `{payload['overall_status']}`\n\n")
-        f.write("| Status | Policy | Required | Completion | Solver Failure | Collision Envelope | Target | Center dmin | Footprint collision | Collision duration | Notes |\n")
-        f.write("|---|---|---:|---|---:|---|---|---:|---|---:|---|\n")
+        f.write("## Gate Settings\n\n")
+        for key, value in sorted(gate_settings.items()):
+            f.write(f"- `{key}`: `{value}`\n")
+        f.write("\n## Policy Results\n\n")
+        f.write("| Status | Policy | Required | Completion | Solver Failure | Collision Envelope | Target | Center dmin | Footprint collision | Yield OK | Collision duration | Notes |\n")
+        f.write("|---|---|---:|---|---:|---|---|---:|---|---|---:|---|\n")
         for evaluation in evaluations:
             if evaluation.pair_safety:
                 pairs = evaluation.pair_safety
             else:
                 pairs = [None]
+            yield_by_target = {rule.target_key: rule for rule in evaluation.yield_rules}
             notes = "; ".join(evaluation.errors + evaluation.warnings)
             for pair in pairs:
+                yield_ok = ""
+                if pair is not None and pair.target_key in yield_by_target:
+                    yield_ok = str(yield_by_target[pair.target_key].target_clears_before_ego_enters)
                 f.write(
                     f"| {evaluation.status} | {evaluation.policy} | {evaluation.is_required_policy} | "
                     f"{evaluation.completion_valid} | "
@@ -369,6 +481,7 @@ def write_reports(results_dir: str, evaluations: List[PolicySafety]) -> Tuple[st
                     f"{'' if pair is None else pair.target_key} | "
                     f"{'' if pair is None else f'{pair.min_center_distance_m:.3f}'} | "
                     f"{'' if pair is None else pair.footprint_collision} | "
+                    f"{yield_ok} | "
                     f"{'' if pair is None else f'{pair.collision_duration_s:.2f}'} | "
                     f"{notes} |\n"
                 )
@@ -392,6 +505,12 @@ def print_summary(evaluations: List[PolicySafety], report_paths: Tuple[str, str]
                 f"footprint_collision={pair.footprint_collision} "
                 f"collision_duration={pair.collision_duration_s:.2f}s"
             )
+        for rule in evaluation.yield_rules:
+            print(
+                f"  yield target={rule.target_key} "
+                f"target_exit={rule.target_exit_time_s} ego_enter={rule.ego_enter_time_s} "
+                f"target_first={rule.target_clears_before_ego_enters}"
+            )
         for error in evaluation.errors:
             print(f"  ERROR: {error}")
         for warning in evaluation.warnings:
@@ -407,11 +526,23 @@ def main() -> int:
     parser.add_argument("results_dir", help="CARLA timestamp results directory.")
     parser.add_argument(
         "--required-policies",
-        default="smpc_var_risk,smpc_fixed_risk",
+        default=None,
         help="Comma-separated policies that must complete and avoid footprint collision.",
     )
-    parser.add_argument("--footprint-margin-m", type=float, default=FOOTPRINT_SAFETY_MARGIN_M)
-    parser.add_argument("--max-solver-failure-frac", type=float, default=0.05)
+    parser.add_argument("--footprint-margin-m", type=float, default=None)
+    parser.add_argument(
+        "--conflict-radius-m",
+        type=float,
+        default=None,
+        help="Radius around the inferred conflict point used for turning-gives-way checks.",
+    )
+    parser.add_argument(
+        "--clearance-tolerance-s",
+        type=float,
+        default=None,
+        help="Allowed timing tolerance for target clearing the conflict zone before ego enters.",
+    )
+    parser.add_argument("--max-solver-failure-frac", type=float, default=None)
     parser.add_argument(
         "--allow-missing-collision-envelope",
         action="store_true",
@@ -420,19 +551,58 @@ def main() -> int:
     args = parser.parse_args()
 
     results_dir = os.path.abspath(args.results_dir)
-    required_policies = [p.strip() for p in args.required_policies.split(",") if p.strip()]
+    gate_config = _load_postcarla_gate_config(results_dir)
+    required_policy_value = args.required_policies
+    if required_policy_value is None:
+        required_policy_value = ",".join(gate_config.get("required_policies", ["smpc_var_risk", "smpc_fixed_risk"]))
+    required_policies = [p.strip() for p in required_policy_value.split(",") if p.strip()]
+    footprint_margin_m = (
+        args.footprint_margin_m
+        if args.footprint_margin_m is not None
+        else float(gate_config.get("footprint_margin_m", FOOTPRINT_SAFETY_MARGIN_M))
+    )
+    conflict_radius_m = (
+        args.conflict_radius_m
+        if args.conflict_radius_m is not None
+        else float(gate_config.get("conflict_radius_m", 4.0))
+    )
+    clearance_tolerance_s = (
+        args.clearance_tolerance_s
+        if args.clearance_tolerance_s is not None
+        else float(gate_config.get("clearance_tolerance_s", 0.2))
+    )
+    max_solver_failure_frac = (
+        args.max_solver_failure_frac
+        if args.max_solver_failure_frac is not None
+        else float(gate_config.get("max_solver_failure_frac", 0.05))
+    )
+    require_collision_envelope = (
+        bool(gate_config.get("require_collision_envelope_log", True))
+        and not args.allow_missing_collision_envelope
+    )
+    gate_settings = {
+        "required_policies": required_policies,
+        "footprint_margin_m": footprint_margin_m,
+        "conflict_radius_m": conflict_radius_m,
+        "clearance_tolerance_s": clearance_tolerance_s,
+        "max_solver_failure_frac": max_solver_failure_frac,
+        "require_collision_envelope_log": require_collision_envelope,
+        "source": "fine_tune_config" if gate_config else "script_defaults",
+    }
     scenario_dirs = _list_scenario_dirs(results_dir)
     evaluations = [
         evaluate_scenario_dir(
             scenario_dir,
             required_policies=required_policies,
-            footprint_margin_m=args.footprint_margin_m,
-            require_collision_envelope=not args.allow_missing_collision_envelope,
-            max_solver_failure_frac=args.max_solver_failure_frac,
+            footprint_margin_m=footprint_margin_m,
+            conflict_radius_m=conflict_radius_m,
+            clearance_tolerance_s=clearance_tolerance_s,
+            require_collision_envelope=require_collision_envelope,
+            max_solver_failure_frac=max_solver_failure_frac,
         )
         for scenario_dir in scenario_dirs
     ]
-    report_paths = write_reports(results_dir, evaluations)
+    report_paths = write_reports(results_dir, evaluations, gate_settings)
     print_summary(evaluations, report_paths)
     return 1 if any(e.status == "FAIL" for e in evaluations) else 0
 

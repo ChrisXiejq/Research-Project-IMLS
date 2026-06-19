@@ -23,6 +23,8 @@ import os
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
+from experiment_tuning import load_scenario_with_tuning
+
 try:
     import gymnasium as gym
     from gymnasium import spaces
@@ -386,8 +388,7 @@ def simulate_min_footprint_separation(
 
 
 def validate_scenario(scenario_path: str, safety_time_gap_s: float = 2.0) -> Tuple[List[str], List[str], ConflictReport]:
-    with open(scenario_path, "r", encoding="utf-8") as f:
-        scenario = json.load(f)
+    scenario, _ = load_scenario_with_tuning(scenario_path)
 
     scenario_dir = os.path.dirname(os.path.abspath(scenario_path))
     intersection_path = os.path.join(scenario_dir, scenario["carla_params"]["intersection_csv_loc"])
