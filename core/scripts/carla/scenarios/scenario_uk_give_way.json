@@ -5,7 +5,7 @@
                 "traffic_control" : "unsignalised",
                 "side_of_road" : "right",
                 "priority_rule" : "left-turning vehicle should give way to oncoming straight-going vehicle",
-                "enforcement" : "Rule-aware SMPC uses target prediction, collision-risk constraints, and a route-defined conflict zone with a yield stop point before the turning ego enters the shared conflict area."
+                "enforcement" : "Rule-aware SMPC uses target prediction, collision-risk constraints, and an explicit yielding state machine with a route-defined conflict zone, stop point, braking-distance activation, release, and recovery."
 	},
         "tuning_config" : "tuning_configs/give_way_smpc_tuning.json",
 	"carla_params" : {

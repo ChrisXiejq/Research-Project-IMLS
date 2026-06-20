@@ -274,6 +274,7 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
     yield_stop_decel = float(ego.get("yield_stop_decel", 0.0))
     yield_conflict_radius = float(ego.get("yield_conflict_radius", 0.0))
     yield_stop_buffer_distance = float(ego.get("yield_stop_buffer_distance", 0.0))
+    yield_brake_distance_margin = float(ego.get("yield_brake_distance_margin", -1.0))
     yield_wait_steer_lookahead_distance = float(ego.get("yield_wait_steer_lookahead_distance", -1.0))
     yield_steer_damping = float(ego.get("yield_steer_damping", -1.0))
     yield_recovery_enabled = bool(ego.get("yield_recovery_enabled", False))
@@ -343,18 +344,21 @@ def controller_envelope_tests(scenario: Dict[str, Any]) -> List[TestOutcome]:
         (
             yield_conflict_radius > 0.0
             and yield_stop_buffer_distance > yield_conflict_radius
+            and yield_brake_distance_margin >= 0.0
             and yield_wait_steer_lookahead_distance >= 0.0
             and 0.0 <= yield_steer_damping <= 1.0
         ),
-        "SMPC route-defined yield stop line",
+        "SMPC rule-aware yield state machine geometry",
         (
-            f"Yield-stop uses a route-defined conflict zone with radius={yield_conflict_radius:.2f}m, "
+            f"Rule-aware yielding uses a route-defined conflict zone with radius={yield_conflict_radius:.2f}m, "
             f"stop_buffer={yield_stop_buffer_distance:.2f}m, "
+            f"brake_margin={yield_brake_distance_margin:.2f}m, "
             f"wait_steer_lookahead={yield_wait_steer_lookahead_distance:.2f}m."
         ),
         (
-            f"Yield-stop stop-line geometry is invalid: conflict_radius={yield_conflict_radius:.2f}m, "
+            f"Rule-aware yield-line geometry is invalid: conflict_radius={yield_conflict_radius:.2f}m, "
             f"stop_buffer={yield_stop_buffer_distance:.2f}m, "
+            f"brake_margin={yield_brake_distance_margin:.2f}m, "
             f"wait_steer_lookahead={yield_wait_steer_lookahead_distance:.2f}m, "
             f"steer_damping={yield_steer_damping:.2f}."
         ),
