@@ -211,9 +211,10 @@ python run_all_scenarios.py \
   --solver_backend gurobi \
   --risk_profile upstream_code \
   --with_notv \
-  --with_notv_cl \
-  --enable_camera_viz
+  --with_notv_cl
 ```
+
+This writes the original CARLA drone-view `carla_sim.avi` because `scenario_uk_give_way.json` has `drone_viz_params.save_avi=true`, and the batch runner now preserves that setting by default. Use `--disable_camera_viz` only for a faster headless run without AVI output. Avoid `--render_topdown_mp4` when the dissertation figure/video should use the original CARLA bird-eye style.
 
 For a small pilot:
 
@@ -230,7 +231,7 @@ python run_all_scenarios.py \
   --with_notv_cl
 ```
 
-For the first validation run, it is better to omit `--enable_camera_viz` unless a video is needed, because video recording slows down the experiment.
+For a faster first validation run where no video is needed, add `--disable_camera_viz`; otherwise keep the default so each successful subrun writes `carla_sim.avi`.
 
 After pulling a CARLA result directory back to the local machine, run the post-CARLA trajectory gate:
 

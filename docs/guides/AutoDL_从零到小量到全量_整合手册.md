@@ -240,7 +240,7 @@ cd "$REPO/core/scripts/carla"
 论文或答辩里常需要「道路几何 + 车辆运动」的动图/视频。已有 `carla_sim.avi` 时，主实验命令只保留 CARLA 航拍 AVI 路径。
 
 1. **CARLA 无人机视角** **`carla_sim.avi`**（仿真**进行中**逐帧写入，真三维 RGB）
-   在 `run_all_scenarios.py` 中加 `**--enable_camera_viz`\*\*，且场景 JSON 的 `drone_viz_params.save_avi=true`。本仓库的 intersection 场景默认是高空俯视/跟随 ego 的 drone camera，所以每个成功子目录会生成 `carla_sim.avi`。\
+   默认保留场景 JSON 的 `drone_viz_params.save_avi=true`，因此本仓库的 intersection 场景会生成高空俯视/跟随 ego 的 `carla_sim.avi`。如需强制确认，可继续加 `--enable_camera_viz`；如需快速无视频运行，改用 `--disable_camera_viz`。\
    **服务端要求：** 必须使用上文 `-RenderOffScreen` 启动；不要用 `-nullrhi`，否则 camera 不会得到有效 RGB。
 2. **离线俯视** **`rollout_topdown.mp4`**（可选，已有 AVI 时无需生成）
    如后续仍想补做俯视 MP4，可事后单独运行：

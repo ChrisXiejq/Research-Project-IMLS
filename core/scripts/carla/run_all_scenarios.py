@@ -18,7 +18,7 @@ from experiment_tuning import apply_tuning_config, load_scenario_with_tuning, tu
 
 
 
-def _prepare_drone_viz_params(scenario_dict, enable_camera_viz=False):
+def _prepare_drone_viz_params(scenario_dict, enable_camera_viz=True):
     drone_viz_dict = dict(scenario_dict["drone_viz_params"])
     if not enable_camera_viz:
         # Headless AutoDL runs are more stable without RGB camera sensors.
@@ -179,7 +179,7 @@ def _run_postprocess(results_folder, args, log):
     return payload
 
 
-def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, enable_camera_viz=False):
+def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, enable_camera_viz=True):
     if scene =="intersection":
         from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
     else:
@@ -226,7 +226,7 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
     return runner.run_scenario()
 
 def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
-                 enable_camera_viz=False, solver_backend="gurobi",
+                 enable_camera_viz=True, solver_backend="gurobi",
                  risk_profile="upstream_code"):
     if scene =="intersection":
         from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
@@ -301,8 +301,11 @@ if __name__ == '__main__':
                         help="Also run no-TV reference rollout.")
     parser.add_argument("--with_notv_cl", action="store_true",
                         help="Also run no-TV centerline rollout.")
-    parser.add_argument("--enable_camera_viz", action="store_true",
-                        help="Enable CARLA RGB camera sensor and avi/opencv visualization. Disabled by default for AutoDL stability.")
+    parser.add_argument("--enable_camera_viz", dest="enable_camera_viz", action="store_true",
+                        help="Enable CARLA RGB camera sensor and avi/opencv visualization. This is the default when the scenario requests save_avi=true.")
+    parser.add_argument("--disable_camera_viz", dest="enable_camera_viz", action="store_false",
+                        help="Disable CARLA RGB camera sensor and carla_sim.avi generation for faster/headless runs.")
+    parser.set_defaults(enable_camera_viz=True)
     parser.add_argument(
         "--render_topdown_mp4",
         action="store_true",
