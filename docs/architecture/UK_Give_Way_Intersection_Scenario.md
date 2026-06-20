@@ -137,7 +137,9 @@ The CARLA transform now uses `side_of_road="right"` and lane-centre-scale offset
 
 ## 6. Important Limitation
 
-The scenario configuration alone does **not** hard-code a traffic-light rule, and the controller must not assume an unseen target vehicle exists. The rule-aware yielding state machine is gated by the predictor: if there is no valid target prediction, no yielding phase is activated. Once an observed target has a valid multimodal prediction, the state machine defines a fixed conflict point from the ego global left-turn route and the target's current/predicted straight motion line, then places an ego stop point before that conflict point. While the straight-going target is approaching or occupying the conflict zone, the turning ego enters `approach_yield_line` once its distance to the stop point is below `v^2 / (2 |a_min|) + margin`, then transitions to `hold_yield_line` near the stop point. During these phases it brakes toward the stop point and uses route lookahead steering for the intended left turn instead of continuing to drift through the junction. After the target clears the zone, `released_recovery` temporarily lets the ego regenerate a local reference from its stopped pose and resume the turn.
+The scenario configuration alone does **not** hard-code a traffic-light rule, and the controller must not assume an unseen target vehicle exists. Full priority yielding is still gated by the predictor: the ego only treats the target as a confirmed straight-going priority vehicle after an observed target has a valid multimodal prediction. The latest CARLA run showed that waiting for the first valid prediction can be too late, so the state machine now has an earlier `cautious_approach_observed_target` phase. This phase uses only observed target positions across frames to estimate a moving target line; if that observed line intersects the ego route near the conflict zone, the ego conservatively brakes before prediction is ready, without declaring full target priority.
+
+Once the target prediction is valid, the state machine defines a fixed conflict point from the ego global left-turn route and the target's current/predicted straight motion line, then places an ego stop point before that conflict point. While the straight-going target is approaching or occupying the conflict zone, the turning ego enters `approach_yield_line` once its distance to the stop point is below `v^2 / (2 |a_min|) + margin`, then transitions to `hold_yield_line` near the stop point. During these phases it brakes toward the stop point and uses route lookahead steering for the intended left turn instead of continuing to drift through the junction. After the target clears the zone, `released_recovery` temporarily lets the ego regenerate a local reference from its stopped pose and resume the turn.
 
 Instead, the expected yielding behaviour should emerge from:
 
@@ -145,6 +147,7 @@ Instead, the expected yielding behaviour should emerge from:
 - SMPC collision-avoidance constraints,
 - risk allocation,
 - ego control optimisation,
+- observed target tracking for non-oracle cautious approach before predictor warm-up,
 - the route-defined rule-aware yielding state machine that preserves the right-of-way rule when the optimiser would otherwise keep moving through the turn,
 - the post-yield recovery supervisor that prevents a safe near-stop yield from becoming a deadlock.
 

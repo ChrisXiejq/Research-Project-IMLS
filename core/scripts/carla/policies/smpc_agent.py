@@ -59,6 +59,9 @@ class SMPCAgent(object):
                  yield_activation_distance=18.0,
                  yield_hold_distance=8.0,
                  yield_release_time=0.3,
+                 yield_observed_caution_enabled=True,
+                 yield_observed_caution_distance=24.0,
+                 yield_observed_caution_min_target_speed=0.5,
                  yield_steer_damping=0.25,
                  yield_recovery_enabled=True,
                  yield_recovery_steps=240,
@@ -103,6 +106,9 @@ class SMPCAgent(object):
         self.yield_activation_distance = float(yield_activation_distance)
         self.yield_hold_distance = float(yield_hold_distance)
         self.yield_release_time = float(yield_release_time)
+        self.yield_observed_caution_enabled = bool(yield_observed_caution_enabled)
+        self.yield_observed_caution_distance = float(yield_observed_caution_distance)
+        self.yield_observed_caution_min_target_speed = float(yield_observed_caution_min_target_speed)
         self.yield_steer_damping = float(yield_steer_damping)
         self.yield_recovery_enabled = bool(yield_recovery_enabled)
         self.yield_recovery_steps = int(yield_recovery_steps)
@@ -138,6 +144,16 @@ class SMPCAgent(object):
             raise ValueError(
                 "yield_wait_steer_lookahead_distance must be non-negative, "
                 f"got {self.yield_wait_steer_lookahead_distance}"
+            )
+        if self.yield_observed_caution_distance < 0.0:
+            raise ValueError(
+                "yield_observed_caution_distance must be non-negative, "
+                f"got {self.yield_observed_caution_distance}"
+            )
+        if self.yield_observed_caution_min_target_speed < 0.0:
+            raise ValueError(
+                "yield_observed_caution_min_target_speed must be non-negative, "
+                f"got {self.yield_observed_caution_min_target_speed}"
             )
         if not 0.0 <= self.yield_steer_damping <= 1.0:
             raise ValueError(f"yield_steer_damping must be in [0, 1], got {self.yield_steer_damping}")
@@ -190,6 +206,7 @@ class SMPCAgent(object):
         self._yield_recovery_steps_remaining = 0
         self._rule_yield_phase = "idle"
         self._yield_geometry = None
+        self._observed_target_tracks = {}
         self.reference_regeneration()
 
         self.warm_start={}
@@ -353,13 +370,14 @@ class SMPCAgent(object):
                 "priority_rule": "turning_gives_way_to_oncoming_straight",
                 "state_machine": [
                     "free_drive",
+                    "cautious_approach_observed_target",
                     "observe_priority_target",
                     "approach_yield_line",
                     "hold_yield_line",
                     "released_recovery",
                 ],
                 "conflict_zone_source": "fixed_ego_route_target_motion_line_intersection",
-                "oracle_guard": "yielding requires an observed target with a valid multimodal prediction; no valid target prediction means no rule-aware yield activation",
+                "oracle_guard": "full priority yielding requires a valid multimodal prediction; before prediction is valid, only an observed moving target track may trigger cautious approach",
                 "activation_rule": "distance_to_stop <= v^2/(2*abs(decel)) + brake_distance_margin",
             },
             "yield_stop_supervisor": {
@@ -375,6 +393,9 @@ class SMPCAgent(object):
                 "activation_distance": self.yield_activation_distance,
                 "hold_distance": self.yield_hold_distance,
                 "release_time": self.yield_release_time,
+                "observed_caution_enabled": self.yield_observed_caution_enabled,
+                "observed_caution_distance": self.yield_observed_caution_distance,
+                "observed_caution_min_target_speed": self.yield_observed_caution_min_target_speed,
                 "steer_damping": self.yield_steer_damping,
                 "recovery_enabled": self.yield_recovery_enabled,
                 "recovery_steps": self.yield_recovery_steps,
@@ -716,93 +737,61 @@ class SMPCAgent(object):
         geometry["target_motion_line_min_distance"] = float(geometry["init_min_path_distance"])
         return geometry
 
-    def _rule_aware_yield_decision(
+    def _update_observed_target_tracks(self, target_vehicle_positions, N_TV):
+        tracks = {}
+        if target_vehicle_positions is None:
+            self._observed_target_tracks = tracks
+            return tracks
+        for k in range(min(N_TV, len(target_vehicle_positions))):
+            current_xy = self._as_xy_array(target_vehicle_positions[k])
+            if current_xy is None:
+                continue
+            previous = self._observed_target_tracks.get(k, {})
+            prev_xy = previous.get("position")
+            velocity = None
+            speed = 0.0
+            if prev_xy is not None:
+                delta = current_xy - np.asarray(prev_xy, dtype=float)
+                velocity = delta / max(self.dt, 1e-3)
+                speed = float(np.linalg.norm(velocity))
+            tracks[k] = {
+                "position": current_xy,
+                "velocity": velocity,
+                "speed": speed,
+            }
+        self._observed_target_tracks = tracks
+        return tracks
+
+    def _observed_target_path(self, track):
+        position = track.get("position")
+        velocity = track.get("velocity")
+        if position is None or velocity is None:
+            return None
+        speed = float(np.linalg.norm(velocity))
+        if speed < self.yield_observed_caution_min_target_speed:
+            return None
+        direction = velocity / max(speed, 1e-6)
+        horizon = max(self.N, 2)
+        times = np.arange(horizon, dtype=float) * self.dt
+        return np.asarray(position, dtype=float)[None, :] + times[:, None] * speed * direction[None, :]
+
+    def _evaluate_yield_geometry(
         self,
         x,
         y,
         speed,
-        t_ref_new,
-        target_vehicle_gmm_preds,
-        target_vehicle_mode_probs,
-        target_vehicle_positions,
-        target_vehicle_valid_pred,
-        N_TV,
+        ego_global_path,
+        ego_global_s,
+        ego_global_idx,
+        target_idx,
+        mode,
+        target_path,
+        geometry,
+        valid_flags,
+        source,
+        allow_priority_yield,
     ):
-        status = {
-            "enabled": self.yield_stop_enabled,
-            "active": False,
-            "reason": None,
-            "target_index": None,
-            "target_mode": None,
-        }
-        if not self.yield_stop_enabled:
-            status["reason"] = "disabled"
-            return status
-        if self.ol_flag:
-            status["reason"] = "open_loop_policy"
-            return status
-        if N_TV <= 0 or target_vehicle_gmm_preds is None:
-            status["reason"] = "no_target_prediction"
-            return status
-        if target_vehicle_valid_pred is not None:
-            valid_flags = [bool(v) for v in target_vehicle_valid_pred[:N_TV]]
-            if not any(valid_flags):
-                status["reason"] = "no_valid_target_prediction"
-                status["prediction_valid"] = valid_flags
-                return status
-        else:
-            valid_flags = [True] * N_TV
-
-        means_all = np.asarray(target_vehicle_gmm_preds[0])
-        if means_all.size == 0:
-            status["reason"] = "empty_target_prediction"
-            return status
-
-        ego_global_path = np.asarray(self.feas_ref_states[:self.ref_horizon + 1, :2], dtype=float)
-        ego_global_s = self._path_cumulative_distance(ego_global_path)
-        if len(ego_global_path) < 2 or len(ego_global_s) < 2:
-            status["reason"] = "short_global_ego_reference"
-            return status
-        ego_global_idx = int(np.argmin(np.linalg.norm(ego_global_path - np.array([x, y], dtype=float), axis=1)))
         ego_route_s = float(ego_global_s[ego_global_idx])
-
-        best = None
-        for k in range(min(N_TV, len(means_all))):
-            if k < len(valid_flags) and not valid_flags[k]:
-                continue
-            target_modes = np.asarray(means_all[k])
-            if target_modes.ndim < 3:
-                continue
-            if target_vehicle_mode_probs is not None:
-                probs = np.asarray(target_vehicle_mode_probs[k], dtype=float)
-                mode = int(np.nanargmax(probs)) if probs.size else 0
-                mode = min(mode, target_modes.shape[0] - 1)
-            else:
-                mode = 0
-            target_path = np.asarray(target_modes[mode, :, :2], dtype=float)
-            if len(target_path) < 2:
-                continue
-            target_position = None
-            if target_vehicle_positions is not None and k < len(target_vehicle_positions):
-                target_position = target_vehicle_positions[k]
-            geometry = self._route_defined_yield_geometry(
-                target_path,
-                target_position=target_position,
-            )
-            if geometry is None:
-                continue
-            target_priority_distance = geometry["target_distance_to_conflict"]
-            if target_priority_distance < -self.yield_conflict_radius:
-                target_priority_distance = float("inf")
-            candidate = (target_priority_distance, k, mode, target_path, geometry)
-            if best is None or candidate[0] < best[0]:
-                best = candidate
-
-        if best is None:
-            status["reason"] = "no_valid_target_path"
-            return status
-
-        _, target_idx, mode, target_path, geometry = best
         conflict_point = np.asarray(geometry["conflict_point"], dtype=float)
         stop_point = np.asarray(geometry["stop_point"], dtype=float)
         target_conflict_point = np.asarray(geometry["target_conflict_point"], dtype=float)
@@ -851,13 +840,25 @@ class SMPCAgent(object):
         )
         approaching_stop_line = ego_dist_to_stop <= self.yield_activation_distance
         not_far_past_conflict = ego_dist_to_conflict >= -self.yield_conflict_radius
+        cautious_candidate = (
+            self.yield_observed_caution_enabled
+            and not allow_priority_yield
+            and source == "observed_track"
+            and target_approaching_conflict
+            and target_speed_est >= self.yield_observed_caution_min_target_speed
+            and ego_dist_to_conflict <= self.yield_observed_caution_distance
+            and not_far_past_conflict
+        )
         active = (
-            target_has_priority
+            allow_priority_yield
+            and target_has_priority
             and approaching_stop_line
             and not_far_past_conflict
             and (braking_distance_required or overlap_risk or close_hold)
-        )
-        if active and ego_dist_to_stop <= self.yield_hold_distance:
+        ) or cautious_candidate
+        if active and not allow_priority_yield:
+            phase = "cautious_approach_observed_target"
+        elif active and ego_dist_to_stop <= self.yield_hold_distance:
             phase = "hold_yield_line"
         elif active:
             phase = "approach_yield_line"
@@ -867,20 +868,27 @@ class SMPCAgent(object):
             phase = "released_recovery"
         else:
             phase = "free_drive"
-        self._rule_yield_phase = phase
 
-        status.update({
+        if active and not allow_priority_yield:
+            reason = "observed_target_cautious_approach"
+        elif active and braking_distance_required:
+            reason = "braking_distance_yield"
+        elif active:
+            reason = "target_has_priority_before_stop_line"
+        else:
+            reason = "no_active_yield_needed"
+
+        return {
             "active": bool(active),
             "phase": phase,
             "priority_rule": "turning_gives_way_to_oncoming_straight",
-            "reason": (
-                "braking_distance_yield"
-                if active and braking_distance_required
-                else ("target_has_priority_before_stop_line" if active else "no_active_yield_needed")
-            ),
+            "reason": reason,
             "target_index": int(target_idx),
             "target_mode": int(mode),
             "prediction_valid": valid_flags,
+            "prediction_source": source,
+            "priority_from_prediction": bool(allow_priority_yield),
+            "cautious_candidate": bool(cautious_candidate),
             "min_path_distance": float(geometry["min_path_distance"]),
             "conflict_point": conflict_point.tolist(),
             "target_conflict_point": target_conflict_point.tolist(),
@@ -911,12 +919,145 @@ class SMPCAgent(object):
             "target_cleared_conflict": bool(target_cleared_conflict),
             "target_enter_time": target_enter_time,
             "target_exit_time": target_exit_time,
-            "target_has_priority": bool(target_has_priority),
+            "target_has_priority": bool(target_has_priority and allow_priority_yield),
+            "observed_target_potential_priority": bool(target_approaching_conflict and not allow_priority_yield),
             "overlap_risk": bool(overlap_risk),
             "close_hold": bool(close_hold),
             "approaching_stop_line": bool(approaching_stop_line),
             "not_far_past_conflict": bool(not_far_past_conflict),
-        })
+        }
+
+    def _rule_aware_yield_decision(
+        self,
+        x,
+        y,
+        speed,
+        t_ref_new,
+        target_vehicle_gmm_preds,
+        target_vehicle_mode_probs,
+        target_vehicle_positions,
+        target_vehicle_valid_pred,
+        N_TV,
+    ):
+        status = {
+            "enabled": self.yield_stop_enabled,
+            "active": False,
+            "reason": None,
+            "target_index": None,
+            "target_mode": None,
+        }
+        if not self.yield_stop_enabled:
+            status["reason"] = "disabled"
+            return status
+        if self.ol_flag:
+            status["reason"] = "open_loop_policy"
+            return status
+        observed_tracks = self._update_observed_target_tracks(target_vehicle_positions, N_TV)
+        if target_vehicle_valid_pred is not None:
+            valid_flags = [bool(v) for v in target_vehicle_valid_pred[:N_TV]]
+        else:
+            valid_flags = [True] * N_TV
+        has_valid_prediction = any(valid_flags)
+
+        ego_global_path = np.asarray(self.feas_ref_states[:self.ref_horizon + 1, :2], dtype=float)
+        ego_global_s = self._path_cumulative_distance(ego_global_path)
+        if len(ego_global_path) < 2 or len(ego_global_s) < 2:
+            status["reason"] = "short_global_ego_reference"
+            status["prediction_valid"] = valid_flags
+            return status
+        ego_global_idx = int(np.argmin(np.linalg.norm(ego_global_path - np.array([x, y], dtype=float), axis=1)))
+
+        if N_TV <= 0 or target_vehicle_gmm_preds is None:
+            status["reason"] = "no_target_prediction"
+            status["prediction_valid"] = valid_flags
+            return status
+
+        means_all = np.asarray(target_vehicle_gmm_preds[0])
+        if means_all.size == 0:
+            status["reason"] = "empty_target_prediction"
+            status["prediction_valid"] = valid_flags
+            return status
+
+        best = None
+        if has_valid_prediction:
+            for k in range(min(N_TV, len(means_all))):
+                if k < len(valid_flags) and not valid_flags[k]:
+                    continue
+                target_modes = np.asarray(means_all[k])
+                if target_modes.ndim < 3:
+                    continue
+                if target_vehicle_mode_probs is not None:
+                    probs = np.asarray(target_vehicle_mode_probs[k], dtype=float)
+                    mode = int(np.nanargmax(probs)) if probs.size else 0
+                    mode = min(mode, target_modes.shape[0] - 1)
+                else:
+                    mode = 0
+                target_path = np.asarray(target_modes[mode, :, :2], dtype=float)
+                if len(target_path) < 2:
+                    continue
+                target_position = None
+                if target_vehicle_positions is not None and k < len(target_vehicle_positions):
+                    target_position = target_vehicle_positions[k]
+                geometry = self._route_defined_yield_geometry(
+                    target_path,
+                    target_position=target_position,
+                )
+                if geometry is None:
+                    continue
+                target_priority_distance = geometry["target_distance_to_conflict"]
+                if target_priority_distance < -self.yield_conflict_radius:
+                    target_priority_distance = float("inf")
+                candidate = (target_priority_distance, k, mode, target_path, geometry, "prediction", True)
+                if best is None or candidate[0] < best[0]:
+                    best = candidate
+        else:
+            for k, track in observed_tracks.items():
+                target_path = self._observed_target_path(track)
+                if target_path is None:
+                    continue
+                geometry = self._route_defined_yield_geometry(
+                    target_path,
+                    target_position=track.get("position"),
+                )
+                if geometry is None:
+                    continue
+                target_priority_distance = geometry["target_distance_to_conflict"]
+                if target_priority_distance < -self.yield_conflict_radius:
+                    target_priority_distance = float("inf")
+                candidate = (target_priority_distance, k, 0, target_path, geometry, "observed_track", False)
+                if best is None or candidate[0] < best[0]:
+                    best = candidate
+
+        if best is None:
+            status["reason"] = "no_valid_target_path" if has_valid_prediction else "no_valid_target_prediction"
+            status["prediction_valid"] = valid_flags
+            if observed_tracks:
+                status["observed_tracks"] = {
+                    int(k): {
+                        "speed": float(v.get("speed", 0.0)),
+                        "has_velocity": v.get("velocity") is not None,
+                    }
+                    for k, v in observed_tracks.items()
+                }
+            return status
+
+        _, target_idx, mode, target_path, geometry, source, allow_priority_yield = best
+        status.update(self._evaluate_yield_geometry(
+            x,
+            y,
+            speed,
+            ego_global_path,
+            ego_global_s,
+            ego_global_idx,
+            target_idx,
+            mode,
+            target_path,
+            geometry,
+            valid_flags,
+            source,
+            allow_priority_yield,
+        ))
+        self._rule_yield_phase = status.get("phase", "free_drive")
         return status
 
     def _apply_rule_aware_yield_control(self, yield_status, u0, v_des, speed):
@@ -941,7 +1082,11 @@ class SMPCAgent(object):
             self._yield_stop_active_prev = True
             self._yield_recovery_steps_remaining = 0
             yield_status["applied"] = {
-                "mode": "yield_line_control",
+                "mode": (
+                    "observed_target_cautious_control"
+                    if yield_status.get("phase") == "cautious_approach_observed_target"
+                    else "yield_line_control"
+                ),
                 "a_des": float(u0_new[0]),
                 "df_des": float(u0_new[1]),
                 "v_des": float(v_des_new),
