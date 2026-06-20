@@ -78,8 +78,8 @@
     "yield_recovery_steps": "Maximum number of controller steps in which the ego may recover from near-stop yielding.",
     "yield_recovery_regen_period": "Reference regeneration period during post-yield recovery. A shorter period helps the ego rebuild a feasible local reference after stopping.",
     "yield_recovery_max_lateral_error": "Temporary lateral-error guard used only after a completed yield, preventing stale-reference lock while still bounding recovery reference generation.",
-    "yield_recovery_speed": "Minimum desired speed during post-yield recovery so the ego resumes the turn after safely yielding.",
-    "yield_recovery_accel": "Minimum desired acceleration during post-yield recovery.",
+    "yield_recovery_speed": "Maximum desired speed during post-yield recovery. Keeping this as a cap prevents the ego from accelerating out of the yield hold before it has rejoined the left-turn route.",
+    "yield_recovery_accel": "Upper bound on desired acceleration during post-yield recovery. The controller applies only a small restart acceleration when the ego is nearly stopped.",
     "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target."
   }
 }

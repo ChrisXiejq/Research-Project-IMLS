@@ -1129,11 +1129,23 @@ class SMPCAgent(object):
             "accel": self.yield_recovery_accel,
         }
         if recovery_active_for_control:
+            restart_accel = 0.0
+            if float(speed) < self.yield_recovery_speed:
+                restart_accel = min(
+                    self.yield_recovery_accel,
+                    max(0.2, 0.4 * (self.yield_recovery_speed - float(speed))),
+                )
             u0_new = np.array([
-                max(float(u0_flat[0]), self.yield_recovery_accel),
+                min(
+                    self.yield_recovery_accel,
+                    max(float(u0_flat[0]), restart_accel),
+                ),
                 float(u0_flat[1]),
             ], dtype=float)
-            v_des_new = max(v_des_float, self.yield_recovery_speed)
+            v_des_new = min(
+                max(v_des_float, self.yield_stop_speed),
+                self.yield_recovery_speed,
+            )
             self.control_prev = u0_new
             self._yield_recovery_steps_remaining = max(
                 0,
@@ -1146,6 +1158,7 @@ class SMPCAgent(object):
                 "a_des": float(u0_new[0]),
                 "df_des": float(u0_new[1]),
                 "v_des": float(v_des_new),
+                "restart_accel": float(restart_accel),
             }
         else:
             u0_new = np.asarray(u0, dtype=float).reshape(-1)
@@ -1282,7 +1295,63 @@ class SMPCAgent(object):
 
 
             t_ref_new=np.argmin(np.linalg.norm(self.feas_ref_states_new[:,:2]-np.hstack((x,y)), axis=1))
-            if self.prev_opt and self.time%1==0 and not reference_status["forced_reference_linearization"]:
+            pre_solve_yield_status = self._rule_aware_yield_decision(
+                x,
+                y,
+                speed,
+                t_ref_new,
+                target_vehicle_gmm_preds,
+                target_vehicle_mode_probs,
+                target_vehicle_positions,
+                target_vehicle_valid_pred,
+                N_TV,
+            )
+            yield_active_for_reference = bool(pre_solve_yield_status.get("active"))
+            reference_speed_cap = None
+            reference_accel_cap = None
+            reference_mode = None
+            if yield_active_for_reference:
+                reference_speed_cap = self.yield_stop_speed
+                reference_accel_cap = 0.0
+                reference_mode = "yield_line_hold_reference"
+            elif recovery_active_for_reference:
+                reference_speed_cap = self.yield_recovery_speed
+                reference_accel_cap = self.yield_recovery_accel
+                reference_mode = "post_yield_rejoin_reference"
+            if reference_speed_cap is not None:
+                self.feas_ref_states_new = np.asarray(self.feas_ref_states_new, dtype=float).copy()
+                self.feas_ref_inputs_new = np.asarray(self.feas_ref_inputs_new, dtype=float).copy()
+                self.feas_ref_states_new[:, 3] = np.minimum(
+                    self.feas_ref_states_new[:, 3],
+                    max(reference_speed_cap, self.yield_stop_speed),
+                )
+                self.feas_ref_inputs_new[:, 0] = np.clip(
+                    self.feas_ref_inputs_new[:, 0],
+                    self.yield_stop_decel,
+                    reference_accel_cap,
+                )
+                reference_status["rule_aware_reference"] = {
+                    "mode": reference_mode,
+                    "yield_active": yield_active_for_reference,
+                    "recovery_active": recovery_active_for_reference,
+                    "speed_cap": float(reference_speed_cap),
+                    "accel_upper_bound": float(reference_accel_cap),
+                }
+            else:
+                reference_status["rule_aware_reference"] = {
+                    "mode": None,
+                    "yield_active": False,
+                    "recovery_active": recovery_active_for_reference,
+                    "speed_cap": None,
+                    "accel_upper_bound": None,
+                }
+            if (
+                self.prev_opt
+                and self.time%1==0
+                and not reference_status["forced_reference_linearization"]
+                and not yield_active_for_reference
+                and not recovery_active_for_reference
+            ):
                 l_states, l_inputs = self.linearization_traj(x,y,psi,speed)
 
             else:
@@ -1479,17 +1548,7 @@ class SMPCAgent(object):
             self.control_prev=np.array([u_control[0]+update_dict['a_lin'][0],u_control[1]+update_dict['df_lin'][0]])
             u0=self.control_prev
             v_des=v_next
-            yield_status = self._rule_aware_yield_decision(
-                x,
-                y,
-                speed,
-                t_ref_new,
-                target_vehicle_gmm_preds,
-                target_vehicle_mode_probs,
-                target_vehicle_positions,
-                target_vehicle_valid_pred,
-                N_TV,
-            )
+            yield_status = pre_solve_yield_status
             u0, v_des, yield_status = self._apply_rule_aware_yield_control(
                 yield_status,
                 u0,
