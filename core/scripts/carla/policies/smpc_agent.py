@@ -379,6 +379,7 @@ class SMPCAgent(object):
                 "conflict_zone_source": "fixed_ego_route_target_motion_line_intersection",
                 "oracle_guard": "full priority yielding requires a valid multimodal prediction; before prediction is valid, only an observed moving target track may trigger cautious approach",
                 "activation_rule": "distance_to_stop <= v^2/(2*abs(decel)) + brake_distance_margin",
+                "pre_solve_reference_profile": "yield reference uses v_ref <= sqrt(v_stop^2 + 2*abs(decel)*remaining_distance_to_stop) instead of an instantaneous near-stop speed cap",
             },
             "yield_stop_supervisor": {
                 "enabled": self.yield_stop_enabled,
@@ -1169,6 +1170,98 @@ class SMPCAgent(object):
         yield_status["recovery"] = recovery_status
         return u0_new, v_des_new, yield_status
 
+    def _apply_rule_aware_reference_profile(
+        self,
+        t_ref_new,
+        yield_status,
+        recovery_active_for_reference,
+    ):
+        """Shape the pre-solve reference without making the SMPC problem infeasible.
+
+        During yield, the reference should decelerate toward the yield line instead of
+        instantly becoming a near-stop trajectory. During recovery, the reference stays
+        capped at the low rejoin speed.
+        """
+        yield_active = bool(yield_status.get("active"))
+        ref_status = {
+            "mode": None,
+            "yield_active": yield_active,
+            "recovery_active": recovery_active_for_reference,
+            "speed_cap": None,
+            "accel_upper_bound": None,
+            "profile": None,
+        }
+        if not yield_active and not recovery_active_for_reference:
+            return ref_status
+
+        self.feas_ref_states_new = np.asarray(self.feas_ref_states_new, dtype=float).copy()
+        self.feas_ref_inputs_new = np.asarray(self.feas_ref_inputs_new, dtype=float).copy()
+
+        if yield_active:
+            start_idx = int(max(0, min(t_ref_new, len(self.feas_ref_states_new) - 1)))
+            reference_xy = self.feas_ref_states_new[start_idx:, :2]
+            if len(reference_xy) >= 2:
+                step_dist = np.linalg.norm(np.diff(reference_xy, axis=0), axis=1)
+                path_dist_from_ego = np.concatenate(([0.0], np.cumsum(step_dist)))
+            else:
+                path_dist_from_ego = np.array([0.0])
+            distance_to_stop = max(float(yield_status.get("ego_distance_to_stop", 0.0)), 0.0)
+            remaining_to_stop = np.maximum(distance_to_stop - path_dist_from_ego, 0.0)
+            max_decel = max(abs(self.yield_stop_decel), 1e-3)
+            speed_profile = np.sqrt(
+                self.yield_stop_speed ** 2 + 2.0 * max_decel * remaining_to_stop
+            )
+            speed_profile = np.maximum(speed_profile, self.yield_stop_speed)
+            end_idx = start_idx + len(speed_profile)
+            self.feas_ref_states_new[start_idx:end_idx, 3] = np.minimum(
+                self.feas_ref_states_new[start_idx:end_idx, 3],
+                speed_profile,
+            )
+            if start_idx > 0:
+                self.feas_ref_states_new[:start_idx, 3] = np.minimum(
+                    self.feas_ref_states_new[:start_idx, 3],
+                    speed_profile[0],
+                )
+            self.feas_ref_inputs_new[:, 0] = np.clip(
+                self.feas_ref_inputs_new[:, 0],
+                self.yield_stop_decel,
+                0.0,
+            )
+            ref_status.update({
+                "mode": "yield_line_deceleration_reference",
+                "speed_cap": float(speed_profile[0]),
+                "accel_upper_bound": 0.0,
+                "profile": {
+                    "type": "braking_distance",
+                    "distance_to_stop": float(distance_to_stop),
+                    "start_speed_cap": float(speed_profile[0]),
+                    "end_speed_cap": float(speed_profile[-1]),
+                    "stop_speed": float(self.yield_stop_speed),
+                    "decel": float(self.yield_stop_decel),
+                },
+            })
+            return ref_status
+
+        self.feas_ref_states_new[:, 3] = np.minimum(
+            self.feas_ref_states_new[:, 3],
+            self.yield_recovery_speed,
+        )
+        self.feas_ref_inputs_new[:, 0] = np.clip(
+            self.feas_ref_inputs_new[:, 0],
+            self.yield_stop_decel,
+            self.yield_recovery_accel,
+        )
+        ref_status.update({
+            "mode": "post_yield_rejoin_reference",
+            "speed_cap": float(self.yield_recovery_speed),
+            "accel_upper_bound": float(self.yield_recovery_accel),
+            "profile": {
+                "type": "constant_recovery_cap",
+                "recovery_speed": float(self.yield_recovery_speed),
+            },
+        })
+        return ref_status
+
     def run_step(self, pred_dict):
         vehicle_loc   = self.vehicle.get_location()
         vehicle_wp    = self.map.get_waypoint(vehicle_loc)
@@ -1307,44 +1400,11 @@ class SMPCAgent(object):
                 N_TV,
             )
             yield_active_for_reference = bool(pre_solve_yield_status.get("active"))
-            reference_speed_cap = None
-            reference_accel_cap = None
-            reference_mode = None
-            if yield_active_for_reference:
-                reference_speed_cap = self.yield_stop_speed
-                reference_accel_cap = 0.0
-                reference_mode = "yield_line_hold_reference"
-            elif recovery_active_for_reference:
-                reference_speed_cap = self.yield_recovery_speed
-                reference_accel_cap = self.yield_recovery_accel
-                reference_mode = "post_yield_rejoin_reference"
-            if reference_speed_cap is not None:
-                self.feas_ref_states_new = np.asarray(self.feas_ref_states_new, dtype=float).copy()
-                self.feas_ref_inputs_new = np.asarray(self.feas_ref_inputs_new, dtype=float).copy()
-                self.feas_ref_states_new[:, 3] = np.minimum(
-                    self.feas_ref_states_new[:, 3],
-                    max(reference_speed_cap, self.yield_stop_speed),
-                )
-                self.feas_ref_inputs_new[:, 0] = np.clip(
-                    self.feas_ref_inputs_new[:, 0],
-                    self.yield_stop_decel,
-                    reference_accel_cap,
-                )
-                reference_status["rule_aware_reference"] = {
-                    "mode": reference_mode,
-                    "yield_active": yield_active_for_reference,
-                    "recovery_active": recovery_active_for_reference,
-                    "speed_cap": float(reference_speed_cap),
-                    "accel_upper_bound": float(reference_accel_cap),
-                }
-            else:
-                reference_status["rule_aware_reference"] = {
-                    "mode": None,
-                    "yield_active": False,
-                    "recovery_active": recovery_active_for_reference,
-                    "speed_cap": None,
-                    "accel_upper_bound": None,
-                }
+            reference_status["rule_aware_reference"] = self._apply_rule_aware_reference_profile(
+                t_ref_new,
+                pre_solve_yield_status,
+                recovery_active_for_reference,
+            )
             if (
                 self.prev_opt
                 and self.time%1==0
