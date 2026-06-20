@@ -17,7 +17,7 @@
       "yield_reference_min_speed": 0.8,
       "yield_stop_decel": -5.0,
       "yield_conflict_radius": 4.0,
-      "yield_stop_buffer_distance": 5.0,
+      "yield_stop_buffer_distance": 6.5,
       "yield_brake_distance_margin": 3.0,
       "yield_wait_steer_lookahead_distance": 6.0,
       "yield_wait_steer_gain": 1.0,
@@ -33,8 +33,8 @@
       "yield_recovery_steps": 60,
       "yield_recovery_regen_period": 2,
       "yield_recovery_max_lateral_error": 12.0,
-      "yield_recovery_speed": 5.0,
-      "yield_recovery_accel": 1.5
+      "yield_recovery_speed": 4.0,
+      "yield_recovery_accel": 1.2
     },
     "target": {
       "nominal_speed": 6.0,
@@ -64,7 +64,7 @@
     "yield_reference_min_speed": "Minimum speed used only by the pre-solve optimisation reference during hold_yield_line. Keeping this above yield_stop_speed avoids making the SMPC reference demand an instantaneous full stop; the control override still performs the final near-stop behaviour.",
     "yield_stop_decel": "Maximum desired deceleration applied by the rule-aware yielding controller. The value is set to -5.0m/s^2 so ego_init_01 can physically brake from the initial approach speed before the route-defined stop point.",
     "yield_conflict_radius": "Radius around the fixed conflict point defined by the ego route and target current/predicted straight motion line.",
-    "yield_stop_buffer_distance": "Distance before the fixed conflict point where the ego must wait while the straight-going target has priority. The buffer is 5.0m so the ego stops close to the conflict zone instead of stopping far upstream outside the visually relevant interaction area.",
+    "yield_stop_buffer_distance": "Distance before the fixed conflict point where the ego must wait while the straight-going target has priority. The buffer is 6.5m, a middle setting that avoids the early upstream stop from larger buffers while keeping more solver margin than the 5.0m close-stop trial.",
     "yield_brake_distance_margin": "Additional safety margin added to v^2/(2|a_min|) so yield activates before the ego reaches the physical braking limit for the stop point.",
     "yield_wait_steer_lookahead_distance": "Route lookahead from the stop point used to keep the ego aligned with the intended left turn while waiting.",
     "yield_wait_steer_gain": "Gain applied to the route-defined waiting steering command.",
@@ -80,8 +80,8 @@
     "yield_recovery_steps": "Maximum number of controller steps in which the ego may recover from near-stop yielding. This is short enough that the ego can return to nominal speed after rejoining the left-turn route.",
     "yield_recovery_regen_period": "Reference regeneration period during post-yield recovery. A shorter period helps the ego rebuild a feasible local reference after stopping.",
     "yield_recovery_max_lateral_error": "Temporary lateral-error guard used only after a completed yield, preventing stale-reference lock while still bounding recovery reference generation.",
-    "yield_recovery_speed": "Maximum desired speed during post-yield recovery. This cap is higher than the earlier 3.0m/s setting so the ego accelerates naturally after the target clears the conflict zone.",
-    "yield_recovery_accel": "Upper bound on desired acceleration during post-yield recovery.",
+    "yield_recovery_speed": "Maximum desired speed during post-yield recovery. The 4.0m/s cap is faster than the earlier slow crawl but less aggressive than the 5.0m/s trial that increased solver failures.",
+    "yield_recovery_accel": "Upper bound on desired acceleration during post-yield recovery. The 1.2m/s^2 cap reduces restart infeasibility compared with the 1.5m/s^2 trial.",
     "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target."
   }
 }

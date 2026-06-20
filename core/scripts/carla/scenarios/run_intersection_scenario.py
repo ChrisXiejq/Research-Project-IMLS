@@ -121,7 +121,7 @@ class VehicleParams:
     yield_reference_min_speed : float = 0.8
     yield_stop_decel : float = -5.0
     yield_conflict_radius : float = 4.0
-    yield_stop_buffer_distance : float = 5.0
+    yield_stop_buffer_distance : float = 6.5
     yield_brake_distance_margin : float = 3.0
     yield_wait_steer_lookahead_distance : float = 6.0
     yield_wait_steer_gain : float = 1.0
@@ -137,8 +137,8 @@ class VehicleParams:
     yield_recovery_steps : int = 60
     yield_recovery_regen_period : int = 2
     yield_recovery_max_lateral_error : float = 12.0
-    yield_recovery_speed : float = 5.0
-    yield_recovery_accel : float = 1.5
+    yield_recovery_speed : float = 4.0
+    yield_recovery_accel : float = 1.2
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way

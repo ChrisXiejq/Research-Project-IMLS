@@ -52,7 +52,7 @@ class SMPCAgent(object):
                  yield_reference_min_speed=0.8,
                  yield_stop_decel=-5.0,
                  yield_conflict_radius=4.0,
-                 yield_stop_buffer_distance=5.0,
+                 yield_stop_buffer_distance=6.5,
                  yield_brake_distance_margin=3.0,
                  yield_wait_steer_lookahead_distance=6.0,
                  yield_wait_steer_gain=1.0,
@@ -68,8 +68,8 @@ class SMPCAgent(object):
                  yield_recovery_steps=60,
                  yield_recovery_regen_period=2,
                  yield_recovery_max_lateral_error=12.0,
-                 yield_recovery_speed=5.0,
-                 yield_recovery_accel=1.5,
+                 yield_recovery_speed=4.0,
+                 yield_recovery_accel=1.2,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -832,7 +832,7 @@ class SMPCAgent(object):
         else:
             target_enter_time = float(target_enter_idx) * self.dt
             target_exit_time = float(target_exit_idx) * self.dt
-            target_has_priority = target_approaching_conflict and target_exit_time > self.yield_release_time
+            target_has_priority = target_approaching_conflict
 
         max_brake = max(abs(self.yield_stop_decel), 1e-3)
         brake_distance = (float(speed) ** 2) / (2.0 * max_brake)
