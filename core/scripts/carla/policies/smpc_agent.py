@@ -49,26 +49,27 @@ class SMPCAgent(object):
                  reference_regen_max_lateral_error=1.5,
                  yield_stop_enabled=True,
                  yield_stop_speed=0.2,
+                 yield_reference_min_speed=0.8,
                  yield_stop_decel=-5.0,
                  yield_conflict_radius=4.0,
-                 yield_stop_buffer_distance=8.0,
+                 yield_stop_buffer_distance=5.0,
                  yield_brake_distance_margin=3.0,
                  yield_wait_steer_lookahead_distance=6.0,
                  yield_wait_steer_gain=1.0,
                  yield_ttc_margin=0.8,
-                 yield_activation_distance=18.0,
-                 yield_hold_distance=8.0,
+                 yield_activation_distance=12.0,
+                 yield_hold_distance=3.0,
                  yield_release_time=0.3,
                  yield_observed_caution_enabled=True,
-                 yield_observed_caution_distance=24.0,
+                 yield_observed_caution_distance=12.0,
                  yield_observed_caution_min_target_speed=0.5,
                  yield_steer_damping=0.25,
                  yield_recovery_enabled=True,
-                 yield_recovery_steps=240,
+                 yield_recovery_steps=60,
                  yield_recovery_regen_period=2,
                  yield_recovery_max_lateral_error=12.0,
-                 yield_recovery_speed=3.0,
-                 yield_recovery_accel=1.0,
+                 yield_recovery_speed=5.0,
+                 yield_recovery_accel=1.5,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -96,6 +97,7 @@ class SMPCAgent(object):
         self.reference_regen_max_lateral_error = float(reference_regen_max_lateral_error)
         self.yield_stop_enabled = bool(yield_stop_enabled)
         self.yield_stop_speed = float(yield_stop_speed)
+        self.yield_reference_min_speed = float(yield_reference_min_speed)
         self.yield_stop_decel = float(yield_stop_decel)
         self.yield_conflict_radius = float(yield_conflict_radius)
         self.yield_stop_buffer_distance = float(yield_stop_buffer_distance)
@@ -130,6 +132,11 @@ class SMPCAgent(object):
             )
         if self.yield_stop_speed < 0.0:
             raise ValueError(f"yield_stop_speed must be non-negative, got {self.yield_stop_speed}")
+        if self.yield_reference_min_speed < self.yield_stop_speed:
+            raise ValueError(
+                "yield_reference_min_speed must be >= yield_stop_speed, "
+                f"got {self.yield_reference_min_speed} < {self.yield_stop_speed}"
+            )
         if self.yield_conflict_radius <= 0.0:
             raise ValueError(f"yield_conflict_radius must be positive, got {self.yield_conflict_radius}")
         if self.yield_stop_buffer_distance <= 0.0:
@@ -379,11 +386,12 @@ class SMPCAgent(object):
                 "conflict_zone_source": "fixed_ego_route_target_motion_line_intersection",
                 "oracle_guard": "full priority yielding requires a valid multimodal prediction; before prediction is valid, only an observed moving target track may trigger cautious approach",
                 "activation_rule": "distance_to_stop <= v^2/(2*abs(decel)) + brake_distance_margin",
-                "pre_solve_reference_profile": "yield reference uses v_ref <= sqrt(v_stop^2 + 2*abs(decel)*remaining_distance_to_stop) instead of an instantaneous near-stop speed cap",
+                "pre_solve_reference_profile": "yield reference uses v_ref <= sqrt(v_ref_min^2 + 2*abs(decel)*remaining_distance_to_stop); final near-stop control is handled by the yield controller, not by an instantaneous near-stop optimisation reference",
             },
             "yield_stop_supervisor": {
                 "enabled": self.yield_stop_enabled,
                 "stop_speed": self.yield_stop_speed,
+                "reference_min_speed": self.yield_reference_min_speed,
                 "decel": self.yield_stop_decel,
                 "conflict_radius": self.yield_conflict_radius,
                 "stop_buffer_distance": self.yield_stop_buffer_distance,
@@ -1209,9 +1217,9 @@ class SMPCAgent(object):
             remaining_to_stop = np.maximum(distance_to_stop - path_dist_from_ego, 0.0)
             max_decel = max(abs(self.yield_stop_decel), 1e-3)
             speed_profile = np.sqrt(
-                self.yield_stop_speed ** 2 + 2.0 * max_decel * remaining_to_stop
+                self.yield_reference_min_speed ** 2 + 2.0 * max_decel * remaining_to_stop
             )
-            speed_profile = np.maximum(speed_profile, self.yield_stop_speed)
+            speed_profile = np.maximum(speed_profile, self.yield_reference_min_speed)
             end_idx = start_idx + len(speed_profile)
             self.feas_ref_states_new[start_idx:end_idx, 3] = np.minimum(
                 self.feas_ref_states_new[start_idx:end_idx, 3],
@@ -1237,6 +1245,7 @@ class SMPCAgent(object):
                     "start_speed_cap": float(speed_profile[0]),
                     "end_speed_cap": float(speed_profile[-1]),
                     "stop_speed": float(self.yield_stop_speed),
+                    "reference_min_speed": float(self.yield_reference_min_speed),
                     "decel": float(self.yield_stop_decel),
                 },
             })

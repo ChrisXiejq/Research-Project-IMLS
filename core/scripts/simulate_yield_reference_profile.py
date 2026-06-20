@@ -4,9 +4,11 @@
 This is a CARLA-free local check for the pre-solve reference shaping used by
 ``SMPCAgent`` during ``hold_yield_line``. It compares the old hard cap
 (``v_ref = yield_stop_speed`` everywhere) with the smoother braking-distance
-profile:
+profile. The optimisation reference uses ``yield_reference_min_speed`` as its
+minimum speed; the lower ``yield_stop_speed`` is still used by the final
+near-stop control override.
 
-    v_cap(d) = sqrt(v_stop^2 + 2 * |a_yield| * d_remaining)
+    v_cap(d) = sqrt(v_ref_min^2 + 2 * |a_yield| * d_remaining)
 
 where ``d_remaining`` is the path distance remaining to the yield line.
 """
@@ -45,6 +47,7 @@ def simulate_profile(
     current_speed: float,
     nominal_speed: float,
     yield_stop_speed: float,
+    yield_reference_min_speed: float,
     yield_stop_decel: float,
     path_distances: Iterable[float],
 ):
@@ -54,8 +57,8 @@ def simulate_profile(
     previous_path_s: Optional[float] = None
     for idx, path_s in enumerate(path_distances):
         remaining = max(distance_to_stop - path_s, 0.0)
-        smooth_cap = math.sqrt(yield_stop_speed ** 2 + 2.0 * max_decel * remaining)
-        smooth_cap = max(smooth_cap, yield_stop_speed)
+        smooth_cap = math.sqrt(yield_reference_min_speed ** 2 + 2.0 * max_decel * remaining)
+        smooth_cap = max(smooth_cap, yield_reference_min_speed)
         old_hard_cap_speed = yield_stop_speed
         smooth_ref_speed = min(nominal_speed, smooth_cap)
         speed_drop_from_current = max(current_speed - smooth_ref_speed, 0.0)
@@ -134,7 +137,9 @@ def main() -> int:
     parser.add_argument("--nominal-speed", type=float, default=6.0,
                         help="Nominal reference speed before applying the braking-distance cap.")
     parser.add_argument("--yield-stop-speed", type=float, default=0.2,
-                        help="Near-stop reference speed at the yield line.")
+                        help="Near-stop control target speed at the yield line.")
+    parser.add_argument("--yield-reference-min-speed", type=float, default=0.8,
+                        help="Minimum pre-solve optimisation reference speed during hold_yield_line.")
     parser.add_argument("--yield-stop-decel", type=float, default=-5.0,
                         help="Desired maximum yield deceleration in m/s^2. Must be negative.")
     parser.add_argument("--horizon-steps", type=int, default=10,
@@ -155,6 +160,8 @@ def main() -> int:
         parser.error("--nominal-speed must be non-negative")
     if args.yield_stop_speed < 0.0:
         parser.error("--yield-stop-speed must be non-negative")
+    if args.yield_reference_min_speed < args.yield_stop_speed:
+        parser.error("--yield-reference-min-speed must be >= --yield-stop-speed")
     if args.yield_stop_decel >= 0.0:
         parser.error("--yield-stop-decel must be negative")
     if args.ds <= 0.0:
@@ -168,6 +175,7 @@ def main() -> int:
         current_speed=args.current_speed,
         nominal_speed=args.nominal_speed,
         yield_stop_speed=args.yield_stop_speed,
+        yield_reference_min_speed=args.yield_reference_min_speed,
         yield_stop_decel=args.yield_stop_decel,
         path_distances=distances,
     )
