@@ -128,12 +128,14 @@ The main change is the target-vehicle timing:
 | Moving vehicle lateral offset | `3.7` | `ego +1.85`, `target +1.85` | Place vehicles near the intended right-hand lane centres rather than on the kerb/road edge |
 | Ego SMPC collision envelope | upstream hard-coded ellipse | `half_length=3.8m`, `half_width=1.8m`, `d_min=0.5m` | Keep the chance-constraint vehicle body approximation conservative while reducing the over-yielding seen with `d_min=1.0m` and `d_min=1.5m` |
 | SMPC reference-regeneration guard | `1.5m` internal default | `1.5m` | Safety-first setting after `2.5m` and `4.0m` allowed unsafe conflict-zone behaviour in CARLA |
-| Rule-aware yielding state machine | not present | enabled, `yield_stop_speed=0.2m/s`, `yield_stop_buffer_distance=14.0m`, `yield_brake_distance_margin=3.0m` | Define a fixed route-level conflict zone and a stop point before it, then move through approach, hold, release, and recovery phases |
+| Rule-aware yielding state machine | not present | enabled, `yield_stop_speed=0.2m/s`, `yield_stop_decel=-5.0m/s^2`, `yield_stop_buffer_distance=8.0m`, `yield_brake_distance_margin=3.0m` | Define a fixed route-level conflict zone and a physically reachable stop point before it, then move through cautious approach, hold, release, and recovery phases |
 | Ego post-yield recovery | not present | enabled, `yield_recovery_speed=3.0m/s` | After the priority target clears the conflict zone, temporarily relax reference regeneration and resume the turn instead of remaining stuck near the yield point |
 
 The route relation is intentionally kept close to the original intersection setting. After inspecting the CARLA video, the experiment is simplified to the visual left-turn case rather than continuing to force a UK-style right-turn interpretation.
 
 The CARLA transform now uses `side_of_road="right"` and lane-centre-scale offsets. The scenario uses `1.85m` rather than the previous `3.7m` full half-road-width offset, because `3.7m` can push the vehicle to the road edge or kerb in the CARLA view.
+
+The `ego_init_01` CARLA rollout now uses `init_speed=6.0m/s`. The previous `9.36m/s` initial speed placed the ego about `2.45m` before the stop point while requiring more than `14m` of braking distance, so even an immediately active cautious-yield controller could not stop before the yield line. The stop buffer is also reduced from `14m` to `8m`, keeping the yield point before the conflict zone while avoiding an upstream stop point that is unreachable from the selected initial condition.
 
 ## 6. Important Limitation
 
