@@ -212,6 +212,15 @@ class SMPCAgent(object):
         else:
             raise ValueError(f"Invalid SMPC config: {smpc_config}")
 
+        # reference_regeneration() is called before the SMPC solver object is
+        # constructed. Keep the expected bounds here, then prefer the solver's
+        # actual bounds after it exists.
+        if not self.ol_flag and not self.obca_flag:
+            self._ref_gen_a_min = -4.0
+        else:
+            self._ref_gen_a_min = -3.0
+        self._ref_gen_a_max = 2.0
+
 
 
 
@@ -291,6 +300,15 @@ class SMPCAgent(object):
         self.debug_savedir = savedir
         if label is not None:
             self.debug_label = label
+
+    def _reference_generator_accel_bounds(self):
+        solver = getattr(self, "SMPC", None)
+        if solver is not None:
+            return (
+                getattr(solver, "A_MIN", self._ref_gen_a_min),
+                getattr(solver, "A_MAX", self._ref_gen_a_max),
+            )
+        return self._ref_gen_a_min, self._ref_gen_a_max
 
     def _debug_json_safe(self, value):
         if isinstance(value, np.ndarray):
@@ -559,13 +577,14 @@ class SMPCAgent(object):
             self.ref_dict={'x_ref':self.reference[1:,1], 'y_ref':self.reference[1:,2], 'psi_ref':self.reference[1:,3], 'v_ref':self.reference[1:,4],
                             'x0'  : self.reference[0,1],  'y0'  : self.reference[0,2],  'psi0'  : self.reference[0,3],  'v0'  : self.reference[0,4], 'acc_prev' : self.control_prev[0], 'df_prev' : self.control_prev[1]}
             self.ref_dict['psi_ref'] = fth.fix_angle( self.ref_dict['psi_ref'] - self.ref_dict['psi0']) + self.ref_dict['psi0']
+            ref_a_min, ref_a_max = self._reference_generator_accel_bounds()
             self.feas_ref_gen=smpc.RefTrajGenerator(
                 N=self.ref_horizon,
                 DT=self.dt,
                 L_F=self.lf,
                 L_R=self.lr,
-                A_MIN=getattr(self.SMPC, "A_MIN", -3.0),
-                A_MAX=getattr(self.SMPC, "A_MAX", 2.0),
+                A_MIN=ref_a_min,
+                A_MAX=ref_a_max,
             )
             self.feas_ref_gen.update(self.ref_dict)
             self.feas_ref_dict=self.feas_ref_gen.solve()
@@ -585,13 +604,14 @@ class SMPCAgent(object):
 
 
 
+            ref_a_min, ref_a_max = self._reference_generator_accel_bounds()
             self.feas_ref_gen=smpc.RefTrajGenerator(
                 N=self.ref_horizon-self.t_ref-1,
                 DT=self.dt,
                 L_F=self.lf,
                 L_R=self.lr,
-                A_MIN=getattr(self.SMPC, "A_MIN", -3.0),
-                A_MAX=getattr(self.SMPC, "A_MAX", 2.0),
+                A_MIN=ref_a_min,
+                A_MAX=ref_a_max,
             )
 
             self.ref_dict={'x_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,0], 'y_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,1], 'psi_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,2], 'v_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,3],
