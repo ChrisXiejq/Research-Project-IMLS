@@ -50,7 +50,7 @@ class SMPCAgent(object):
                  yield_stop_enabled=True,
                  yield_stop_speed=0.2,
                  yield_reference_min_speed=0.8,
-                 yield_reference_decel=-3.5,
+                 yield_reference_decel=-3.75,
                  yield_stop_decel=-5.0,
                  yield_conflict_radius=4.0,
                  yield_stop_buffer_distance=6.25,

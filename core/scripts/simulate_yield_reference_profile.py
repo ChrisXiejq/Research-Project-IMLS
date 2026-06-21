@@ -140,7 +140,7 @@ def main() -> int:
                         help="Near-stop control target speed at the yield line.")
     parser.add_argument("--yield-reference-min-speed", type=float, default=0.8,
                         help="Minimum pre-solve optimisation reference speed during hold_yield_line.")
-    parser.add_argument("--yield-reference-decel", type=float, default=-3.5,
+    parser.add_argument("--yield-reference-decel", type=float, default=-3.75,
                         help="Reference-profile deceleration in m/s^2. Must be negative.")
     parser.add_argument("--horizon-steps", type=int, default=10,
                         help="Number of reference intervals to simulate when --path-distances is omitted.")
