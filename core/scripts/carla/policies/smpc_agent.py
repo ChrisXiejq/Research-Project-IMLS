@@ -50,9 +50,10 @@ class SMPCAgent(object):
                  yield_stop_enabled=True,
                  yield_stop_speed=0.2,
                  yield_reference_min_speed=0.8,
+                 yield_reference_decel=-4.0,
                  yield_stop_decel=-5.0,
                  yield_conflict_radius=4.0,
-                 yield_stop_buffer_distance=6.0,
+                 yield_stop_buffer_distance=6.25,
                  yield_brake_distance_margin=3.0,
                  yield_wait_steer_lookahead_distance=6.0,
                  yield_wait_steer_gain=1.0,
@@ -98,6 +99,7 @@ class SMPCAgent(object):
         self.yield_stop_enabled = bool(yield_stop_enabled)
         self.yield_stop_speed = float(yield_stop_speed)
         self.yield_reference_min_speed = float(yield_reference_min_speed)
+        self.yield_reference_decel = float(yield_reference_decel)
         self.yield_stop_decel = float(yield_stop_decel)
         self.yield_conflict_radius = float(yield_conflict_radius)
         self.yield_stop_buffer_distance = float(yield_stop_buffer_distance)
@@ -136,6 +138,15 @@ class SMPCAgent(object):
             raise ValueError(
                 "yield_reference_min_speed must be >= yield_stop_speed, "
                 f"got {self.yield_reference_min_speed} < {self.yield_stop_speed}"
+            )
+        if self.yield_reference_decel >= 0.0:
+            raise ValueError(f"yield_reference_decel must be negative, got {self.yield_reference_decel}")
+        if self.yield_stop_decel >= 0.0:
+            raise ValueError(f"yield_stop_decel must be negative, got {self.yield_stop_decel}")
+        if abs(self.yield_reference_decel) > abs(self.yield_stop_decel):
+            raise ValueError(
+                "yield_reference_decel must be no stronger than yield_stop_decel, "
+                f"got {self.yield_reference_decel} vs {self.yield_stop_decel}"
             )
         if self.yield_conflict_radius <= 0.0:
             raise ValueError(f"yield_conflict_radius must be positive, got {self.yield_conflict_radius}")
@@ -386,12 +397,13 @@ class SMPCAgent(object):
                 "conflict_zone_source": "fixed_ego_route_target_motion_line_intersection",
                 "oracle_guard": "full priority yielding requires a valid multimodal prediction; before prediction is valid, only an observed moving target track may trigger cautious approach",
                 "activation_rule": "distance_to_stop <= v^2/(2*abs(decel)) + brake_distance_margin",
-                "pre_solve_reference_profile": "yield reference uses v_ref <= sqrt(v_ref_min^2 + 2*abs(decel)*remaining_distance_to_stop); final near-stop control is handled by the yield controller, not by an instantaneous near-stop optimisation reference",
+                "pre_solve_reference_profile": "yield reference uses v_ref <= sqrt(v_ref_min^2 + 2*abs(reference_decel)*remaining_distance_to_stop); final near-stop control is handled by the yield controller, not by an instantaneous near-stop optimisation reference",
             },
             "yield_stop_supervisor": {
                 "enabled": self.yield_stop_enabled,
                 "stop_speed": self.yield_stop_speed,
                 "reference_min_speed": self.yield_reference_min_speed,
+                "reference_decel": self.yield_reference_decel,
                 "decel": self.yield_stop_decel,
                 "conflict_radius": self.yield_conflict_radius,
                 "stop_buffer_distance": self.yield_stop_buffer_distance,
@@ -1215,7 +1227,7 @@ class SMPCAgent(object):
                 path_dist_from_ego = np.array([0.0])
             distance_to_stop = max(float(yield_status.get("ego_distance_to_stop", 0.0)), 0.0)
             remaining_to_stop = np.maximum(distance_to_stop - path_dist_from_ego, 0.0)
-            max_decel = max(abs(self.yield_stop_decel), 1e-3)
+            max_decel = max(abs(self.yield_reference_decel), 1e-3)
             speed_profile = np.sqrt(
                 self.yield_reference_min_speed ** 2 + 2.0 * max_decel * remaining_to_stop
             )
@@ -1246,6 +1258,7 @@ class SMPCAgent(object):
                     "end_speed_cap": float(speed_profile[-1]),
                     "stop_speed": float(self.yield_stop_speed),
                     "reference_min_speed": float(self.yield_reference_min_speed),
+                    "reference_decel": float(self.yield_reference_decel),
                     "decel": float(self.yield_stop_decel),
                 },
             })

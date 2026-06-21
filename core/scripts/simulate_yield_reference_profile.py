@@ -8,7 +8,7 @@ profile. The optimisation reference uses ``yield_reference_min_speed`` as its
 minimum speed; the lower ``yield_stop_speed`` is still used by the final
 near-stop control override.
 
-    v_cap(d) = sqrt(v_ref_min^2 + 2 * |a_yield| * d_remaining)
+    v_cap(d) = sqrt(v_ref_min^2 + 2 * |a_ref| * d_remaining)
 
 where ``d_remaining`` is the path distance remaining to the yield line.
 """
@@ -48,10 +48,10 @@ def simulate_profile(
     nominal_speed: float,
     yield_stop_speed: float,
     yield_reference_min_speed: float,
-    yield_stop_decel: float,
+    yield_reference_decel: float,
     path_distances: Iterable[float],
 ):
-    max_decel = max(abs(yield_stop_decel), 1e-9)
+    max_decel = max(abs(yield_reference_decel), 1e-9)
     rows = []
     previous_profile_speed: Optional[float] = None
     previous_path_s: Optional[float] = None
@@ -81,10 +81,10 @@ def simulate_profile(
     return rows
 
 
-def profile_is_smooth(rows, yield_stop_decel: float, tolerance: float = 1e-6):
+def profile_is_smooth(rows, yield_reference_decel: float, tolerance: float = 1e-6):
     speeds = [row["smooth_ref_mps"] for row in rows]
     monotonic = all(b <= a + tolerance for a, b in zip(speeds, speeds[1:]))
-    max_decel = abs(yield_stop_decel)
+    max_decel = abs(yield_reference_decel)
     decel_ok = True
     for row in rows[1:]:
         implied = row["implied_decel_mps2"]
@@ -101,7 +101,7 @@ def write_csv(path: str, rows) -> None:
         writer.writerows(rows)
 
 
-def print_table(rows, yield_stop_decel: float) -> None:
+def print_table(rows, yield_reference_decel: float) -> None:
     print("Yield-line reference speed profile simulation")
     print("=" * 72)
     print(
@@ -119,10 +119,10 @@ def print_table(rows, yield_stop_decel: float) -> None:
             f"{row['smooth_ref_mps']:>10.2f}  "
             f"{implied_text:>13}"
         )
-    ok, monotonic, decel_ok = profile_is_smooth(rows, yield_stop_decel)
+    ok, monotonic, decel_ok = profile_is_smooth(rows, yield_reference_decel)
     print()
     print(f"Monotonic non-increasing speed: {monotonic}")
-    print(f"Implied deceleration within |a| <= {abs(yield_stop_decel):.2f} m/s^2: {decel_ok}")
+    print(f"Implied deceleration within |a_ref| <= {abs(yield_reference_decel):.2f} m/s^2: {decel_ok}")
     print(f"Profile smoothness check: {'PASS' if ok else 'FAIL'}")
 
 
@@ -140,8 +140,8 @@ def main() -> int:
                         help="Near-stop control target speed at the yield line.")
     parser.add_argument("--yield-reference-min-speed", type=float, default=0.8,
                         help="Minimum pre-solve optimisation reference speed during hold_yield_line.")
-    parser.add_argument("--yield-stop-decel", type=float, default=-5.0,
-                        help="Desired maximum yield deceleration in m/s^2. Must be negative.")
+    parser.add_argument("--yield-reference-decel", type=float, default=-4.0,
+                        help="Reference-profile deceleration in m/s^2. Must be negative.")
     parser.add_argument("--horizon-steps", type=int, default=10,
                         help="Number of reference intervals to simulate when --path-distances is omitted.")
     parser.add_argument("--ds", type=float, default=0.5,
@@ -162,8 +162,8 @@ def main() -> int:
         parser.error("--yield-stop-speed must be non-negative")
     if args.yield_reference_min_speed < args.yield_stop_speed:
         parser.error("--yield-reference-min-speed must be >= --yield-stop-speed")
-    if args.yield_stop_decel >= 0.0:
-        parser.error("--yield-stop-decel must be negative")
+    if args.yield_reference_decel >= 0.0:
+        parser.error("--yield-reference-decel must be negative")
     if args.ds <= 0.0:
         parser.error("--ds must be positive")
 
@@ -176,14 +176,14 @@ def main() -> int:
         nominal_speed=args.nominal_speed,
         yield_stop_speed=args.yield_stop_speed,
         yield_reference_min_speed=args.yield_reference_min_speed,
-        yield_stop_decel=args.yield_stop_decel,
+        yield_reference_decel=args.yield_reference_decel,
         path_distances=distances,
     )
-    print_table(rows, args.yield_stop_decel)
+    print_table(rows, args.yield_reference_decel)
     if args.csv:
         write_csv(args.csv, rows)
         print(f"\nCSV written: {args.csv}")
-    ok, _, _ = profile_is_smooth(rows, args.yield_stop_decel)
+    ok, _, _ = profile_is_smooth(rows, args.yield_reference_decel)
     return 0 if ok else 1
 
 
