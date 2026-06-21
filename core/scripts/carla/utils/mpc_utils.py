@@ -284,7 +284,7 @@ class SMPC_MMPreds():
                 L_R          = 1.4987,
                 V_MIN        = 0.0,
                 V_MAX        = 15.0,
-                A_MIN      = -3.0,   # min/max acceleration constraint (m/s^2)
+                A_MIN      = -4.0,   # min/max acceleration constraint (m/s^2)
                 A_MAX      =  2.0,
                 DF_MIN     = -0.5,   # min/max front steer angle constraint (rad)
                 DF_MAX     =  0.5,
