@@ -401,16 +401,24 @@ def get_target_agent_history(agent_history, target_agent_id):
         if(len(snapshot[snapshot_key]) == 0):
             poses.append([None, None, None])
         else:
+            found_target = False
             for entry in snapshot[snapshot_key]['vehicles']:
                 if entry['id'] == target_agent_id:
                     pose = entry['centroid']
                     pose.append(entry['yaw'])
                     poses.append( pose )
+                    found_target = True
                     break
+            if not found_target:
+                poses.append([None, None, None])
     tms = [-v if v > 0. else 0. for v in tms]
     motion_hist_array = np.column_stack((tms, poses)).astype(np.float32)
 
     return transform_to_local_frame(motion_hist_array)
+
+def get_actor_position_rhs(actor):
+    location = actor.get_location()
+    return np.array([location.x, -location.y])
 
 """
 Main class to simulate and run parametrized scenarios.
@@ -742,11 +750,15 @@ class RunIntersectionScenario:
             tvs_valid_pred = [False]
         else:
             # TODO: clean up and generalize this to many target vehicles.
-            target_agent_id = self.vehicle_actors[self.tv_vehicle_idxs[0]].id
+            target_actor = self.vehicle_actors[self.tv_vehicle_idxs[0]]
+            target_agent_id = target_actor.id
             past_states_tv, R_target_to_world, t_target_to_world = \
                 get_target_agent_history(self.agent_history, target_agent_id)
 
-            curr_target_vehicle_position = R_target_to_world @ past_states_tv[-1, 1:3] + t_target_to_world
+            if np.any(np.isnan(past_states_tv)) or np.any(np.isnan(R_target_to_world)) or np.any(np.isnan(t_target_to_world)):
+                curr_target_vehicle_position = get_actor_position_rhs(target_actor)
+            else:
+                curr_target_vehicle_position = R_target_to_world @ past_states_tv[-1, 1:3] + t_target_to_world
             tvs_positions = [curr_target_vehicle_position]
 
             if np.any(np.isnan(past_states_tv)):
@@ -911,7 +923,8 @@ class RunIntersectionScenario:
         self.tv_vehicle_idxs = tv_vehicle_idxs
 
     def _setup_predictions(self, prediction_params):
-        self.agent_history = AgentHistory(self.world.get_actors())
+        traffic_light_actors = list(self.world.get_actors().filter('*traffic_light*'))
+        self.agent_history = AgentHistory(list(self.vehicle_actors) + traffic_light_actors)
         self.rasterizer    = SemBoxRasterizer(self.world.get_map().get_topology(), render_traffic_lights=\
                                                  prediction_params.render_traffic_lights)
         prefix             = os.path.abspath(__file__).split('carla')[0] + 'models/'

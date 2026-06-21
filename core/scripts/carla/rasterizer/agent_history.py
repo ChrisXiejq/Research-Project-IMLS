@@ -40,9 +40,14 @@ class AgentHistory:
 		""" Initialize the ActorInfo history for each agent.
 		    NOTE: we assume no agents will be created/destroyed in the episode of interest.
 		"""
-		vehicle_actors       = actor_list.filter('vehicle*')
-		walker_actors        = actor_list.filter('walker*')
-		traffic_light_actors = actor_list.filter('*traffic_light*')
+		if hasattr(actor_list, 'filter'):
+			vehicle_actors       = actor_list.filter('vehicle*')
+			walker_actors        = actor_list.filter('walker*')
+			traffic_light_actors = actor_list.filter('*traffic_light*')
+		else:
+			vehicle_actors = [actor for actor in actor_list if actor.type_id.startswith('vehicle')]
+			walker_actors = [actor for actor in actor_list if actor.type_id.startswith('walker')]
+			traffic_light_actors = [actor for actor in actor_list if 'traffic_light' in actor.type_id]
 
 		# Identify all vehicles in the scene.
 		self.vehicles = {actor.id : ActorInfo(actor, history_max_length) for actor in vehicle_actors}
@@ -77,10 +82,14 @@ class AgentHistory:
 		time = world_snapshot.timestamp.elapsed_seconds
 
 		for veh_id in self.vehicles.keys():
-			self.vehicles[veh_id].update( time, world_snapshot.find(veh_id).get_transform() )
+			actor_snapshot = world_snapshot.find(veh_id)
+			if actor_snapshot is not None:
+				self.vehicles[veh_id].update( time, actor_snapshot.get_transform() )
 
 		for ped_id in self.pedestrians.keys():
-			self.pedestrians[ped_id].update( time, world_snapshot.find(ped_id).get_transform() )
+			actor_snapshot = world_snapshot.find(ped_id)
+			if actor_snapshot is not None:
+				self.pedestrians[ped_id].update( time, actor_snapshot.get_transform() )
 
 		for tl_id in self.traffic_lights.keys():
 			tl_actor = world.get_actor(tl_id)
@@ -95,8 +104,18 @@ class AgentHistory:
 		"""
 
 		snapshots = {}
+		if len(self.vehicles) == 0:
+			for hsec in history_secs:
+				snapshots[np.round(hsec, 2)] = {}
+			return snapshots
+
 		arbitrary_veh_key = list(self.vehicles.keys())[0]
 		tms = np.array(self.vehicles[arbitrary_veh_key].time_history)
+		if len(tms) == 0:
+			for hsec in history_secs:
+				snapshots[np.round(hsec, 2)] = {}
+			return snapshots
+
 		current_tm = tms[-1]
 
 		if np.min(history_secs) < 0.:

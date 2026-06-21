@@ -2,6 +2,8 @@
 
 This note explains the current intersection scenario and the revised give-way scenario configuration. The experiment has been simplified to a conventional right-hand-traffic setting: the ego vehicle left-turns across an oncoming straight-going target vehicle.
 
+For tuning history and measured effects, see `docs/architecture/Give_Way_SMPC_Experiment_Changelog.md`. Before changing yield/recovery parameters, consult that changelog to avoid repeating rejected configurations and to choose the next direction from prior evidence.
+
 ## 1. Is the Current Scenario Signalised?
 
 The give-way experiment should be treated as **unsignalised** from the controller's perspective.
