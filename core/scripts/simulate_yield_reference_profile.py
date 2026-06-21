@@ -138,9 +138,9 @@ def main() -> int:
                         help="Nominal reference speed before applying the braking-distance cap.")
     parser.add_argument("--yield-stop-speed", type=float, default=0.2,
                         help="Near-stop control target speed at the yield line.")
-    parser.add_argument("--yield-reference-min-speed", type=float, default=0.8,
+    parser.add_argument("--yield-reference-min-speed", type=float, default=1.0,
                         help="Minimum pre-solve optimisation reference speed during hold_yield_line.")
-    parser.add_argument("--yield-reference-decel", type=float, default=-3.0,
+    parser.add_argument("--yield-reference-decel", type=float, default=-3.5,
                         help="Reference-profile deceleration in m/s^2. Must be negative.")
     parser.add_argument("--horizon-steps", type=int, default=10,
                         help="Number of reference intervals to simulate when --path-distances is omitted.")
