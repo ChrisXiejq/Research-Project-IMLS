@@ -559,7 +559,14 @@ class SMPCAgent(object):
             self.ref_dict={'x_ref':self.reference[1:,1], 'y_ref':self.reference[1:,2], 'psi_ref':self.reference[1:,3], 'v_ref':self.reference[1:,4],
                             'x0'  : self.reference[0,1],  'y0'  : self.reference[0,2],  'psi0'  : self.reference[0,3],  'v0'  : self.reference[0,4], 'acc_prev' : self.control_prev[0], 'df_prev' : self.control_prev[1]}
             self.ref_dict['psi_ref'] = fth.fix_angle( self.ref_dict['psi_ref'] - self.ref_dict['psi0']) + self.ref_dict['psi0']
-            self.feas_ref_gen=smpc.RefTrajGenerator(N=self.ref_horizon, DT=self.dt, L_F=self.lf, L_R=self.lr)
+            self.feas_ref_gen=smpc.RefTrajGenerator(
+                N=self.ref_horizon,
+                DT=self.dt,
+                L_F=self.lf,
+                L_R=self.lr,
+                A_MIN=getattr(self.SMPC, "A_MIN", -3.0),
+                A_MAX=getattr(self.SMPC, "A_MAX", 2.0),
+            )
             self.feas_ref_gen.update(self.ref_dict)
             self.feas_ref_dict=self.feas_ref_gen.solve()
             self.feas_ref_states=self.feas_ref_dict['z_opt']
@@ -578,7 +585,14 @@ class SMPCAgent(object):
 
 
 
-            self.feas_ref_gen=smpc.RefTrajGenerator(N=self.ref_horizon-self.t_ref-1, DT=self.dt, L_F=self.lf, L_R=self.lr)
+            self.feas_ref_gen=smpc.RefTrajGenerator(
+                N=self.ref_horizon-self.t_ref-1,
+                DT=self.dt,
+                L_F=self.lf,
+                L_R=self.lr,
+                A_MIN=getattr(self.SMPC, "A_MIN", -3.0),
+                A_MAX=getattr(self.SMPC, "A_MAX", 2.0),
+            )
 
             self.ref_dict={'x_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,0], 'y_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,1], 'psi_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,2], 'v_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,3],
                             'x0'  : x,  'y0'  : y,  'psi0'  : psi,  'v0'  : speed, 'acc_prev' : self.control_prev[0], 'df_prev' : self.control_prev[1]}
