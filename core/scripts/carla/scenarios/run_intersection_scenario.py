@@ -118,7 +118,7 @@ class VehicleParams:
     reference_regen_max_lateral_error : float = 1.5
     yield_stop_enabled : bool = True
     yield_stop_speed : float = 0.2
-    yield_reference_min_speed : float = 1.0
+    yield_reference_min_speed : float = 0.8
     yield_reference_decel : float = -3.5
     yield_stop_decel : float = -5.0
     yield_conflict_radius : float = 4.0

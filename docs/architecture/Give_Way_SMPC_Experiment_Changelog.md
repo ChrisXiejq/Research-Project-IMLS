@@ -30,19 +30,22 @@ This file records each give-way SMPC tuning change, the amount changed, observed
 | `20260621_161906` | Split the difference and softened reference decel. | `yield_stop_buffer_distance=6.25`, `yield_reference_decel=-4.0`, `yield_reference_min_speed=0.8`. | Improved over `6.0m`: `var=0.090`, `fixed=0.070`. Safety passed, but still above threshold. | Direction helped but not enough; remaining failures in approach/hold. |
 | `20260621_164134` | Further softened reference decel. | `yield_reference_decel=-3.5`, `yield_reference_min_speed=0.8`, stop buffer stayed `6.25`. | Clear improvement: `var=0.066`, `fixed=0.066`. Footprint separation `var=2.557m`, `fixed=2.545m`. | Best balanced tested run so far. Keep `-3.5` as baseline unless a new change beats it. |
 | `20260621_181839` | Tried even softer reference decel. | `yield_reference_decel=-3.0`, `yield_reference_min_speed=0.8`, stop buffer stayed `6.25`. | Not worthwhile: `var=0.065` was only marginally better, but `fixed=0.075` regressed. Safety/completion still passed. | Do not continue softening decel. Revert to `-3.5`. |
-| Local pending after `20260621_181839` | Based on hold-phase failures, keep the best decel and raise hold reference floor. | `yield_reference_decel=-3.5`, `yield_reference_min_speed=1.0`, stop buffer `6.25`, activation/caution `12.0`, recovery `4.0/1.2`. | Local profile simulation passes; pre-CARLA gate passes `32 PASS / 0 WARN / 0 FAIL`. CARLA result pending. | Next server run should test whether hold failures drop without hurting fixed-risk. |
+| `20260621_192020` | Kept best decel and raised hold reference floor. | `yield_reference_decel=-3.5`, `yield_reference_min_speed=1.0`, stop buffer `6.25`, activation/caution `12.0`, recovery `4.0/1.2`. | No improvement: `var=0.066` stayed flat, `fixed=0.085` regressed. Safety/completion still passed. Fixed-risk hold failures increased to 10; recovery remained stable with 0 failures. | Do not keep `yield_reference_min_speed=1.0`. Revert to `0.8` or test a smaller `0.9` only if needed. Current best measured run remains `20260621_164134`. |
+| Local pending after `20260621_192020` | Reverted the rejected hold reference floor trial to the best measured baseline. | `yield_reference_min_speed=1.0 -> 0.8`; kept `yield_reference_decel=-3.5`, `yield_stop_buffer_distance=6.25`, activation/caution `12.0`, recovery `4.0/1.2`. | Local validation pending in this row; expected to recover fixed-risk behaviour toward `20260621_164134`. | Re-run CARLA to confirm the regression from `1.0` is removed before attempting new tuning. |
 
 ## Rejected Directions
 
 - `yield_stop_buffer_distance=5.0` with fast recovery: caused high solver failure (`var=0.165`).
 - `yield_stop_buffer_distance=6.0`: made video less conservative but worsened `var_risk` solver failure.
 - `yield_reference_decel=-3.0`: did not materially improve `var_risk` and worsened `fixed_risk`.
+- `yield_reference_min_speed=1.0`: did not reduce `var_risk` and worsened `fixed_risk` hold failures.
 - Increasing `yield_activation_distance` / `yield_observed_caution_distance`: not tested after user preference; avoid unless reference-profile tuning cannot reduce failures.
 
 ## Next Candidate Changes
 
-Evaluate these only after the current pending run (`yield_reference_min_speed=1.0`, `yield_reference_decel=-3.5`):
+Current best measured baseline is `20260621_164134` (`yield_reference_decel=-3.5`, `yield_reference_min_speed=0.8`, `yield_stop_buffer_distance=6.25`).
 
-1. If `hold_yield_line` failures decrease and approach failures dominate, keep `yield_reference_min_speed=1.0` and consider a small `yield_brake_distance_margin` adjustment.
-2. If `fixed_risk` regresses, revert `yield_reference_min_speed` to `0.8` and consider `yield_reference_min_speed=0.9`.
+1. Revert `yield_reference_min_speed` to `0.8` before further tests.
+2. If another min-speed test is needed, try `0.9`, not `1.0`.
 3. If both policies remain around `0.06`, inspect first-failure KKT/debug setup before changing geometry again.
+4. If geometry must change, prefer a small `yield_brake_distance_margin` adjustment before changing activation/caution distance.

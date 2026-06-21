@@ -7,6 +7,7 @@
 > Evolve these entries as new tasks reveal better patterns.
 
 - **give-way-smpc-tuning**: Before changing the UK give-way SMPC experiment, read the experiment changelog and base the next parameter change on measured past effects. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
+- **server-result-pull-method**: For this project, pull server experiment results with direct `scp -r` from `root@connect.cqa1.seetacloud.com:/root/autodl-tmp/Research-Project-IMLS/core/results/<timestamp>`; do not tar unless explicitly requested. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 
 ## Project Records
 
