@@ -213,9 +213,10 @@ class SMPCAgent(object):
             raise ValueError(f"Invalid SMPC config: {smpc_config}")
 
         # reference_regeneration() is called before the SMPC solver object is
-        # constructed. Keep the expected bounds here, then prefer the solver's
-        # actual bounds after it exists.
-        if not self.ol_flag and not self.obca_flag:
+        # constructed. Keep policy-specific feasible-reference bounds here:
+        # fixed-risk benefited from a stronger local braking reference, while
+        # var-risk regressed when its reference generator used -4.0 globally.
+        if self.fixed_risk and not self.obca_flag:
             self._ref_gen_a_min = -4.0
         else:
             self._ref_gen_a_min = -3.0
@@ -303,7 +304,7 @@ class SMPCAgent(object):
 
     def _reference_generator_accel_bounds(self):
         solver = getattr(self, "SMPC", None)
-        if solver is not None:
+        if solver is not None and self.fixed_risk and not self.obca_flag:
             return (
                 getattr(solver, "A_MIN", self._ref_gen_a_min),
                 getattr(solver, "A_MAX", self._ref_gen_a_max),
@@ -458,6 +459,10 @@ class SMPCAgent(object):
                 "V_MAX": getattr(self.SMPC, "V_MAX", None),
                 "DF_MIN": getattr(self.SMPC, "DF_MIN", None),
                 "DF_MAX": getattr(self.SMPC, "DF_MAX", None),
+            },
+            "reference_generator": {
+                "A_MIN": self._reference_generator_accel_bounds()[0],
+                "A_MAX": self._reference_generator_accel_bounds()[1],
             },
         }
         self._debug_write_json("smpc_debug_setup.json", payload)
