@@ -847,11 +847,7 @@ class SMPCAgent(object):
         close_hold,
         allow_priority_yield,
     ):
-        """Interpretable severity signal for later adaptive risk allocation.
-
-        This is intentionally logging-only at this stage. The controller behaviour
-        should not change until the severity curve has been checked in CARLA logs.
-        """
+        """Interpretable severity signal for adaptive risk allocation."""
         activation_distance = max(float(self.yield_activation_distance), 1.0)
         distance_factor = 1.0 - np.clip(max(float(ego_dist_to_conflict), 0.0) / activation_distance, 0.0, 1.0)
 
@@ -924,19 +920,33 @@ class SMPCAgent(object):
         relaxed_tight = 1.2815515655446004  # Phi^{-1}(0.90), used only after target clearance.
         high_tight = float(smpc.PAPER_INTERSECTION_TIGHTENING)
         nominal_to_high_span = high_tight - upstream_tight
+        deterministic_yield_phase = yield_phase in {"approach_yield_line", "hold_yield_line"}
+        policy_map = "fixed_mild" if self.fixed_risk else "var_feasibility_preserving"
+        mild_tightening_scale = 0.35 if self.fixed_risk else 0.12
 
         phase_floor = 0.0
-        if yield_phase == "approach_yield_line":
-            phase_floor = 0.35
-        elif yield_phase == "hold_yield_line":
-            phase_floor = 0.45
-        elif yield_phase == "cautious_approach_observed_target":
-            phase_floor = 0.25
-        elif yield_phase == "observe_priority_target":
-            phase_floor = 0.20
+        if self.fixed_risk:
+            if yield_phase == "approach_yield_line":
+                phase_floor = 0.35
+            elif yield_phase == "hold_yield_line":
+                phase_floor = 0.45
+            elif yield_phase == "cautious_approach_observed_target":
+                phase_floor = 0.25
+            elif yield_phase == "observe_priority_target":
+                phase_floor = 0.20
+        else:
+            if yield_phase == "approach_yield_line":
+                phase_floor = 0.20
+            elif yield_phase == "hold_yield_line":
+                phase_floor = 0.25
+            elif yield_phase == "cautious_approach_observed_target":
+                phase_floor = 0.15
+            elif yield_phase == "observe_priority_target":
+                phase_floor = 0.10
 
         if target_cleared or yield_phase == "released_recovery":
             effective_score = 0.0
+            risk_scale = 0.0
             tightening = relaxed_tight
             risk_phase = "relaxed_after_clearance"
         else:
@@ -947,21 +957,21 @@ class SMPCAgent(object):
             if effective_score >= 0.85:
                 risk_scale = 0.70 + 0.30 * effective_score
             else:
-                risk_scale = 0.35 * effective_score
+                risk_scale = mild_tightening_scale * effective_score
             tightening = upstream_tight + risk_scale * nominal_to_high_span
             if effective_score >= 0.85:
                 risk_phase = "high"
-            elif effective_score >= 0.45:
+            elif effective_score >= 0.45 and not (deterministic_yield_phase and not self.fixed_risk):
                 risk_phase = "medium"
             else:
                 risk_phase = "nominal"
 
         target_prob = float(smpc._standard_normal_cdf(tightening))
-        risk_scale = 0.0 if target_cleared or yield_phase == "released_recovery" else risk_scale
         return {
             "enabled": True,
             "risk_profile": self.risk_profile,
             "phase": risk_phase,
+            "policy_map": policy_map,
             "yield_phase": yield_phase,
             "raw_severity_score": raw_score,
             "effective_severity_score": effective_score,
@@ -978,7 +988,11 @@ class SMPCAgent(object):
                 "hold_floor": 0.45,
                 "cautious_floor": 0.25,
                 "observe_floor": 0.20,
-                "mild_tightening_scale": 0.35,
+                "var_approach_floor": 0.20,
+                "var_hold_floor": 0.25,
+                "var_cautious_floor": 0.15,
+                "var_observe_floor": 0.10,
+                "mild_tightening_scale": mild_tightening_scale,
                 "critical_score_threshold": 0.85,
             },
         }
