@@ -15,7 +15,7 @@ The current dissertation candidate run is:
 core/results/20260627_201840
 ```
 
-This run should be used as the current best passed final-method dissertation candidate for the proposed method. A later repeat run (`20260627_203901`) exposed a fixed-risk footprint-clearance robustness issue, so the method should not be frozen until the new `yield_release_clearance_margin=1.0m` buffer is validated.
+This run should be used as the current best passed final-method dissertation candidate for the proposed method. Later repeat runs exposed fixed-risk footprint-clearance robustness issues, so the method should not be frozen until the hold-line clearance fix described below is validated.
 
 Key configuration:
 
@@ -39,7 +39,7 @@ Key result:
 
 This candidate supports the dissertation argument that deterministic traffic-rule yielding should be handled by a rule-aware supervisory layer, while SMPC and adaptive risk allocation handle interaction-aware planning outside deterministic stop/hold and short recovery-handoff windows.
 
-Earlier milestone `core/results/20260627_155115` remains useful as the first dissertation-quality proof that rule-yield bypass removes approach/hold infeasibility. The newer `20260627_201840` supersedes it as the best passed final-method candidate because it also uses the user-confirmed `+2.75m` visual start geometry and fixes the released-recovery solver failures. The next robustness step has been implemented locally: prevent release immediately after the target crosses the conflict-radius boundary by requiring an additional `1.0m` target-clearance margin.
+Earlier milestone `core/results/20260627_155115` remains useful as the first dissertation-quality proof that rule-yield bypass removes approach/hold infeasibility. The newer `20260627_201840` supersedes it as the best passed final-method candidate because it also uses the user-confirmed `+2.75m` visual start geometry and fixes the released-recovery solver failures. The `20260627_205856_final_dissertation` repeat confirms that the full paper-panel batch now works, but fixed-risk can still collide while waiting. The current local robustness step moves the yield stop line upstream by setting `yield_stop_buffer_distance=8.0m`, so the hold pose itself has more footprint clearance.
 
 ## 1. Dissertation Topic
 
@@ -234,7 +234,7 @@ The implementation updates risk parameters through the existing SMPC parameter p
 - `approach_yield_line` / `hold_yield_line`: deterministic rule-yield control.
 - early low-speed `released_recovery`: deterministic recovery handoff after the priority target has cleared.
 
-The recovery handoff is intentionally bounded and should not be expanded without new evidence. The repeat run `20260627_203901` shows that the safety improvement should instead be a target-clearance release buffer before `released_recovery`, not a wider recovery bypass. The current local implementation uses `yield_release_clearance_margin=1.0m`.
+The recovery handoff is intentionally bounded and should not be expanded without new evidence. The repeat run `20260627_203901` motivated the `yield_release_clearance_margin=1.0m` buffer. The full batch `20260627_205856_final_dissertation` shows the remaining safety issue occurs before release, during `hold_yield_line`, so the next change should increase `yield_stop_buffer_distance` rather than widening release/recovery logic.
 
 ## 9. Baselines
 
@@ -255,7 +255,7 @@ The existing best tuning should be preserved as the baseline:
 ```text
 yield_reference_decel = -3.75
 yield_reference_min_speed = 0.8
-yield_stop_buffer_distance = 6.25
+yield_stop_buffer_distance = 8.0
 yield_brake_distance_margin = 3.5
 SMPC_MMPreds.A_MIN = -4.0
 RefTrajGenerator.A_MIN:
@@ -492,7 +492,7 @@ Generate:
 ## 16. Immediate Next Actions
 
 1. Treat `20260627_201840` as the current best passed final-method candidate, but keep `20260627_203901` as a robustness warning.
-2. Validate the local `yield_release_clearance_margin=1.0m` change, which requires the priority target to move beyond `yield_conflict_radius + 1.0m` before ego recovery starts.
+2. Validate the local hold-line clearance fix: `yield_stop_buffer_distance=6.25m -> 8.0m`.
 3. Run `run_give_way_final_dissertation_batch.sh` on the server to regenerate a full comparable run with `smpc_open_loop` included.
 4. Pull that run and verify the post-CARLA gate, paper panel, and baseline metrics.
 5. Produce result tables comparing final method, open-loop, no-target, fixed-risk, and variable-risk behaviours.

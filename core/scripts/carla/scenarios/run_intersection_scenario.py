@@ -122,7 +122,7 @@ class VehicleParams:
     yield_reference_decel : float = -3.75
     yield_stop_decel : float = -5.0
     yield_conflict_radius : float = 4.0
-    yield_stop_buffer_distance : float = 6.25
+    yield_stop_buffer_distance : float = 8.0
     yield_brake_distance_margin : float = 3.5
     yield_wait_steer_lookahead_distance : float = 6.0
     yield_wait_steer_gain : float = 1.0
