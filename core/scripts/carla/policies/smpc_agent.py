@@ -923,16 +923,17 @@ class SMPCAgent(object):
         target_cleared = bool(yield_status.get("target_cleared_conflict", False))
         relaxed_tight = 1.2815515655446004  # Phi^{-1}(0.90), used only after target clearance.
         high_tight = float(smpc.PAPER_INTERSECTION_TIGHTENING)
+        nominal_to_high_span = high_tight - upstream_tight
 
         phase_floor = 0.0
         if yield_phase == "approach_yield_line":
-            phase_floor = 0.72
-        elif yield_phase == "hold_yield_line":
-            phase_floor = 0.78
-        elif yield_phase == "cautious_approach_observed_target":
-            phase_floor = 0.45
-        elif yield_phase == "observe_priority_target":
             phase_floor = 0.35
+        elif yield_phase == "hold_yield_line":
+            phase_floor = 0.45
+        elif yield_phase == "cautious_approach_observed_target":
+            phase_floor = 0.25
+        elif yield_phase == "observe_priority_target":
+            phase_floor = 0.20
 
         if target_cleared or yield_phase == "released_recovery":
             effective_score = 0.0
@@ -940,15 +941,23 @@ class SMPCAgent(object):
             risk_phase = "relaxed_after_clearance"
         else:
             effective_score = float(np.clip(max(raw_score, phase_floor), 0.0, 1.0))
-            tightening = upstream_tight + effective_score * (high_tight - upstream_tight)
-            if effective_score >= 0.75:
+            # The rule supervisor already enforces deterministic yielding in approach/hold.
+            # Keep chance-constraint tightening mild unless the measured interaction
+            # severity itself becomes critical; otherwise these phases become infeasible.
+            if effective_score >= 0.85:
+                risk_scale = 0.70 + 0.30 * effective_score
+            else:
+                risk_scale = 0.35 * effective_score
+            tightening = upstream_tight + risk_scale * nominal_to_high_span
+            if effective_score >= 0.85:
                 risk_phase = "high"
-            elif effective_score >= 0.40:
+            elif effective_score >= 0.45:
                 risk_phase = "medium"
             else:
                 risk_phase = "nominal"
 
         target_prob = float(smpc._standard_normal_cdf(tightening))
+        risk_scale = 0.0 if target_cleared or yield_phase == "released_recovery" else risk_scale
         return {
             "enabled": True,
             "risk_profile": self.risk_profile,
@@ -957,6 +966,7 @@ class SMPCAgent(object):
             "raw_severity_score": raw_score,
             "effective_severity_score": effective_score,
             "phase_floor": float(phase_floor),
+            "risk_scale": float(risk_scale),
             "tightening": float(tightening),
             "target_prob": target_prob,
             "target_cleared_conflict": target_cleared,
@@ -964,10 +974,12 @@ class SMPCAgent(object):
                 "relaxed_after_clearance_tight": relaxed_tight,
                 "nominal_tight": upstream_tight,
                 "high_tight": high_tight,
-                "approach_floor": 0.72,
-                "hold_floor": 0.78,
-                "cautious_floor": 0.45,
-                "observe_floor": 0.35,
+                "approach_floor": 0.35,
+                "hold_floor": 0.45,
+                "cautious_floor": 0.25,
+                "observe_floor": 0.20,
+                "mild_tightening_scale": 0.35,
+                "critical_score_threshold": 0.85,
             },
         }
 
