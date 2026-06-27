@@ -15,7 +15,7 @@ The current dissertation candidate run is:
 core/results/20260627_201840
 ```
 
-This run should be used as the current final-method dissertation candidate for the proposed method.
+This run should be used as the current best passed final-method dissertation candidate for the proposed method. A later repeat run (`20260627_203901`) exposed a fixed-risk footprint-clearance robustness issue, so the method should not be frozen until the new `yield_release_clearance_margin=1.0m` buffer is validated.
 
 Key configuration:
 
@@ -39,7 +39,7 @@ Key result:
 
 This candidate supports the dissertation argument that deterministic traffic-rule yielding should be handled by a rule-aware supervisory layer, while SMPC and adaptive risk allocation handle interaction-aware planning outside deterministic stop/hold and short recovery-handoff windows.
 
-Earlier milestone `core/results/20260627_155115` remains useful as the first dissertation-quality proof that rule-yield bypass removes approach/hold infeasibility. The newer `20260627_201840` supersedes it as the final-method candidate because it also uses the user-confirmed `+2.75m` visual start geometry and fixes the released-recovery solver failures.
+Earlier milestone `core/results/20260627_155115` remains useful as the first dissertation-quality proof that rule-yield bypass removes approach/hold infeasibility. The newer `20260627_201840` supersedes it as the best passed final-method candidate because it also uses the user-confirmed `+2.75m` visual start geometry and fixes the released-recovery solver failures. The next robustness step has been implemented locally: prevent release immediately after the target crosses the conflict-radius boundary by requiring an additional `1.0m` target-clearance margin.
 
 ## 1. Dissertation Topic
 
@@ -234,7 +234,7 @@ The implementation updates risk parameters through the existing SMPC parameter p
 - `approach_yield_line` / `hold_yield_line`: deterministic rule-yield control.
 - early low-speed `released_recovery`: deterministic recovery handoff after the priority target has cleared.
 
-The recovery handoff is intentionally bounded and should not be expanded without new evidence.
+The recovery handoff is intentionally bounded and should not be expanded without new evidence. The repeat run `20260627_203901` shows that the safety improvement should instead be a target-clearance release buffer before `released_recovery`, not a wider recovery bypass. The current local implementation uses `yield_release_clearance_margin=1.0m`.
 
 ## 9. Baselines
 
@@ -491,8 +491,8 @@ Generate:
 
 ## 16. Immediate Next Actions
 
-1. Treat `20260627_201840` as the current final-method dissertation candidate.
-2. Run `run_give_way_final_dissertation_batch.sh` on the server to regenerate a full comparable run with `smpc_open_loop` included.
-3. Pull that run and verify the post-CARLA gate, paper panel, and baseline metrics.
-4. Produce result tables comparing final method, open-loop, no-target, fixed-risk, and variable-risk behaviours.
-5. Only after the baseline table is stable, consider ablations such as removing priority, TTC, or clearance-relaxation terms.
+1. Treat `20260627_201840` as the current best passed final-method candidate, but keep `20260627_203901` as a robustness warning.
+2. Validate the local `yield_release_clearance_margin=1.0m` change, which requires the priority target to move beyond `yield_conflict_radius + 1.0m` before ego recovery starts.
+3. Run `run_give_way_final_dissertation_batch.sh` on the server to regenerate a full comparable run with `smpc_open_loop` included.
+4. Pull that run and verify the post-CARLA gate, paper panel, and baseline metrics.
+5. Produce result tables comparing final method, open-loop, no-target, fixed-risk, and variable-risk behaviours.

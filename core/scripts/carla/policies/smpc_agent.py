@@ -61,6 +61,7 @@ class SMPCAgent(object):
                  yield_activation_distance=12.0,
                  yield_hold_distance=3.0,
                  yield_release_time=0.3,
+                 yield_release_clearance_margin=1.0,
                  yield_observed_caution_enabled=True,
                  yield_observed_caution_distance=12.0,
                  yield_observed_caution_min_target_speed=0.5,
@@ -110,6 +111,7 @@ class SMPCAgent(object):
         self.yield_activation_distance = float(yield_activation_distance)
         self.yield_hold_distance = float(yield_hold_distance)
         self.yield_release_time = float(yield_release_time)
+        self.yield_release_clearance_margin = float(yield_release_clearance_margin)
         self.yield_observed_caution_enabled = bool(yield_observed_caution_enabled)
         self.yield_observed_caution_distance = float(yield_observed_caution_distance)
         self.yield_observed_caution_min_target_speed = float(yield_observed_caution_min_target_speed)
@@ -157,6 +159,11 @@ class SMPCAgent(object):
         if self.yield_brake_distance_margin < 0.0:
             raise ValueError(
                 f"yield_brake_distance_margin must be non-negative, got {self.yield_brake_distance_margin}"
+            )
+        if self.yield_release_clearance_margin < 0.0:
+            raise ValueError(
+                "yield_release_clearance_margin must be non-negative, "
+                f"got {self.yield_release_clearance_margin}"
             )
         if self.yield_wait_steer_lookahead_distance < 0.0:
             raise ValueError(
@@ -418,6 +425,7 @@ class SMPCAgent(object):
                 "activation_rule": "distance_to_stop <= v^2/(2*abs(decel)) + brake_distance_margin",
                 "pre_solve_reference_profile": "yield reference uses v_ref <= sqrt(v_ref_min^2 + 2*abs(reference_decel)*remaining_distance_to_stop); final near-stop control is handled by the yield controller, not by an instantaneous near-stop optimisation reference",
                 "solver_bypass": "adaptive profile bypasses deterministic approach/hold and the first low-speed released_recovery handoff frames after the priority target has cleared",
+                "release_clearance_buffer": "released_recovery starts only after the priority target has moved beyond conflict_radius + release_clearance_margin, so rule-order clearance also respects vehicle footprint clearance",
             },
             "yield_stop_supervisor": {
                 "enabled": self.yield_stop_enabled,
@@ -434,6 +442,7 @@ class SMPCAgent(object):
                 "activation_distance": self.yield_activation_distance,
                 "hold_distance": self.yield_hold_distance,
                 "release_time": self.yield_release_time,
+                "release_clearance_margin": self.yield_release_clearance_margin,
                 "observed_caution_enabled": self.yield_observed_caution_enabled,
                 "observed_caution_distance": self.yield_observed_caution_distance,
                 "observed_caution_min_target_speed": self.yield_observed_caution_min_target_speed,
@@ -1059,7 +1068,9 @@ class SMPCAgent(object):
             target_speed_est,
             max(self.yield_stop_speed, 0.2),
         )
-        target_cleared_conflict = target_distance_to_conflict < -self.yield_conflict_radius
+        target_nominally_cleared_conflict = target_distance_to_conflict < -self.yield_conflict_radius
+        target_release_clearance_distance = self.yield_conflict_radius + self.yield_release_clearance_margin
+        target_cleared_conflict = target_distance_to_conflict < -target_release_clearance_distance
         target_approaching_conflict = (
             target_motion_line_min_distance <= self.yield_conflict_radius
             and not target_cleared_conflict
@@ -1179,7 +1190,10 @@ class SMPCAgent(object):
             "target_speed_est": target_speed_est,
             "target_motion_line_min_distance": target_motion_line_min_distance,
             "target_approaching_conflict": bool(target_approaching_conflict),
+            "target_nominally_cleared_conflict": bool(target_nominally_cleared_conflict),
             "target_cleared_conflict": bool(target_cleared_conflict),
+            "target_release_clearance_distance": float(target_release_clearance_distance),
+            "target_release_clearance_margin": float(self.yield_release_clearance_margin),
             "target_enter_time": target_enter_time,
             "target_exit_time": target_exit_time,
             "target_has_priority": bool(target_has_priority and allow_priority_yield),
@@ -1268,7 +1282,8 @@ class SMPCAgent(object):
                 if geometry is None:
                     continue
                 target_priority_distance = geometry["target_distance_to_conflict"]
-                if target_priority_distance < -self.yield_conflict_radius:
+                release_clearance_distance = self.yield_conflict_radius + self.yield_release_clearance_margin
+                if target_priority_distance < -release_clearance_distance:
                     target_priority_distance = float("inf")
                 candidate = (target_priority_distance, k, mode, target_path, geometry, "prediction", True)
                 if best is None or candidate[0] < best[0]:
@@ -1285,7 +1300,8 @@ class SMPCAgent(object):
                 if geometry is None:
                     continue
                 target_priority_distance = geometry["target_distance_to_conflict"]
-                if target_priority_distance < -self.yield_conflict_radius:
+                release_clearance_distance = self.yield_conflict_radius + self.yield_release_clearance_margin
+                if target_priority_distance < -release_clearance_distance:
                     target_priority_distance = float("inf")
                 candidate = (target_priority_distance, k, 0, target_path, geometry, "observed_track", False)
                 if best is None or candidate[0] < best[0]:
