@@ -63,10 +63,49 @@ This file records each give-way SMPC tuning change, the amount changed, observed
 | `20260627_170746` | Server run with `ego start_left_offset=+2.75`, but using upstream risk profile. | Ran `smpc_var_risk`, `smpc_fixed_risk`, `smpc_open_loop`, `notv`, and `notv_cl` with `risk_profile=upstream_code` rather than `adaptive_interaction_severity`. This run includes the `+2.75` visual start offset and generated `paper_panel`, so it is useful as a baseline/panel run, but it does not validate the final adaptive-risk method. | Strict required-policy gate failed because adaptive solve bypass was disabled by the upstream profile. `smpc_fixed_risk`: completion valid but `solver_failure_frac=0.221`, failures `12` approach / `35` hold / `13` recovery, all `INF_OR_UNBD`, center clearance `4.686m`. `smpc_var_risk`: completion valid but `solver_failure_frac=0.209`, failures `15` approach / `31` hold / `15` recovery, all `INF_OR_UNBD`, center clearance `4.463m`. `smpc_open_loop` ran and produced the paper panel, but violated yield order (`ego_enter=142.62s` before `target_exit=146.37s`) while avoiding collision. | Do not treat this as a failure of the `+2.75` visual geometry or of the proposed method. It is mostly an upstream-risk baseline demonstrating why adaptive rule-yield bypass is needed. Re-run with `--risk_profile adaptive_interaction_severity` to validate whether `+2.75` can become the final visual-geometry milestone. |
 | `20260627_194959` | Server validation of `ego start_left_offset=+2.75` with the final adaptive-risk profile. | Ran `smpc_var_risk`, `smpc_fixed_risk`, `notv`, and `notv_cl` with `risk_profile=adaptive_interaction_severity`. Scenario geometry used `ego start_left_offset=+2.75`, `ego goal_left_offset=+1.85`, and target offsets `+1.85`. Unified mild adaptive risk and deterministic `approach_yield_line` / `hold_yield_line` bypass were active. | Safety, completion, and yield order are good, but the strict required-policy gate narrowly failed. `smpc_var_risk` passed with `solver_failure_frac=0.04464`, completion valid, no footprint collision, target cleared before ego entered, center clearance `4.237m`. `smpc_fixed_risk` failed only because `solver_failure_frac=0.05172` exceeds the `0.050` gate by `0.00172`; completion valid, no footprint collision, target cleared before ego entered, center clearance `4.234m`. All failures occurred in `released_recovery` (`fixed=12`, `var=10`, all `INF_OR_UNBD`). Bypass worked correctly in deterministic yield phases: both policies bypassed `51` frames (`11` approach / `40` hold). Adaptive risk was applied as intended: approach/hold tightening mean about `1.72` with target probability about `0.957`, while released recovery relaxed to `Phi^-1(0.90)=1.282`. | This validates the adaptive-risk mechanism under the `+2.75` visual geometry, but it is not yet the final milestone because fixed-risk misses the solver gate narrowly. Do not change approach/hold risk floors or undo `+2.75` solely from this result. If the video visually matches the red rectangle, next fix should target early `released_recovery` infeasibility, for example by extending deterministic bypass or recovery handoff for the first few low-speed recovery frames after target clearance. |
 | Local pending recovery-handoff bypass after `20260627_194959` | Kept the confirmed `+2.75` visual geometry and targeted only early `released_recovery` solver infeasibility. | In `smpc_agent.py`, replaced the simple boolean bypass helper with a reasoned bypass decision. The adaptive profile still bypasses deterministic `approach_yield_line` / `hold_yield_line`, and now additionally bypasses only the first low-speed released-recovery handoff frames after the priority target has cleared the conflict zone. Conditions: `risk_profile=adaptive_interaction_severity`, non-open-loop/non-OBCA, valid priority prediction, `target_cleared_conflict=true`, `speed <= max(2.0, 0.5 * yield_recovery_speed)`, and either the first release frame after hold or the first `min(15, ceil(0.25 * yield_recovery_steps))` recovery frames. Debug now records `solver_bypass.reason=deterministic_rule_yield_recovery_handoff` and `recovery_steps_remaining`. | Python syntax validation and `git diff --check` passed. Replay against the `20260627_194959` debug window shows the new condition would cover all old recovery failures: fixed-risk failures `[69-78, 80, 81]` and var-risk failures `[69-77, 79]`, while only adding bypass over the early handoff window `[69-84]`. This should bring fixed-risk below the `0.050` gate without changing conflict-zone logic, adaptive risk floors, or the visually confirmed start geometry. | Re-run the adaptive batch with the same `+2.75` geometry. Success means both SMPC policies pass completion, no footprint collision, target-first yield order, and fixed-risk `solver_failure_frac` drops below `0.050` with debug showing recovery handoff bypass only in the early released-recovery window. |
+| `20260627_201840` | Server validation after early `released_recovery` handoff bypass. | Ran the same final adaptive command: `smpc_var_risk`, `smpc_fixed_risk`, `notv`, and `notv_cl` with `risk_profile=adaptive_interaction_severity`, `solver_backend=gurobi`, and confirmed `ego start_left_offset=+2.75`. The new recovery-handoff bypass was active. | Required policies now pass the strict post-CARLA gate. `smpc_fixed_risk`: completion valid at `11.10s`, no footprint collision, target cleared before ego entered, center clearance `4.227m`, `solver_failure_frac=0.000`. `smpc_var_risk`: completion valid at `11.10s`, no footprint collision, target cleared before ego entered, center clearance `4.147m`, `solver_failure_frac=0.000`. Debug confirms the intended bypass distribution for both policies: `51` deterministic approach/hold frames (`11` approach / `40` hold) plus exactly `16` early `released_recovery` handoff frames (`steps 69-84`) with reason `deterministic_rule_yield_recovery_handoff`. Adaptive risk remains interpretable: approach/hold tightening mean about `1.72` with target probability about `0.957`, recovery relaxed to `Phi^-1(0.90)=1.282`. | This is the best current final-method run with the user-confirmed visual geometry. Promote it as the current dissertation candidate for the proposed method. The trade-off is reduced clearance versus the older `+1.85` zero-failure milestone (`~4.15-4.23m` vs `~5.31-5.34m`) and moderate route deviation (`completion_ey≈-3.6`, still completion-valid). Do not add broader recovery bypass; the current handoff window is sufficient and bounded. Next work should focus on generating comparable baselines/paper panels and documenting the method, not further solver-failure tuning. |
 
-## Milestone: Dissertation Candidate Run `20260627_155115`
+## Current Final-Method Dissertation Candidate: `20260627_201840`
 
-This run should be treated as the first dissertation-quality milestone for the rule-aware adaptive-risk SMPC direction.
+This run should be treated as the current best dissertation candidate for the rule-aware adaptive-risk SMPC direction.
+
+Configuration:
+
+- Scenario: right-hand-traffic unsignalised give-way interaction, ego left turn across an oncoming straight-going target.
+- Visual geometry: ego `start_left_offset=+2.75`, confirmed by user video inspection as the correct start position.
+- Policies in the validation run: `smpc_var_risk`, `smpc_fixed_risk`, `notv`, `notv_cl`.
+- Risk profile: `adaptive_interaction_severity`.
+- Architecture: unified mild adaptive risk allocation, deterministic rule-yield SMPC solve bypass, and bounded early `released_recovery` handoff bypass.
+- Bypass condition: active priority rule-yield in `approach_yield_line` / `hold_yield_line`, or low-speed early recovery after the priority target has cleared the conflict zone.
+
+Measured outcome:
+
+- `smpc_var_risk`: completion valid, no footprint collision, target cleared before ego entered the conflict zone, `solver_failure_frac=0.000`, center clearance `4.147m`, completion time `11.10s`.
+- `smpc_fixed_risk`: completion valid, no footprint collision, target cleared before ego entered the conflict zone, `solver_failure_frac=0.000`, center clearance `4.227m`, completion time `11.10s`.
+- Both SMPC policies bypassed `51` deterministic approach/hold frames and exactly `16` bounded early recovery-handoff frames (`steps 69-84`).
+- Adaptive risk remained active and interpretable: approach/hold tightening stayed near `1.72` (`target_prob≈0.957`), while released recovery relaxed to `Phi^-1(0.90)=1.282`.
+
+Why this matters:
+
+- This is the first run that combines the user-confirmed visual start geometry, the full adaptive-risk profile, and zero solver failures for both required SMPC policies.
+- It validates the final architecture direction: traffic rules handle deterministic priority-yield and short recovery-handoff phases, while SMPC/adaptive risk remains responsible for interaction-aware planning outside those deterministic windows.
+- It fixes the only remaining narrow gate failure from `20260627_194959`, where fixed-risk missed the solver gate by `0.00172` due to early `released_recovery` infeasibility.
+
+Known trade-off:
+
+- Clearance is lower than the earlier `+1.85` zero-failure milestone (`~4.15-4.23m` instead of `~5.31-5.34m`), but remains collision-free and passes the post-CARLA gate.
+- Route deviation is moderate (`completion_ey≈-3.6`) but still completion-valid.
+- Do not broaden the recovery bypass unless a new failure mode appears; the bounded `16`-frame handoff is sufficient for the validated scenario.
+
+Recommended use in the dissertation:
+
+- Use `20260627_201840` as the main final-method quantitative candidate.
+- Use the next full dissertation batch with `smpc_open_loop` included to generate comparable paper panels and baseline tables.
+- Frame the final contribution as rule-aware SMPC with interaction-severity-adaptive risk allocation and bounded deterministic rule-yield / recovery-handoff control.
+
+## Earlier Milestone: Dissertation Candidate Run `20260627_155115`
+
+This run should be treated as the first dissertation-quality milestone for the rule-aware adaptive-risk SMPC direction, but it is no longer the current final-method candidate.
 
 Configuration:
 
@@ -116,7 +155,7 @@ Recommended use in the dissertation:
 
 ## Next Candidate Changes
 
-Current dissertation candidate is `20260627_155115` (`risk_profile=adaptive_interaction_severity`, unified mild adaptive risk, deterministic rule-yield solve bypass). Earlier parameter-only baselines are retained for comparison but are no longer the primary direction.
+Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_interaction_severity`, unified mild adaptive risk, deterministic rule-yield solve bypass, and bounded early recovery-handoff bypass). Earlier parameter-only baselines are retained for comparison but are no longer the primary direction.
 
 1. If both policies remain around `0.06` to `0.08`, inspect first-failure KKT/debug setup before changing geometry again.
 2. The `yield_brake_distance_margin=3.5` test was neutral (`20260621_215045`), so avoid further margin-only increases.
@@ -142,3 +181,4 @@ Current dissertation candidate is `20260627_155115` (`risk_profile=adaptive_inte
 22. `20260627_170746` accidentally/explicitly used `risk_profile=upstream_code`; its solver failures are expected because bypass is off. Use it as a baseline/paper-panel run, not as final-method validation.
 23. After `20260627_194959`, `+2.75` with `adaptive_interaction_severity` is mechanically correct and safe, but fixed-risk narrowly fails due to `released_recovery` infeasibility. If visual placement is good, preserve the geometry and fix the recovery handoff rather than retuning approach/hold risk or conflict-zone parameters.
 24. After user confirmation, `+2.75` is the correct visual start geometry. Keep it. The pending recovery-handoff bypass is the next validation target and should be judged by whether it removes the narrow fixed-risk recovery failures while preserving safety and yield order.
+25. After `20260627_201840`, recovery-handoff bypass is validated: both required SMPC policies pass with `solver_failure_frac=0.000`, safety and yield order pass, and the bypass is bounded to `16` early recovery frames. Treat this as the current final-method dissertation candidate.

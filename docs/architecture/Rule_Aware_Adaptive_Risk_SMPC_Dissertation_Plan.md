@@ -5,24 +5,26 @@ This document defines the dissertation direction, experimental scheme, implement
 - `docs/architecture/UK_Give_Way_Intersection_Scenario.md`
 - `docs/architecture/Give_Way_SMPC_Experiment_Changelog.md`
 
-The current experiment should now move from parameter tuning toward a dissertation contribution: rule-aware SMPC with interaction-severity-adaptive risk allocation.
+The current experiment has moved from parameter tuning toward the dissertation contribution: rule-aware SMPC with interaction-severity-adaptive risk allocation and a bounded deterministic recovery handoff after rule-compliant yielding.
 
 ## Current Milestone
 
 The current dissertation candidate run is:
 
 ```text
-core/results/20260627_155115
+core/results/20260627_201840
 ```
 
-This run should be used as the first main milestone demonstration of the proposed method.
+This run should be used as the current final-method dissertation candidate for the proposed method.
 
 Key configuration:
 
 - `risk_profile=adaptive_interaction_severity`
 - policies: `smpc_var_risk`, `smpc_fixed_risk`, `notv`, `notv_cl`
+- ego visual start geometry: `start_left_offset=+2.75`, confirmed by video inspection
 - unified mild adaptive risk allocation
 - deterministic rule-yield SMPC solve bypass during `approach_yield_line` and `hold_yield_line`
+- bounded deterministic recovery-handoff bypass during the first low-speed `released_recovery` frames after the priority target has cleared the conflict zone
 
 Key result:
 
@@ -31,9 +33,13 @@ Key result:
 - no footprint collision,
 - valid completion,
 - target vehicle clears the conflict zone before ego enters,
-- video quality has been manually inspected and judged good enough for the milestone demonstration.
+- `smpc_fixed_risk` center clearance is `4.227m`, `smpc_var_risk` center clearance is `4.147m`,
+- both policies complete in about `11.10s`,
+- the recovery-handoff bypass is bounded to `16` early `released_recovery` frames and does not replace the full recovery phase.
 
-This milestone supports the dissertation argument that deterministic traffic-rule yielding should be handled by a rule-aware supervisory layer, while SMPC and adaptive risk allocation handle interaction-aware planning outside those deterministic stop/hold windows.
+This candidate supports the dissertation argument that deterministic traffic-rule yielding should be handled by a rule-aware supervisory layer, while SMPC and adaptive risk allocation handle interaction-aware planning outside deterministic stop/hold and short recovery-handoff windows.
+
+Earlier milestone `core/results/20260627_155115` remains useful as the first dissertation-quality proof that rule-yield bypass removes approach/hold infeasibility. The newer `20260627_201840` supersedes it as the final-method candidate because it also uses the user-confirmed `+2.75m` visual start geometry and fixes the released-recovery solver failures.
 
 ## 1. Dissertation Topic
 
@@ -135,7 +141,7 @@ This layer ensures the turning ego vehicle gives way to the oncoming straight-go
 
 ### 6.3 Interaction-Severity-Adaptive Risk Layer
 
-This is the dissertation contribution to add next. The controller computes an interaction severity score:
+This is one dissertation contribution. The controller computes an interaction severity score:
 
 ```text
 S(t) in [0, 1]
@@ -199,17 +205,17 @@ S >= 0.75       high
 target cleared  cleared
 ```
 
-The first code step should only log this score. The score should not control SMPC until the curve has been checked against CARLA rollouts.
+The implementation has already passed the logging-only and adaptive-control validation stages. The score should still be reported in the dissertation because it explains why the controller tightens during approach/hold and relaxes after the target clears.
 
 ## 8. Adaptive Risk Mapping
 
-After severity logging is validated, implement a new risk profile:
+The final method uses the risk profile:
 
 ```text
 risk_profile = adaptive_interaction_severity
 ```
 
-Initial probability mapping:
+Implemented probability mapping:
 
 ```text
 p_low  = upstream_code target probability
@@ -223,7 +229,12 @@ This means:
 - high severity approaches the stricter paper-style chance constraint,
 - target-cleared phase relaxes the constraint again.
 
-The first adaptive implementation should update risk parameters through existing SMPC parameter paths where possible, rather than rebuilding the whole optimisation problem.
+The implementation updates risk parameters through the existing SMPC parameter path rather than rebuilding the optimisation problem. The final version also uses a bounded deterministic bypass for traffic-rule phases where solving the SMPC problem is not the meaningful control objective:
+
+- `approach_yield_line` / `hold_yield_line`: deterministic rule-yield control.
+- early low-speed `released_recovery`: deterministic recovery handoff after the priority target has cleared.
+
+The recovery handoff is intentionally bounded and should not be expanded without new evidence.
 
 ## 9. Baselines
 
@@ -237,7 +248,7 @@ The final dissertation should compare at least:
 | `smpc_var_risk` | Existing variable risk allocation baseline. |
 | `rule_aware_smpc_fixed_risk` | Tests the value of the traffic-rule supervisor. |
 | `rule_aware_smpc_var_risk` | Current best rule-aware baseline. |
-| `rule_aware_smpc_adaptive_risk` | Main proposed dissertation method. |
+| `rule_aware_smpc_adaptive_risk` | Main proposed dissertation method, represented by `20260627_201840`. |
 
 The existing best tuning should be preserved as the baseline:
 
@@ -253,6 +264,18 @@ RefTrajGenerator.A_MIN:
 ```
 
 Rejected configurations in the changelog should not be repeated unless there is a new reason.
+
+For the next paper-panel run, use the reproducible script:
+
+```bash
+cd /root/autodl-tmp/Research-Project-IMLS/core/scripts/carla
+source /root/autodl-tmp/load_gurobi11.sh
+conda activate carla_modern
+export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
+bash run_give_way_final_dissertation_batch.sh
+```
+
+This script runs `notv`, `notv_cl`, `smpc_open_loop`, `smpc_var_risk`, and `smpc_fixed_risk` with `risk_profile=adaptive_interaction_severity`, then runs the post-CARLA trajectory gate. It is intended to generate both the final-method results and the missing open-loop baseline needed by paper-panel postprocessing.
 
 ## 10. Ablation Studies
 
@@ -378,7 +401,7 @@ The severity should be high during approach/hold and low after clearance.
 
 ### Stage 3: Adaptive Risk Profile
 
-Add `adaptive_interaction_severity` as a risk profile. The first implementation should pass an adaptive target probability into the existing SMPC risk-allocation parameter path.
+Implemented `adaptive_interaction_severity` as a risk profile. It passes adaptive tightening and target probability into the existing SMPC risk-allocation parameter path.
 
 ### Stage 4: CARLA Experiments
 
@@ -391,7 +414,7 @@ smpc_open_loop
 rule_aware_smpc_adaptive_risk
 ```
 
-Then run the ablation matrix.
+The immediate experimental improvement is to run the final dissertation batch with `smpc_open_loop` included, so that paper panels and baseline tables can be generated from one comparable run. Then run the ablation matrix.
 
 ### Stage 5: Result Tables and Dissertation Figures
 
@@ -468,8 +491,8 @@ Generate:
 
 ## 16. Immediate Next Actions
 
-1. Add severity logging to the current rule-aware yield decision.
-2. Run lightweight syntax/pre-CARLA checks.
-3. Run one CARLA batch with current best baseline.
-4. Plot severity timeline and verify that it matches the intended interaction phases.
-5. Implement adaptive risk profile only after the severity signal is validated.
+1. Treat `20260627_201840` as the current final-method dissertation candidate.
+2. Run `run_give_way_final_dissertation_batch.sh` on the server to regenerate a full comparable run with `smpc_open_loop` included.
+3. Pull that run and verify the post-CARLA gate, paper panel, and baseline metrics.
+4. Produce result tables comparing final method, open-loop, no-target, fixed-risk, and variable-risk behaviours.
+5. Only after the baseline table is stable, consider ablations such as removing priority, TTC, or clearance-relaxation terms.
