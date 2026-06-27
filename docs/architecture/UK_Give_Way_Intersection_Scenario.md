@@ -83,9 +83,9 @@ In code, that sketch is represented as:
   The ego vehicle comes from the left/west approach and left-turns across the oncoming straight-going target path.
 - TV / target: `intersection_start_node_idx = 2`, `intersection_goal_node_idx = 2`.
   The target vehicle comes from the right/east approach and continues straight through the junction.
-- The moving vehicles use lane-centre-scale lateral offsets rather than the old full half-road-width offset:
-  `ego = +1.85m`, `target = +1.85m`.
-  This keeps the vehicles in the intended CARLA-view lanes and avoids placing the ego on the kerb.
+- The moving vehicles use lane-centre-scale lateral offsets rather than the old full half-road-width offset.
+  After the `20260627_155115` video inspection, the ego start offset was changed from `+1.85m` to `-1.85m` so the ego starts in the visual left-turn lane instead of between approach lanes. The target remains at `+1.85m`.
+  The ego goal offset remains `+1.85m` for now to avoid unnecessarily changing the already validated exit route and conflict-zone timing.
 
 The new scenario is explicitly documented as:
 
@@ -127,7 +127,7 @@ The main change is the target-vehicle timing:
 | Target nominal speed | `10.0` | `6.0` | Keep the priority vehicle in the conflict zone long enough for a give-way interaction |
 | Target init speed | `12.0` | `6.0` | Match the target's initial motion to the slower priority-vehicle timing |
 | Ego nominal speed | `10.0` | `6.0` | Make the simplified timing gate produce a clear no-yield conflict and a safe give-way alternative |
-| Moving vehicle lateral offset | `3.7` | `ego +1.85`, `target +1.85` | Place vehicles near the intended right-hand lane centres rather than on the kerb/road edge |
+| Moving vehicle lateral offset | `3.7` | `ego start -1.85`, `ego goal +1.85`, `target +1.85` | Put the ego in the visual left-turn approach lane while preserving the validated target lane and exit route |
 | Ego SMPC collision envelope | upstream hard-coded ellipse | `half_length=3.8m`, `half_width=1.8m`, `d_min=0.5m` | Keep the chance-constraint vehicle body approximation conservative while reducing the over-yielding seen with `d_min=1.0m` and `d_min=1.5m` |
 | SMPC reference-regeneration guard | `1.5m` internal default | `1.5m` | Safety-first setting after `2.5m` and `4.0m` allowed unsafe conflict-zone behaviour in CARLA |
 | Rule-aware yielding state machine | not present | enabled, `yield_stop_speed=0.2m/s`, `yield_reference_min_speed=0.8m/s`, `yield_reference_decel=-3.75m/s^2`, `yield_stop_decel=-5.0m/s^2`, `yield_stop_buffer_distance=6.25m`, `yield_brake_distance_margin=3.5m` | Define a fixed route-level conflict zone and a physically reachable stop point before it, then move through cautious approach, hold, release, and recovery phases |
@@ -135,7 +135,7 @@ The main change is the target-vehicle timing:
 
 The route relation is intentionally kept close to the original intersection setting. After inspecting the CARLA video, the experiment is simplified to the visual left-turn case rather than continuing to force a UK-style right-turn interpretation.
 
-The CARLA transform now uses `side_of_road="right"` and lane-centre-scale offsets. The scenario uses `1.85m` rather than the previous `3.7m` full half-road-width offset, because `3.7m` can push the vehicle to the road edge or kerb in the CARLA view.
+The CARLA transform now uses `side_of_road="right"` and lane-centre-scale offsets. The scenario uses `1.85m`-scale offsets rather than the previous `3.7m` full half-road-width offset, because `3.7m` can push the vehicle to the road edge or kerb in the CARLA view. The ego start offset is negative (`-1.85m`) because the latest video showed the positive offset placed the ego between approach lanes rather than in the visual left-turn lane.
 
 The `ego_init_01` CARLA rollout now uses `init_speed=6.0m/s`. The previous `9.36m/s` initial speed placed the ego about `2.45m` before the stop point while requiring more than `14m` of braking distance, so even an immediately active cautious-yield controller could not stop before the yield line. The stop buffer is set to `6.25m`: this keeps the activation distance at `12.0m`, stays closer to the conflict zone than the `6.5m` trial, and avoids the var-risk solver regression seen with the `6.0m` trial. The optimisation reference now tests `yield_reference_decel=-3.75m/s^2` with `yield_reference_min_speed=0.8m/s`, a modestly stronger profile intended to reduce var-risk approach speed after `A_MIN=-4.0m/s^2` improved fixed-risk but left var-risk unchanged. The SMPC optimiser allows `A_MIN=-4.0m/s^2`; the feasible reference generator now uses policy-specific acceleration bounds, with `-3.0m/s^2` retained for var-risk and `-4.0m/s^2` used for fixed-risk after the global `-4.0m/s^2` trial regressed var-risk hold feasibility. The final control override still allows `yield_stop_decel=-5.0m/s^2`. The release condition also waits until the priority target has cleared the configured conflict radius, preventing recovery from starting while the target is still inside the conflict zone.
 

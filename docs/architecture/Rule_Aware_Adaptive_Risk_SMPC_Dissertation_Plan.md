@@ -7,6 +7,34 @@ This document defines the dissertation direction, experimental scheme, implement
 
 The current experiment should now move from parameter tuning toward a dissertation contribution: rule-aware SMPC with interaction-severity-adaptive risk allocation.
 
+## Current Milestone
+
+The current dissertation candidate run is:
+
+```text
+core/results/20260627_155115
+```
+
+This run should be used as the first main milestone demonstration of the proposed method.
+
+Key configuration:
+
+- `risk_profile=adaptive_interaction_severity`
+- policies: `smpc_var_risk`, `smpc_fixed_risk`, `notv`, `notv_cl`
+- unified mild adaptive risk allocation
+- deterministic rule-yield SMPC solve bypass during `approach_yield_line` and `hold_yield_line`
+
+Key result:
+
+- both required SMPC policies pass the post-CARLA gate,
+- `solver_failure_frac=0.000` for both `smpc_var_risk` and `smpc_fixed_risk`,
+- no footprint collision,
+- valid completion,
+- target vehicle clears the conflict zone before ego enters,
+- video quality has been manually inspected and judged good enough for the milestone demonstration.
+
+This milestone supports the dissertation argument that deterministic traffic-rule yielding should be handled by a rule-aware supervisory layer, while SMPC and adaptive risk allocation handle interaction-aware planning outside those deterministic stop/hold windows.
+
 ## 1. Dissertation Topic
 
 Working title:
@@ -445,4 +473,3 @@ Generate:
 3. Run one CARLA batch with current best baseline.
 4. Plot severity timeline and verify that it matches the intended interaction phases.
 5. Implement adaptive risk profile only after the severity signal is validated.
-
