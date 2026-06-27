@@ -417,6 +417,7 @@ class SMPCAgent(object):
                 "oracle_guard": "full priority yielding requires a valid multimodal prediction; before prediction is valid, only an observed moving target track may trigger cautious approach",
                 "activation_rule": "distance_to_stop <= v^2/(2*abs(decel)) + brake_distance_margin",
                 "pre_solve_reference_profile": "yield reference uses v_ref <= sqrt(v_ref_min^2 + 2*abs(reference_decel)*remaining_distance_to_stop); final near-stop control is handled by the yield controller, not by an instantaneous near-stop optimisation reference",
+                "solver_bypass": "adaptive profile bypasses deterministic approach/hold and the first low-speed released_recovery handoff frames after the priority target has cleared",
             },
             "yield_stop_supervisor": {
                 "enabled": self.yield_stop_enabled,
@@ -982,17 +983,45 @@ class SMPCAgent(object):
             },
         }
 
-    def _should_bypass_smpc_for_rule_yield(self, yield_status):
-        """Skip SMPC solves for deterministic rule-supervised stop/hold steps."""
+    def _rule_yield_smpc_bypass_reason(self, yield_status, speed):
+        """Return why the rule supervisor should replace an SMPC solve, if any."""
         if (self.risk_profile or "").lower() != "adaptive_interaction_severity":
-            return False
+            return None
         if self.ol_flag or self.obca_flag:
-            return False
-        if not bool(yield_status.get("active", False)):
-            return False
-        if yield_status.get("phase") not in {"approach_yield_line", "hold_yield_line"}:
-            return False
-        return bool(yield_status.get("priority_from_prediction", False))
+            return None
+        if not bool(yield_status.get("priority_from_prediction", False)):
+            return None
+
+        phase = yield_status.get("phase")
+        if (
+            bool(yield_status.get("active", False))
+            and phase in {"approach_yield_line", "hold_yield_line"}
+        ):
+            return "deterministic_rule_yield_control"
+
+        if not self.yield_recovery_enabled or self.yield_recovery_steps <= 0:
+            return None
+        if not bool(yield_status.get("target_cleared_conflict", False)):
+            return None
+
+        handoff_steps = min(
+            15,
+            max(1, int(np.ceil(0.25 * float(self.yield_recovery_steps)))),
+        )
+        recovery_handoff_start = bool(self._yield_stop_seen and self._yield_stop_active_prev)
+        early_recovery_phase = (
+            phase == "released_recovery"
+            and self._yield_recovery_steps_remaining
+            >= max(0, self.yield_recovery_steps - handoff_steps)
+        )
+        low_speed_handoff = float(speed) <= max(2.0, 0.5 * float(self.yield_recovery_speed))
+        if (recovery_handoff_start or early_recovery_phase) and low_speed_handoff:
+            return "deterministic_rule_yield_recovery_handoff"
+        return None
+
+    def _should_bypass_smpc_for_rule_yield(self, yield_status, speed):
+        """Skip SMPC solves for deterministic rule-supervised yield steps."""
+        return self._rule_yield_smpc_bypass_reason(yield_status, speed) is not None
 
     def _evaluate_yield_geometry(
         self,
@@ -1786,16 +1815,14 @@ class SMPCAgent(object):
 
 
 
-            bypass_smpc_for_rule_yield = self._should_bypass_smpc_for_rule_yield(pre_solve_yield_status)
+            bypass_reason = self._rule_yield_smpc_bypass_reason(pre_solve_yield_status, speed)
+            bypass_smpc_for_rule_yield = bypass_reason is not None
             debug_payload["solver_bypass"] = {
                 "enabled": bool(bypass_smpc_for_rule_yield),
-                "reason": (
-                    "deterministic_rule_yield_control"
-                    if bypass_smpc_for_rule_yield
-                    else "not_applicable"
-                ),
+                "reason": bypass_reason if bypass_smpc_for_rule_yield else "not_applicable",
                 "yield_phase": pre_solve_yield_status.get("phase"),
                 "yield_active": bool(pre_solve_yield_status.get("active")),
+                "recovery_steps_remaining": int(self._yield_recovery_steps_remaining),
             }
 
             if bypass_smpc_for_rule_yield:
@@ -1826,7 +1853,7 @@ class SMPCAgent(object):
                     "optimal": True,
                     "solve_time": solve_time,
                     "collision_prob": collision_prob,
-                    "reason": "deterministic_rule_yield_control",
+                    "reason": bypass_reason,
                     "risk_profile": self.risk_profile,
                     "adaptive_risk_allocation": adaptive_risk,
                 }
