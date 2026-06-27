@@ -920,29 +920,18 @@ class SMPCAgent(object):
         relaxed_tight = 1.2815515655446004  # Phi^{-1}(0.90), used only after target clearance.
         high_tight = float(smpc.PAPER_INTERSECTION_TIGHTENING)
         nominal_to_high_span = high_tight - upstream_tight
-        deterministic_yield_phase = yield_phase in {"approach_yield_line", "hold_yield_line"}
-        policy_map = "fixed_mild" if self.fixed_risk else "var_feasibility_preserving"
-        mild_tightening_scale = 0.35 if self.fixed_risk else 0.12
+        policy_map = "unified_mild_with_rule_yield_bypass"
+        mild_tightening_scale = 0.35
 
         phase_floor = 0.0
-        if self.fixed_risk:
-            if yield_phase == "approach_yield_line":
-                phase_floor = 0.35
-            elif yield_phase == "hold_yield_line":
-                phase_floor = 0.45
-            elif yield_phase == "cautious_approach_observed_target":
-                phase_floor = 0.25
-            elif yield_phase == "observe_priority_target":
-                phase_floor = 0.20
-        else:
-            if yield_phase == "approach_yield_line":
-                phase_floor = 0.20
-            elif yield_phase == "hold_yield_line":
-                phase_floor = 0.25
-            elif yield_phase == "cautious_approach_observed_target":
-                phase_floor = 0.15
-            elif yield_phase == "observe_priority_target":
-                phase_floor = 0.10
+        if yield_phase == "approach_yield_line":
+            phase_floor = 0.35
+        elif yield_phase == "hold_yield_line":
+            phase_floor = 0.45
+        elif yield_phase == "cautious_approach_observed_target":
+            phase_floor = 0.25
+        elif yield_phase == "observe_priority_target":
+            phase_floor = 0.20
 
         if target_cleared or yield_phase == "released_recovery":
             effective_score = 0.0
@@ -961,7 +950,7 @@ class SMPCAgent(object):
             tightening = upstream_tight + risk_scale * nominal_to_high_span
             if effective_score >= 0.85:
                 risk_phase = "high"
-            elif effective_score >= 0.45 and not (deterministic_yield_phase and not self.fixed_risk):
+            elif effective_score >= 0.45:
                 risk_phase = "medium"
             else:
                 risk_phase = "nominal"
@@ -988,14 +977,22 @@ class SMPCAgent(object):
                 "hold_floor": 0.45,
                 "cautious_floor": 0.25,
                 "observe_floor": 0.20,
-                "var_approach_floor": 0.20,
-                "var_hold_floor": 0.25,
-                "var_cautious_floor": 0.15,
-                "var_observe_floor": 0.10,
                 "mild_tightening_scale": mild_tightening_scale,
                 "critical_score_threshold": 0.85,
             },
         }
+
+    def _should_bypass_smpc_for_rule_yield(self, yield_status):
+        """Skip SMPC solves for deterministic rule-supervised stop/hold steps."""
+        if (self.risk_profile or "").lower() != "adaptive_interaction_severity":
+            return False
+        if self.ol_flag or self.obca_flag:
+            return False
+        if not bool(yield_status.get("active", False)):
+            return False
+        if yield_status.get("phase") not in {"approach_yield_line", "hold_yield_line"}:
+            return False
+        return bool(yield_status.get("priority_from_prediction", False))
 
     def _evaluate_yield_geometry(
         self,
@@ -1789,7 +1786,52 @@ class SMPCAgent(object):
 
 
 
-            if self.ol_flag:
+            bypass_smpc_for_rule_yield = self._should_bypass_smpc_for_rule_yield(pre_solve_yield_status)
+            debug_payload["solver_bypass"] = {
+                "enabled": bool(bypass_smpc_for_rule_yield),
+                "reason": (
+                    "deterministic_rule_yield_control"
+                    if bypass_smpc_for_rule_yield
+                    else "not_applicable"
+                ),
+                "yield_phase": pre_solve_yield_status.get("phase"),
+                "yield_active": bool(pre_solve_yield_status.get("active")),
+            }
+
+            if bypass_smpc_for_rule_yield:
+                t_bar=2
+                i=(N_TV-1)*(self.SMPC.t_bar_max)+t_bar
+                debug_payload["solver_problem"] = {
+                    "backend_class": type(self.SMPC).__name__,
+                    "problem_id": i,
+                    "N_TV": N_TV,
+                    "t_bar": t_bar,
+                    "t_bar_max": self.SMPC.t_bar_max,
+                    "n_joint_modes": int(self.N_modes ** N_TV),
+                    "n_active_modes": int(1 + (-1 + self.N_modes ** N_TV) * (t_bar > 0)),
+                    "bypassed": True,
+                }
+                a_lin0 = float(np.asarray(update_dict["a_lin"], dtype=float).reshape(-1)[0])
+                df_lin0 = float(np.asarray(update_dict["df_lin"], dtype=float).reshape(-1)[0])
+                previous_steer = float(np.asarray(self.control_prev, dtype=float).reshape(-1)[1])
+                u_seed = np.array([0.0, previous_steer], dtype=float)
+                u_control = np.array([u_seed[0] - a_lin0, u_seed[1] - df_lin0], dtype=float)
+                v_next = float(speed)
+                is_opt = True
+                solve_time = 0.0
+                collision_prob = np.nan
+                self.prev_opt = False
+                debug_payload["solver"] = {
+                    "bypassed": True,
+                    "optimal": True,
+                    "solve_time": solve_time,
+                    "collision_prob": collision_prob,
+                    "reason": "deterministic_rule_yield_control",
+                    "risk_profile": self.risk_profile,
+                    "adaptive_risk_allocation": adaptive_risk,
+                }
+
+            elif self.ol_flag:
 
                 debug_payload["solver_problem"] = {
                     "backend_class": type(self.SMPC).__name__,
