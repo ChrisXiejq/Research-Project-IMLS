@@ -835,6 +835,74 @@ class SMPCAgent(object):
         times = np.arange(horizon, dtype=float) * self.dt
         return np.asarray(position, dtype=float)[None, :] + times[:, None] * speed * direction[None, :]
 
+    def _interaction_severity_score(
+        self,
+        ego_dist_to_conflict,
+        ego_ttc_to_conflict,
+        target_ttc_to_conflict,
+        target_has_priority,
+        target_approaching_conflict,
+        target_cleared_conflict,
+        overlap_risk,
+        close_hold,
+        allow_priority_yield,
+    ):
+        """Interpretable severity signal for later adaptive risk allocation.
+
+        This is intentionally logging-only at this stage. The controller behaviour
+        should not change until the severity curve has been checked in CARLA logs.
+        """
+        activation_distance = max(float(self.yield_activation_distance), 1.0)
+        distance_factor = 1.0 - np.clip(max(float(ego_dist_to_conflict), 0.0) / activation_distance, 0.0, 1.0)
+
+        ttc_gap = abs(float(ego_ttc_to_conflict) - float(target_ttc_to_conflict))
+        ttc_window = max(2.0 * float(self.yield_ttc_margin), 1.0)
+        ttc_factor = 1.0 - np.clip(ttc_gap / ttc_window, 0.0, 1.0)
+        if not target_approaching_conflict:
+            ttc_factor *= 0.5
+
+        priority_factor = 0.0
+        if target_has_priority and allow_priority_yield:
+            priority_factor = 1.0
+        elif target_approaching_conflict:
+            priority_factor = 0.5
+
+        overlap_factor = 1.0 if overlap_risk else (0.8 if close_hold else 0.0)
+
+        if target_cleared_conflict:
+            score = 0.0
+            phase = "cleared"
+        else:
+            score = (
+                0.35 * distance_factor
+                + 0.25 * ttc_factor
+                + 0.25 * priority_factor
+                + 0.15 * overlap_factor
+            )
+            score = float(np.clip(score, 0.0, 1.0))
+            if score >= 0.75:
+                phase = "high"
+            elif score >= 0.40:
+                phase = "medium"
+            else:
+                phase = "low"
+
+        return {
+            "score": float(score),
+            "phase": phase,
+            "distance_factor": float(distance_factor),
+            "ttc_factor": float(ttc_factor),
+            "priority_factor": float(priority_factor),
+            "overlap_factor": float(overlap_factor),
+            "weights": {
+                "distance": 0.35,
+                "ttc": 0.25,
+                "priority": 0.25,
+                "overlap": 0.15,
+            },
+            "logging_only": True,
+        }
+
     def _evaluate_yield_geometry(
         self,
         x,
@@ -938,11 +1006,26 @@ class SMPCAgent(object):
         else:
             reason = "no_active_yield_needed"
 
+        interaction_severity = self._interaction_severity_score(
+            ego_dist_to_conflict,
+            ego_ttc_to_conflict,
+            target_ttc_to_conflict,
+            target_has_priority,
+            target_approaching_conflict,
+            target_cleared_conflict,
+            overlap_risk,
+            close_hold,
+            allow_priority_yield,
+        )
+
         return {
             "active": bool(active),
             "phase": phase,
             "priority_rule": "turning_gives_way_to_oncoming_straight",
             "reason": reason,
+            "severity_score": interaction_severity["score"],
+            "severity_phase": interaction_severity["phase"],
+            "interaction_severity": interaction_severity,
             "target_index": int(target_idx),
             "target_mode": int(mode),
             "prediction_valid": valid_flags,
