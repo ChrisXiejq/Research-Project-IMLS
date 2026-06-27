@@ -316,8 +316,8 @@ if __name__ == '__main__':
     parser.add_argument("--render_topdown_height", type=int, default=720, help="Height in pixels for offline top-down MP4.")
     parser.add_argument("--solver_backend", choices=["gurobi", "ipopt_approx"], default="gurobi",
                         help="Solver backend for SMPC policies. Use ipopt_approx when Gurobi is unavailable.")
-    parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002"], default="upstream_code",
-                        help="Gurobi SMPC risk profile: upstream_code matches SMPC_MMPreds numerical settings; paper_eps_002 uses epsilon=0.02.")
+    parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002", "adaptive_interaction_severity"], default="upstream_code",
+                        help="Gurobi SMPC risk profile: upstream_code matches SMPC_MMPreds numerical settings; paper_eps_002 uses epsilon=0.02; adaptive_interaction_severity updates risk from rule-aware interaction severity.")
     parser.add_argument(
         "--tuning_config",
         default=None,

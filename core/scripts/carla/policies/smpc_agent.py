@@ -903,6 +903,74 @@ class SMPCAgent(object):
             "logging_only": True,
         }
 
+    def _adaptive_risk_allocation(self, yield_status):
+        profile = (self.risk_profile or "upstream_code").lower()
+        upstream_tight = float(smpc.UPSTREAM_CODE_TIGHTENING)
+        upstream_prob = float(smpc.UPSTREAM_CODE_TARGET_PROB)
+        if profile != "adaptive_interaction_severity":
+            static_tight = float(getattr(self.SMPC, "tight", upstream_tight))
+            static_prob = float(getattr(self.SMPC, "target_prob", upstream_prob))
+            return {
+                "enabled": False,
+                "risk_profile": self.risk_profile,
+                "tightening": static_tight,
+                "target_prob": static_prob,
+                "phase": "static_profile",
+            }
+
+        raw_score = float(yield_status.get("severity_score", 0.0) or 0.0)
+        yield_phase = yield_status.get("phase", "free_drive")
+        target_cleared = bool(yield_status.get("target_cleared_conflict", False))
+        relaxed_tight = 1.2815515655446004  # Phi^{-1}(0.90), used only after target clearance.
+        high_tight = float(smpc.PAPER_INTERSECTION_TIGHTENING)
+
+        phase_floor = 0.0
+        if yield_phase == "approach_yield_line":
+            phase_floor = 0.72
+        elif yield_phase == "hold_yield_line":
+            phase_floor = 0.78
+        elif yield_phase == "cautious_approach_observed_target":
+            phase_floor = 0.45
+        elif yield_phase == "observe_priority_target":
+            phase_floor = 0.35
+
+        if target_cleared or yield_phase == "released_recovery":
+            effective_score = 0.0
+            tightening = relaxed_tight
+            risk_phase = "relaxed_after_clearance"
+        else:
+            effective_score = float(np.clip(max(raw_score, phase_floor), 0.0, 1.0))
+            tightening = upstream_tight + effective_score * (high_tight - upstream_tight)
+            if effective_score >= 0.75:
+                risk_phase = "high"
+            elif effective_score >= 0.40:
+                risk_phase = "medium"
+            else:
+                risk_phase = "nominal"
+
+        target_prob = float(smpc._standard_normal_cdf(tightening))
+        return {
+            "enabled": True,
+            "risk_profile": self.risk_profile,
+            "phase": risk_phase,
+            "yield_phase": yield_phase,
+            "raw_severity_score": raw_score,
+            "effective_severity_score": effective_score,
+            "phase_floor": float(phase_floor),
+            "tightening": float(tightening),
+            "target_prob": target_prob,
+            "target_cleared_conflict": target_cleared,
+            "mapping": {
+                "relaxed_after_clearance_tight": relaxed_tight,
+                "nominal_tight": upstream_tight,
+                "high_tight": high_tight,
+                "approach_floor": 0.72,
+                "hold_floor": 0.78,
+                "cautious_floor": 0.45,
+                "observe_floor": 0.35,
+            },
+        }
+
     def _evaluate_yield_geometry(
         self,
         x,
@@ -1619,6 +1687,12 @@ class SMPCAgent(object):
                         joint_probs = np.outer(joint_probs, mode_probs).reshape(-1)
                     update_dict["probs"] = joint_probs / np.sum(joint_probs)
 
+            adaptive_risk = self._adaptive_risk_allocation(pre_solve_yield_status)
+            if adaptive_risk.get("enabled"):
+                update_dict["risk_tightening"] = adaptive_risk["tightening"]
+                update_dict["risk_target_prob"] = adaptive_risk["target_prob"]
+                update_dict["adaptive_risk_allocation"] = adaptive_risk
+
 
 
             debug_payload = {
@@ -1635,6 +1709,9 @@ class SMPCAgent(object):
                     "risk_profile": self.risk_profile,
                     "tight": getattr(self.SMPC, "tight", None),
                     "target_prob": getattr(self.SMPC, "target_prob", None),
+                    "applied_tight": adaptive_risk["tightening"],
+                    "applied_target_prob": adaptive_risk["target_prob"],
+                    "adaptive": adaptive_risk,
                 },
                 "collision_envelope": {
                     "d_min": self.d_min,

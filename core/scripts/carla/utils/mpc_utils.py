@@ -25,7 +25,7 @@ def _risk_profile_values(risk_profile, tightening_override=None):
         return tightening, _standard_normal_cdf(tightening)
 
     normalized = (risk_profile or "upstream_code").lower()
-    if normalized in {"upstream", "upstream_code", "smpc_mmpreds"}:
+    if normalized in {"upstream", "upstream_code", "smpc_mmpreds", "adaptive_interaction_severity"}:
         return UPSTREAM_CODE_TIGHTENING, UPSTREAM_CODE_TARGET_PROB
     if normalized in {"paper", "paper_eps_002", "eps_002"}:
         return PAPER_INTERSECTION_TIGHTENING, PAPER_INTERSECTION_TARGET_PROB
@@ -51,7 +51,7 @@ def _mode_component(joint_index, vehicle_index, n_modes, n_tvs, risk_profile=Non
     profiles and multi-TV runs.
     """
     normalized = (risk_profile or "upstream_code").lower()
-    if n_tvs == 1 and normalized in {"upstream", "upstream_code", "smpc_mmpreds"}:
+    if n_tvs == 1 and normalized in {"upstream", "upstream_code", "smpc_mmpreds", "adaptive_interaction_severity"}:
         return 0
     return _joint_mode_component(joint_index, vehicle_index, n_modes)
 
@@ -328,6 +328,9 @@ class SMPC_MMPreds():
         self.t_bar_max=T_BAR_MAX
         self.risk_profile = risk_profile
         self.tight, self.target_prob = _risk_profile_values(risk_profile, TIGHTENING)
+        self.current_tight = self.tight
+        self.current_target_prob = self.target_prob
+        self.current_risk_allocation = None
         self.noise_std=NOISE_STD
         self.Q = ca.diag(Q)
         self.R = ca.diag(R)
@@ -390,6 +393,7 @@ class SMPC_MMPreds():
 
         self.mmrisk_std= []
         self.mmrisk_prob=[]
+        self.risk_target_prob_min = []
 
         self.probs=[]
 
@@ -413,6 +417,8 @@ class SMPC_MMPreds():
             t_bar=i-(N_TV-1)*self.t_bar_max
 
             self.probs.append(self.opti[i].parameter(self.N_modes**N_TV))
+            self.risk_target_prob_min.append(self.opti[i].parameter())
+            self.opti[i].set_value(self.risk_target_prob_min[i], self.target_prob)
 
             self.c_mmrstd.append(ca.DM([self.tight]*(self.N_modes**N_TV)))
             self.c_mmrprob.append(ca.DM([self.target_prob]*(self.N_modes**N_TV)))
@@ -756,7 +762,7 @@ class SMPC_MMPreds():
                                                       nom_diff_df/self.DT,
                                                       self.DF_DOT_MAX+slack))
         if not self.fixed_risk:
-            self.opti[i].subject_to(total_prob>=self.c_mmrprob[i][0])
+            self.opti[i].subject_to(total_prob>=self.risk_target_prob_min[i])
 
         self.opti[i].minimize( cost )
         self.nom_z_ev.append(nom_z_ev_i)
@@ -778,6 +784,9 @@ class SMPC_MMPreds():
             "risk_profile": getattr(self, "risk_profile", None),
             "tight": getattr(self, "tight", None),
             "target_prob": getattr(self, "target_prob", None),
+            "current_tight": getattr(self, "current_tight", None),
+            "current_target_prob": getattr(self, "current_target_prob", None),
+            "adaptive_risk_allocation": getattr(self, "current_risk_allocation", None),
         }
 
 
@@ -944,6 +953,17 @@ class SMPC_MMPreds():
             self.opti[i].set_value(self.probs[i], update_dict["probs"])
         else:
             self.opti[i].set_value(self.probs[i], np.ones(self.N_modes**N_TV)/(self.N_modes**N_TV))
+
+        risk_tightening = float(update_dict.get("risk_tightening", self.tight))
+        risk_target_prob = float(update_dict.get("risk_target_prob", self.target_prob))
+        self.opti[i].set_value(self.risk_target_prob_min[i], risk_target_prob)
+        if self.fixed_risk:
+            n_joint_modes = self.N_modes ** N_TV
+            self.opti[i].set_value(self.mmrisk_std[i], ca.DM([risk_tightening] * n_joint_modes))
+            self.opti[i].set_value(self.mmrisk_prob[i], ca.DM([risk_target_prob] * n_joint_modes))
+        self.current_tight = risk_tightening
+        self.current_target_prob = risk_target_prob
+        self.current_risk_allocation = update_dict.get("adaptive_risk_allocation")
 
 
 
