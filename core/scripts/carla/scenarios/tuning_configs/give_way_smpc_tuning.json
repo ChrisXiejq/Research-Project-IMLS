@@ -5,6 +5,7 @@
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
+      "goal_longitudinal_offset": 30.0,
       "N": 10,
       "dt": 0.2,
       "num_modes": 3,
@@ -36,7 +37,11 @@
       "yield_recovery_regen_period": 2,
       "yield_recovery_max_lateral_error": 12.0,
       "yield_recovery_speed": 4.0,
-      "yield_recovery_accel": 1.2
+      "yield_recovery_accel": 1.2,
+      "completion_s_margin": 2.0,
+      "completion_goal_dist": 4.0,
+      "completion_lateral_error": 1.5,
+      "completion_heading_error": 0.1
     },
     "target": {
       "nominal_speed": 6.0,
@@ -86,6 +91,11 @@
     "yield_recovery_max_lateral_error": "Temporary lateral-error guard used only after a completed yield, preventing stale-reference lock while still bounding recovery reference generation.",
     "yield_recovery_speed": "Maximum desired speed during post-yield recovery. The 4.0m/s cap is faster than the earlier slow crawl but less aggressive than the 5.0m/s trial that increased solver failures.",
     "yield_recovery_accel": "Upper bound on desired acceleration during post-yield recovery. The 1.2m/s^2 cap reduces restart infeasibility compared with the 1.5m/s^2 trial.",
-    "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target."
+    "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target.",
+    "goal_longitudinal_offset": "Extended from the scenario base 20.0m to 30.0m so the post-yield left turn includes enough downstream straight lane for the vehicle body to align before rollout completion.",
+    "completion_s_margin": "Tightened from the previous hard-coded 6.0m to 2.0m so CARLA rollouts do not finish while the ego is still in the post-turn alignment transition.",
+    "completion_goal_dist": "Tightened from the previous hard-coded 8.0m to 4.0m to prevent early completion before the ego is visually settled in the target lane.",
+    "completion_lateral_error": "Tightened from the previous hard-coded 4.0m to 1.5m so completion requires actual lane-level alignment rather than merely being near the route.",
+    "completion_heading_error": "New heading-alignment completion gate. The ego must have |epsi| <= 0.1rad (about 5.7deg) before the rollout is considered complete."
   }
 }

@@ -74,6 +74,7 @@ def _load_completion_diagnostics(scenario_dir):
         "completion_epsi": np.nan,
         "completion_s_to_end": np.nan,
         "completion_lateral_ok": np.nan,
+        "completion_heading_ok": np.nan,
         "completed_by_s_margin": np.nan,
         "completed_by_goal_dist": np.nan,
         "completion_valid": np.nan,
@@ -87,6 +88,7 @@ def _load_completion_diagnostics(scenario_dir):
         by_s = bool(comp.get("completed_by_s_margin", False))
         by_goal = bool(comp.get("completed_by_goal_dist", False))
         lateral_ok = bool(comp.get("lateral_ok", False))
+        heading_ok = bool(comp.get("heading_ok", True))
         return {
             "completion_step": data.get("step", np.nan),
             "completion_goal_dist": comp.get("goal_dist", np.nan),
@@ -94,9 +96,10 @@ def _load_completion_diagnostics(scenario_dir):
             "completion_epsi": comp.get("epsi", np.nan),
             "completion_s_to_end": comp.get("s_to_end", np.nan),
             "completion_lateral_ok": lateral_ok,
+            "completion_heading_ok": heading_ok,
             "completed_by_s_margin": by_s,
             "completed_by_goal_dist": by_goal,
-            "completion_valid": bool(lateral_ok and (by_s or by_goal)),
+            "completion_valid": bool(lateral_ok and heading_ok and (by_s or by_goal)),
         }
     except Exception as exc:
         empty["completion_error"] = repr(exc)
@@ -313,7 +316,7 @@ def write_paper_summary(results_dir, df_full, df_final):
                 c for c in [
                     "scenario", "initial", "policy", "completion_step",
                     "completion_goal_dist", "completion_ey", "completion_s_to_end",
-                    "completion_lateral_ok", "completed_by_goal_dist",
+                    "completion_lateral_ok", "completion_heading_ok", "completed_by_goal_dist",
                     "completed_by_s_margin", "completion_valid",
                     "max_abs_ey_debug",
                     "forced_reference_linearization_count", "forced_reference_linearization_frac",

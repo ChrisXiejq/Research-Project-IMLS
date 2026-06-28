@@ -141,6 +141,10 @@ class VehicleParams:
     yield_recovery_max_lateral_error : float = 12.0
     yield_recovery_speed : float = 4.0
     yield_recovery_accel : float = 1.2
+    completion_s_margin : float = 2.0
+    completion_goal_dist : float = 4.0
+    completion_lateral_error : float = 1.5
+    completion_heading_error : float = 0.10
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way
@@ -245,7 +249,11 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             yield_recovery_regen_period=vehicle_params.yield_recovery_regen_period,
                             yield_recovery_max_lateral_error=vehicle_params.yield_recovery_max_lateral_error,
                             yield_recovery_speed=vehicle_params.yield_recovery_speed,
-                            yield_recovery_accel=vehicle_params.yield_recovery_accel)
+                            yield_recovery_accel=vehicle_params.yield_recovery_accel,
+                            completion_s_margin=vehicle_params.completion_s_margin,
+                            completion_goal_dist=vehicle_params.completion_goal_dist,
+                            completion_lateral_error=vehicle_params.completion_lateral_error,
+                            completion_heading_error=vehicle_params.completion_heading_error)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -285,7 +293,11 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             yield_recovery_regen_period=vehicle_params.yield_recovery_regen_period,
                             yield_recovery_max_lateral_error=vehicle_params.yield_recovery_max_lateral_error,
                             yield_recovery_speed=vehicle_params.yield_recovery_speed,
-                            yield_recovery_accel=vehicle_params.yield_recovery_accel)
+                            yield_recovery_accel=vehicle_params.yield_recovery_accel,
+                            completion_s_margin=vehicle_params.completion_s_margin,
+                            completion_goal_dist=vehicle_params.completion_goal_dist,
+                            completion_lateral_error=vehicle_params.completion_lateral_error,
+                            completion_heading_error=vehicle_params.completion_heading_error)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -323,7 +335,11 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             yield_recovery_regen_period=vehicle_params.yield_recovery_regen_period,
                             yield_recovery_max_lateral_error=vehicle_params.yield_recovery_max_lateral_error,
                             yield_recovery_speed=vehicle_params.yield_recovery_speed,
-                            yield_recovery_accel=vehicle_params.yield_recovery_accel)
+                            yield_recovery_accel=vehicle_params.yield_recovery_accel,
+                            completion_s_margin=vehicle_params.completion_s_margin,
+                            completion_goal_dist=vehicle_params.completion_goal_dist,
+                            completion_lateral_error=vehicle_params.completion_lateral_error,
+                            completion_heading_error=vehicle_params.completion_heading_error)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 

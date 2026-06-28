@@ -72,6 +72,10 @@ class SMPCAgent(object):
                  yield_recovery_max_lateral_error=12.0,
                  yield_recovery_speed=4.0,
                  yield_recovery_accel=1.2,
+                 completion_s_margin=2.0,
+                 completion_goal_dist=4.0,
+                 completion_lateral_error=1.5,
+                 completion_heading_error=0.10,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -122,6 +126,10 @@ class SMPCAgent(object):
         self.yield_recovery_max_lateral_error = float(yield_recovery_max_lateral_error)
         self.yield_recovery_speed = float(yield_recovery_speed)
         self.yield_recovery_accel = float(yield_recovery_accel)
+        self.completion_s_margin = float(completion_s_margin)
+        self.completion_goal_dist = float(completion_goal_dist)
+        self.completion_lateral_error = float(completion_lateral_error)
+        self.completion_heading_error = float(completion_heading_error)
         if self.d_min < 0.0:
             raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
         if self.collision_ellipse_half_length <= 0.0 or self.collision_ellipse_half_width <= 0.0:
@@ -197,6 +205,18 @@ class SMPCAgent(object):
             raise ValueError(
                 f"yield_recovery_speed must be >= yield_stop_speed, got {self.yield_recovery_speed}"
             )
+        if self.completion_s_margin < 0.0:
+            raise ValueError(f"completion_s_margin must be non-negative, got {self.completion_s_margin}")
+        if self.completion_goal_dist <= 0.0:
+            raise ValueError(f"completion_goal_dist must be positive, got {self.completion_goal_dist}")
+        if self.completion_lateral_error <= 0.0:
+            raise ValueError(
+                f"completion_lateral_error must be positive, got {self.completion_lateral_error}"
+            )
+        if self.completion_heading_error <= 0.0:
+            raise ValueError(
+                f"completion_heading_error must be positive, got {self.completion_heading_error}"
+            )
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
         self.risk_profile = risk_profile
@@ -250,9 +270,6 @@ class SMPCAgent(object):
         self._debug_setup_written = False
         self._debug_first_failure_written = False
         self._debug_completion_written = False
-        self.completion_s_margin = 6.0
-        self.completion_goal_dist = 8.0
-        self.completion_lateral_error = 4.0
 
         # Debugging: see the reference solution.
 
@@ -410,6 +427,12 @@ class SMPCAgent(object):
             "reference_regeneration": {
                 "max_lateral_error": self.reference_regen_max_lateral_error,
             },
+            "completion": {
+                "s_margin": self.completion_s_margin,
+                "goal_dist": self.completion_goal_dist,
+                "lateral_error": self.completion_lateral_error,
+                "heading_error": self.completion_heading_error,
+            },
             "rule_aware_yield": {
                 "priority_rule": "turning_gives_way_to_oncoming_straight",
                 "state_machine": [
@@ -523,7 +546,9 @@ class SMPCAgent(object):
         goal_dist = float(np.linalg.norm(np.array([x, y], dtype=float) - goal_xy))
         s_to_end = float(end_s - s)
         lateral_ok = bool(ey is not None and abs(float(ey)) <= self.completion_lateral_error)
+        heading_ok = bool(epsi is not None and abs(float(epsi)) <= self.completion_heading_error)
         goal_dist_ok = bool(goal_dist <= self.completion_goal_dist)
+        pose_ok = bool(lateral_ok and heading_ok)
         return {
             "end_s": end_s,
             "s_to_end": s_to_end,
@@ -531,12 +556,14 @@ class SMPCAgent(object):
             "completion_s_margin": self.completion_s_margin,
             "completion_goal_dist": self.completion_goal_dist,
             "completion_lateral_error": self.completion_lateral_error,
+            "completion_heading_error": self.completion_heading_error,
             "lateral_ok": lateral_ok,
+            "heading_ok": heading_ok,
             "ey": ey,
             "epsi": epsi,
             "goal_dist_ok": goal_dist_ok,
-            "completed_by_s_margin": bool(s >= end_s - self.completion_s_margin and lateral_ok),
-            "completed_by_goal_dist": bool(goal_dist_ok and lateral_ok),
+            "completed_by_s_margin": bool(s >= end_s - self.completion_s_margin and pose_ok),
+            "completed_by_goal_dist": bool(goal_dist_ok and pose_ok),
         }
 
 
@@ -1599,7 +1626,7 @@ class SMPCAgent(object):
 
         completion_metrics = self._completion_metrics(s, x, y, ey=ey, epsi=epsi)
         reached_end = self.frenet_traj.reached_trajectory_end(s, resolution=5.)
-        reached_end = reached_end and completion_metrics["lateral_ok"]
+        reached_end = reached_end and completion_metrics["lateral_ok"] and completion_metrics["heading_ok"]
         reached_end = reached_end or completion_metrics["completed_by_s_margin"]
         reached_end = reached_end or completion_metrics["completed_by_goal_dist"]
 
