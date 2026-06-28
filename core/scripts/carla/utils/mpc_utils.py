@@ -25,7 +25,13 @@ def _risk_profile_values(risk_profile, tightening_override=None):
         return tightening, _standard_normal_cdf(tightening)
 
     normalized = (risk_profile or "upstream_code").lower()
-    if normalized in {"upstream", "upstream_code", "smpc_mmpreds", "adaptive_interaction_severity"}:
+    if normalized in {
+        "upstream",
+        "upstream_code",
+        "smpc_mmpreds",
+        "adaptive_interaction_severity",
+        "rule_aware_static_risk",
+    }:
         return UPSTREAM_CODE_TIGHTENING, UPSTREAM_CODE_TARGET_PROB
     if normalized in {"paper", "paper_eps_002", "eps_002"}:
         return PAPER_INTERSECTION_TIGHTENING, PAPER_INTERSECTION_TARGET_PROB
@@ -51,7 +57,13 @@ def _mode_component(joint_index, vehicle_index, n_modes, n_tvs, risk_profile=Non
     profiles and multi-TV runs.
     """
     normalized = (risk_profile or "upstream_code").lower()
-    if n_tvs == 1 and normalized in {"upstream", "upstream_code", "smpc_mmpreds", "adaptive_interaction_severity"}:
+    if n_tvs == 1 and normalized in {
+        "upstream",
+        "upstream_code",
+        "smpc_mmpreds",
+        "adaptive_interaction_severity",
+        "rule_aware_static_risk",
+    }:
         return 0
     return _joint_mode_component(joint_index, vehicle_index, n_modes)
 

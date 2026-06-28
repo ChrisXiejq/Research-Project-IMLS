@@ -9,19 +9,21 @@ The current experiment has moved from parameter tuning toward the dissertation c
 
 ## Current Milestone
 
-The current dissertation candidate run is:
+The current full dissertation-batch candidate run is:
 
 ```text
-core/results/20260627_201840
+core/results/20260627_212618_final_dissertation
 ```
 
-This run should be used as the current best passed final-method dissertation candidate for the proposed method. Later repeat runs exposed fixed-risk footprint-clearance robustness issues, so the method should not be frozen until the hold-line clearance fix described below is validated.
+This run should be used as the current best full final-method dissertation candidate for the proposed method. It validates the user-confirmed visual geometry, adaptive-risk profile, bounded rule-yield/recovery bypass, hold-line clearance fix, and full paper-panel batch with `smpc_open_loop` included.
 
 Key configuration:
 
 - `risk_profile=adaptive_interaction_severity`
-- policies: `smpc_var_risk`, `smpc_fixed_risk`, `notv`, `notv_cl`
+- policies: `smpc_var_risk`, `smpc_fixed_risk`, `smpc_open_loop`, `notv`, `notv_cl`
 - ego visual start geometry: `start_left_offset=+2.75`, confirmed by video inspection
+- hold-line clearance: `yield_stop_buffer_distance=8.0m`
+- release clearance: `yield_release_clearance_margin=1.0m`
 - unified mild adaptive risk allocation
 - deterministic rule-yield SMPC solve bypass during `approach_yield_line` and `hold_yield_line`
 - bounded deterministic recovery-handoff bypass during the first low-speed `released_recovery` frames after the priority target has cleared the conflict zone
@@ -33,13 +35,14 @@ Key result:
 - no footprint collision,
 - valid completion,
 - target vehicle clears the conflict zone before ego enters,
-- `smpc_fixed_risk` center clearance is `4.227m`, `smpc_var_risk` center clearance is `4.147m`,
-- both policies complete in about `11.10s`,
-- the recovery-handoff bypass is bounded to `16` early `released_recovery` frames and does not replace the full recovery phase.
+- `smpc_fixed_risk`: center clearance `4.142m`, min footprint separation `0.347m`, completion time `11.60s`,
+- `smpc_var_risk`: center clearance `3.897m`, min footprint separation `0.135m`, completion time `12.55s`,
+- the recovery-handoff bypass remains bounded to `16` early `released_recovery` frames and does not replace the full recovery phase,
+- `smpc_open_loop` is a useful non-required contrast: it avoids collision but violates the give-way order and has poor trajectory quality.
 
-This candidate supports the dissertation argument that deterministic traffic-rule yielding should be handled by a rule-aware supervisory layer, while SMPC and adaptive risk allocation handle interaction-aware planning outside deterministic stop/hold and short recovery-handoff windows.
+This candidate supports the dissertation argument that deterministic traffic-rule yielding should be handled by a rule-aware supervisory layer, while SMPC and adaptive risk allocation handle interaction-aware planning outside deterministic stop/hold and short recovery-handoff windows. The open-loop warning supports the baseline argument: a non-rule-aware policy can avoid collision while still violating traffic priority.
 
-Earlier milestone `core/results/20260627_155115` remains useful as the first dissertation-quality proof that rule-yield bypass removes approach/hold infeasibility. The newer `20260627_201840` supersedes it as the best passed final-method candidate because it also uses the user-confirmed `+2.75m` visual start geometry and fixes the released-recovery solver failures. The `20260627_205856_final_dissertation` repeat confirms that the full paper-panel batch now works, but fixed-risk can still collide while waiting. The current local robustness step moves the yield stop line upstream by setting `yield_stop_buffer_distance=8.0m`, so the hold pose itself has more footprint clearance.
+Earlier milestone `core/results/20260627_201840` remains useful as the first passed candidate with the user-confirmed `+2.75m` visual geometry. The newer `20260627_212618_final_dissertation` supersedes it because it also validates the full dissertation batch, generates the paper panel, and fixes the hold-line footprint collision exposed by `20260627_205856_final_dissertation`.
 
 ## 1. Dissertation Topic
 
@@ -248,7 +251,7 @@ The final dissertation should compare at least:
 | `smpc_var_risk` | Existing variable risk allocation baseline. |
 | `rule_aware_smpc_fixed_risk` | Tests the value of the traffic-rule supervisor. |
 | `rule_aware_smpc_var_risk` | Current best rule-aware baseline. |
-| `rule_aware_smpc_adaptive_risk` | Main proposed dissertation method, represented by `20260627_201840`. |
+| `rule_aware_smpc_adaptive_risk` | Main proposed dissertation method, represented by `20260627_212618_final_dissertation`. |
 
 The existing best tuning should be preserved as the baseline:
 
@@ -491,8 +494,8 @@ Generate:
 
 ## 16. Immediate Next Actions
 
-1. Treat `20260627_201840` as the current best passed final-method candidate, but keep `20260627_203901` as a robustness warning.
-2. Validate the local hold-line clearance fix: `yield_stop_buffer_distance=6.25m -> 8.0m`.
-3. Run `run_give_way_final_dissertation_batch.sh` on the server to regenerate a full comparable run with `smpc_open_loop` included.
-4. Pull that run and verify the post-CARLA gate, paper panel, and baseline metrics.
-5. Produce result tables comparing final method, open-loop, no-target, fixed-risk, and variable-risk behaviours.
+1. Treat `20260627_212618_final_dissertation` as the current best full dissertation-batch candidate.
+2. Run the no-adaptive-risk ablation with `risk_profile=rule_aware_static_risk`, not raw `upstream_code`, so the rule-aware supervisor and bounded bypass remain active.
+3. Pull and compare the ablation against `20260627_212618_final_dissertation`.
+4. Produce result tables comparing final method, open-loop, no-target, fixed-risk, variable-risk, and no-adaptive-risk behaviours.
+5. Use the open-loop warning as evidence that collision avoidance alone is insufficient; traffic-rule-aware yielding is needed.

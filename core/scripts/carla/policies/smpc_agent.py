@@ -994,7 +994,10 @@ class SMPCAgent(object):
 
     def _rule_yield_smpc_bypass_reason(self, yield_status, speed):
         """Return why the rule supervisor should replace an SMPC solve, if any."""
-        if (self.risk_profile or "").lower() != "adaptive_interaction_severity":
+        if (self.risk_profile or "").lower() not in {
+            "adaptive_interaction_severity",
+            "rule_aware_static_risk",
+        }:
             return None
         if self.ol_flag or self.obca_flag:
             return None
