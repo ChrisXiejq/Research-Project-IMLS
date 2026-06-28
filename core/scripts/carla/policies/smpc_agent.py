@@ -566,6 +566,19 @@ class SMPCAgent(object):
             "completed_by_goal_dist": bool(goal_dist_ok and pose_ok),
         }
 
+    def _horizon_slice_with_tail_padding(self, arr, start_idx, length):
+        """Return a fixed-length horizon slice, repeating the tail near route end."""
+        arr = np.asarray(arr)
+        start_idx = int(max(0, min(start_idx, max(len(arr) - 1, 0))))
+        sliced = arr[start_idx:start_idx + int(length)]
+        if sliced.shape[0] == 0:
+            sliced = arr[-1:]
+        missing = int(length) - int(sliced.shape[0])
+        if missing > 0:
+            tail = np.repeat(sliced[-1:], missing, axis=0)
+            sliced = np.concatenate((sliced, tail), axis=0)
+        return sliced
+
 
 
 
@@ -1725,8 +1738,12 @@ class SMPCAgent(object):
                 l_states, l_inputs = self.linearization_traj(x,y,psi,speed)
 
             else:
-                l_states=self.feas_ref_states_new[t_ref_new:t_ref_new+self.N+1,:]
-                l_inputs=self.feas_ref_inputs_new[t_ref_new:t_ref_new+self.N+1,:]
+                l_states = self._horizon_slice_with_tail_padding(
+                    self.feas_ref_states_new, t_ref_new, self.N + 1
+                )
+                l_inputs = self._horizon_slice_with_tail_padding(
+                    self.feas_ref_inputs_new, t_ref_new, self.N + 1
+                )
 
 
             ## TV shapes estimate along prediction horizon
@@ -1762,12 +1779,12 @@ class SMPCAgent(object):
 
             update_dict={  'dx0':x-l_states[0,0],     'dy0':y-l_states[0,1],         'dpsi0':psi-l_states[0,2],       'dv0':speed-l_states[0,3],
                          'x_tv0': [target_vehicle_positions[k][0] for k in range(N_TV)],        'y_tv0': [target_vehicle_positions[k][1] for k in range(N_TV)],
-                         'x_ref': self.feas_ref_states_new[t_ref_new:t_ref_new+self.SMPC.N+1,0].T,
-                         'y_ref': self.feas_ref_states_new[t_ref_new:t_ref_new+self.SMPC.N+1,1].T ,
-                         'psi_ref': self.feas_ref_states_new[t_ref_new:t_ref_new+self.SMPC.N+1,2].T ,
-                         'v_ref': self.feas_ref_states_new[t_ref_new:t_ref_new+self.SMPC.N+1,3].T ,
-                         'a_ref': self.feas_ref_inputs_new[t_ref_new:t_ref_new+self.SMPC.N+1,0].T ,
-                         'df_ref': self.feas_ref_inputs_new[t_ref_new:t_ref_new+self.SMPC.N+1,1].T ,
+                         'x_ref': self._horizon_slice_with_tail_padding(self.feas_ref_states_new[:, 0], t_ref_new, self.SMPC.N + 1).T,
+                         'y_ref': self._horizon_slice_with_tail_padding(self.feas_ref_states_new[:, 1], t_ref_new, self.SMPC.N + 1).T ,
+                         'psi_ref': self._horizon_slice_with_tail_padding(self.feas_ref_states_new[:, 2], t_ref_new, self.SMPC.N + 1).T ,
+                         'v_ref': self._horizon_slice_with_tail_padding(self.feas_ref_states_new[:, 3], t_ref_new, self.SMPC.N + 1).T ,
+                         'a_ref': self._horizon_slice_with_tail_padding(self.feas_ref_inputs_new[:, 0], t_ref_new, self.SMPC.N + 1).T ,
+                         'df_ref': self._horizon_slice_with_tail_padding(self.feas_ref_inputs_new[:, 1], t_ref_new, self.SMPC.N + 1).T ,
                          'x_lin': l_states[:,0].T,
                          'y_lin': l_states[:,1].T ,
                          'psi_lin': l_states[:,2].T,

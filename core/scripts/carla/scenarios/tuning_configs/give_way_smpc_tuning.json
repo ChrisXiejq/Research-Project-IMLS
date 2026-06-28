@@ -5,6 +5,7 @@
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
+      "goal_left_offset": 0.0,
       "goal_longitudinal_offset": 30.0,
       "N": 10,
       "dt": 0.2,
@@ -92,6 +93,7 @@
     "yield_recovery_speed": "Maximum desired speed during post-yield recovery. The 4.0m/s cap is faster than the earlier slow crawl but less aggressive than the 5.0m/s trial that increased solver failures.",
     "yield_recovery_accel": "Upper bound on desired acceleration during post-yield recovery. The 1.2m/s^2 cap reduces restart infeasibility compared with the 1.5m/s^2 trial.",
     "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target.",
+    "goal_left_offset": "Overrides the scenario base +1.85m to 0.0m so the ego completes the left turn into the first/natural exit lane instead of entering that lane and then drifting into the adjacent lane before completion.",
     "goal_longitudinal_offset": "Extended from the scenario base 20.0m to 30.0m so the post-yield left turn includes enough downstream straight lane for the vehicle body to align before rollout completion.",
     "completion_s_margin": "Tightened from the previous hard-coded 6.0m to 2.0m so CARLA rollouts do not finish while the ego is still in the post-turn alignment transition.",
     "completion_goal_dist": "Tightened from the previous hard-coded 8.0m to 4.0m to prevent early completion before the ego is visually settled in the target lane.",
