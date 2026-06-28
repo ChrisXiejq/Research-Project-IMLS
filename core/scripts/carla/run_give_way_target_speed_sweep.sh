@@ -23,7 +23,7 @@ set -euo pipefail
 #   RESULTS_DIR=/path/to/results_dir
 #   PYTHON_BIN=python
 #   ENABLE_CAMERA_VIZ=0          # default: 0 for quantitative sweeps
-#   INCLUDE_NOTV=0               # set 1 to add notv and notv_cl to each batch
+#   INCLUDE_NOTV=1               # required by compute_scenario_results metrics
 #   POSTPROCESS_NO_PLOTS=1       # default: 1 for faster sweep metrics
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,7 +38,7 @@ RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/${RUN_STAMP}_target_speed_sweep}
 GENERATED_DIR="${SCENARIO_DIR}/generated/${RUN_STAMP}_target_speed_sweep"
 TARGET_SPEEDS="${TARGET_SPEEDS:-4.5 6.0 7.5}"
 ENABLE_CAMERA_VIZ="${ENABLE_CAMERA_VIZ:-0}"
-INCLUDE_NOTV="${INCLUDE_NOTV:-0}"
+INCLUDE_NOTV="${INCLUDE_NOTV:-1}"
 POSTPROCESS_NO_PLOTS="${POSTPROCESS_NO_PLOTS:-1}"
 
 mkdir -p "${RESULTS_DIR}" "${GENERATED_DIR}"
