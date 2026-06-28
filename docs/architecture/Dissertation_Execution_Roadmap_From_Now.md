@@ -551,3 +551,193 @@ python run_all_scenarios.py \
 ```
 
 当前已经满足 1、2、5、6。下一步重点是补足 3 和 4。
+
+## 15. 从 Small-Scale Trial 到 Full Experiment 的扩展路线
+
+当前实验属于 small-scale controlled case study，而不是 full experiment。它已经证明核心方法在一个关键 give-way 场景中可行，但还不足以声称方法在广泛交通条件下全面有效。
+
+### 当前结果说明什么
+
+当前 `20260627_212618_final_dissertation` 和 `20260628_103325_final_dissertation` 都满足：
+
+```text
+required SMPC policies pass
+solver_failure_frac = 0.000
+footprint_collision = False
+yield_order = True
+paper panel generated
+open-loop baseline violates give-way order
+```
+
+因此当前结果说明：
+
+- final method 已经具备扩展到 full experiment 的基础稳定性。
+- 现在不应继续围绕单个视频调参。
+- 下一步可以做有控制的实验扩展，用来验证论文 claim。
+
+### 不应该立刻做的 full experiment
+
+不要马上扩展到大量随机地图、随机车辆、随机路线。原因：
+
+- 当前方法是围绕一个 unsignalised left-turn give-way 场景建立的。
+- 直接随机化过多因素会让失败难以归因。
+- dissertation 更需要清晰证据链，而不是大量难解释的日志。
+
+### 推荐的 full experiment 层级
+
+#### Level 1: Method Ablation
+
+目标：证明每个方法模块的必要性。
+
+必须包括：
+
+```text
+1. full adaptive method
+2. rule-aware static risk / no adaptive risk
+3. open-loop non-rule-aware baseline
+```
+
+可引用历史结果：
+
+```text
+no recovery handoff -> 20260627_194959
+smaller stop buffer -> 20260627_205856_final_dissertation
+raw upstream profile -> 20260627_170746
+```
+
+#### Level 2: Controlled Scenario Sweep
+
+目标：在同一交通语义下改变交互强度，验证 adaptive risk 是否随 severity 合理变化。
+
+建议 sweep：
+
+```text
+target init speed: 4.5, 6.0, 7.5 m/s
+ego nominal speed: 5.0, 6.0, 7.0 m/s
+target spawn timing / initial gap: early, nominal, late
+```
+
+优先只改一个维度，每次保持其它参数不变。
+
+建议最小矩阵：
+
+```text
+3 target speeds x 1 ego speed x 1 target timing = 3 runs
+1 target speed x 3 ego speeds x 1 target timing = 3 runs
+1 target speed x 1 ego speed x 3 target timings = 3 runs
+```
+
+合计约 9 个 controlled scenario variants。
+
+每个 variant 至少跑：
+
+```text
+smpc_var_risk
+smpc_fixed_risk
+smpc_open_loop
+```
+
+如果时间充足，再加 `notv` / `notv_cl`。
+
+#### Level 3: Robustness Repeat
+
+目标：证明不是偶然通过。
+
+对 final method 做 3-5 次 repeat run：
+
+```text
+same scenario
+same configuration
+different CARLA run timestamp / possible simulator nondeterminism
+```
+
+已有 repeat evidence：
+
+```text
+20260627_212618_final_dissertation
+20260628_103325_final_dissertation
+```
+
+还可以再补 1-3 次，但优先级低于 no-adaptive-risk ablation。
+
+#### Level 4: Extended Traffic Cases
+
+只有在 Level 1-3 完成后才做。
+
+可选扩展：
+
+```text
+different target arrival gap
+more aggressive target speed
+delayed target observation
+slightly shifted conflict point
+```
+
+不建议在当前 dissertation 阶段切换到完全不同路口、UK left-hand traffic 或多目标交互，除非论文时间非常充足。
+
+### 是否已经可以扩展到 full experiment
+
+判断：
+
+```text
+可以扩展，但应该从 Level 1 ablation 开始，而不是直接做大规模随机实验。
+```
+
+理由：
+
+- final method 已两次通过 full batch。
+- solver failure 已经稳定为 0。
+- required policies 没有 footprint collision。
+- open-loop baseline 已经给出 rule-awareness 对照。
+- 当前缺口不是方法能不能跑，而是论文证据链是否完整。
+
+### 下一步实验顺序
+
+严格按这个顺序：
+
+```text
+1. DONE: No adaptive risk ablation: rule_aware_static_risk
+   result = 20260628_153117_no_adaptive_risk_final_dissertation
+2. DONE: Compare against 20260628_103325_final_dissertation
+   conclusion = static risk also passes, but adaptive var-risk is faster and more route-stable
+3. DONE: Add ablation table to result analysis
+4. NEXT: If time allows, run target-speed sweep: 4.5 / 6.0 / 7.5 m/s
+5. THEN: If still有时间，再做 ego-speed 或 target-gap sweep
+```
+
+No-adaptive-risk ablation conclusion:
+
+```text
+rule_aware_static_risk preserves safety, yield order, completion, and zero solver failures in the nominal single scenario.
+Adaptive interaction-severity risk allocation should therefore be claimed as an efficiency / route-stability improvement for variable-risk SMPC, not as the only reason the vehicle is safe.
+The traffic-rule supervisor and bounded deterministic yield/recovery handoff remain the main source of rule compliance and solver robustness.
+```
+
+### Full Experiment 的最小可交付版本
+
+如果论文时间紧，full experiment 最小版本可以是：
+
+```text
+Main result:
+  full adaptive method, full batch, 1-2 repeat runs
+
+Baselines:
+  smpc_open_loop
+  rule_aware_static_risk
+  notv / notv_cl
+
+Ablations:
+  no adaptive risk
+  historical no recovery handoff
+  historical smaller stop buffer
+
+Metrics:
+  safety
+  yield order
+  solver stability
+  completion
+  efficiency
+  comfort
+```
+
+这个版本足够支撑 dissertation 里的 focused experimental evaluation。

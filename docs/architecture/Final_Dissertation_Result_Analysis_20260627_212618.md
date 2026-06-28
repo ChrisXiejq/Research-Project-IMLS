@@ -250,13 +250,51 @@ The next experiments should be ablations that test the dissertation contribution
 | No bounded recovery handoff | Disable early recovery handoff bypass | Show why deterministic release handoff improves solver stability. |
 | Smaller stop buffer | Compare `6.25m` vs `8.0m` using prior results | Explain why footprint-level hold-line clearance is needed. |
 
-## 11. Suggested Results-Section Narrative
+## 11. Completed No-Adaptive-Risk Ablation
+
+Run:
+
+```text
+20260628_153117_no_adaptive_risk_final_dissertation
+```
+
+Configuration:
+
+```text
+risk_profile = rule_aware_static_risk
+tight = 1.64
+target_prob = 0.949497
+```
+
+This ablation keeps the rule-aware supervisor, deterministic yield bypass, bounded recovery handoff, final `+2.75m` visual geometry, `8.0m` stop buffer, and `1.0m` release clearance margin. Only the interaction-severity adaptive risk update is disabled.
+
+Key result:
+
+| Method | Gate | Center dmin | Completion time | Solver failure | Forced ref. linearization | Main interpretation |
+|---|---:|---:|---:|---:|---:|---|
+| Adaptive `smpc_var_risk` repeat `20260628_103325` | PASS | `4.060m` | `11.55s` | `0.000` | `0.194` | Faster and more route-stable. |
+| Static-risk `smpc_var_risk` ablation `20260628_153117` | PASS | `4.285m` | `12.70s` | `0.000` | `0.247` | Safe, but slower and needs more reference recovery. |
+| Adaptive `smpc_fixed_risk` repeat `20260628_103325` | PASS | `4.137m` | `11.55s` | `0.000` | `0.194` | Stable rule-aware fixed-risk baseline. |
+| Static-risk `smpc_fixed_risk` ablation `20260628_153117` | PASS | `4.154m` | `11.50s` | `0.000` | `0.190` | Essentially unchanged, as expected for fixed-risk behaviour. |
+
+Debug evidence:
+
+| Run | Policy | Adaptive enabled | Tightening range | Risk phase evidence |
+|---|---|---:|---:|---|
+| Adaptive repeat | `smpc_var_risk` | `232/232` | `1.282-1.727` | `nominal`, `medium`, `relaxed_after_clearance` |
+| Static ablation | `smpc_var_risk` | `0/255` | `1.640-1.640` | `static_profile` |
+
+Conclusion:
+
+The no-adaptive-risk ablation does not fail in the validated single scenario, so the dissertation should not claim that static risk is unsafe here. The stronger and defensible claim is narrower: with the same rule-aware traffic supervisor, adaptive interaction-severity risk allocation improves the variable-risk controller's efficiency and route stability while preserving safety, yield order, completion, and zero solver failures.
+
+## 12. Suggested Results-Section Narrative
 
 A concise results narrative for the dissertation:
 
 > The final rule-aware adaptive-risk SMPC configuration successfully completed the unsignalised give-way interaction in CARLA. Both fixed-risk and variable-risk SMPC variants passed the post-CARLA gate with zero solver failures, no footprint collision, valid completion, and correct give-way ordering. In contrast, the open-loop SMPC baseline remained collision-free but entered the conflict zone before the priority target had cleared it, demonstrating that geometric collision avoidance alone is insufficient for traffic-rule-compliant behaviour. The final method therefore supports the central claim of this dissertation: traffic-rule awareness and conflict-zone interaction severity should be incorporated into SMPC for priority-sensitive urban interactions.
 
-## 12. Dissertation Conclusion Supported by This Run
+## 13. Dissertation Conclusion Supported by This Run
 
 The result supports the following final conclusion:
 
