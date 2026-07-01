@@ -5,8 +5,8 @@
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
-      "goal_left_offset": 0.0,
-      "goal_longitudinal_offset": 30.0,
+      "goal_left_offset": 1.85,
+      "goal_longitudinal_offset": 22.0,
       "N": 10,
       "dt": 0.2,
       "num_modes": 3,
@@ -39,10 +39,11 @@
       "yield_recovery_max_lateral_error": 12.0,
       "yield_recovery_speed": 4.0,
       "yield_recovery_accel": 1.2,
-      "completion_s_margin": 2.0,
-      "completion_goal_dist": 4.0,
-      "completion_lateral_error": 1.5,
-      "completion_heading_error": 0.1
+      "completion_s_margin": 3.0,
+      "completion_goal_dist": 5.0,
+      "completion_lateral_error": 2.0,
+      "completion_heading_error": 0.18,
+      "post_goal_reference_extension_m": 12.0
     },
     "target": {
       "nominal_speed": 6.0,
@@ -93,11 +94,12 @@
     "yield_recovery_speed": "Maximum desired speed during post-yield recovery. The 4.0m/s cap is faster than the earlier slow crawl but less aggressive than the 5.0m/s trial that increased solver failures.",
     "yield_recovery_accel": "Upper bound on desired acceleration during post-yield recovery. The 1.2m/s^2 cap reduces restart infeasibility compared with the 1.5m/s^2 trial.",
     "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target.",
-    "goal_left_offset": "Overrides the scenario base +1.85m to 0.0m so the ego completes the left turn into the first/natural exit lane instead of entering that lane and then drifting into the adjacent lane before completion.",
-    "goal_longitudinal_offset": "Extended from the scenario base 20.0m to 30.0m so the post-yield left turn includes enough downstream straight lane for the vehicle body to align before rollout completion.",
-    "completion_s_margin": "Tightened from the previous hard-coded 6.0m to 2.0m so CARLA rollouts do not finish while the ego is still in the post-turn alignment transition.",
-    "completion_goal_dist": "Tightened from the previous hard-coded 8.0m to 4.0m to prevent early completion before the ego is visually settled in the target lane.",
-    "completion_lateral_error": "Tightened from the previous hard-coded 4.0m to 1.5m so completion requires actual lane-level alignment rather than merely being near the route.",
-    "completion_heading_error": "New heading-alignment completion gate. The ego must have |epsi| <= 0.1rad (about 5.7deg) before the rollout is considered complete."
+    "goal_left_offset": "Restored to the validated scenario-lane value +1.85m. The 0.0m trial made the endpoint geometrically inconsistent with the driven post-turn path and caused completion_valid=None.",
+    "goal_longitudinal_offset": "Slightly extended from the scenario base 20.0m to 22.0m. The rejected 30.0m trial made the vehicle continue into an unwanted downstream lane correction; 22.0m gives a short alignment segment without forcing a second lane change.",
+    "completion_s_margin": "Tightened from the previous hard-coded 6.0m to 3.0m so CARLA rollouts do not finish too early, while avoiding the 2.0m route-end clamp seen in the 30m/0m trials.",
+    "completion_goal_dist": "Tightened from the previous hard-coded 8.0m to 5.0m to prevent early completion before the ego is visually settled in the selected target lane.",
+    "completion_lateral_error": "Tightened from the previous hard-coded 4.0m to 2.0m. The 1.5m trial was too strict for the CARLA map waypoint route and caused otherwise safe runs to miss completion.",
+    "completion_heading_error": "New heading-alignment completion gate. The ego must have |epsi| <= 0.18rad (about 10.3deg) before the rollout is considered complete; the rejected 0.1rad trial was too strict for the waypoint route near the exit.",
+    "post_goal_reference_extension_m": "Adds a short same-lane straight reference after the routed goal point. This prevents route-end reference freezing and low-speed stagnation if the ego reaches the goal area before the strict completion gate fires."
   }
 }

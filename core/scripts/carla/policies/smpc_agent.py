@@ -76,6 +76,7 @@ class SMPCAgent(object):
                  completion_goal_dist=4.0,
                  completion_lateral_error=1.5,
                  completion_heading_error=0.10,
+                 post_goal_reference_extension_m=12.0,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -130,6 +131,7 @@ class SMPCAgent(object):
         self.completion_goal_dist = float(completion_goal_dist)
         self.completion_lateral_error = float(completion_lateral_error)
         self.completion_heading_error = float(completion_heading_error)
+        self.post_goal_reference_extension_m = float(post_goal_reference_extension_m)
         if self.d_min < 0.0:
             raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
         if self.collision_ellipse_half_length <= 0.0 or self.collision_ellipse_half_width <= 0.0:
@@ -216,6 +218,11 @@ class SMPCAgent(object):
         if self.completion_heading_error <= 0.0:
             raise ValueError(
                 f"completion_heading_error must be positive, got {self.completion_heading_error}"
+            )
+        if self.post_goal_reference_extension_m < 0.0:
+            raise ValueError(
+                "post_goal_reference_extension_m must be non-negative, "
+                f"got {self.post_goal_reference_extension_m}"
             )
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
@@ -432,6 +439,7 @@ class SMPCAgent(object):
                 "goal_dist": self.completion_goal_dist,
                 "lateral_error": self.completion_lateral_error,
                 "heading_error": self.completion_heading_error,
+                "post_goal_reference_extension_m": self.post_goal_reference_extension_m,
             },
             "rule_aware_yield": {
                 "priority_rule": "turning_gives_way_to_oncoming_straight",
@@ -622,6 +630,23 @@ class SMPCAgent(object):
             # # Generate a refernece by fitting a velocity profile with specified nominal speed and time discretization.
 
             way_s, way_xy, way_yaw = fth.extract_path_from_waypoints(route)
+            if self.post_goal_reference_extension_m > 0.0 and len(way_s) >= 1:
+                extension_s = np.arange(
+                    1.0,
+                    self.post_goal_reference_extension_m + 0.5,
+                    1.0,
+                    dtype=float,
+                )
+                if extension_s.size > 0:
+                    tail_xy = way_xy[-1]
+                    tail_yaw = way_yaw[-1]
+                    extension_xy = tail_xy + np.column_stack((
+                        extension_s * np.cos(tail_yaw),
+                        extension_s * np.sin(tail_yaw),
+                    ))
+                    way_s = np.concatenate((way_s, way_s[-1] + extension_s))
+                    way_xy = np.vstack((way_xy, extension_xy))
+                    way_yaw = np.concatenate((way_yaw, np.full(extension_s.shape, tail_yaw)))
             self.frenet_traj = fth.FrenetTrajectoryHandler(way_s, way_xy, way_yaw, s_resolution=1.)
             self.nominal_speed = self.nominal_speed_mps
             self.lat_accel_max = 2. # maximum lateral acceleration (m/s^2), for slowing down at turns

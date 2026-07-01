@@ -145,6 +145,7 @@ class VehicleParams:
     completion_goal_dist : float = 4.0
     completion_lateral_error : float = 1.5
     completion_heading_error : float = 0.10
+    post_goal_reference_extension_m : float = 12.0
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way
@@ -253,7 +254,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             completion_s_margin=vehicle_params.completion_s_margin,
                             completion_goal_dist=vehicle_params.completion_goal_dist,
                             completion_lateral_error=vehicle_params.completion_lateral_error,
-                            completion_heading_error=vehicle_params.completion_heading_error)
+                            completion_heading_error=vehicle_params.completion_heading_error,
+                            post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -297,7 +299,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             completion_s_margin=vehicle_params.completion_s_margin,
                             completion_goal_dist=vehicle_params.completion_goal_dist,
                             completion_lateral_error=vehicle_params.completion_lateral_error,
-                            completion_heading_error=vehicle_params.completion_heading_error)
+                            completion_heading_error=vehicle_params.completion_heading_error,
+                            post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -339,7 +342,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             completion_s_margin=vehicle_params.completion_s_margin,
                             completion_goal_dist=vehicle_params.completion_goal_dist,
                             completion_lateral_error=vehicle_params.completion_lateral_error,
-                            completion_heading_error=vehicle_params.completion_heading_error)
+                            completion_heading_error=vehicle_params.completion_heading_error,
+                            post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 
