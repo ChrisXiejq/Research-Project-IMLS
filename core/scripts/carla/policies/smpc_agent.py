@@ -1,4 +1,5 @@
 import carla
+import csv
 import json
 import os
 import sys
@@ -153,6 +154,8 @@ class SMPCAgent(object):
         self.exit_alignment_post_clearance_speed = float(exit_alignment_post_clearance_speed)
         self.exit_alignment_post_clearance_goal_window = float(exit_alignment_post_clearance_goal_window)
         self._route_goal_s = None
+        self._lane_entry_heading_diagnostics = []
+        self._lane_entry_heading_diag_steps = set()
         if self.d_min < 0.0:
             raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
         if self.collision_ellipse_half_length <= 0.0 or self.collision_ellipse_half_width <= 0.0:
@@ -468,6 +471,123 @@ class SMPCAgent(object):
             path = os.path.join(self.debug_savedir, filename)
             with open(path, "a", encoding="utf-8") as f:
                 f.write(json.dumps(self._debug_json_safe(payload), sort_keys=True) + "\n")
+        except Exception:
+            pass
+
+    def _write_lane_entry_heading_diagnostics(self):
+        if not self.debug_savedir:
+            return
+        try:
+            os.makedirs(self.debug_savedir, exist_ok=True)
+            json_path = os.path.join(self.debug_savedir, "smpc_lane_entry_heading_diagnostics.json")
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(
+                    self._debug_json_safe(self._lane_entry_heading_diagnostics),
+                    f,
+                    indent=2,
+                    sort_keys=True,
+                )
+
+            csv_path = os.path.join(self.debug_savedir, "smpc_lane_entry_heading_diagnostics.csv")
+            fieldnames = [
+                "step", "debug_label", "trigger", "x", "y", "psi", "speed", "s", "ey", "epsi",
+                "goal_dist", "s_after_route_goal", "ref_s", "ref_x", "ref_y", "ref_yaw",
+                "map_wp_x", "map_wp_y", "map_wp_yaw", "map_lane_id", "map_road_id",
+                "goal_x", "goal_y", "goal_yaw", "ego_minus_ref_yaw",
+                "ego_minus_map_yaw", "ref_minus_map_yaw", "completed_by_lane_entry",
+                "completion_heading_ok", "completion_lateral_ok",
+            ]
+            with open(csv_path, "w", encoding="utf-8", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+                writer.writeheader()
+                for row in self._lane_entry_heading_diagnostics:
+                    writer.writerow({key: row.get(key) for key in fieldnames})
+        except Exception:
+            pass
+
+    def _record_lane_entry_heading_diagnostics(
+        self,
+        *,
+        x,
+        y,
+        psi,
+        speed,
+        s,
+        ey,
+        epsi,
+        vehicle_wp,
+        completion_metrics,
+        trigger,
+    ):
+        if not self.debug_savedir:
+            return
+        try:
+            step = int(self.time)
+            trigger_key = (step, str(trigger))
+            if trigger_key in self._lane_entry_heading_diag_steps:
+                return
+            self._lane_entry_heading_diag_steps.add(trigger_key)
+
+            traj = self.frenet_traj.trajectory
+            ref_idx = int(np.argmin(np.abs(traj[:, 0] - float(s))))
+            ref_s = float(traj[ref_idx, 0])
+            ref_x = float(traj[ref_idx, 1])
+            ref_y = float(traj[ref_idx, 2])
+            ref_yaw = float(traj[ref_idx, 3])
+
+            map_wp_x = map_wp_y = map_wp_yaw = None
+            map_lane_id = map_road_id = None
+            if vehicle_wp is not None:
+                map_loc = vehicle_wp.transform.location
+                map_wp_x = float(map_loc.x)
+                map_wp_y = float(-map_loc.y)
+                map_wp_yaw = float(-fth.fix_angle(np.radians(vehicle_wp.transform.rotation.yaw)))
+                map_lane_id = int(vehicle_wp.lane_id)
+                map_road_id = int(vehicle_wp.road_id)
+
+            goal_wp = self.map.get_waypoint(
+                self.goal_location,
+                project_to_road=True,
+                lane_type=(carla.LaneType.Driving),
+            )
+            goal_yaw = None
+            if goal_wp is not None:
+                goal_yaw = float(-fth.fix_angle(np.radians(goal_wp.transform.rotation.yaw)))
+
+            payload = {
+                "step": step,
+                "debug_label": self.debug_label,
+                "trigger": str(trigger),
+                "x": float(x),
+                "y": float(y),
+                "psi": float(psi),
+                "speed": float(speed),
+                "s": float(s),
+                "ey": float(ey),
+                "epsi": float(epsi),
+                "goal_dist": completion_metrics.get("goal_dist"),
+                "s_after_route_goal": completion_metrics.get("s_after_route_goal"),
+                "ref_s": ref_s,
+                "ref_x": ref_x,
+                "ref_y": ref_y,
+                "ref_yaw": ref_yaw,
+                "map_wp_x": map_wp_x,
+                "map_wp_y": map_wp_y,
+                "map_wp_yaw": map_wp_yaw,
+                "map_lane_id": map_lane_id,
+                "map_road_id": map_road_id,
+                "goal_x": float(self.goal_location.x),
+                "goal_y": float(-self.goal_location.y),
+                "goal_yaw": goal_yaw,
+                "ego_minus_ref_yaw": float(fth.fix_angle(float(psi) - ref_yaw)),
+                "ego_minus_map_yaw": None if map_wp_yaw is None else float(fth.fix_angle(float(psi) - map_wp_yaw)),
+                "ref_minus_map_yaw": None if map_wp_yaw is None else float(fth.fix_angle(ref_yaw - map_wp_yaw)),
+                "completed_by_lane_entry": bool(completion_metrics.get("completed_by_lane_entry", False)),
+                "completion_heading_ok": bool(completion_metrics.get("heading_ok", False)),
+                "completion_lateral_ok": bool(completion_metrics.get("lateral_ok", False)),
+            }
+            self._lane_entry_heading_diagnostics.append(payload)
+            self._write_lane_entry_heading_diagnostics()
         except Exception:
             pass
 
@@ -1874,6 +1994,32 @@ class SMPCAgent(object):
         reached_end = reached_end or completion_metrics["completed_by_goal_dist"]
         reached_end = reached_end or completion_metrics["completed_by_lane_entry"]
         reached_end = reached_end or completion_metrics["completed_by_exit_alignment"]
+
+        diag_triggers = []
+        goal_dist_for_diag = completion_metrics.get("goal_dist")
+        s_after_route_goal_for_diag = completion_metrics.get("s_after_route_goal")
+        if goal_dist_for_diag is not None and goal_dist_for_diag <= 8.0:
+            diag_triggers.append("goal_dist_le_8m")
+        if (
+            s_after_route_goal_for_diag is not None
+            and s_after_route_goal_for_diag >= -8.0
+        ):
+            diag_triggers.append("s_after_route_goal_ge_minus_8m")
+        if reached_end:
+            diag_triggers.append("completion")
+        for diag_trigger in diag_triggers:
+            self._record_lane_entry_heading_diagnostics(
+                x=x,
+                y=y,
+                psi=psi,
+                speed=speed,
+                s=s,
+                ey=ey,
+                epsi=epsi,
+                vehicle_wp=vehicle_wp,
+                completion_metrics=completion_metrics,
+                trigger=diag_trigger,
+            )
 
         if self.goal_reached or reached_end:
             # Stop if the end of the path is reached and signal completion.
