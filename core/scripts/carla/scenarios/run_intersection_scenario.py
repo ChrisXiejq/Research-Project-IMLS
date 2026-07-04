@@ -146,13 +146,13 @@ class VehicleParams:
     completion_lateral_error : float = 1.5
     completion_heading_error : float = 0.10
     completion_lane_entry_goal_dist : float = 1.0
-    completion_lane_entry_heading_error : float = 0.18
+    completion_lane_entry_heading_error : float = 0.30
     completion_exit_alignment_min_s_after_goal : float = 4.0
     post_goal_reference_extension_m : float = 12.0
     exit_alignment_path_enabled : bool = True
-    exit_alignment_path_length : float = 18.0
+    exit_alignment_path_length : float = 10.0
     exit_alignment_post_clearance_speed : float = 4.0
-    exit_alignment_post_clearance_goal_window : float = 14.0
+    exit_alignment_post_clearance_goal_window : float = 0.0
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way

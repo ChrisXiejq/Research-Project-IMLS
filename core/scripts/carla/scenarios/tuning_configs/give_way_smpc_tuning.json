@@ -44,13 +44,13 @@
       "completion_lateral_error": 2.0,
       "completion_heading_error": 0.18,
       "completion_lane_entry_goal_dist": 1.0,
-      "completion_lane_entry_heading_error": 0.18,
+      "completion_lane_entry_heading_error": 0.30,
       "completion_exit_alignment_min_s_after_goal": 4.0,
       "post_goal_reference_extension_m": 12.0,
       "exit_alignment_path_enabled": true,
-      "exit_alignment_path_length": 18.0,
+      "exit_alignment_path_length": 10.0,
       "exit_alignment_post_clearance_speed": 4.0,
-      "exit_alignment_post_clearance_goal_window": 14.0
+      "exit_alignment_post_clearance_goal_window": 0.0
     },
     "target": {
       "nominal_speed": 6.0,
@@ -108,12 +108,12 @@
     "completion_lateral_error": "Tightened from the previous hard-coded 4.0m to 2.0m. The 1.5m trial was too strict for the CARLA map waypoint route and caused otherwise safe runs to miss completion.",
     "completion_heading_error": "Normal heading-alignment completion gate. The ego must have |epsi| <= 0.18rad (about 10.3deg) for route-end or broad goal-distance completion.",
     "completion_lane_entry_goal_dist": "Near-goal lane-entry completion window. If the ego is within 1.0m of the route goal and laterally within the selected lane, completion can use the lane-entry heading threshold before the post-goal extension pulls the vehicle downstream.",
-    "completion_lane_entry_heading_error": "Heading tolerance for the near-goal lane-entry completion window. Tightened to 0.18rad because the 0.30rad version safely completed but accepted visually diagonal entry at about 0.245rad.",
-    "completion_exit_alignment_min_s_after_goal": "Additional completion mode for visual lane entry: if lane-entry heading is not yet aligned at the routed goal, the ego may continue along the post-goal extension and complete only after travelling at least this distance beyond the routed goal with lateral and heading errors both valid.",
+    "completion_lane_entry_heading_error": "Safety-baseline heading tolerance for the near-goal lane-entry completion window. Restored to 0.30rad after the strict 0.18rad/18m exit-alignment trial preserved safety but failed completion and reintroduced tail-end stagnation. The stricter 0.18rad normal heading metric remains logged as a visual-quality diagnostic.",
+    "completion_exit_alignment_min_s_after_goal": "Diagnostic/secondary completion mode for visual lane entry. The current gentler experiment should normally complete by lane entry; this field is retained for metrics compatibility but is no longer the primary way to force strict post-goal alignment.",
     "post_goal_reference_extension_m": "Adds a short same-lane straight reference after the routed goal point. This prevents route-end reference freezing and low-speed stagnation if the ego reaches the goal area before the strict completion gate fires.",
     "exit_alignment_path_enabled": "Enables spatial path shaping only on the final post-turn route segment. This keeps the validated yield-before-conflict behavior unchanged while making the exit reference enter the target lane along the lane direction.",
-    "exit_alignment_path_length": "Length of the final route segment reshaped into a smooth Hermite transition plus same-lane straight segment. Increased to 18m after the 10m straight-tail shaping still completed with epsi about 0.245rad; the longer segment asks the vehicle to align before lane entry rather than only at the endpoint.",
-    "exit_alignment_post_clearance_speed": "A mild speed cap applied only after the priority target has cleared the conflict zone and only for reference points near the routed goal. This differs from the rejected static 3.0m/s cap because it cannot slow the ego during the pre-yield or hold-yield phases.",
-    "exit_alignment_post_clearance_goal_window": "Distance-to-goal window where the post-clearance exit-alignment speed cap is applied. Expanded to 14m so heading alignment has enough time after the priority target has cleared, without affecting pre-yield or hold-yield behaviour."
+    "exit_alignment_path_length": "Length of the final route segment replaced by a gentle same-lane straight tail. Restored to 10m after the 18m Hermite trial created an unreachable tail-alignment task and failed completion.",
+    "exit_alignment_post_clearance_speed": "Reserved mild post-clearance speed cap. The current safety-baseline rollback disables the cap window because the previous tail-alignment run reintroduced low-speed stagnation.",
+    "exit_alignment_post_clearance_goal_window": "Distance-to-goal window where the post-clearance exit-alignment speed cap is applied. Set to 0.0 to disable this mechanism for the gentler rollback experiment."
   }
 }

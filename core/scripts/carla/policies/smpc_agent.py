@@ -77,13 +77,13 @@ class SMPCAgent(object):
                  completion_lateral_error=1.5,
                  completion_heading_error=0.10,
                  completion_lane_entry_goal_dist=1.0,
-                 completion_lane_entry_heading_error=0.18,
+                 completion_lane_entry_heading_error=0.30,
                  completion_exit_alignment_min_s_after_goal=4.0,
                  post_goal_reference_extension_m=12.0,
                  exit_alignment_path_enabled=True,
-                 exit_alignment_path_length=18.0,
+                 exit_alignment_path_length=10.0,
                  exit_alignment_post_clearance_speed=4.0,
-                 exit_alignment_post_clearance_goal_window=14.0,
+                 exit_alignment_post_clearance_goal_window=0.0,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -666,12 +666,11 @@ class SMPCAgent(object):
 
 
     def _apply_exit_alignment_path_shaping(self, way_s, way_xy, way_yaw):
-        """Smooth the final route into a same-lane exit-alignment segment.
+        """Apply a gentle same-lane straight tail near the route goal.
 
-        The earlier two-point replacement made the route end point correct, but it
-        left a kink that could still be reached with a large heading error.  Use a
-        short Hermite transition followed by a straight segment in the exit-lane
-        direction so the reference asks for heading alignment before completion.
+        This is intentionally weaker than the rejected 18m Hermite shaping: it
+        nudges the final reference direction without creating a long tail that can
+        pull the vehicle past the original goal and cause low-speed stagnation.
         """
         if (
             not self.exit_alignment_path_enabled
@@ -688,53 +687,19 @@ class SMPCAgent(object):
         tail_xy = np.asarray(way_xy[-1], dtype=float)
         tail_yaw = float(way_yaw[-1])
         tail_dir = np.array([np.cos(tail_yaw), np.sin(tail_yaw)], dtype=float)
+        alignment_start_xy = tail_xy - alignment_len * tail_dir
         alignment_start_s = route_end_s - alignment_len
 
-        start_xy = np.array([
-            np.interp(alignment_start_s, way_s, way_xy[:, 0]),
-            np.interp(alignment_start_s, way_s, way_xy[:, 1]),
-        ], dtype=float)
-        start_yaw = float(np.interp(alignment_start_s, way_s, np.unwrap(way_yaw)))
-        start_dir = np.array([np.cos(start_yaw), np.sin(start_yaw)], dtype=float)
-
-        final_straight_len = min(8.0, max(4.0, 0.45 * alignment_len))
-        final_straight_len = min(final_straight_len, max(alignment_len - 2.0, 1.0))
-        straight_start_xy = tail_xy - final_straight_len * tail_dir
-        transition_len = max(
-            float(np.linalg.norm(straight_start_xy - start_xy)),
-            alignment_len - final_straight_len,
-            1.0,
-        )
-
-        transition_samples = max(4, int(np.ceil(transition_len)))
-        u = np.linspace(0.0, 1.0, transition_samples + 1, dtype=float)
-        h00 = 2.0 * u ** 3 - 3.0 * u ** 2 + 1.0
-        h10 = u ** 3 - 2.0 * u ** 2 + u
-        h01 = -2.0 * u ** 3 + 3.0 * u ** 2
-        h11 = u ** 3 - u ** 2
-        tangent_scale = max(transition_len * 0.55, 1.0)
-        transition_xy = (
-            h00[:, None] * start_xy
-            + h10[:, None] * (tangent_scale * start_dir)
-            + h01[:, None] * straight_start_xy
-            + h11[:, None] * (tangent_scale * tail_dir)
-        )
-        transition_yaw = np.linspace(start_yaw, tail_yaw, transition_samples + 1, dtype=float)
-
-        straight_samples = max(2, int(np.ceil(final_straight_len)))
-        straight_u = np.linspace(0.0, 1.0, straight_samples + 1, dtype=float)[1:]
-        straight_xy = straight_start_xy + straight_u[:, None] * (tail_xy - straight_start_xy)
-        straight_yaw = np.full(straight_samples, tail_yaw, dtype=float)
-
         keep_mask = way_s < alignment_start_s
+        keep_s = way_s[keep_mask]
         keep_xy = way_xy[keep_mask]
         keep_yaw = way_yaw[keep_mask]
-        if len(keep_xy) == 0:
+        if len(keep_s) == 0:
             keep_xy = way_xy[:1]
             keep_yaw = way_yaw[:1]
 
-        shaped_xy = np.vstack((keep_xy, transition_xy, straight_xy))
-        shaped_yaw = np.concatenate((keep_yaw, transition_yaw, straight_yaw))
+        shaped_xy = np.vstack((keep_xy, alignment_start_xy, tail_xy))
+        shaped_yaw = np.concatenate((keep_yaw, np.array([tail_yaw, tail_yaw], dtype=float)))
 
         step_dist = np.linalg.norm(np.diff(shaped_xy, axis=0), axis=1)
         valid_steps = step_dist > 1e-3
