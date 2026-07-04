@@ -80,6 +80,7 @@ class SMPCAgent(object):
                  completion_lane_entry_heading_error=0.30,
                  completion_exit_alignment_min_s_after_goal=4.0,
                  post_goal_reference_extension_m=12.0,
+                 route_goal_extension_m=6.0,
                  exit_alignment_path_enabled=True,
                  exit_alignment_path_length=10.0,
                  exit_alignment_post_clearance_speed=4.0,
@@ -142,6 +143,7 @@ class SMPCAgent(object):
         self.completion_lane_entry_heading_error = float(completion_lane_entry_heading_error)
         self.completion_exit_alignment_min_s_after_goal = float(completion_exit_alignment_min_s_after_goal)
         self.post_goal_reference_extension_m = float(post_goal_reference_extension_m)
+        self.route_goal_extension_m = float(route_goal_extension_m)
         self.exit_alignment_path_enabled = bool(exit_alignment_path_enabled)
         self.exit_alignment_path_length = float(exit_alignment_path_length)
         self.exit_alignment_post_clearance_speed = float(exit_alignment_post_clearance_speed)
@@ -253,6 +255,11 @@ class SMPCAgent(object):
             raise ValueError(
                 "post_goal_reference_extension_m must be non-negative, "
                 f"got {self.post_goal_reference_extension_m}"
+            )
+        if self.route_goal_extension_m < 0.0:
+            raise ValueError(
+                "route_goal_extension_m must be non-negative, "
+                f"got {self.route_goal_extension_m}"
             )
         if self.exit_alignment_path_length < 0.0:
             raise ValueError(
@@ -487,6 +494,7 @@ class SMPCAgent(object):
                 "lane_entry_heading_error": self.completion_lane_entry_heading_error,
                 "exit_alignment_min_s_after_goal": self.completion_exit_alignment_min_s_after_goal,
                 "post_goal_reference_extension_m": self.post_goal_reference_extension_m,
+                "route_goal_extension_m": self.route_goal_extension_m,
                 "exit_alignment_path_enabled": self.exit_alignment_path_enabled,
                 "exit_alignment_path_length": self.exit_alignment_path_length,
                 "exit_alignment_post_clearance_speed": self.exit_alignment_post_clearance_speed,
@@ -711,6 +719,26 @@ class SMPCAgent(object):
         shaped_s = np.concatenate(([0.0], np.cumsum(step_dist)))
         return shaped_s, shaped_xy, shaped_yaw
 
+    def _extended_route_goal_location(self, goal_waypoint):
+        """Return a downstream route-planning goal while preserving the task goal."""
+        base_location = goal_waypoint.transform.location
+        if self.route_goal_extension_m <= 0.0:
+            return base_location
+
+        yaw_rad = np.radians(float(goal_waypoint.transform.rotation.yaw))
+        return carla.Location(
+            x=base_location.x + self.route_goal_extension_m * np.cos(yaw_rad),
+            y=base_location.y + self.route_goal_extension_m * np.sin(yaw_rad),
+            z=base_location.z,
+        )
+
+    def _s_at_original_goal(self, way_s, way_xy):
+        goal_xy = np.array([self.goal_location.x, -self.goal_location.y], dtype=float)
+        if len(way_s) == 0:
+            return None
+        nearest_idx = int(np.argmin(np.linalg.norm(np.asarray(way_xy) - goal_xy.reshape(1, 2), axis=1)))
+        return float(way_s[nearest_idx])
+
 
 
 
@@ -748,14 +776,17 @@ class SMPCAgent(object):
 
             init_waypoint = self.map.get_waypoint(self.vehicle.get_location(), project_to_road=True, lane_type=(carla.LaneType.Driving))
             goal          = self.map.get_waypoint(self.goal_location, project_to_road=True, lane_type=(carla.LaneType.Driving))
-            route = self.planner.trace_route(init_waypoint.transform.location, goal.transform.location)
+            route_goal_location = self._extended_route_goal_location(goal)
+            route = self.planner.trace_route(init_waypoint.transform.location, route_goal_location)
 
             # # Convert the high-level route into a path parametrized by arclength distance s (i.e. Frenet frame).
             # # Generate a refernece by fitting a velocity profile with specified nominal speed and time discretization.
 
             way_s, way_xy, way_yaw = fth.extract_path_from_waypoints(route)
             way_s, way_xy, way_yaw = self._apply_exit_alignment_path_shaping(way_s, way_xy, way_yaw)
-            self._route_goal_s = float(way_s[-1])
+            self._route_goal_s = self._s_at_original_goal(way_s, way_xy)
+            if self._route_goal_s is None:
+                self._route_goal_s = float(way_s[-1])
             if self.post_goal_reference_extension_m > 0.0 and len(way_s) >= 1:
                 extension_s = np.arange(
                     1.0,
