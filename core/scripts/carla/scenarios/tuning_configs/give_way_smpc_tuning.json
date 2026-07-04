@@ -44,8 +44,11 @@
       "completion_lateral_error": 2.0,
       "completion_heading_error": 0.18,
       "completion_lane_entry_goal_dist": 1.0,
-      "completion_lane_entry_heading_error": 0.30,
-      "post_goal_reference_extension_m": 12.0
+      "completion_lane_entry_heading_error": 0.18,
+      "post_goal_reference_extension_m": 12.0,
+      "exit_alignment_speed": 3.0,
+      "exit_alignment_distance_before_goal": 12.0,
+      "exit_alignment_distance_after_goal": 12.0
     },
     "target": {
       "nominal_speed": 6.0,
@@ -103,7 +106,10 @@
     "completion_lateral_error": "Tightened from the previous hard-coded 4.0m to 2.0m. The 1.5m trial was too strict for the CARLA map waypoint route and caused otherwise safe runs to miss completion.",
     "completion_heading_error": "Normal heading-alignment completion gate. The ego must have |epsi| <= 0.18rad (about 10.3deg) for route-end or broad goal-distance completion.",
     "completion_lane_entry_goal_dist": "Near-goal lane-entry completion window. If the ego is within 1.0m of the route goal and laterally within the selected lane, completion can use the lane-entry heading threshold before the post-goal extension pulls the vehicle downstream.",
-    "completion_lane_entry_heading_error": "Heading tolerance for the near-goal lane-entry completion window. Set to 0.30rad after 20260704_125801 showed the ego at goal_dist=0.21m and ey=-1.45m but epsi=0.266rad, causing it to miss completion and later stagnate at the extended route end.",
-    "post_goal_reference_extension_m": "Adds a short same-lane straight reference after the routed goal point. This prevents route-end reference freezing and low-speed stagnation if the ego reaches the goal area before the strict completion gate fires."
+    "completion_lane_entry_heading_error": "Heading tolerance for the near-goal lane-entry completion window. Tightened back to 0.18rad after the 0.30rad trial prevented stagnation but allowed visually diagonal lane entry.",
+    "post_goal_reference_extension_m": "Adds a short same-lane straight reference after the routed goal point. This prevents route-end reference freezing and low-speed stagnation if the ego reaches the goal area before the strict completion gate fires.",
+    "exit_alignment_speed": "Reference speed cap applied near the exit-lane alignment segment. It gives the controller time to align vehicle heading before entering the target lane instead of cutting in diagonally at about 5m/s.",
+    "exit_alignment_distance_before_goal": "Distance before the routed goal where the exit alignment speed cap starts.",
+    "exit_alignment_distance_after_goal": "Distance after the routed goal where the exit alignment speed cap remains active along the post-goal reference extension."
   }
 }

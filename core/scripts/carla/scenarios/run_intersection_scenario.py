@@ -146,8 +146,11 @@ class VehicleParams:
     completion_lateral_error : float = 1.5
     completion_heading_error : float = 0.10
     completion_lane_entry_goal_dist : float = 1.0
-    completion_lane_entry_heading_error : float = 0.30
+    completion_lane_entry_heading_error : float = 0.18
     post_goal_reference_extension_m : float = 12.0
+    exit_alignment_speed : float = 3.0
+    exit_alignment_distance_before_goal : float = 12.0
+    exit_alignment_distance_after_goal : float = 12.0
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way
@@ -259,7 +262,10 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             completion_heading_error=vehicle_params.completion_heading_error,
                             completion_lane_entry_goal_dist=vehicle_params.completion_lane_entry_goal_dist,
                             completion_lane_entry_heading_error=vehicle_params.completion_lane_entry_heading_error,
-                            post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m)
+                            post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m,
+                            exit_alignment_speed=vehicle_params.exit_alignment_speed,
+                            exit_alignment_distance_before_goal=vehicle_params.exit_alignment_distance_before_goal,
+                            exit_alignment_distance_after_goal=vehicle_params.exit_alignment_distance_after_goal)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -306,7 +312,10 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             completion_heading_error=vehicle_params.completion_heading_error,
                             completion_lane_entry_goal_dist=vehicle_params.completion_lane_entry_goal_dist,
                             completion_lane_entry_heading_error=vehicle_params.completion_lane_entry_heading_error,
-                            post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m)
+                            post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m,
+                            exit_alignment_speed=vehicle_params.exit_alignment_speed,
+                            exit_alignment_distance_before_goal=vehicle_params.exit_alignment_distance_before_goal,
+                            exit_alignment_distance_after_goal=vehicle_params.exit_alignment_distance_after_goal)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -351,7 +360,10 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             completion_heading_error=vehicle_params.completion_heading_error,
                             completion_lane_entry_goal_dist=vehicle_params.completion_lane_entry_goal_dist,
                             completion_lane_entry_heading_error=vehicle_params.completion_lane_entry_heading_error,
-                            post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m)
+                            post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m,
+                            exit_alignment_speed=vehicle_params.exit_alignment_speed,
+                            exit_alignment_distance_before_goal=vehicle_params.exit_alignment_distance_before_goal,
+                            exit_alignment_distance_after_goal=vehicle_params.exit_alignment_distance_after_goal)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 
