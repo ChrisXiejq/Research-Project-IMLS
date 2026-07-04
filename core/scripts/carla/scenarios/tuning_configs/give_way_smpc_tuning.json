@@ -47,11 +47,12 @@
       "completion_lane_entry_heading_error": 0.30,
       "completion_exit_alignment_min_s_after_goal": 4.0,
       "post_goal_reference_extension_m": 12.0,
-      "route_goal_extension_m": 6.0,
+      "route_goal_extension_m": 0.0,
       "exit_alignment_path_enabled": true,
-      "exit_alignment_path_length": 10.0,
-      "exit_alignment_post_clearance_speed": 4.0,
-      "exit_alignment_post_clearance_goal_window": 0.0
+      "exit_alignment_path_length": 12.0,
+      "exit_alignment_distance_after_goal": 6.0,
+      "exit_alignment_post_clearance_speed": 4.5,
+      "exit_alignment_post_clearance_goal_window": 10.0
     },
     "target": {
       "nominal_speed": 6.0,
@@ -112,10 +113,11 @@
     "completion_lane_entry_heading_error": "Safety-baseline heading tolerance for the near-goal lane-entry completion window. Restored to 0.30rad after the strict 0.18rad/18m exit-alignment trial preserved safety but failed completion and reintroduced tail-end stagnation. The stricter 0.18rad normal heading metric remains logged as a visual-quality diagnostic.",
     "completion_exit_alignment_min_s_after_goal": "Diagnostic/secondary completion mode for visual lane entry. The current gentler experiment should normally complete by lane entry; this field is retained for metrics compatibility but is no longer the primary way to force strict post-goal alignment.",
     "post_goal_reference_extension_m": "Adds a short same-lane straight reference after the routed goal point. This prevents route-end reference freezing and low-speed stagnation if the ego reaches the goal area before the strict completion gate fires.",
-    "route_goal_extension_m": "Extends only the CARLA route-planning target along the exit-lane waypoint yaw while preserving the original scenario goal for completion metrics. This is a gentler lane-consistent endpoint experiment: unlike the rejected goal_longitudinal_offset=30m trial, the task endpoint is not moved; unlike the rejected 18m Hermite tail, completion is not forced by a far downstream alignment segment.",
-    "exit_alignment_path_enabled": "Enables spatial path shaping only on the final post-turn route segment. This keeps the validated yield-before-conflict behavior unchanged while making the exit reference enter the target lane along the lane direction.",
-    "exit_alignment_path_length": "Length of the final route segment replaced by a gentle same-lane straight tail. Restored to 10m after the 18m Hermite trial created an unreachable tail-alignment task and failed completion.",
-    "exit_alignment_post_clearance_speed": "Reserved mild post-clearance speed cap. The current safety-baseline rollback disables the cap window because the previous tail-alignment run reintroduced low-speed stagnation.",
-    "exit_alignment_post_clearance_goal_window": "Distance-to-goal window where the post-clearance exit-alignment speed cap is applied. Set to 0.0 to disable this mechanism for the gentler rollback experiment."
+    "route_goal_extension_m": "Disabled for the goal-anchored lane-entry alignment experiment. The 6m route-only downstream extension preserved safety but changed epsi by only about 0.001-0.003rad, so it is not a useful visual fix.",
+    "exit_alignment_path_enabled": "Enables spatial path shaping only on the post-turn exit segment. The current implementation anchors the same-lane alignment around the original completion goal, not the route endpoint, so the heading cue starts before lane-entry completion.",
+    "exit_alignment_path_length": "Distance before the original completion goal where the same-lane exit alignment segment begins. Set to 12m, slightly upstream of the previous 10m route-end tail, but far below the rejected 18m strict-completion trial.",
+    "exit_alignment_distance_after_goal": "Distance after the original completion goal for which the shaped reference continues along the exit-lane direction before the generic post-goal extension begins.",
+    "exit_alignment_post_clearance_speed": "Mild speed cap applied only after the priority target has cleared the conflict zone and only near the original goal. Set to 4.5m/s, less aggressive than the rejected static 3.0m/s cap and isolated from pre-yield behaviour.",
+    "exit_alignment_post_clearance_goal_window": "Distance-to-goal window where the post-clearance speed cap is applied. Re-enabled at 10m so yaw can settle near lane entry without forcing strict heading completion."
   }
 }
