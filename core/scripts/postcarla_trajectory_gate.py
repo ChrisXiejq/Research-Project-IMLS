@@ -117,7 +117,8 @@ def _completion_valid(scenario_dir: str) -> Optional[bool]:
     heading_ok = bool(comp.get("heading_ok", True))
     by_s = bool(comp.get("completed_by_s_margin", False))
     by_goal = bool(comp.get("completed_by_goal_dist", False))
-    return bool(lateral_ok and heading_ok and (by_s or by_goal))
+    by_lane_entry = bool(comp.get("completed_by_lane_entry", False))
+    return bool(by_lane_entry or (lateral_ok and heading_ok and (by_s or by_goal)))
 
 
 def _solver_failure_frac(scenario_dir: str) -> Optional[float]:

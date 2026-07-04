@@ -76,6 +76,8 @@ class SMPCAgent(object):
                  completion_goal_dist=4.0,
                  completion_lateral_error=1.5,
                  completion_heading_error=0.10,
+                 completion_lane_entry_goal_dist=1.0,
+                 completion_lane_entry_heading_error=0.30,
                  post_goal_reference_extension_m=12.0,
                  ):
         self.vehicle = vehicle
@@ -131,6 +133,8 @@ class SMPCAgent(object):
         self.completion_goal_dist = float(completion_goal_dist)
         self.completion_lateral_error = float(completion_lateral_error)
         self.completion_heading_error = float(completion_heading_error)
+        self.completion_lane_entry_goal_dist = float(completion_lane_entry_goal_dist)
+        self.completion_lane_entry_heading_error = float(completion_lane_entry_heading_error)
         self.post_goal_reference_extension_m = float(post_goal_reference_extension_m)
         if self.d_min < 0.0:
             raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
@@ -218,6 +222,16 @@ class SMPCAgent(object):
         if self.completion_heading_error <= 0.0:
             raise ValueError(
                 f"completion_heading_error must be positive, got {self.completion_heading_error}"
+            )
+        if self.completion_lane_entry_goal_dist <= 0.0:
+            raise ValueError(
+                "completion_lane_entry_goal_dist must be positive, "
+                f"got {self.completion_lane_entry_goal_dist}"
+            )
+        if self.completion_lane_entry_heading_error <= 0.0:
+            raise ValueError(
+                "completion_lane_entry_heading_error must be positive, "
+                f"got {self.completion_lane_entry_heading_error}"
             )
         if self.post_goal_reference_extension_m < 0.0:
             raise ValueError(
@@ -439,6 +453,8 @@ class SMPCAgent(object):
                 "goal_dist": self.completion_goal_dist,
                 "lateral_error": self.completion_lateral_error,
                 "heading_error": self.completion_heading_error,
+                "lane_entry_goal_dist": self.completion_lane_entry_goal_dist,
+                "lane_entry_heading_error": self.completion_lane_entry_heading_error,
                 "post_goal_reference_extension_m": self.post_goal_reference_extension_m,
             },
             "rule_aware_yield": {
@@ -556,6 +572,11 @@ class SMPCAgent(object):
         lateral_ok = bool(ey is not None and abs(float(ey)) <= self.completion_lateral_error)
         heading_ok = bool(epsi is not None and abs(float(epsi)) <= self.completion_heading_error)
         goal_dist_ok = bool(goal_dist <= self.completion_goal_dist)
+        lane_entry_goal_ok = bool(goal_dist <= self.completion_lane_entry_goal_dist)
+        lane_entry_heading_ok = bool(
+            epsi is not None and abs(float(epsi)) <= self.completion_lane_entry_heading_error
+        )
+        lane_entry_ok = bool(lane_entry_goal_ok and lateral_ok and lane_entry_heading_ok)
         pose_ok = bool(lateral_ok and heading_ok)
         return {
             "end_s": end_s,
@@ -565,13 +586,19 @@ class SMPCAgent(object):
             "completion_goal_dist": self.completion_goal_dist,
             "completion_lateral_error": self.completion_lateral_error,
             "completion_heading_error": self.completion_heading_error,
+            "completion_lane_entry_goal_dist": self.completion_lane_entry_goal_dist,
+            "completion_lane_entry_heading_error": self.completion_lane_entry_heading_error,
             "lateral_ok": lateral_ok,
             "heading_ok": heading_ok,
+            "lane_entry_goal_ok": lane_entry_goal_ok,
+            "lane_entry_heading_ok": lane_entry_heading_ok,
+            "lane_entry_ok": lane_entry_ok,
             "ey": ey,
             "epsi": epsi,
             "goal_dist_ok": goal_dist_ok,
             "completed_by_s_margin": bool(s >= end_s - self.completion_s_margin and pose_ok),
             "completed_by_goal_dist": bool(goal_dist_ok and pose_ok),
+            "completed_by_lane_entry": lane_entry_ok,
         }
 
     def _horizon_slice_with_tail_padding(self, arr, start_idx, length):
@@ -1667,6 +1694,7 @@ class SMPCAgent(object):
         reached_end = reached_end and completion_metrics["lateral_ok"] and completion_metrics["heading_ok"]
         reached_end = reached_end or completion_metrics["completed_by_s_margin"]
         reached_end = reached_end or completion_metrics["completed_by_goal_dist"]
+        reached_end = reached_end or completion_metrics["completed_by_lane_entry"]
 
         if self.goal_reached or reached_end:
             # Stop if the end of the path is reached and signal completion.
