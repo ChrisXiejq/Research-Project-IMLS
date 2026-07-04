@@ -44,11 +44,10 @@
       "completion_lateral_error": 2.0,
       "completion_heading_error": 0.18,
       "completion_lane_entry_goal_dist": 1.0,
-      "completion_lane_entry_heading_error": 0.18,
+      "completion_lane_entry_heading_error": 0.30,
       "post_goal_reference_extension_m": 12.0,
-      "exit_alignment_speed": 3.0,
-      "exit_alignment_distance_before_goal": 12.0,
-      "exit_alignment_distance_after_goal": 12.0
+      "exit_alignment_path_enabled": true,
+      "exit_alignment_path_length": 10.0
     },
     "target": {
       "nominal_speed": 6.0,
@@ -106,10 +105,9 @@
     "completion_lateral_error": "Tightened from the previous hard-coded 4.0m to 2.0m. The 1.5m trial was too strict for the CARLA map waypoint route and caused otherwise safe runs to miss completion.",
     "completion_heading_error": "Normal heading-alignment completion gate. The ego must have |epsi| <= 0.18rad (about 10.3deg) for route-end or broad goal-distance completion.",
     "completion_lane_entry_goal_dist": "Near-goal lane-entry completion window. If the ego is within 1.0m of the route goal and laterally within the selected lane, completion can use the lane-entry heading threshold before the post-goal extension pulls the vehicle downstream.",
-    "completion_lane_entry_heading_error": "Heading tolerance for the near-goal lane-entry completion window. Tightened back to 0.18rad after the 0.30rad trial prevented stagnation but allowed visually diagonal lane entry.",
+    "completion_lane_entry_heading_error": "Heading tolerance for the near-goal lane-entry completion window. Restored to the last safe value 0.30rad after the 0.18rad + 3.0m/s exit-speed-cap trial caused fixed-risk solver failures, yield-order failure, and footprint collision. Diagonal entry is now addressed by spatial exit-route shaping instead of hard speed capping.",
     "post_goal_reference_extension_m": "Adds a short same-lane straight reference after the routed goal point. This prevents route-end reference freezing and low-speed stagnation if the ego reaches the goal area before the strict completion gate fires.",
-    "exit_alignment_speed": "Reference speed cap applied near the exit-lane alignment segment. It gives the controller time to align vehicle heading before entering the target lane instead of cutting in diagonally at about 5m/s.",
-    "exit_alignment_distance_before_goal": "Distance before the routed goal where the exit alignment speed cap starts.",
-    "exit_alignment_distance_after_goal": "Distance after the routed goal where the exit alignment speed cap remains active along the post-goal reference extension."
+    "exit_alignment_path_enabled": "Enables spatial path shaping only on the final post-turn route segment. This keeps the validated yield-before-conflict behavior unchanged while making the exit reference enter the target lane along the lane direction.",
+    "exit_alignment_path_length": "Length of the final route segment replaced by a same-lane alignment segment. The 10m value is intended to reduce diagonal entry without imposing the rejected 3.0m/s speed cap that destabilized fixed-risk SMPC."
   }
 }

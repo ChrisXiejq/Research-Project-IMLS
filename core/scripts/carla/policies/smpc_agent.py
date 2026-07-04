@@ -77,11 +77,10 @@ class SMPCAgent(object):
                  completion_lateral_error=1.5,
                  completion_heading_error=0.10,
                  completion_lane_entry_goal_dist=1.0,
-                 completion_lane_entry_heading_error=0.18,
+                 completion_lane_entry_heading_error=0.30,
                  post_goal_reference_extension_m=12.0,
-                 exit_alignment_speed=3.0,
-                 exit_alignment_distance_before_goal=12.0,
-                 exit_alignment_distance_after_goal=12.0,
+                 exit_alignment_path_enabled=True,
+                 exit_alignment_path_length=10.0,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -139,10 +138,8 @@ class SMPCAgent(object):
         self.completion_lane_entry_goal_dist = float(completion_lane_entry_goal_dist)
         self.completion_lane_entry_heading_error = float(completion_lane_entry_heading_error)
         self.post_goal_reference_extension_m = float(post_goal_reference_extension_m)
-        self.exit_alignment_speed = float(exit_alignment_speed)
-        self.exit_alignment_distance_before_goal = float(exit_alignment_distance_before_goal)
-        self.exit_alignment_distance_after_goal = float(exit_alignment_distance_after_goal)
-        self._route_goal_s = None
+        self.exit_alignment_path_enabled = bool(exit_alignment_path_enabled)
+        self.exit_alignment_path_length = float(exit_alignment_path_length)
         if self.d_min < 0.0:
             raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
         if self.collision_ellipse_half_length <= 0.0 or self.collision_ellipse_half_width <= 0.0:
@@ -245,12 +242,9 @@ class SMPCAgent(object):
                 "post_goal_reference_extension_m must be non-negative, "
                 f"got {self.post_goal_reference_extension_m}"
             )
-        if self.exit_alignment_speed <= 0.0:
-            raise ValueError(f"exit_alignment_speed must be positive, got {self.exit_alignment_speed}")
-        if self.exit_alignment_distance_before_goal < 0.0 or self.exit_alignment_distance_after_goal < 0.0:
+        if self.exit_alignment_path_length < 0.0:
             raise ValueError(
-                "exit_alignment_distance_before_goal and exit_alignment_distance_after_goal "
-                "must be non-negative"
+                f"exit_alignment_path_length must be non-negative, got {self.exit_alignment_path_length}"
             )
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
@@ -470,9 +464,8 @@ class SMPCAgent(object):
                 "lane_entry_goal_dist": self.completion_lane_entry_goal_dist,
                 "lane_entry_heading_error": self.completion_lane_entry_heading_error,
                 "post_goal_reference_extension_m": self.post_goal_reference_extension_m,
-                "exit_alignment_speed": self.exit_alignment_speed,
-                "exit_alignment_distance_before_goal": self.exit_alignment_distance_before_goal,
-                "exit_alignment_distance_after_goal": self.exit_alignment_distance_after_goal,
+                "exit_alignment_path_enabled": self.exit_alignment_path_enabled,
+                "exit_alignment_path_length": self.exit_alignment_path_length,
             },
             "rule_aware_yield": {
                 "priority_rule": "turning_gives_way_to_oncoming_straight",
@@ -632,6 +625,49 @@ class SMPCAgent(object):
         return sliced
 
 
+    def _apply_exit_alignment_path_shaping(self, way_s, way_xy, way_yaw):
+        """Replace the final route segment with a same-lane exit alignment segment."""
+        if (
+            not self.exit_alignment_path_enabled
+            or self.exit_alignment_path_length <= 0.0
+            or len(way_s) < 3
+        ):
+            return way_s, way_xy, way_yaw
+
+        route_end_s = float(way_s[-1])
+        alignment_len = min(float(self.exit_alignment_path_length), max(route_end_s - 1.0, 0.0))
+        if alignment_len <= 1e-6:
+            return way_s, way_xy, way_yaw
+
+        tail_xy = np.asarray(way_xy[-1], dtype=float)
+        tail_yaw = float(way_yaw[-1])
+        tail_dir = np.array([np.cos(tail_yaw), np.sin(tail_yaw)], dtype=float)
+        alignment_start_xy = tail_xy - alignment_len * tail_dir
+        alignment_start_s = route_end_s - alignment_len
+
+        keep_mask = way_s < alignment_start_s
+        keep_s = way_s[keep_mask]
+        keep_xy = way_xy[keep_mask]
+        keep_yaw = way_yaw[keep_mask]
+        if len(keep_s) == 0:
+            keep_s = way_s[:1]
+            keep_xy = way_xy[:1]
+            keep_yaw = way_yaw[:1]
+
+        shaped_xy = np.vstack((keep_xy, alignment_start_xy, tail_xy))
+        shaped_yaw = np.concatenate((keep_yaw, np.array([tail_yaw, tail_yaw], dtype=float)))
+
+        step_dist = np.linalg.norm(np.diff(shaped_xy, axis=0), axis=1)
+        valid_steps = step_dist > 1e-3
+        if not np.all(valid_steps):
+            keep_indices = np.concatenate(([True], valid_steps))
+            shaped_xy = shaped_xy[keep_indices]
+            shaped_yaw = shaped_yaw[keep_indices]
+            step_dist = np.linalg.norm(np.diff(shaped_xy, axis=0), axis=1)
+        shaped_s = np.concatenate(([0.0], np.cumsum(step_dist)))
+        return shaped_s, shaped_xy, shaped_yaw
+
+
 
 
     def fit_velocity_profile(self):
@@ -643,12 +679,6 @@ class SMPCAgent(object):
             sn, xn, yn, yawn, curvn = next_state
 
             v_curr = min( self.nominal_speed, np.sqrt(self.lat_accel_max / max(0.01, np.abs(curv))) )
-            if self._route_goal_s is not None:
-                s_mid = 0.5 * (float(s) + float(sn))
-                alignment_start = float(self._route_goal_s) - self.exit_alignment_distance_before_goal
-                alignment_end = float(self._route_goal_s) + self.exit_alignment_distance_after_goal
-                if alignment_start <= s_mid <= alignment_end:
-                    v_curr = min(v_curr, self.exit_alignment_speed)
 
             t_fits.append( (sn - s) / v_curr + t_fits[-1] )
 
@@ -680,7 +710,7 @@ class SMPCAgent(object):
             # # Generate a refernece by fitting a velocity profile with specified nominal speed and time discretization.
 
             way_s, way_xy, way_yaw = fth.extract_path_from_waypoints(route)
-            self._route_goal_s = float(way_s[-1])
+            way_s, way_xy, way_yaw = self._apply_exit_alignment_path_shaping(way_s, way_xy, way_yaw)
             if self.post_goal_reference_extension_m > 0.0 and len(way_s) >= 1:
                 extension_s = np.arange(
                     1.0,
