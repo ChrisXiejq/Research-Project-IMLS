@@ -77,10 +77,13 @@ class SMPCAgent(object):
                  completion_lateral_error=1.5,
                  completion_heading_error=0.10,
                  completion_lane_entry_goal_dist=1.0,
-                 completion_lane_entry_heading_error=0.30,
+                 completion_lane_entry_heading_error=0.18,
+                 completion_exit_alignment_min_s_after_goal=4.0,
                  post_goal_reference_extension_m=12.0,
                  exit_alignment_path_enabled=True,
-                 exit_alignment_path_length=10.0,
+                 exit_alignment_path_length=18.0,
+                 exit_alignment_post_clearance_speed=4.0,
+                 exit_alignment_post_clearance_goal_window=14.0,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -137,9 +140,13 @@ class SMPCAgent(object):
         self.completion_heading_error = float(completion_heading_error)
         self.completion_lane_entry_goal_dist = float(completion_lane_entry_goal_dist)
         self.completion_lane_entry_heading_error = float(completion_lane_entry_heading_error)
+        self.completion_exit_alignment_min_s_after_goal = float(completion_exit_alignment_min_s_after_goal)
         self.post_goal_reference_extension_m = float(post_goal_reference_extension_m)
         self.exit_alignment_path_enabled = bool(exit_alignment_path_enabled)
         self.exit_alignment_path_length = float(exit_alignment_path_length)
+        self.exit_alignment_post_clearance_speed = float(exit_alignment_post_clearance_speed)
+        self.exit_alignment_post_clearance_goal_window = float(exit_alignment_post_clearance_goal_window)
+        self._route_goal_s = None
         if self.d_min < 0.0:
             raise ValueError(f"collision_d_min must be non-negative, got {self.d_min}")
         if self.collision_ellipse_half_length <= 0.0 or self.collision_ellipse_half_width <= 0.0:
@@ -237,6 +244,11 @@ class SMPCAgent(object):
                 "completion_lane_entry_heading_error must be positive, "
                 f"got {self.completion_lane_entry_heading_error}"
             )
+        if self.completion_exit_alignment_min_s_after_goal < 0.0:
+            raise ValueError(
+                "completion_exit_alignment_min_s_after_goal must be non-negative, "
+                f"got {self.completion_exit_alignment_min_s_after_goal}"
+            )
         if self.post_goal_reference_extension_m < 0.0:
             raise ValueError(
                 "post_goal_reference_extension_m must be non-negative, "
@@ -245,6 +257,16 @@ class SMPCAgent(object):
         if self.exit_alignment_path_length < 0.0:
             raise ValueError(
                 f"exit_alignment_path_length must be non-negative, got {self.exit_alignment_path_length}"
+            )
+        if self.exit_alignment_post_clearance_speed <= 0.0:
+            raise ValueError(
+                "exit_alignment_post_clearance_speed must be positive, "
+                f"got {self.exit_alignment_post_clearance_speed}"
+            )
+        if self.exit_alignment_post_clearance_goal_window < 0.0:
+            raise ValueError(
+                "exit_alignment_post_clearance_goal_window must be non-negative, "
+                f"got {self.exit_alignment_post_clearance_goal_window}"
             )
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
@@ -463,9 +485,12 @@ class SMPCAgent(object):
                 "heading_error": self.completion_heading_error,
                 "lane_entry_goal_dist": self.completion_lane_entry_goal_dist,
                 "lane_entry_heading_error": self.completion_lane_entry_heading_error,
+                "exit_alignment_min_s_after_goal": self.completion_exit_alignment_min_s_after_goal,
                 "post_goal_reference_extension_m": self.post_goal_reference_extension_m,
                 "exit_alignment_path_enabled": self.exit_alignment_path_enabled,
                 "exit_alignment_path_length": self.exit_alignment_path_length,
+                "exit_alignment_post_clearance_speed": self.exit_alignment_post_clearance_speed,
+                "exit_alignment_post_clearance_goal_window": self.exit_alignment_post_clearance_goal_window,
             },
             "rule_aware_yield": {
                 "priority_rule": "turning_gives_way_to_oncoming_straight",
@@ -579,6 +604,10 @@ class SMPCAgent(object):
         end_s = float(self.frenet_traj.trajectory[-1, 0])
         goal_dist = float(np.linalg.norm(np.array([x, y], dtype=float) - goal_xy))
         s_to_end = float(end_s - s)
+        route_goal_s = self._route_goal_s
+        if route_goal_s is None and self.post_goal_reference_extension_m > 0.0:
+            route_goal_s = max(0.0, end_s - self.post_goal_reference_extension_m)
+        s_after_route_goal = None if route_goal_s is None else float(s - route_goal_s)
         lateral_ok = bool(ey is not None and abs(float(ey)) <= self.completion_lateral_error)
         heading_ok = bool(epsi is not None and abs(float(epsi)) <= self.completion_heading_error)
         goal_dist_ok = bool(goal_dist <= self.completion_goal_dist)
@@ -587,9 +616,16 @@ class SMPCAgent(object):
             epsi is not None and abs(float(epsi)) <= self.completion_lane_entry_heading_error
         )
         lane_entry_ok = bool(lane_entry_goal_ok and lateral_ok and lane_entry_heading_ok)
+        exit_alignment_s_ok = bool(
+            s_after_route_goal is not None
+            and s_after_route_goal >= self.completion_exit_alignment_min_s_after_goal
+        )
+        exit_alignment_ok = bool(exit_alignment_s_ok and lateral_ok and heading_ok)
         pose_ok = bool(lateral_ok and heading_ok)
         return {
             "end_s": end_s,
+            "route_goal_s": route_goal_s,
+            "s_after_route_goal": s_after_route_goal,
             "s_to_end": s_to_end,
             "goal_dist": goal_dist,
             "completion_s_margin": self.completion_s_margin,
@@ -598,17 +634,21 @@ class SMPCAgent(object):
             "completion_heading_error": self.completion_heading_error,
             "completion_lane_entry_goal_dist": self.completion_lane_entry_goal_dist,
             "completion_lane_entry_heading_error": self.completion_lane_entry_heading_error,
+            "completion_exit_alignment_min_s_after_goal": self.completion_exit_alignment_min_s_after_goal,
             "lateral_ok": lateral_ok,
             "heading_ok": heading_ok,
             "lane_entry_goal_ok": lane_entry_goal_ok,
             "lane_entry_heading_ok": lane_entry_heading_ok,
             "lane_entry_ok": lane_entry_ok,
+            "exit_alignment_s_ok": exit_alignment_s_ok,
+            "exit_alignment_ok": exit_alignment_ok,
             "ey": ey,
             "epsi": epsi,
             "goal_dist_ok": goal_dist_ok,
             "completed_by_s_margin": bool(s >= end_s - self.completion_s_margin and pose_ok),
             "completed_by_goal_dist": bool(goal_dist_ok and pose_ok),
             "completed_by_lane_entry": lane_entry_ok,
+            "completed_by_exit_alignment": exit_alignment_ok,
         }
 
     def _horizon_slice_with_tail_padding(self, arr, start_idx, length):
@@ -626,7 +666,13 @@ class SMPCAgent(object):
 
 
     def _apply_exit_alignment_path_shaping(self, way_s, way_xy, way_yaw):
-        """Replace the final route segment with a same-lane exit alignment segment."""
+        """Smooth the final route into a same-lane exit-alignment segment.
+
+        The earlier two-point replacement made the route end point correct, but it
+        left a kink that could still be reached with a large heading error.  Use a
+        short Hermite transition followed by a straight segment in the exit-lane
+        direction so the reference asks for heading alignment before completion.
+        """
         if (
             not self.exit_alignment_path_enabled
             or self.exit_alignment_path_length <= 0.0
@@ -642,20 +688,53 @@ class SMPCAgent(object):
         tail_xy = np.asarray(way_xy[-1], dtype=float)
         tail_yaw = float(way_yaw[-1])
         tail_dir = np.array([np.cos(tail_yaw), np.sin(tail_yaw)], dtype=float)
-        alignment_start_xy = tail_xy - alignment_len * tail_dir
         alignment_start_s = route_end_s - alignment_len
 
+        start_xy = np.array([
+            np.interp(alignment_start_s, way_s, way_xy[:, 0]),
+            np.interp(alignment_start_s, way_s, way_xy[:, 1]),
+        ], dtype=float)
+        start_yaw = float(np.interp(alignment_start_s, way_s, np.unwrap(way_yaw)))
+        start_dir = np.array([np.cos(start_yaw), np.sin(start_yaw)], dtype=float)
+
+        final_straight_len = min(8.0, max(4.0, 0.45 * alignment_len))
+        final_straight_len = min(final_straight_len, max(alignment_len - 2.0, 1.0))
+        straight_start_xy = tail_xy - final_straight_len * tail_dir
+        transition_len = max(
+            float(np.linalg.norm(straight_start_xy - start_xy)),
+            alignment_len - final_straight_len,
+            1.0,
+        )
+
+        transition_samples = max(4, int(np.ceil(transition_len)))
+        u = np.linspace(0.0, 1.0, transition_samples + 1, dtype=float)
+        h00 = 2.0 * u ** 3 - 3.0 * u ** 2 + 1.0
+        h10 = u ** 3 - 2.0 * u ** 2 + u
+        h01 = -2.0 * u ** 3 + 3.0 * u ** 2
+        h11 = u ** 3 - u ** 2
+        tangent_scale = max(transition_len * 0.55, 1.0)
+        transition_xy = (
+            h00[:, None] * start_xy
+            + h10[:, None] * (tangent_scale * start_dir)
+            + h01[:, None] * straight_start_xy
+            + h11[:, None] * (tangent_scale * tail_dir)
+        )
+        transition_yaw = np.linspace(start_yaw, tail_yaw, transition_samples + 1, dtype=float)
+
+        straight_samples = max(2, int(np.ceil(final_straight_len)))
+        straight_u = np.linspace(0.0, 1.0, straight_samples + 1, dtype=float)[1:]
+        straight_xy = straight_start_xy + straight_u[:, None] * (tail_xy - straight_start_xy)
+        straight_yaw = np.full(straight_samples, tail_yaw, dtype=float)
+
         keep_mask = way_s < alignment_start_s
-        keep_s = way_s[keep_mask]
         keep_xy = way_xy[keep_mask]
         keep_yaw = way_yaw[keep_mask]
-        if len(keep_s) == 0:
-            keep_s = way_s[:1]
+        if len(keep_xy) == 0:
             keep_xy = way_xy[:1]
             keep_yaw = way_yaw[:1]
 
-        shaped_xy = np.vstack((keep_xy, alignment_start_xy, tail_xy))
-        shaped_yaw = np.concatenate((keep_yaw, np.array([tail_yaw, tail_yaw], dtype=float)))
+        shaped_xy = np.vstack((keep_xy, transition_xy, straight_xy))
+        shaped_yaw = np.concatenate((keep_yaw, transition_yaw, straight_yaw))
 
         step_dist = np.linalg.norm(np.diff(shaped_xy, axis=0), axis=1)
         valid_steps = step_dist > 1e-3
@@ -711,6 +790,7 @@ class SMPCAgent(object):
 
             way_s, way_xy, way_yaw = fth.extract_path_from_waypoints(route)
             way_s, way_xy, way_yaw = self._apply_exit_alignment_path_shaping(way_s, way_xy, way_yaw)
+            self._route_goal_s = float(way_s[-1])
             if self.post_goal_reference_extension_m > 0.0 and len(way_s) >= 1:
                 extension_s = np.arange(
                     1.0,
@@ -1618,7 +1698,11 @@ class SMPCAgent(object):
             "accel_upper_bound": None,
             "profile": None,
         }
-        if not yield_active and not recovery_active_for_reference:
+        post_clearance_alignment_active = bool(
+            yield_status.get("target_cleared_conflict", False)
+            and self.exit_alignment_post_clearance_goal_window > 0.0
+        )
+        if not yield_active and not recovery_active_for_reference and not post_clearance_alignment_active:
             return ref_status
 
         self.feas_ref_states_new = np.asarray(self.feas_ref_states_new, dtype=float).copy()
@@ -1670,6 +1754,29 @@ class SMPCAgent(object):
                 },
             })
             return ref_status
+
+        if post_clearance_alignment_active:
+            goal_xy = np.array([self.goal_location.x, -self.goal_location.y], dtype=float)
+            ref_xy = np.asarray(self.feas_ref_states_new[:, :2], dtype=float)
+            goal_dist = np.linalg.norm(ref_xy - goal_xy.reshape(1, 2), axis=1)
+            mask = goal_dist <= self.exit_alignment_post_clearance_goal_window
+            if np.any(mask):
+                self.feas_ref_states_new[mask, 3] = np.minimum(
+                    self.feas_ref_states_new[mask, 3],
+                    self.exit_alignment_post_clearance_speed,
+                )
+                ref_status.update({
+                    "mode": "post_clearance_exit_alignment_reference",
+                    "speed_cap": float(self.exit_alignment_post_clearance_speed),
+                    "profile": {
+                        "type": "goal_window_speed_cap_after_target_clearance",
+                        "goal_window": float(self.exit_alignment_post_clearance_goal_window),
+                        "capped_points": int(np.count_nonzero(mask)),
+                        "target_cleared_conflict": True,
+                    },
+                })
+                if not recovery_active_for_reference:
+                    return ref_status
 
         self.feas_ref_states_new[:, 3] = np.minimum(
             self.feas_ref_states_new[:, 3],
@@ -1749,6 +1856,7 @@ class SMPCAgent(object):
         reached_end = reached_end or completion_metrics["completed_by_s_margin"]
         reached_end = reached_end or completion_metrics["completed_by_goal_dist"]
         reached_end = reached_end or completion_metrics["completed_by_lane_entry"]
+        reached_end = reached_end or completion_metrics["completed_by_exit_alignment"]
 
         if self.goal_reached or reached_end:
             # Stop if the end of the path is reached and signal completion.

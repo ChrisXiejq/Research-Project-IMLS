@@ -118,7 +118,8 @@ def _completion_valid(scenario_dir: str) -> Optional[bool]:
     by_s = bool(comp.get("completed_by_s_margin", False))
     by_goal = bool(comp.get("completed_by_goal_dist", False))
     by_lane_entry = bool(comp.get("completed_by_lane_entry", False))
-    return bool(by_lane_entry or (lateral_ok and heading_ok and (by_s or by_goal)))
+    by_exit_alignment = bool(comp.get("completed_by_exit_alignment", False))
+    return bool(by_lane_entry or by_exit_alignment or (lateral_ok and heading_ok and (by_s or by_goal)))
 
 
 def _solver_failure_frac(scenario_dir: str) -> Optional[float]:
