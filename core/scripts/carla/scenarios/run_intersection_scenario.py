@@ -147,14 +147,15 @@ class VehicleParams:
     completion_heading_error : float = 0.10
     completion_lane_entry_goal_dist : float = 1.0
     completion_lane_entry_heading_error : float = 0.30
+    completion_lane_entry_min_s_after_route_goal : float = 0.0
     completion_exit_alignment_min_s_after_goal : float = 4.0
     post_goal_reference_extension_m : float = 12.0
     route_goal_extension_m : float = 0.0
     exit_alignment_path_enabled : bool = True
-    exit_alignment_path_length : float = 12.0
-    exit_alignment_distance_after_goal : float = 6.0
-    exit_alignment_post_clearance_speed : float = 4.5
-    exit_alignment_post_clearance_goal_window : float = 10.0
+    exit_alignment_path_length : float = 10.0
+    exit_alignment_distance_after_goal : float = 0.0
+    exit_alignment_post_clearance_speed : float = 4.0
+    exit_alignment_post_clearance_goal_window : float = 0.0
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way
@@ -266,6 +267,7 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             completion_heading_error=vehicle_params.completion_heading_error,
                             completion_lane_entry_goal_dist=vehicle_params.completion_lane_entry_goal_dist,
                             completion_lane_entry_heading_error=vehicle_params.completion_lane_entry_heading_error,
+                            completion_lane_entry_min_s_after_route_goal=vehicle_params.completion_lane_entry_min_s_after_route_goal,
                             completion_exit_alignment_min_s_after_goal=vehicle_params.completion_exit_alignment_min_s_after_goal,
                             post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m,
                             route_goal_extension_m=vehicle_params.route_goal_extension_m,
@@ -320,6 +322,7 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             completion_heading_error=vehicle_params.completion_heading_error,
                             completion_lane_entry_goal_dist=vehicle_params.completion_lane_entry_goal_dist,
                             completion_lane_entry_heading_error=vehicle_params.completion_lane_entry_heading_error,
+                            completion_lane_entry_min_s_after_route_goal=vehicle_params.completion_lane_entry_min_s_after_route_goal,
                             completion_exit_alignment_min_s_after_goal=vehicle_params.completion_exit_alignment_min_s_after_goal,
                             post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m,
                             route_goal_extension_m=vehicle_params.route_goal_extension_m,
@@ -372,6 +375,7 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             completion_heading_error=vehicle_params.completion_heading_error,
                             completion_lane_entry_goal_dist=vehicle_params.completion_lane_entry_goal_dist,
                             completion_lane_entry_heading_error=vehicle_params.completion_lane_entry_heading_error,
+                            completion_lane_entry_min_s_after_route_goal=vehicle_params.completion_lane_entry_min_s_after_route_goal,
                             completion_exit_alignment_min_s_after_goal=vehicle_params.completion_exit_alignment_min_s_after_goal,
                             post_goal_reference_extension_m=vehicle_params.post_goal_reference_extension_m,
                             route_goal_extension_m=vehicle_params.route_goal_extension_m,

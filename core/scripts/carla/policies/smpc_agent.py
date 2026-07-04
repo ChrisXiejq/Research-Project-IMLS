@@ -78,14 +78,15 @@ class SMPCAgent(object):
                  completion_heading_error=0.10,
                  completion_lane_entry_goal_dist=1.0,
                  completion_lane_entry_heading_error=0.30,
+                 completion_lane_entry_min_s_after_route_goal=0.0,
                  completion_exit_alignment_min_s_after_goal=4.0,
                  post_goal_reference_extension_m=12.0,
                  route_goal_extension_m=0.0,
                  exit_alignment_path_enabled=True,
-                 exit_alignment_path_length=12.0,
-                 exit_alignment_distance_after_goal=6.0,
-                 exit_alignment_post_clearance_speed=4.5,
-                 exit_alignment_post_clearance_goal_window=10.0,
+                 exit_alignment_path_length=10.0,
+                 exit_alignment_distance_after_goal=0.0,
+                 exit_alignment_post_clearance_speed=4.0,
+                 exit_alignment_post_clearance_goal_window=0.0,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -142,6 +143,7 @@ class SMPCAgent(object):
         self.completion_heading_error = float(completion_heading_error)
         self.completion_lane_entry_goal_dist = float(completion_lane_entry_goal_dist)
         self.completion_lane_entry_heading_error = float(completion_lane_entry_heading_error)
+        self.completion_lane_entry_min_s_after_route_goal = float(completion_lane_entry_min_s_after_route_goal)
         self.completion_exit_alignment_min_s_after_goal = float(completion_exit_alignment_min_s_after_goal)
         self.post_goal_reference_extension_m = float(post_goal_reference_extension_m)
         self.route_goal_extension_m = float(route_goal_extension_m)
@@ -247,6 +249,11 @@ class SMPCAgent(object):
             raise ValueError(
                 "completion_lane_entry_heading_error must be positive, "
                 f"got {self.completion_lane_entry_heading_error}"
+            )
+        if self.completion_lane_entry_min_s_after_route_goal < 0.0:
+            raise ValueError(
+                "completion_lane_entry_min_s_after_route_goal must be non-negative, "
+                f"got {self.completion_lane_entry_min_s_after_route_goal}"
             )
         if self.completion_exit_alignment_min_s_after_goal < 0.0:
             raise ValueError(
@@ -499,6 +506,7 @@ class SMPCAgent(object):
                 "heading_error": self.completion_heading_error,
                 "lane_entry_goal_dist": self.completion_lane_entry_goal_dist,
                 "lane_entry_heading_error": self.completion_lane_entry_heading_error,
+                "lane_entry_min_s_after_route_goal": self.completion_lane_entry_min_s_after_route_goal,
                 "exit_alignment_min_s_after_goal": self.completion_exit_alignment_min_s_after_goal,
                 "post_goal_reference_extension_m": self.post_goal_reference_extension_m,
                 "route_goal_extension_m": self.route_goal_extension_m,
@@ -631,7 +639,11 @@ class SMPCAgent(object):
         lane_entry_heading_ok = bool(
             epsi is not None and abs(float(epsi)) <= self.completion_lane_entry_heading_error
         )
-        lane_entry_ok = bool(lane_entry_goal_ok and lateral_ok and lane_entry_heading_ok)
+        lane_entry_s_ok = bool(
+            s_after_route_goal is not None
+            and s_after_route_goal >= self.completion_lane_entry_min_s_after_route_goal
+        )
+        lane_entry_ok = bool(lane_entry_goal_ok and lateral_ok and lane_entry_heading_ok and lane_entry_s_ok)
         exit_alignment_s_ok = bool(
             s_after_route_goal is not None
             and s_after_route_goal >= self.completion_exit_alignment_min_s_after_goal
@@ -650,11 +662,13 @@ class SMPCAgent(object):
             "completion_heading_error": self.completion_heading_error,
             "completion_lane_entry_goal_dist": self.completion_lane_entry_goal_dist,
             "completion_lane_entry_heading_error": self.completion_lane_entry_heading_error,
+            "completion_lane_entry_min_s_after_route_goal": self.completion_lane_entry_min_s_after_route_goal,
             "completion_exit_alignment_min_s_after_goal": self.completion_exit_alignment_min_s_after_goal,
             "lateral_ok": lateral_ok,
             "heading_ok": heading_ok,
             "lane_entry_goal_ok": lane_entry_goal_ok,
             "lane_entry_heading_ok": lane_entry_heading_ok,
+            "lane_entry_s_ok": lane_entry_s_ok,
             "lane_entry_ok": lane_entry_ok,
             "exit_alignment_s_ok": exit_alignment_s_ok,
             "exit_alignment_ok": exit_alignment_ok,
@@ -682,12 +696,10 @@ class SMPCAgent(object):
 
 
     def _apply_exit_alignment_path_shaping(self, way_s, way_xy, way_yaw):
-        """Anchor the exit-lane alignment segment around the original task goal.
+        """Apply a gentle same-lane straight tail near the route goal.
 
-        The route-extension trial showed that shaping relative to the route end is
-        too late: the vehicle completes near the original goal before the final tail
-        can affect heading.  Shape a bounded segment before and after the original
-        goal instead, while leaving completion tied to that original goal.
+        Keep the safe baseline geometry: a short final straight cue without the
+        aggressive goal-anchored segment that caused 600-step non-completion.
         """
         if (
             not self.exit_alignment_path_enabled
@@ -696,21 +708,16 @@ class SMPCAgent(object):
         ):
             return way_s, way_xy, way_yaw
 
-        goal_xy = np.array([self.goal_location.x, -self.goal_location.y], dtype=float)
-        way_xy = np.asarray(way_xy, dtype=float)
-        way_yaw = np.asarray(way_yaw, dtype=float)
-        nearest_goal_idx = int(np.argmin(np.linalg.norm(way_xy - goal_xy.reshape(1, 2), axis=1)))
-        goal_s = float(way_s[nearest_goal_idx])
-        before_len = min(float(self.exit_alignment_path_length), max(goal_s - 1.0, 0.0))
-        after_len = float(self.exit_alignment_distance_after_goal)
-        if before_len <= 1e-6 and after_len <= 1e-6:
+        route_end_s = float(way_s[-1])
+        alignment_len = min(float(self.exit_alignment_path_length), max(route_end_s - 1.0, 0.0))
+        if alignment_len <= 1e-6:
             return way_s, way_xy, way_yaw
 
-        lane_yaw = float(way_yaw[nearest_goal_idx])
-        lane_dir = np.array([np.cos(lane_yaw), np.sin(lane_yaw)], dtype=float)
-        alignment_start_xy = goal_xy - before_len * lane_dir
-        alignment_end_xy = goal_xy + after_len * lane_dir
-        alignment_start_s = goal_s - before_len
+        tail_xy = np.asarray(way_xy[-1], dtype=float)
+        tail_yaw = float(way_yaw[-1])
+        tail_dir = np.array([np.cos(tail_yaw), np.sin(tail_yaw)], dtype=float)
+        alignment_start_xy = tail_xy - alignment_len * tail_dir
+        alignment_start_s = route_end_s - alignment_len
 
         keep_mask = way_s < alignment_start_s
         keep_s = way_s[keep_mask]
@@ -720,11 +727,8 @@ class SMPCAgent(object):
             keep_xy = way_xy[:1]
             keep_yaw = way_yaw[:1]
 
-        shaped_xy = np.vstack((keep_xy, alignment_start_xy, goal_xy, alignment_end_xy))
-        shaped_yaw = np.concatenate((
-            keep_yaw,
-            np.array([lane_yaw, lane_yaw, lane_yaw], dtype=float),
-        ))
+        shaped_xy = np.vstack((keep_xy, alignment_start_xy, tail_xy))
+        shaped_yaw = np.concatenate((keep_yaw, np.array([tail_yaw, tail_yaw], dtype=float)))
 
         step_dist = np.linalg.norm(np.diff(shaped_xy, axis=0), axis=1)
         valid_steps = step_dist > 1e-3
