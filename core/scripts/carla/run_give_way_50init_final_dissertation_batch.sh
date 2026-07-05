@@ -12,6 +12,46 @@ RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_50init_fi
 PYTHON_BIN="${PYTHON_BIN:-python}"
 ENABLE_CAMERA_VIZ="${ENABLE_CAMERA_VIZ:-0}"
 
+mkdir -p "${RESULTS_DIR}"
+START_EPOCH="$(date +%s)"
+START_TIME="$(date '+%Y-%m-%dT%H:%M:%S%z')"
+
+format_duration() {
+  local total_seconds="$1"
+  local hours=$((total_seconds / 3600))
+  local minutes=$(((total_seconds % 3600) / 60))
+  local seconds=$((total_seconds % 60))
+  printf "%02d:%02d:%02d" "${hours}" "${minutes}" "${seconds}"
+}
+
+write_run_timing() {
+  local exit_code="$1"
+  local end_epoch
+  local end_time
+  local duration_seconds
+  local duration_hms
+
+  end_epoch="$(date +%s)"
+  end_time="$(date '+%Y-%m-%dT%H:%M:%S%z')"
+  duration_seconds=$((end_epoch - START_EPOCH))
+  duration_hms="$(format_duration "${duration_seconds}")"
+
+  cat > "${RESULTS_DIR}/run_timing.txt" <<EOF
+script=$(basename "$0")
+results_dir=${RESULTS_DIR}
+start_time=${START_TIME}
+end_time=${end_time}
+duration_seconds=${duration_seconds}
+duration_hms=${duration_hms}
+exit_code=${exit_code}
+EOF
+
+  echo "Run timing: ${duration_hms} (${duration_seconds}s), exit_code=${exit_code}"
+  echo "Timing report: ${RESULTS_DIR}/run_timing.txt"
+}
+
+trap 'status=$?; write_run_timing "${status}"; exit "${status}"' EXIT
+
 cd "${SCRIPT_DIR}"
 
 camera_args=()
