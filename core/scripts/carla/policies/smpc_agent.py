@@ -50,13 +50,18 @@ class SMPCAgent(object):
                  reference_regen_max_lateral_error=1.5,
                  yield_stop_enabled=True,
                  yield_stop_speed=0.2,
+                 yield_caution_speed=4.5,
+                 yield_creep_speed=1.5,
+                 yield_caution_decel=-2.8,
                  yield_reference_min_speed=0.8,
                  yield_reference_decel=-3.75,
                  yield_stop_decel=-5.0,
                  yield_emergency_brake_enabled=True,
-                 yield_emergency_decel=-7.0,
-                 yield_emergency_jerk_limit=15.0,
+                 yield_emergency_decel=-6.0,
+                 yield_emergency_jerk_limit=8.0,
                  yield_emergency_conflict_margin=1.25,
+                 yield_hard_stop_target_distance=8.0,
+                 yield_hard_stop_conflict_distance=7.0,
                  yield_conflict_radius=4.0,
                  yield_stop_buffer_distance=8.0,
                  yield_brake_distance_margin=3.5,
@@ -72,11 +77,11 @@ class SMPCAgent(object):
                  yield_observed_caution_min_target_speed=0.5,
                  yield_steer_damping=0.25,
                  yield_recovery_enabled=True,
-                 yield_recovery_steps=60,
+                 yield_recovery_steps=180,
                  yield_recovery_regen_period=2,
                  yield_recovery_max_lateral_error=12.0,
-                 yield_recovery_speed=4.0,
-                 yield_recovery_accel=1.2,
+                 yield_recovery_speed=5.5,
+                 yield_recovery_accel=1.8,
                  completion_s_margin=6.0,
                  completion_goal_dist=8.0,
                  completion_lateral_error=4.0,
@@ -123,6 +128,9 @@ class SMPCAgent(object):
         self.reference_regen_max_lateral_error = float(reference_regen_max_lateral_error)
         self.yield_stop_enabled = bool(yield_stop_enabled)
         self.yield_stop_speed = float(yield_stop_speed)
+        self.yield_caution_speed = float(yield_caution_speed)
+        self.yield_creep_speed = float(yield_creep_speed)
+        self.yield_caution_decel = float(yield_caution_decel)
         self.yield_reference_min_speed = float(yield_reference_min_speed)
         self.yield_reference_decel = float(yield_reference_decel)
         self.yield_stop_decel = float(yield_stop_decel)
@@ -130,6 +138,8 @@ class SMPCAgent(object):
         self.yield_emergency_decel = float(yield_emergency_decel)
         self.yield_emergency_jerk_limit = float(yield_emergency_jerk_limit)
         self.yield_emergency_conflict_margin = float(yield_emergency_conflict_margin)
+        self.yield_hard_stop_target_distance = float(yield_hard_stop_target_distance)
+        self.yield_hard_stop_conflict_distance = float(yield_hard_stop_conflict_distance)
         self.yield_conflict_radius = float(yield_conflict_radius)
         self.yield_stop_buffer_distance = float(yield_stop_buffer_distance)
         self.yield_brake_distance_margin = float(yield_brake_distance_margin)
@@ -186,6 +196,18 @@ class SMPCAgent(object):
             )
         if self.yield_stop_speed < 0.0:
             raise ValueError(f"yield_stop_speed must be non-negative, got {self.yield_stop_speed}")
+        if self.yield_caution_speed < self.yield_stop_speed:
+            raise ValueError(
+                "yield_caution_speed must be >= yield_stop_speed, "
+                f"got {self.yield_caution_speed} < {self.yield_stop_speed}"
+            )
+        if self.yield_creep_speed < self.yield_stop_speed:
+            raise ValueError(
+                "yield_creep_speed must be >= yield_stop_speed, "
+                f"got {self.yield_creep_speed} < {self.yield_stop_speed}"
+            )
+        if self.yield_caution_decel >= 0.0:
+            raise ValueError(f"yield_caution_decel must be negative, got {self.yield_caution_decel}")
         if self.yield_reference_min_speed < self.yield_stop_speed:
             raise ValueError(
                 "yield_reference_min_speed must be >= yield_stop_speed, "
@@ -210,6 +232,16 @@ class SMPCAgent(object):
             raise ValueError(
                 "yield_emergency_conflict_margin must be non-negative, "
                 f"got {self.yield_emergency_conflict_margin}"
+            )
+        if self.yield_hard_stop_target_distance < 0.0:
+            raise ValueError(
+                "yield_hard_stop_target_distance must be non-negative, "
+                f"got {self.yield_hard_stop_target_distance}"
+            )
+        if self.yield_hard_stop_conflict_distance < self.yield_conflict_radius:
+            raise ValueError(
+                "yield_hard_stop_conflict_distance must be >= yield_conflict_radius, "
+                f"got {self.yield_hard_stop_conflict_distance} < {self.yield_conflict_radius}"
             )
         if abs(self.yield_reference_decel) > abs(self.yield_stop_decel):
             raise ValueError(
@@ -712,6 +744,9 @@ class SMPCAgent(object):
             "yield_stop_supervisor": {
                 "enabled": self.yield_stop_enabled,
                 "stop_speed": self.yield_stop_speed,
+                "caution_speed": self.yield_caution_speed,
+                "creep_speed": self.yield_creep_speed,
+                "caution_decel": self.yield_caution_decel,
                 "reference_min_speed": self.yield_reference_min_speed,
                 "reference_decel": self.yield_reference_decel,
                 "decel": self.yield_stop_decel,
@@ -719,9 +754,12 @@ class SMPCAgent(object):
                 "emergency_decel": self.yield_emergency_decel,
                 "emergency_jerk_limit": self.yield_emergency_jerk_limit,
                 "emergency_conflict_margin": self.yield_emergency_conflict_margin,
+                "hard_stop_target_distance": self.yield_hard_stop_target_distance,
+                "hard_stop_conflict_distance": self.yield_hard_stop_conflict_distance,
                 "emergency_rule": (
-                    "active yield + target not cleared + braking_distance_required; "
-                    "never weaker than nominal yield braking, jerk-limited toward emergency_decel"
+                    "hard-stop yield + target not cleared + braking_distance_required; "
+                    "observed-track yield first rolls at caution/creep speed, then hard-stops only "
+                    "near the conflict boundary or when the target is close enough"
                 ),
                 "conflict_radius": self.yield_conflict_radius,
                 "stop_buffer_distance": self.yield_stop_buffer_distance,
@@ -1595,6 +1633,8 @@ class SMPCAgent(object):
         not_far_past_conflict = ego_dist_to_conflict >= -self.yield_conflict_radius
         observed_caution_distance_trigger = ego_dist_to_conflict <= self.yield_observed_caution_distance
         observed_caution_braking_trigger = braking_distance_required
+        hard_stop_target_close = target_distance_to_conflict <= self.yield_hard_stop_target_distance
+        hard_stop_conflict_close = ego_dist_to_conflict <= self.yield_hard_stop_conflict_distance
         cautious_candidate = (
             self.yield_observed_caution_enabled
             and not allow_priority_yield
@@ -1611,6 +1651,11 @@ class SMPCAgent(object):
             and not_far_past_conflict
             and (braking_distance_required or overlap_risk or close_hold)
         ) or cautious_candidate
+        hard_stop_required = (
+            active
+            and not target_cleared_conflict
+            and (hard_stop_target_close or hard_stop_conflict_close)
+        )
         if active and not allow_priority_yield:
             phase = "cautious_approach_observed_target"
         elif active and ego_dist_to_stop <= self.yield_hold_distance:
@@ -1663,6 +1708,11 @@ class SMPCAgent(object):
             "cautious_candidate": bool(cautious_candidate),
             "observed_caution_distance_trigger": bool(observed_caution_distance_trigger),
             "observed_caution_braking_trigger": bool(observed_caution_braking_trigger),
+            "hard_stop_required": bool(hard_stop_required),
+            "hard_stop_target_close": bool(hard_stop_target_close),
+            "hard_stop_conflict_close": bool(hard_stop_conflict_close),
+            "hard_stop_target_distance_threshold": float(self.yield_hard_stop_target_distance),
+            "hard_stop_conflict_distance_threshold": float(self.yield_hard_stop_conflict_distance),
             "min_path_distance": float(geometry["min_path_distance"]),
             "conflict_point": conflict_point.tolist(),
             "target_conflict_point": target_conflict_point.tolist(),
@@ -1850,12 +1900,14 @@ class SMPCAgent(object):
         if yield_status.get("active"):
             distance_to_stop = max(float(yield_status.get("ego_distance_to_stop", 0.0)), 0.5)
             required_stop_decel = -(float(speed) ** 2) / (2.0 * distance_to_stop)
+            hard_stop_required = bool(yield_status.get("hard_stop_required", False))
             nominal_a_des = max(
                 self.yield_stop_decel,
                 min(float(u0_flat[0]), required_stop_decel),
             )
             emergency_active = bool(
                 self.yield_emergency_brake_enabled
+                and hard_stop_required
                 and not bool(yield_status.get("target_cleared_conflict", False))
                 and bool(yield_status.get("braking_distance_required", False))
                 and float(yield_status.get("ego_distance_to_conflict", 0.0)) >= -self.yield_conflict_radius
@@ -1876,29 +1928,63 @@ class SMPCAgent(object):
                 # the nominal yield brake computed above.
                 a_des = min(nominal_a_des, emergency_jerk_limited_a_des)
             else:
-                a_des = nominal_a_des
+                if hard_stop_required:
+                    a_des = nominal_a_des
+                else:
+                    rolling_speed = (
+                        self.yield_creep_speed
+                        if float(yield_status.get("ego_distance_to_stop", np.inf)) <= self.yield_hold_distance
+                        else self.yield_caution_speed
+                    )
+                    if float(speed) > rolling_speed + 0.25:
+                        a_des = max(
+                            self.yield_caution_decel,
+                            min(float(u0_flat[0]), self.yield_caution_decel),
+                        )
+                    else:
+                        a_des = max(0.0, float(u0_flat[0]))
             wait_steer_ref = float(yield_status.get("wait_steer_ref", 0.0)) * self.yield_wait_steer_gain
             wait_steer_ref = float(np.clip(wait_steer_ref, self.SMPC.DF_MIN, self.SMPC.DF_MAX))
             damped_steer = self.yield_steer_damping * float(u0_flat[1])
             df_des = wait_steer_ref if abs(wait_steer_ref) >= 0.03 else damped_steer
             u0_new = np.array([a_des, df_des], dtype=float)
-            v_des_new = min(v_des_float, self.yield_stop_speed)
+            if hard_stop_required:
+                v_des_new = min(v_des_float, self.yield_stop_speed)
+            else:
+                rolling_speed = (
+                    self.yield_creep_speed
+                    if float(yield_status.get("ego_distance_to_stop", np.inf)) <= self.yield_hold_distance
+                    else self.yield_caution_speed
+                )
+                v_des_new = min(max(v_des_float, rolling_speed), rolling_speed)
             self.control_prev = u0_new
             self._yield_last_applied_accel = float(u0_new[0])
             self._yield_stop_seen = True
             self._yield_stop_active_prev = True
             self._yield_recovery_steps_remaining = 0
+            if not hard_stop_required:
+                applied_mode = "rolling_caution_yield_control"
+            elif yield_status.get("phase") == "cautious_approach_observed_target":
+                applied_mode = "hard_stop_observed_target_control"
+            else:
+                applied_mode = "hard_stop_yield_line_control"
             yield_status["applied"] = {
-                "mode": (
-                    "observed_target_cautious_control"
-                    if yield_status.get("phase") == "cautious_approach_observed_target"
-                    else "yield_line_control"
-                ),
+                "mode": applied_mode,
                 "a_des": float(u0_new[0]),
                 "df_des": float(u0_new[1]),
                 "v_des": float(v_des_new),
                 "required_stop_decel": float(required_stop_decel),
                 "nominal_a_des": float(nominal_a_des),
+                "hard_stop_required": bool(hard_stop_required),
+                "rolling_speed_target": float(
+                    self.yield_stop_speed
+                    if hard_stop_required
+                    else (
+                        self.yield_creep_speed
+                        if float(yield_status.get("ego_distance_to_stop", np.inf)) <= self.yield_hold_distance
+                        else self.yield_caution_speed
+                    )
+                ),
                 "wait_steer_ref": float(wait_steer_ref),
                 "damped_steer": float(damped_steer),
                 "emergency_brake": {
@@ -2038,6 +2124,42 @@ class SMPCAgent(object):
 
         if yield_active:
             start_idx = int(max(0, min(t_ref_new, len(self.feas_ref_states_new) - 1)))
+            hard_stop_required = bool(yield_status.get("hard_stop_required", False))
+            if not hard_stop_required:
+                rolling_speed = (
+                    self.yield_creep_speed
+                    if float(yield_status.get("ego_distance_to_stop", np.inf)) <= self.yield_hold_distance
+                    else self.yield_caution_speed
+                )
+                self.feas_ref_states_new[start_idx:, 3] = np.minimum(
+                    self.feas_ref_states_new[start_idx:, 3],
+                    rolling_speed,
+                )
+                if start_idx > 0:
+                    self.feas_ref_states_new[:start_idx, 3] = np.minimum(
+                        self.feas_ref_states_new[:start_idx, 3],
+                        rolling_speed,
+                    )
+                self.feas_ref_inputs_new[:, 0] = np.clip(
+                    self.feas_ref_inputs_new[:, 0],
+                    self.yield_caution_decel,
+                    self.yield_recovery_accel,
+                )
+                ref_status.update({
+                    "mode": "rolling_caution_yield_reference",
+                    "speed_cap": float(rolling_speed),
+                    "accel_upper_bound": float(self.yield_recovery_accel),
+                    "profile": {
+                        "type": "rolling_caution_or_creep",
+                        "hard_stop_required": False,
+                        "ego_distance_to_stop": float(yield_status.get("ego_distance_to_stop", np.nan)),
+                        "rolling_speed": float(rolling_speed),
+                        "caution_speed": float(self.yield_caution_speed),
+                        "creep_speed": float(self.yield_creep_speed),
+                        "caution_decel": float(self.yield_caution_decel),
+                    },
+                })
+                return ref_status
             reference_xy = self.feas_ref_states_new[start_idx:, :2]
             if len(reference_xy) >= 2:
                 step_dist = np.linalg.norm(np.diff(reference_xy, axis=0), axis=1)
