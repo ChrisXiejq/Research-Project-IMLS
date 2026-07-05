@@ -679,7 +679,7 @@ class SMPCAgent(object):
                 ],
                 "conflict_zone_source": "fixed_ego_route_target_motion_line_intersection",
                 "oracle_guard": "full priority yielding requires a valid multimodal prediction; before prediction is valid, only an observed moving target track may trigger cautious approach",
-                "activation_rule": "distance_to_stop <= v^2/(2*abs(decel)) + brake_distance_margin",
+                "activation_rule": "priority yield uses distance_to_stop <= v^2/(2*abs(decel)) + brake_distance_margin; observed-track cautious approach also activates on this braking-distance trigger before MultiPath is valid",
                 "pre_solve_reference_profile": "yield reference uses v_ref <= sqrt(v_ref_min^2 + 2*abs(reference_decel)*remaining_distance_to_stop); final near-stop control is handled by the yield controller, not by an instantaneous near-stop optimisation reference",
                 "solver_bypass": "adaptive profile bypasses deterministic approach/hold and the first low-speed released_recovery handoff frames after the priority target has cleared",
                 "release_clearance_buffer": "released_recovery starts only after the priority target has moved beyond conflict_radius + release_clearance_margin, so rule-order clearance also respects vehicle footprint clearance",
@@ -1556,13 +1556,15 @@ class SMPCAgent(object):
         )
         approaching_stop_line = ego_dist_to_stop <= self.yield_activation_distance
         not_far_past_conflict = ego_dist_to_conflict >= -self.yield_conflict_radius
+        observed_caution_distance_trigger = ego_dist_to_conflict <= self.yield_observed_caution_distance
+        observed_caution_braking_trigger = braking_distance_required
         cautious_candidate = (
             self.yield_observed_caution_enabled
             and not allow_priority_yield
             and source == "observed_track"
             and target_approaching_conflict
             and target_speed_est >= self.yield_observed_caution_min_target_speed
-            and ego_dist_to_conflict <= self.yield_observed_caution_distance
+            and (observed_caution_distance_trigger or observed_caution_braking_trigger)
             and not_far_past_conflict
         )
         active = (
@@ -1585,7 +1587,9 @@ class SMPCAgent(object):
         else:
             phase = "free_drive"
 
-        if active and not allow_priority_yield:
+        if active and not allow_priority_yield and observed_caution_braking_trigger:
+            reason = "observed_target_braking_distance_caution"
+        elif active and not allow_priority_yield:
             reason = "observed_target_cautious_approach"
         elif active and braking_distance_required:
             reason = "braking_distance_yield"
@@ -1620,6 +1624,8 @@ class SMPCAgent(object):
             "prediction_source": source,
             "priority_from_prediction": bool(allow_priority_yield),
             "cautious_candidate": bool(cautious_candidate),
+            "observed_caution_distance_trigger": bool(observed_caution_distance_trigger),
+            "observed_caution_braking_trigger": bool(observed_caution_braking_trigger),
             "min_path_distance": float(geometry["min_path_distance"]),
             "conflict_point": conflict_point.tolist(),
             "target_conflict_point": target_conflict_point.tolist(),
