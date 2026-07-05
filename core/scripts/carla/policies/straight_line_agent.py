@@ -40,8 +40,6 @@ class StraightLineAgent(object):
 
         self.max_accel = 1.5
         self.max_decel = -2.0
-        self.stop_distance = 4.0
-
         self.lf, self.lr = vehicle_name_to_lf_lr(self.vehicle.type_id)
         self._low_level_control = LowLevelControl(vehicle)
         self.goal_reached = False
@@ -61,12 +59,12 @@ class StraightLineAgent(object):
 
         path_rel = xy - self.start_xy
         s = float(np.dot(path_rel, self.path_tangent))
-        if self.goal_s > 0.0 and s >= self.goal_s - self.stop_distance:
+        if self.goal_s > 0.0 and s >= self.goal_s:
             self.goal_reached = True
 
         if self.goal_reached:
-            v_des = 0.0
-            a_des = self.max_decel
+            v_des = self.nominal_speed
+            a_des = float(np.clip(0.8 * (v_des - speed), self.max_decel, self.max_accel))
             df_des = 0.0
         else:
             v_des = self.nominal_speed

@@ -63,7 +63,7 @@ class SMPCAgent(object):
                  yield_hard_stop_target_distance=12.0,
                  yield_hard_stop_conflict_distance=15.5,
                  yield_conflict_radius=4.0,
-                 yield_stop_buffer_distance=10.5,
+                 yield_stop_buffer_distance=5.5,
                  yield_brake_distance_margin=3.5,
                  yield_wait_steer_lookahead_distance=6.0,
                  yield_wait_steer_gain=1.0,
@@ -758,8 +758,9 @@ class SMPCAgent(object):
                 "hard_stop_conflict_distance": self.yield_hard_stop_conflict_distance,
                 "emergency_rule": (
                     "hard-stop yield + target not cleared + braking_distance_required; "
-                    "observed-track yield first rolls at caution/creep speed, then hard-stops only "
-                    "near the conflict boundary or when the target is close enough"
+                    "observed-track yield rolls at caution/creep speed only while there is still "
+                    "enough distance to the stop line, then hard-stops when stop-line braking "
+                    "distance, conflict distance, or target distance requires it"
                 ),
                 "conflict_radius": self.yield_conflict_radius,
                 "stop_buffer_distance": self.yield_stop_buffer_distance,
@@ -1635,6 +1636,7 @@ class SMPCAgent(object):
         observed_caution_braking_trigger = braking_distance_required
         hard_stop_target_close = target_distance_to_conflict <= self.yield_hard_stop_target_distance
         hard_stop_conflict_close = ego_dist_to_conflict <= self.yield_hard_stop_conflict_distance
+        hard_stop_stop_line_braking = braking_distance_required and target_has_priority
         cautious_candidate = (
             self.yield_observed_caution_enabled
             and not allow_priority_yield
@@ -1654,7 +1656,7 @@ class SMPCAgent(object):
         hard_stop_required = (
             active
             and not target_cleared_conflict
-            and (hard_stop_target_close or hard_stop_conflict_close)
+            and (hard_stop_stop_line_braking or hard_stop_target_close or hard_stop_conflict_close)
         )
         if active and not allow_priority_yield:
             phase = "cautious_approach_observed_target"
@@ -1709,6 +1711,7 @@ class SMPCAgent(object):
             "observed_caution_distance_trigger": bool(observed_caution_distance_trigger),
             "observed_caution_braking_trigger": bool(observed_caution_braking_trigger),
             "hard_stop_required": bool(hard_stop_required),
+            "hard_stop_stop_line_braking": bool(hard_stop_stop_line_braking),
             "hard_stop_target_close": bool(hard_stop_target_close),
             "hard_stop_conflict_close": bool(hard_stop_conflict_close),
             "hard_stop_target_distance_threshold": float(self.yield_hard_stop_target_distance),
