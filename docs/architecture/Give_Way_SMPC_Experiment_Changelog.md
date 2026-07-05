@@ -381,3 +381,9 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Do not keep blindly increasing `yield_stop_buffer_distance`; leave it at `7.0m`.
     - Add `yield_footprint_clearance_margin=1.5m` as an explicit footprint-aware clearance margin. Target release clearance now uses `yield_conflict_radius + max(yield_release_clearance_margin, yield_footprint_clearance_margin)`, and emergency safe-stop diagnostics use at least `yield_conflict_radius + yield_footprint_clearance_margin`.
     - New debug fields include `ego_required_clearance`, `ego_inside_footprint_clearance`, and `footprint_clearance_margin`, so the next run can distinguish residual low-level braking overshoot from an overly early target-release decision.
+
+45. Local fix after `20260705_210018_final_dissertation`:
+    - The footprint-aware release diagnostic did its job: both SMPC policies held until the target moved past the `5.5m` release distance, so the remaining collision is not caused by early target release.
+    - Debug shows the ego was already inside the footprint-aware clearance while waiting: `ego_distance_to_conflict≈4.239m`, `ego_required_clearance=5.5m`, `ego_inside_footprint_clearance=True`. The visual interpretation is that the EV gives way but its front footprint is too close to the straight target path.
+    - Local pending fix: increase only `yield_stop_buffer_distance` from `7.0m` to `9.0m`. This repositions the yield stop line upstream by about `2m`, aiming for final stopped `dconf>=5.5m`. It is intentionally below the rejected `10.5m` trial; that older trial also had the wrong target-controller behavior, so it should not block this smaller single-variable stop-line experiment.
+    - Keep unchanged: target `StraightLineAgent`, target offset `1.50m`, `yield_footprint_clearance_margin=1.5m`, emergency decel/jerk, hard-stop trigger logic, and accepted post-turn recovery.

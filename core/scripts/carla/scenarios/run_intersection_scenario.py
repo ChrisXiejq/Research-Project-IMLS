@@ -131,7 +131,7 @@ class VehicleParams:
     yield_hard_stop_target_distance : float = 12.0
     yield_hard_stop_conflict_distance : float = 15.5
     yield_conflict_radius : float = 4.0
-    yield_stop_buffer_distance : float = 7.0
+    yield_stop_buffer_distance : float = 9.0
     yield_footprint_clearance_margin : float = 1.5
     yield_brake_distance_margin : float = 3.5
     yield_wait_steer_lookahead_distance : float = 6.0
