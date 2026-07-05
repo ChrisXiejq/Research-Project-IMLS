@@ -326,3 +326,9 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - To reduce jerk relative to the first emergency-brake trial, emergency braking is softened from `-7.0m/s^2` / `15.0m/s^3` to `yield_emergency_decel=-6.0m/s^2` and `yield_emergency_jerk_limit=8.0m/s^3`.
     - Post-yield recovery is extended and strengthened so the ego accelerates through the turn and lane-entry segment (`yield_recovery_steps=180`, `yield_recovery_speed=5.5m/s`, `yield_recovery_accel=1.8m/s^2`) instead of dropping back to a slow crawl before the lane entry completes.
     - New debug fields: every active-yield step records `hard_stop_required`, `hard_stop_target_close`, `hard_stop_conflict_close`, rolling speed target, and whether control/reference used rolling caution or hard-stop yielding.
+
+36. After `20260705_174648_final_dissertation`, the post-turn/lane-entry fix is accepted but the delayed hard-stop settings fail yield safety:
+    - The extended recovery is now treated as the correct post-turn solution. Lane-entry diagnostics show required SMPC policies enter the lane at about `5.3-5.8m/s`, with `|ey|<0.07m`, `|epsi|<0.01rad`, and `map_lane_id=1`.
+    - The remaining failure is purely the give-way phase. Rolling caution prevents step-1 hard-stop behaviour, but it is too weak: at the last rolling step the ego still travels at about `8.22m/s`; hard-stop yielding begins around `dconf=6.28m`, which is physically too late.
+    - Local pending fix: keep the accepted recovery values unchanged, strengthen the rolling phase (`yield_caution_speed=3.5m/s`, `yield_caution_decel=-4.0m/s^2`), and switch to hard-stop yielding earlier (`yield_hard_stop_target_distance=10.0m`, `yield_hard_stop_conflict_distance=11.0m`).
+    - Emergency braking remains bounded at `yield_emergency_decel=-6.0m/s^2` and `yield_emergency_jerk_limit=8.0m/s^3`; the goal is to regain yield safety without reverting to the visually unacceptable step-1 emergency stop.
