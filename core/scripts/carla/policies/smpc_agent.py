@@ -53,6 +53,10 @@ class SMPCAgent(object):
                  yield_reference_min_speed=0.8,
                  yield_reference_decel=-3.75,
                  yield_stop_decel=-5.0,
+                 yield_emergency_brake_enabled=True,
+                 yield_emergency_decel=-7.0,
+                 yield_emergency_jerk_limit=15.0,
+                 yield_emergency_conflict_margin=1.25,
                  yield_conflict_radius=4.0,
                  yield_stop_buffer_distance=8.0,
                  yield_brake_distance_margin=3.5,
@@ -122,6 +126,10 @@ class SMPCAgent(object):
         self.yield_reference_min_speed = float(yield_reference_min_speed)
         self.yield_reference_decel = float(yield_reference_decel)
         self.yield_stop_decel = float(yield_stop_decel)
+        self.yield_emergency_brake_enabled = bool(yield_emergency_brake_enabled)
+        self.yield_emergency_decel = float(yield_emergency_decel)
+        self.yield_emergency_jerk_limit = float(yield_emergency_jerk_limit)
+        self.yield_emergency_conflict_margin = float(yield_emergency_conflict_margin)
         self.yield_conflict_radius = float(yield_conflict_radius)
         self.yield_stop_buffer_distance = float(yield_stop_buffer_distance)
         self.yield_brake_distance_margin = float(yield_brake_distance_margin)
@@ -187,6 +195,22 @@ class SMPCAgent(object):
             raise ValueError(f"yield_reference_decel must be negative, got {self.yield_reference_decel}")
         if self.yield_stop_decel >= 0.0:
             raise ValueError(f"yield_stop_decel must be negative, got {self.yield_stop_decel}")
+        if self.yield_emergency_decel >= 0.0:
+            raise ValueError(f"yield_emergency_decel must be negative, got {self.yield_emergency_decel}")
+        if abs(self.yield_emergency_decel) < abs(self.yield_stop_decel):
+            raise ValueError(
+                "yield_emergency_decel must be at least as strong as yield_stop_decel, "
+                f"got {self.yield_emergency_decel} vs {self.yield_stop_decel}"
+            )
+        if self.yield_emergency_jerk_limit <= 0.0:
+            raise ValueError(
+                f"yield_emergency_jerk_limit must be positive, got {self.yield_emergency_jerk_limit}"
+            )
+        if self.yield_emergency_conflict_margin < 0.0:
+            raise ValueError(
+                "yield_emergency_conflict_margin must be non-negative, "
+                f"got {self.yield_emergency_conflict_margin}"
+            )
         if abs(self.yield_reference_decel) > abs(self.yield_stop_decel):
             raise ValueError(
                 "yield_reference_decel must be no stronger than yield_stop_decel, "
@@ -358,6 +382,7 @@ class SMPCAgent(object):
         self._yield_stop_active_prev = False
         self._yield_recovery_steps_remaining = 0
         self._rule_yield_phase = "idle"
+        self._yield_last_applied_accel = None
         self._yield_geometry = None
         self._observed_target_tracks = {}
         self.reference_regeneration()
@@ -690,6 +715,14 @@ class SMPCAgent(object):
                 "reference_min_speed": self.yield_reference_min_speed,
                 "reference_decel": self.yield_reference_decel,
                 "decel": self.yield_stop_decel,
+                "emergency_brake_enabled": self.yield_emergency_brake_enabled,
+                "emergency_decel": self.yield_emergency_decel,
+                "emergency_jerk_limit": self.yield_emergency_jerk_limit,
+                "emergency_conflict_margin": self.yield_emergency_conflict_margin,
+                "emergency_rule": (
+                    "active yield + target not cleared + braking_distance_required; "
+                    "never weaker than nominal yield braking, jerk-limited toward emergency_decel"
+                ),
                 "conflict_radius": self.yield_conflict_radius,
                 "stop_buffer_distance": self.yield_stop_buffer_distance,
                 "brake_distance_margin": self.yield_brake_distance_margin,
@@ -1545,6 +1578,10 @@ class SMPCAgent(object):
         brake_distance = (float(speed) ** 2) / (2.0 * max_brake)
         brake_activation_distance = brake_distance + self.yield_brake_distance_margin
         braking_distance_required = ego_dist_to_stop <= brake_activation_distance
+        emergency_conflict_clearance = self.yield_conflict_radius + self.yield_emergency_conflict_margin
+        emergency_safe_stop_s = conflict_s - emergency_conflict_clearance
+        ego_dist_to_emergency_stop = emergency_safe_stop_s - ego_route_s
+        emergency_braking_distance_required = ego_dist_to_emergency_stop <= brake_activation_distance
         overlap_risk = (
             target_has_priority
             and target_enter_time <= ego_ttc_to_conflict + self.yield_ttc_margin
@@ -1648,6 +1685,10 @@ class SMPCAgent(object):
             "brake_activation_distance": brake_activation_distance,
             "brake_distance_margin": self.yield_brake_distance_margin,
             "braking_distance_required": bool(braking_distance_required),
+            "emergency_conflict_clearance": float(emergency_conflict_clearance),
+            "emergency_safe_stop_s": float(emergency_safe_stop_s),
+            "ego_distance_to_emergency_stop": float(ego_dist_to_emergency_stop),
+            "emergency_braking_distance_required": bool(emergency_braking_distance_required),
             "target_distance_to_conflict": target_distance_to_conflict,
             "target_ttc_to_conflict": target_ttc_to_conflict,
             "target_speed_est": target_speed_est,
@@ -1809,10 +1850,33 @@ class SMPCAgent(object):
         if yield_status.get("active"):
             distance_to_stop = max(float(yield_status.get("ego_distance_to_stop", 0.0)), 0.5)
             required_stop_decel = -(float(speed) ** 2) / (2.0 * distance_to_stop)
-            a_des = max(
+            nominal_a_des = max(
                 self.yield_stop_decel,
                 min(float(u0_flat[0]), required_stop_decel),
             )
+            emergency_active = bool(
+                self.yield_emergency_brake_enabled
+                and not bool(yield_status.get("target_cleared_conflict", False))
+                and bool(yield_status.get("braking_distance_required", False))
+                and float(yield_status.get("ego_distance_to_conflict", 0.0)) >= -self.yield_conflict_radius
+            )
+            previous_accel = (
+                float(self._yield_last_applied_accel)
+                if self._yield_last_applied_accel is not None
+                else float(u0_flat[0])
+            )
+            max_accel_drop = self.yield_emergency_jerk_limit * self.dt
+            emergency_unlimited_a_des = self.yield_emergency_decel if emergency_active else nominal_a_des
+            emergency_jerk_limited_a_des = max(
+                self.yield_emergency_decel,
+                previous_accel - max_accel_drop,
+            )
+            if emergency_active:
+                # Never let the jerk limiter make emergency braking weaker than
+                # the nominal yield brake computed above.
+                a_des = min(nominal_a_des, emergency_jerk_limited_a_des)
+            else:
+                a_des = nominal_a_des
             wait_steer_ref = float(yield_status.get("wait_steer_ref", 0.0)) * self.yield_wait_steer_gain
             wait_steer_ref = float(np.clip(wait_steer_ref, self.SMPC.DF_MIN, self.SMPC.DF_MAX))
             damped_steer = self.yield_steer_damping * float(u0_flat[1])
@@ -1820,6 +1884,7 @@ class SMPCAgent(object):
             u0_new = np.array([a_des, df_des], dtype=float)
             v_des_new = min(v_des_float, self.yield_stop_speed)
             self.control_prev = u0_new
+            self._yield_last_applied_accel = float(u0_new[0])
             self._yield_stop_seen = True
             self._yield_stop_active_prev = True
             self._yield_recovery_steps_remaining = 0
@@ -1833,8 +1898,35 @@ class SMPCAgent(object):
                 "df_des": float(u0_new[1]),
                 "v_des": float(v_des_new),
                 "required_stop_decel": float(required_stop_decel),
+                "nominal_a_des": float(nominal_a_des),
                 "wait_steer_ref": float(wait_steer_ref),
                 "damped_steer": float(damped_steer),
+                "emergency_brake": {
+                    "enabled": self.yield_emergency_brake_enabled,
+                    "active": bool(emergency_active),
+                    "reason": (
+                        "target_not_cleared_and_braking_distance_required"
+                        if emergency_active
+                        else "not_required"
+                    ),
+                    "decel_limit": float(self.yield_emergency_decel),
+                    "jerk_limit": float(self.yield_emergency_jerk_limit),
+                    "dt": float(self.dt),
+                    "max_accel_drop_per_step": float(max_accel_drop),
+                    "previous_accel": float(previous_accel),
+                    "unlimited_a_des": float(emergency_unlimited_a_des),
+                    "jerk_limited_a_des": float(emergency_jerk_limited_a_des),
+                    "final_a_des": float(u0_new[0]),
+                    "safe_conflict_clearance": float(
+                        yield_status.get("emergency_conflict_clearance", np.nan)
+                    ),
+                    "ego_distance_to_emergency_stop": float(
+                        yield_status.get("ego_distance_to_emergency_stop", np.nan)
+                    ),
+                    "emergency_braking_distance_required": bool(
+                        yield_status.get("emergency_braking_distance_required", False)
+                    ),
+                },
             }
             yield_status["recovery"] = {
                 "enabled": self.yield_recovery_enabled,
@@ -1889,6 +1981,7 @@ class SMPCAgent(object):
                 self.yield_recovery_speed,
             )
             self.control_prev = u0_new
+            self._yield_last_applied_accel = float(u0_new[0])
             self._yield_recovery_steps_remaining = max(
                 0,
                 self._yield_recovery_steps_remaining - 1,
@@ -1906,6 +1999,7 @@ class SMPCAgent(object):
             u0_new = np.asarray(u0, dtype=float).reshape(-1)
             v_des_new = v_des
             recovery_status["applied"] = None
+            self._yield_last_applied_accel = None
         recovery_status["steps_remaining_after"] = int(self._yield_recovery_steps_remaining)
         self._yield_stop_active_prev = False
         yield_status["recovery"] = recovery_status
