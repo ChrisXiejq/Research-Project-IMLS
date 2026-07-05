@@ -156,6 +156,10 @@ class VehicleParams:
     exit_alignment_distance_after_goal : float = 0.0
     exit_alignment_post_clearance_speed : float = 4.0
     exit_alignment_post_clearance_goal_window : float = 0.0
+    lane_entry_heading_cost_enabled : bool = False
+    lane_entry_heading_cost_goal_window : float = 8.0
+    lane_entry_heading_cost_weight : float = 0.2
+    lane_entry_heading_cost_max_abs_epsi : float = 0.35
 
     # Traffic-rule metadata.  ``traffic_role`` is descriptive.  ``obey_traffic_lights``
     # enables an optional safety override for signalised scenarios; the UK give-way
@@ -275,7 +279,11 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             exit_alignment_path_length=vehicle_params.exit_alignment_path_length,
                             exit_alignment_distance_after_goal=vehicle_params.exit_alignment_distance_after_goal,
                             exit_alignment_post_clearance_speed=vehicle_params.exit_alignment_post_clearance_speed,
-                            exit_alignment_post_clearance_goal_window=vehicle_params.exit_alignment_post_clearance_goal_window)
+                            exit_alignment_post_clearance_goal_window=vehicle_params.exit_alignment_post_clearance_goal_window,
+                            lane_entry_heading_cost_enabled=vehicle_params.lane_entry_heading_cost_enabled,
+                            lane_entry_heading_cost_goal_window=vehicle_params.lane_entry_heading_cost_goal_window,
+                            lane_entry_heading_cost_weight=vehicle_params.lane_entry_heading_cost_weight,
+                            lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -330,7 +338,11 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             exit_alignment_path_length=vehicle_params.exit_alignment_path_length,
                             exit_alignment_distance_after_goal=vehicle_params.exit_alignment_distance_after_goal,
                             exit_alignment_post_clearance_speed=vehicle_params.exit_alignment_post_clearance_speed,
-                            exit_alignment_post_clearance_goal_window=vehicle_params.exit_alignment_post_clearance_goal_window)
+                            exit_alignment_post_clearance_goal_window=vehicle_params.exit_alignment_post_clearance_goal_window,
+                            lane_entry_heading_cost_enabled=vehicle_params.lane_entry_heading_cost_enabled,
+                            lane_entry_heading_cost_goal_window=vehicle_params.lane_entry_heading_cost_goal_window,
+                            lane_entry_heading_cost_weight=vehicle_params.lane_entry_heading_cost_weight,
+                            lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -383,7 +395,11 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             exit_alignment_path_length=vehicle_params.exit_alignment_path_length,
                             exit_alignment_distance_after_goal=vehicle_params.exit_alignment_distance_after_goal,
                             exit_alignment_post_clearance_speed=vehicle_params.exit_alignment_post_clearance_speed,
-                            exit_alignment_post_clearance_goal_window=vehicle_params.exit_alignment_post_clearance_goal_window)
+                            exit_alignment_post_clearance_goal_window=vehicle_params.exit_alignment_post_clearance_goal_window,
+                            lane_entry_heading_cost_enabled=vehicle_params.lane_entry_heading_cost_enabled,
+                            lane_entry_heading_cost_goal_window=vehicle_params.lane_entry_heading_cost_goal_window,
+                            lane_entry_heading_cost_weight=vehicle_params.lane_entry_heading_cost_weight,
+                            lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 

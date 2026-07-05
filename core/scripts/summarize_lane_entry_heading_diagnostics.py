@@ -18,7 +18,7 @@ def summarize_policy(results_dir, policy):
         return f"{policy}: diagnostics file is empty"
 
     completion_rows = [row for row in rows if row.get("trigger") == "completion"]
-    row = completion_rows[-1] if completion_rows else rows[-1]
+    row = completion_rows[0] if completion_rows else rows[-1]
     return (
         f"{policy}: rows={len(rows)} trigger={row.get('trigger')} "
         f"step={row.get('step')} goal_dist={row.get('goal_dist')} "

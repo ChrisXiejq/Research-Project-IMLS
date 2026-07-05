@@ -343,6 +343,7 @@ class SMPC_MMPreds():
         self.current_tight = self.tight
         self.current_target_prob = self.target_prob
         self.current_risk_allocation = None
+        self.current_heading_cost_weights = None
         self.noise_std=NOISE_STD
         self.Q = ca.diag(Q)
         self.R = ca.diag(R)
@@ -384,6 +385,7 @@ class SMPC_MMPreds():
         self.dz_curr=[]
         self.Sigma_tv_sqrt  =  []
         self.Q_tv = []
+        self.heading_cost_weights = []
 
         self.T_tv=[]
         self.c_tv=[]
@@ -484,6 +486,7 @@ class SMPC_MMPreds():
 
             self.z_tv_curr.append(self.opti[i].parameter(2,N_TV))
             self.rot_costs.append([self.opti[i].parameter(4,4) for t in range(self.N)])
+            self.heading_cost_weights.append(self.opti[i].parameter(self.N))
             self.policy.append(self._return_policy_class(i, N_TV, t_bar))
             self._add_constraints_and_cost(i, N_TV, t_bar)
             self.u_ref_val=np.zeros((2,1))
@@ -498,6 +501,7 @@ class SMPC_MMPreds():
             self._update_tv_preds(i, N_TV*[20.0], N_TV*[20.0], N_TV*[20*np.ones((self.N_modes, self.N, 2))], N_TV*[np.stack(self.N_modes*[self.N*[np.identity(2)]])])
             self._update_previous_input(i, 0.0, 0.0)
             self._update_tv_shapes(i, N_TV*[self.N_modes*[self.N*[0.1*np.identity(2)]]])
+            self._update_heading_cost_weights(i, np.zeros(self.N))
             self.opti[i].set_value(self.probs[i], np.ones(self.N_modes**N_TV)/(self.N_modes**N_TV))
             sol=self.solve(i)
 
@@ -724,6 +728,10 @@ class SMPC_MMPreds():
             nom_z_ev=A_block@self.dz_curr[i]+B_block@h[j]
             nom_z_err=nom_z_ev[4:,:]+self.z_lin[i][:,1:].reshape((-1,1))-self.z_ref[i][:,1:].reshape((-1,1))
             nom_z_diff= ca.diff(nom_z_ev.reshape((4,-1)),1,1).reshape((-1,1))
+            heading_cost = 0
+            for t in range(self.N):
+                heading_err_t = nom_z_err[4 * t + 2]
+                heading_cost += self.heading_cost_weights[i][t] * heading_err_t * heading_err_t
 
 
             cost_matrix_z=ca.diagcat(self.Q, *[1**t*self.rot_costs[i][t] for t in range(self.N)])
@@ -747,7 +755,8 @@ class SMPC_MMPreds():
             cost+=RefTrajGenerator._quad_form(nom_z_ev, 10*cost_matrix_z)+\
                   RefTrajGenerator._quad_form(h[j],ca.kron(ca.DM.eye(self.N),ca.diag([0, 0])))+\
                   RefTrajGenerator._quad_form(nom_z_diff,100*cost_matrix_z[4:,4:])+\
-                  RefTrajGenerator._quad_form(nom_diff_u,10*cost_matrix_u)
+                  RefTrajGenerator._quad_form(nom_diff_u,10*cost_matrix_u)+\
+                  heading_cost
                   #+RefTrajGenerator._quad_form(H,ca.kron(ca.MX.eye(self.N),1*ca.MX.eye(2)))
 
             self.opti[i].subject_to( self.opti[i].bounded(self.V_MIN,
@@ -799,6 +808,15 @@ class SMPC_MMPreds():
             "current_tight": getattr(self, "current_tight", None),
             "current_target_prob": getattr(self, "current_target_prob", None),
             "adaptive_risk_allocation": getattr(self, "current_risk_allocation", None),
+            "heading_cost_weights": (
+                None
+                if getattr(self, "current_heading_cost_weights", None) is None
+                else {
+                    "active_count": int(np.count_nonzero(self.current_heading_cost_weights > 0.0)),
+                    "max": float(np.max(self.current_heading_cost_weights)) if self.current_heading_cost_weights.size else 0.0,
+                    "weights": self.current_heading_cost_weights.tolist(),
+                }
+            ),
         }
 
 
@@ -955,6 +973,7 @@ class SMPC_MMPreds():
         self._update_tv_preds(i, *[update_dict[key] for key in ['x_tv0', 'y_tv0']], *[update_dict[key] for key in ['mus', 'sigmas']] )
         self._update_previous_input(i, *[update_dict[key] for key in ['acc_prev', 'df_prev']] )
         self._update_tv_shapes(i, update_dict['tv_shapes'])
+        self._update_heading_cost_weights(i, update_dict.get("heading_cost_weights", np.zeros(self.N)))
         self.u_ref_val=np.hstack((update_dict['a_ref'][0],update_dict['df_ref'][0]))
         self.v_curr=update_dict['dv0']+update_dict['v_ref'][0]
         self.v_next=update_dict['v_ref'][1]
@@ -977,6 +996,13 @@ class SMPC_MMPreds():
         self.current_target_prob = risk_target_prob
         self.current_risk_allocation = update_dict.get("adaptive_risk_allocation")
 
+    def _update_heading_cost_weights(self, i, weights):
+        weights = np.asarray(weights, dtype=float).reshape(-1)
+        if weights.size < self.N:
+            weights = np.pad(weights, (0, self.N - weights.size), mode="constant")
+        weights = np.maximum(weights[:self.N], 0.0)
+        self.current_heading_cost_weights = weights.copy()
+        self.opti[i].set_value(self.heading_cost_weights[i], ca.DM(weights))
 
 
     def _update_ev_initial_condition(self, i, dx0, dy0, dpsi0, dvel0):

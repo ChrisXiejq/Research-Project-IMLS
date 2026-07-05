@@ -88,6 +88,10 @@ class SMPCAgent(object):
                  exit_alignment_distance_after_goal=0.0,
                  exit_alignment_post_clearance_speed=4.0,
                  exit_alignment_post_clearance_goal_window=0.0,
+                 lane_entry_heading_cost_enabled=False,
+                 lane_entry_heading_cost_goal_window=8.0,
+                 lane_entry_heading_cost_weight=0.2,
+                 lane_entry_heading_cost_max_abs_epsi=0.35,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -153,6 +157,10 @@ class SMPCAgent(object):
         self.exit_alignment_distance_after_goal = float(exit_alignment_distance_after_goal)
         self.exit_alignment_post_clearance_speed = float(exit_alignment_post_clearance_speed)
         self.exit_alignment_post_clearance_goal_window = float(exit_alignment_post_clearance_goal_window)
+        self.lane_entry_heading_cost_enabled = bool(lane_entry_heading_cost_enabled)
+        self.lane_entry_heading_cost_goal_window = float(lane_entry_heading_cost_goal_window)
+        self.lane_entry_heading_cost_weight = float(lane_entry_heading_cost_weight)
+        self.lane_entry_heading_cost_max_abs_epsi = float(lane_entry_heading_cost_max_abs_epsi)
         self._route_goal_s = None
         self._lane_entry_heading_diagnostics = []
         self._lane_entry_heading_diag_steps = set()
@@ -291,6 +299,21 @@ class SMPCAgent(object):
             raise ValueError(
                 "exit_alignment_post_clearance_goal_window must be non-negative, "
                 f"got {self.exit_alignment_post_clearance_goal_window}"
+            )
+        if self.lane_entry_heading_cost_goal_window < 0.0:
+            raise ValueError(
+                "lane_entry_heading_cost_goal_window must be non-negative, "
+                f"got {self.lane_entry_heading_cost_goal_window}"
+            )
+        if self.lane_entry_heading_cost_weight < 0.0:
+            raise ValueError(
+                "lane_entry_heading_cost_weight must be non-negative, "
+                f"got {self.lane_entry_heading_cost_weight}"
+            )
+        if self.lane_entry_heading_cost_max_abs_epsi <= 0.0:
+            raise ValueError(
+                "lane_entry_heading_cost_max_abs_epsi must be positive, "
+                f"got {self.lane_entry_heading_cost_max_abs_epsi}"
             )
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
@@ -619,6 +642,14 @@ class SMPCAgent(object):
             "reference_regeneration": {
                 "max_lateral_error": self.reference_regen_max_lateral_error,
             },
+            "lane_entry_heading_cost": {
+                "enabled": self.lane_entry_heading_cost_enabled,
+                "goal_window": self.lane_entry_heading_cost_goal_window,
+                "weight": self.lane_entry_heading_cost_weight,
+                "max_abs_epsi": self.lane_entry_heading_cost_max_abs_epsi,
+                "activation": "target_cleared_conflict and near_original_goal",
+                "applies_to": "SMPC_MMPreds var/fixed risk only; open-loop and yield supervisor unchanged",
+            },
             "completion": {
                 "s_margin": self.completion_s_margin,
                 "goal_dist": self.completion_goal_dist,
@@ -719,7 +750,7 @@ class SMPCAgent(object):
         keys = [
             "dx0", "dy0", "dpsi0", "dv0", "x_tv0", "y_tv0", "x_ref", "y_ref",
             "psi_ref", "v_ref", "a_ref", "df_ref", "x_lin", "y_lin",
-            "psi_lin", "v_lin", "a_lin", "df_lin", "probs",
+            "psi_lin", "v_lin", "a_lin", "df_lin", "heading_cost_weights", "probs",
         ]
         return {key: self._debug_array_summary(update_dict[key])
                 for key in keys if key in update_dict}
@@ -813,6 +844,66 @@ class SMPCAgent(object):
             tail = np.repeat(sliced[-1:], missing, axis=0)
             sliced = np.concatenate((sliced, tail), axis=0)
         return sliced
+
+    def _lane_entry_heading_cost_profile(self, t_ref_new, yield_status, epsi):
+        weights = np.zeros(int(getattr(self.SMPC, "N", self.N)), dtype=float)
+        status = {
+            "enabled": bool(self.lane_entry_heading_cost_enabled),
+            "active": False,
+            "reason": "disabled",
+            "goal_window": float(self.lane_entry_heading_cost_goal_window),
+            "weight": float(self.lane_entry_heading_cost_weight),
+            "max_abs_epsi": float(self.lane_entry_heading_cost_max_abs_epsi),
+            "active_count": 0,
+            "max_weight": 0.0,
+        }
+        if not self.lane_entry_heading_cost_enabled:
+            return weights, status
+        if self.ol_flag or self.obca_flag:
+            status["reason"] = "unsupported_policy"
+            return weights, status
+        if self.lane_entry_heading_cost_weight <= 0.0:
+            status["reason"] = "zero_weight"
+            return weights, status
+        if self.lane_entry_heading_cost_goal_window <= 0.0:
+            status["reason"] = "zero_goal_window"
+            return weights, status
+        if not bool(yield_status.get("target_cleared_conflict", False)):
+            status["reason"] = "target_not_cleared"
+            return weights, status
+        if epsi is None or abs(float(epsi)) > self.lane_entry_heading_cost_max_abs_epsi:
+            status["reason"] = "epsi_outside_bound"
+            status["epsi"] = None if epsi is None else float(epsi)
+            return weights, status
+
+        horizon_states = self._horizon_slice_with_tail_padding(
+            self.feas_ref_states_new,
+            t_ref_new + 1,
+            int(getattr(self.SMPC, "N", self.N)),
+        )
+        ref_xy = np.asarray(horizon_states[:, :2], dtype=float)
+        goal_xy = np.array([self.goal_location.x, -self.goal_location.y], dtype=float)
+        goal_dist = np.linalg.norm(ref_xy - goal_xy.reshape(1, 2), axis=1)
+        active_mask = goal_dist <= self.lane_entry_heading_cost_goal_window
+        if not np.any(active_mask):
+            status["reason"] = "horizon_outside_goal_window"
+            status["min_horizon_goal_dist"] = float(np.min(goal_dist)) if goal_dist.size else None
+            return weights, status
+
+        ramp = 1.0 - np.clip(goal_dist / self.lane_entry_heading_cost_goal_window, 0.0, 1.0)
+        weights[active_mask] = self.lane_entry_heading_cost_weight * ramp[active_mask]
+        active_indices = np.flatnonzero(weights > 0.0)
+        status.update({
+            "active": True,
+            "reason": "target_cleared_near_goal",
+            "epsi": float(epsi),
+            "active_count": int(active_indices.size),
+            "max_weight": float(np.max(weights)) if weights.size else 0.0,
+            "min_horizon_goal_dist": float(np.min(goal_dist)) if goal_dist.size else None,
+            "first_active_index": int(active_indices[0]),
+            "last_active_index": int(active_indices[-1]),
+        })
+        return weights, status
 
 
     def _apply_exit_alignment_path_shaping(self, way_s, way_xy, way_yaw):
@@ -2005,7 +2096,7 @@ class SMPCAgent(object):
             and s_after_route_goal_for_diag >= -8.0
         ):
             diag_triggers.append("s_after_route_goal_ge_minus_8m")
-        if reached_end:
+        if reached_end and not self.goal_reached:
             diag_triggers.append("completion")
         for diag_trigger in diag_triggers:
             self._record_lane_entry_heading_diagnostics(
@@ -2171,6 +2262,13 @@ class SMPCAgent(object):
                          'df_lin': l_inputs[:,1].T,
                          'mus'  : [target_vehicle_gmm_preds[0][k] for k in range(N_TV)],     'sigmas' : [target_vehicle_gmm_preds[1][k] for k in range(N_TV)], 'acc_prev' : self.control_prev[0], 'df_prev' : self.control_prev[1],       'tv_shapes': tv_shape_matrices, 'Rs_ev': Rs_ev }
 
+            heading_cost_weights, heading_cost_status = self._lane_entry_heading_cost_profile(
+                t_ref_new,
+                pre_solve_yield_status,
+                epsi,
+            )
+            update_dict["heading_cost_weights"] = heading_cost_weights
+
             if target_vehicle_mode_probs is not None:
                 probs = np.asarray(target_vehicle_mode_probs[:N_TV], dtype=float)
                 if probs.shape == (N_TV, self.N_modes):
@@ -2233,6 +2331,7 @@ class SMPCAgent(object):
                     "l_inputs": self._debug_array_summary(l_inputs),
                 },
                 "completion": completion_metrics,
+                "lane_entry_heading_cost": heading_cost_status,
                 "prediction": self._debug_prediction_summary(
                     target_vehicle_positions,
                     target_vehicle_gmm_preds,

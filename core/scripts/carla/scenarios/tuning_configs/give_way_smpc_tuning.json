@@ -53,7 +53,11 @@
       "exit_alignment_path_length": 10.0,
       "exit_alignment_distance_after_goal": 0.0,
       "exit_alignment_post_clearance_speed": 4.0,
-      "exit_alignment_post_clearance_goal_window": 0.0
+      "exit_alignment_post_clearance_goal_window": 0.0,
+      "lane_entry_heading_cost_enabled": true,
+      "lane_entry_heading_cost_goal_window": 8.0,
+      "lane_entry_heading_cost_weight": 0.2,
+      "lane_entry_heading_cost_max_abs_epsi": 0.35
     },
     "target": {
       "nominal_speed": 6.0,
@@ -120,6 +124,10 @@
     "exit_alignment_path_length": "Restored to the safe-baseline 10m route-end straight tail after the goal-anchored 12m segment failed completion.",
     "exit_alignment_distance_after_goal": "Disabled for the safe-baseline rollback. Goal-anchored after-goal shaping caused non-completion in 20260704_232914.",
     "exit_alignment_post_clearance_speed": "Reserved post-clearance speed cap. The current anti-early-stop experiment disables the cap window to isolate completion timing from speed effects.",
-    "exit_alignment_post_clearance_goal_window": "Set to 0.0 to disable post-clearance speed capping; the 4.5m/s cap combined with goal-anchored shaping failed completion."
+    "exit_alignment_post_clearance_goal_window": "Set to 0.0 to disable post-clearance speed capping; the 4.5m/s cap combined with goal-anchored shaping failed completion.",
+    "lane_entry_heading_cost_enabled": "Stage B1 post-turn heading fix. Stage A diagnostics showed ref_minus_map_yaw=0.0 at completion, so the reference yaw matches CARLA lane yaw and the residual is ego heading tracking. This enables a bounded heading objective rather than changing route geometry or completion.",
+    "lane_entry_heading_cost_goal_window": "Distance-to-original-goal window where the heading objective may be applied after the priority target has cleared the conflict zone.",
+    "lane_entry_heading_cost_weight": "Small additional MPC heading-error weight. It is intentionally weak because stronger path/termination changes previously caused non-completion or safety regressions.",
+    "lane_entry_heading_cost_max_abs_epsi": "Safety bound for activating the heading objective. If current |epsi| is larger than this value, the additional cost is disabled to avoid aggressive steering recovery."
   }
 }
