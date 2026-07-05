@@ -332,3 +332,9 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - The remaining failure is purely the give-way phase. Rolling caution prevents step-1 hard-stop behaviour, but it is too weak: at the last rolling step the ego still travels at about `8.22m/s`; hard-stop yielding begins around `dconf=6.28m`, which is physically too late.
     - Local pending fix: keep the accepted recovery values unchanged, strengthen the rolling phase (`yield_caution_speed=3.5m/s`, `yield_caution_decel=-4.0m/s^2`), and switch to hard-stop yielding earlier (`yield_hard_stop_target_distance=10.0m`, `yield_hard_stop_conflict_distance=11.0m`).
     - Emergency braking remains bounded at `yield_emergency_decel=-6.0m/s^2` and `yield_emergency_jerk_limit=8.0m/s^3`; the goal is to regain yield safety without reverting to the visually unacceptable step-1 emergency stop.
+
+37. After `20260705_180748_final_dissertation`, the rolling phase and post-turn recovery remain useful, but the hard-stop trigger is still too late:
+    - Required SMPC policies complete with zero solver failures and stable lane entry, but both still enter the conflict zone about `1.25s` before the target clears it.
+    - Debug shows hard-stop yielding begins around `dconf=10.65m` with ego speed still about `8.32m/s`, then the vehicle stops around `dconf=2.16m`, inside the `4.0m` conflict radius.
+    - Local pending fix: do not increase emergency deceleration yet. Instead, keep `yield_caution_speed=3.5m/s`, `yield_caution_decel=-4.0m/s^2`, `yield_emergency_decel=-6.0m/s^2`, and `yield_emergency_jerk_limit=8.0m/s^3`, but move hard-stop thresholds earlier to `yield_hard_stop_target_distance=12.0m` and `yield_hard_stop_conflict_distance=14.0m`.
+    - Expected effect: hard-stop should start near `dconf≈14m`, adding roughly `3m` of braking distance while preserving the rolling-caution phase and the accepted post-turn recovery behaviour.
