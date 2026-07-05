@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Stage B1: bounded lane-entry heading objective.
+# Stage B1.1: stronger bounded lane-entry heading objective plus a small
+# anti-early-stop completion delay.
 # The controller change is enabled through give_way_smpc_tuning.json and only
 # applies after the priority target has cleared the conflict zone near the
 # original goal. This script keeps the same validation/gate surface as Stage A.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CORE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_lane_entry_heading_cost_check}"
+RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_lane_entry_heading_cost_b11_check}"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 ENABLE_CAMERA_VIZ="${ENABLE_CAMERA_VIZ:-1}"
 
@@ -37,4 +38,4 @@ fi
 "${PYTHON_BIN}" "${CORE_DIR}/scripts/postcarla_trajectory_gate.py" "${RESULTS_DIR}"
 "${PYTHON_BIN}" "${CORE_DIR}/scripts/summarize_lane_entry_heading_diagnostics.py" "${RESULTS_DIR}"
 
-echo "Lane-entry heading cost check complete: ${RESULTS_DIR}"
+echo "Lane-entry heading cost B1.1 check complete: ${RESULTS_DIR}"

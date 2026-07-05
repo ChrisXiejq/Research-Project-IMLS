@@ -45,7 +45,7 @@
       "completion_heading_error": 0.18,
       "completion_lane_entry_goal_dist": 1.0,
       "completion_lane_entry_heading_error": 0.30,
-      "completion_lane_entry_min_s_after_route_goal": 0.0,
+      "completion_lane_entry_min_s_after_route_goal": 1.0,
       "completion_exit_alignment_min_s_after_goal": 4.0,
       "post_goal_reference_extension_m": 12.0,
       "route_goal_extension_m": 0.0,
@@ -56,7 +56,7 @@
       "exit_alignment_post_clearance_goal_window": 0.0,
       "lane_entry_heading_cost_enabled": true,
       "lane_entry_heading_cost_goal_window": 8.0,
-      "lane_entry_heading_cost_weight": 0.2,
+      "lane_entry_heading_cost_weight": 0.4,
       "lane_entry_heading_cost_max_abs_epsi": 0.35
     },
     "target": {
@@ -116,7 +116,7 @@
     "completion_heading_error": "Normal heading-alignment completion gate. The ego must have |epsi| <= 0.18rad (about 10.3deg) for route-end or broad goal-distance completion.",
     "completion_lane_entry_goal_dist": "Near-goal lane-entry completion window. If the ego is within 1.0m of the route goal and laterally within the selected lane, completion can use the lane-entry heading threshold before the post-goal extension pulls the vehicle downstream.",
     "completion_lane_entry_heading_error": "Safety-baseline heading tolerance for the near-goal lane-entry completion window. Restored to 0.30rad after the strict 0.18rad/18m exit-alignment trial preserved safety but failed completion and reintroduced tail-end stagnation. The stricter 0.18rad normal heading metric remains logged as a visual-quality diagnostic.",
-    "completion_lane_entry_min_s_after_route_goal": "Small anti-early-stop guard for visual lane entry. The 20260704_151615 safety baseline completed about 0.41m before the original route goal; requiring s_after_route_goal>=0.0 delays lane-entry completion only until the ego reaches the original goal, without forcing the rejected 4m post-goal strict alignment.",
+    "completion_lane_entry_min_s_after_route_goal": "Stage B1.1 anti-early-stop guard for visual lane entry. After Stage B1 completed at s_after_route_goal≈0.59m with epsi still around 0.25-0.27rad, this requires at least 1.0m beyond the original route goal before lane-entry completion. This gives the bounded heading objective a short additional window without forcing the rejected 4m post-goal strict alignment.",
     "completion_exit_alignment_min_s_after_goal": "Diagnostic/secondary completion mode for visual lane entry. The current gentler experiment should normally complete by lane entry; this field is retained for metrics compatibility but is no longer the primary way to force strict post-goal alignment.",
     "post_goal_reference_extension_m": "Adds a short same-lane straight reference after the routed goal point. This prevents route-end reference freezing and low-speed stagnation if the ego reaches the goal area before the strict completion gate fires.",
     "route_goal_extension_m": "Disabled. The 6m route-only downstream extension preserved safety but changed epsi by only about 0.001-0.003rad, so it is not a useful visual fix.",
@@ -127,7 +127,7 @@
     "exit_alignment_post_clearance_goal_window": "Set to 0.0 to disable post-clearance speed capping; the 4.5m/s cap combined with goal-anchored shaping failed completion.",
     "lane_entry_heading_cost_enabled": "Stage B1 post-turn heading fix. Stage A diagnostics showed ref_minus_map_yaw=0.0 at completion, so the reference yaw matches CARLA lane yaw and the residual is ego heading tracking. This enables a bounded heading objective rather than changing route geometry or completion.",
     "lane_entry_heading_cost_goal_window": "Distance-to-original-goal window where the heading objective may be applied after the priority target has cleared the conflict zone.",
-    "lane_entry_heading_cost_weight": "Small additional MPC heading-error weight. It is intentionally weak because stronger path/termination changes previously caused non-completion or safety regressions.",
+    "lane_entry_heading_cost_weight": "Stage B1.1 additional MPC heading-error weight. Increased from 0.2 to 0.4 after Stage B1 was safe and active but did not reliably reduce completion epsi before lane-entry completion triggered.",
     "lane_entry_heading_cost_max_abs_epsi": "Safety bound for activating the heading objective. If current |epsi| is larger than this value, the additional cost is disabled to avoid aggressive steering recovery."
   }
 }
