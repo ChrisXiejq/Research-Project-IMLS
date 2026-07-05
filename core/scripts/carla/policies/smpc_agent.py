@@ -57,15 +57,15 @@ class SMPCAgent(object):
                  yield_reference_decel=-3.75,
                  yield_stop_decel=-5.0,
                  yield_emergency_brake_enabled=True,
-                 yield_emergency_decel=-6.0,
-                 yield_emergency_jerk_limit=8.0,
+                 yield_emergency_decel=-7.0,
+                 yield_emergency_jerk_limit=10.0,
                  yield_emergency_conflict_margin=1.25,
                  yield_hard_stop_target_distance=12.0,
                  yield_hard_stop_conflict_distance=15.5,
                  yield_conflict_radius=4.0,
                  yield_stop_buffer_distance=7.0,
                  yield_footprint_clearance_margin=1.5,
-                 yield_brake_distance_margin=3.5,
+                 yield_brake_distance_margin=4.5,
                  yield_wait_steer_lookahead_distance=6.0,
                  yield_wait_steer_gain=1.0,
                  yield_ttc_margin=0.8,
@@ -77,7 +77,6 @@ class SMPCAgent(object):
                  yield_observed_caution_distance=12.0,
                  yield_observed_caution_min_target_speed=0.5,
                  yield_steer_damping=0.25,
-                 yield_hard_stop_steer_damping=0.0,
                  yield_recovery_enabled=True,
                  yield_recovery_steps=180,
                  yield_recovery_regen_period=2,
@@ -157,7 +156,6 @@ class SMPCAgent(object):
         self.yield_observed_caution_distance = float(yield_observed_caution_distance)
         self.yield_observed_caution_min_target_speed = float(yield_observed_caution_min_target_speed)
         self.yield_steer_damping = float(yield_steer_damping)
-        self.yield_hard_stop_steer_damping = float(yield_hard_stop_steer_damping)
         self.yield_recovery_enabled = bool(yield_recovery_enabled)
         self.yield_recovery_steps = int(yield_recovery_steps)
         self.yield_recovery_regen_period = int(yield_recovery_regen_period)
@@ -271,11 +269,6 @@ class SMPCAgent(object):
             raise ValueError(
                 "yield_release_clearance_margin must be non-negative, "
                 f"got {self.yield_release_clearance_margin}"
-            )
-        if self.yield_hard_stop_steer_damping < 0.0:
-            raise ValueError(
-                "yield_hard_stop_steer_damping must be non-negative, "
-                f"got {self.yield_hard_stop_steer_damping}"
             )
         if self.yield_wait_steer_lookahead_distance < 0.0:
             raise ValueError(
@@ -791,7 +784,6 @@ class SMPCAgent(object):
                 "observed_caution_distance": self.yield_observed_caution_distance,
                 "observed_caution_min_target_speed": self.yield_observed_caution_min_target_speed,
                 "steer_damping": self.yield_steer_damping,
-                "hard_stop_steer_damping": self.yield_hard_stop_steer_damping,
                 "recovery_enabled": self.yield_recovery_enabled,
                 "recovery_steps": self.yield_recovery_steps,
                 "recovery_regen_period": self.yield_recovery_regen_period,
@@ -1982,20 +1974,12 @@ class SMPCAgent(object):
             wait_steer_ref = float(yield_status.get("wait_steer_ref", 0.0)) * self.yield_wait_steer_gain
             wait_steer_ref = float(np.clip(wait_steer_ref, self.SMPC.DF_MIN, self.SMPC.DF_MAX))
             damped_steer = self.yield_steer_damping * float(u0_flat[1])
-            hard_stop_target_not_cleared = bool(
-                hard_stop_required
-                and not bool(yield_status.get("target_cleared_conflict", False))
+            df_des = wait_steer_ref if abs(wait_steer_ref) >= 0.03 else damped_steer
+            steering_mode = (
+                "wait_steer_ref"
+                if abs(wait_steer_ref) >= 0.03
+                else "damped_steer"
             )
-            if hard_stop_target_not_cleared:
-                df_des = self.yield_hard_stop_steer_damping * float(u0_flat[1])
-                steering_mode = "hard_stop_neutral_steer"
-            else:
-                df_des = wait_steer_ref if abs(wait_steer_ref) >= 0.03 else damped_steer
-                steering_mode = (
-                    "wait_steer_ref"
-                    if abs(wait_steer_ref) >= 0.03
-                    else "damped_steer"
-                )
             df_des = float(np.clip(df_des, self.SMPC.DF_MIN, self.SMPC.DF_MAX))
             u0_new = np.array([a_des, df_des], dtype=float)
             if hard_stop_required:
@@ -2038,8 +2022,6 @@ class SMPCAgent(object):
                 "wait_steer_ref": float(wait_steer_ref),
                 "damped_steer": float(damped_steer),
                 "steering_mode": steering_mode,
-                "hard_stop_target_not_cleared": bool(hard_stop_target_not_cleared),
-                "hard_stop_steer_damping": float(self.yield_hard_stop_steer_damping),
                 "emergency_brake": {
                     "enabled": self.yield_emergency_brake_enabled,
                     "active": bool(emergency_active),

@@ -393,3 +393,9 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Restore `yield_stop_buffer_distance=7.0m` and keep `yield_footprint_clearance_margin=1.5m`.
     - New root cause: during hard-stop yield before target clearance, the ego kept route-following left steer around `-0.17`, so the vehicle front rotated toward the straight target path while braking. This explains why the visual behavior looks like yielding but the footprint replay still collides near the front.
     - Add `yield_hard_stop_steer_damping=0.0`. While `hard_stop_required` and `target_cleared_conflict=False`, the yield controller now uses neutral hard-stop steering instead of `wait_steer_ref`; after target clearance it returns to normal wait/recovery steering. Target speed remains `6.0m/s`; increasing TV speed is deferred to a separate ablation because it changes the scenario timing rather than fixing EV waiting pose.
+
+47. Local fix after visual review of `20260705_222018_final_dissertation`:
+    - `20260705_222018` passed the required post-CARLA safety gate, but the solution is rejected visually because neutral hard-stop steering forces the EV to wait too straight before the conflict point. The intended behaviour is continuous left-turn route following while yielding, not a pre-conflict straight-line hold.
+    - Remove the `yield_hard_stop_steer_damping` experiment and restore the original route-following wait steering during hard-stop yield.
+    - Compensate with stronger braking and earlier braking-distance margin instead of steering suppression: `yield_emergency_decel=-6.0 -> -7.0`, `yield_emergency_jerk_limit=8.0 -> 10.0`, and `yield_brake_distance_margin=3.5 -> 4.5`.
+    - Keep unchanged: `yield_stop_buffer_distance=7.0`, `yield_footprint_clearance_margin=1.5`, target speed `6.0m/s`, target straight policy and offset, and accepted post-turn recovery. Target-speed increases remain a later controlled ablation, not part of this baseline repair.
