@@ -1,9 +1,8 @@
 """
-Export lane polygons from the *currently loaded* CARLA map for offline top-down video.
+Export lane polygons from the *currently loaded* CARLA map for rollout debugging.
 
 Writes ``map_viz_snapshot.json`` next to ``scenario_result.pkl`` (same coordinate frame
-as logged trajectories: CARLA world X/Y, yaw unchanged). Offline ``render_rollout_video.py``
-consumes this file when present.
+as logged trajectories: CARLA world X/Y, yaw unchanged).
 """
 from __future__ import annotations
 

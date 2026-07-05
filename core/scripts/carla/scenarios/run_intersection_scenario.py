@@ -19,7 +19,6 @@ from policies.static_agent import StaticAgent
 from policies.smpc_agent import SMPCAgent
 from policies.mpc_agent import MPCAgent
 from policies.bl_smpc_agent import BLSMPCAgent
-from policies.ipopt_smpc_agent import IPOPTSMPCAgent
 
 from rasterizer.agent_history import AgentHistory
 from rasterizer.sem_box_rasterizer import SemBoxRasterizer
@@ -110,7 +109,7 @@ class VehicleParams:
 
     # SMPC specific parameters (ignored for any other policy_type).
     smpc_config : str = "full" # "var_risk", "open_loop", "fixed_risk"
-    solver_backend : str = "gurobi" # "gurobi" or "ipopt_approx"
+    solver_backend : str = "gurobi"
     risk_profile : str = "upstream_code" # "upstream_code", "paper_eps_002", "adaptive_interaction_severity", or "rule_aware_static_risk"
     collision_d_min : float = 0.5
     collision_ellipse_half_length : float = 3.8
@@ -141,17 +140,17 @@ class VehicleParams:
     yield_recovery_max_lateral_error : float = 12.0
     yield_recovery_speed : float = 4.0
     yield_recovery_accel : float = 1.2
-    completion_s_margin : float = 2.0
-    completion_goal_dist : float = 4.0
-    completion_lateral_error : float = 1.5
-    completion_heading_error : float = 0.10
+    completion_s_margin : float = 6.0
+    completion_goal_dist : float = 8.0
+    completion_lateral_error : float = 4.0
+    completion_heading_error : float = 0.18
     completion_lane_entry_goal_dist : float = 1.0
     completion_lane_entry_heading_error : float = 0.30
     completion_lane_entry_min_s_after_route_goal : float = 0.0
     completion_exit_alignment_min_s_after_goal : float = 4.0
-    post_goal_reference_extension_m : float = 12.0
+    post_goal_reference_extension_m : float = 0.0
     route_goal_extension_m : float = 0.0
-    exit_alignment_path_enabled : bool = True
+    exit_alignment_path_enabled : bool = False
     exit_alignment_path_length : float = 10.0
     exit_alignment_distance_after_goal : float = 0.0
     exit_alignment_post_clearance_speed : float = 4.0
@@ -215,14 +214,6 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                         N_modes=vehicle_params.num_modes,
                         nominal_speed_mps=vehicle_params.nominal_speed)
     elif vehicle_params.policy_type == "smpc":
-        if vehicle_params.solver_backend == "ipopt_approx":
-            return IPOPTSMPCAgent(vehicle_actor, goal_transform.location,
-                                  N=vehicle_params.N,
-                                  dt=vehicle_params.dt,
-                                  N_modes=vehicle_params.num_modes,
-                                  nominal_speed_mps=vehicle_params.nominal_speed,
-                                  approx_config=vehicle_params.smpc_config)
-
         if vehicle_params.solver_backend != "gurobi":
             raise ValueError(f"Unsupported solver backend: {vehicle_params.solver_backend}")
 

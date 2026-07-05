@@ -40,11 +40,7 @@
 		"overlay_traj_hist"    : false
 	},
 	"ego_init_jsons" : [
-		"ego_init_01.json",
-		"ego_init_02.json",
-		"ego_init_03.json",
-		"ego_init_04.json",
-		"ego_init_05.json"
+                "ego_init_01.json"
 	],
 	"viz_topdown" : {
 		"road_half_width_m" : 3.7,

@@ -507,7 +507,7 @@ def make_trajectory_viz_plot(results_dir, color1="r", color2="b", plot_init=1, p
 
 
 def make_trajectory_map_plot(results_dir,
-                             plot_scenario="scenario_01",
+                             plot_scenario="scenario_uk_give_way",
                              plot_init=1,
                              plot_policies=None,
                              tv_source_policy="smpc_var_risk",
@@ -598,7 +598,7 @@ def _load_policy_data(matched, policy):
 
 
 def make_paper_timeseries_plot(results_dir,
-                               plot_scenario="scenario_01",
+                               plot_scenario="scenario_uk_give_way",
                                plot_init=1,
                                proposed_policy="smpc_var_risk",
                                baseline_policy="smpc_open_loop",
@@ -752,7 +752,7 @@ if __name__ == '__main__':
     parser.add_argument("--make_traj_map", action="store_true", help="Save paper-style XY trajectory map.")
     parser.add_argument("--make_paper_panel", action="store_true",
                         help="Save 5-panel paper-style curves (ey/epsi/v/steer/a).")
-    parser.add_argument("--plot_scenario", default="scenario_01", help="Scenario name, e.g. scenario_01.")
+    parser.add_argument("--plot_scenario", default="scenario_uk_give_way", help="Scenario name, e.g. scenario_uk_give_way.")
     parser.add_argument("--plot_init", type=int, default=1, help="Init index, e.g. 1 for ego_init_01.")
     parser.add_argument("--plot_policies", nargs="+",
                         default=["smpc_var_risk", "smpc_open_loop", "smpc_fixed_risk", "notv", "notv_cl"],

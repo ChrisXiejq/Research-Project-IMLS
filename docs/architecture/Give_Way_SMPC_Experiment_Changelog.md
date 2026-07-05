@@ -51,6 +51,38 @@ Decision:
 - Use `run_give_way_final_dissertation_batch.sh` as the restart entry point.
 - Do not use the lane-entry heading branch scripts or parameters.
 - Treat `20260628_103325_final_dissertation` as the active baseline for the next full experiment expansion.
+- Scope is intersection-only: do not expand this dissertation reproduction into the original paper's lane-change or hardware / vehicle-in-the-loop experiments unless the research scope explicitly changes.
+- Keep the successful mainline risk profile as `adaptive_interaction_severity`; do not introduce a separate fixed-`epsilon=0.02` branch for the baseline/full experiment path.
+
+Follow-up after server run `20260705_152245_final_dissertation`:
+
+- Server result failed only because required SMPC policies did not write valid completion; both policies still had `solver_failure_frac=0.000`, no footprint collision, and yield order OK.
+- Root cause: server code still used visual-heading branch defaults even though the tuning config had been restored:
+  - `completion_goal_dist=4.0`
+  - `completion_lateral_error=1.5`
+  - `completion_heading_error=0.10`
+  - `completion_s_margin=2.0`
+  - `post_goal_reference_extension_m=12.0`
+  - `exit_alignment_path_enabled=True`
+- These defaults differ from the validated 20260628 completion behaviour and forced the ego to chase the post-goal route tail until 600 steps.
+- Local fix:
+  - `completion_goal_dist=8.0`
+  - `completion_lateral_error=4.0`
+  - `completion_heading_error=0.18`
+  - `completion_s_margin=6.0`
+  - `post_goal_reference_extension_m=0.0`
+  - `exit_alignment_path_enabled=False`
+- Recomputing the latest failed trajectory with the restored defaults shows expected valid completion:
+  - `smpc_var_risk`: would complete at step 277, `goal_dist=7.926m`, `ey=-3.134m`, `epsi=0.002rad`.
+  - `smpc_fixed_risk`: would complete at step 256, `goal_dist=7.881m`, `ey=-3.104m`, `epsi=0.005rad`.
+- Decision: sync the corrected code defaults before rerunning the single-init baseline. Do not proceed to 50-init full experiments until this single-init rerun passes.
+
+Follow-up for 50-init feasibility:
+
+- Changed `core/scripts/carla/scenarios/inits/ego_init_01.json` from the tuned speed `6.0m/s` back to the original paper initial speed `9.364703726496288m/s`.
+- The current single-init file now exactly matches `core/scripts/carla/scenarios/inits/paper_intersection_50/ego_init_01.json`.
+- Purpose: validate the baseline under one original paper initial condition before running the full 50-init batch.
+- Risk: this is a harder case than `20260628_103325_final_dissertation`, because the ego starts with substantially higher speed and may need earlier/more aggressive give-way braking.
 
 ## Change History
 

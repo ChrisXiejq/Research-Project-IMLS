@@ -5,13 +5,10 @@
 
 ## 目录说明
 
-- `core/`：主实验代码（基于 `SMPC_MMPreds`，含 SMPC 三策略、CARLA 场景、预训练 MultiPath 资产）
-- `extensions/`：来自 `confidence_aware_predictions` 的扩展模块（用于后续校准/预测侧增强）
-- `docs/guides/AutoDL_现代稳定版复现手册.md`：现代稳定版复现（推荐，含 intersection 三层检查）
-- `docs/paper/论文与SMPC_Intersection复现梳理.md`：**论文方法 · SMPC 流程 · 迁移与 intersection 范围**（概念与流程总览）
+- `core/`：主实验代码（基于 `SMPC_MMPreds`，含 SMPC 三策略、CARLA give-way intersection 场景、预训练 MultiPath 资产）
+- `archive/extensions_confidence_reference/`：已归档的 `confidence_aware_predictions` 参考代码；当前主线实验不依赖
+- `docs/paper/Predictive_Control_for_Autonomous_Driving_With_Uncertain_Multimodal_Predictions.pdf`：原论文 PDF
 - `docs/architecture/`：流程图与代码架构映射
-- `docs/milestones/`：实验里程碑与进展记录
-- `tools/assemble_from_sources.py`：从源仓重组当前工作区的脚本
 
 ## 复现实验步骤（基础版，完整可跑）
 
@@ -20,20 +17,18 @@
    - `cd $CARLA_ROOT && ./CarlaUE4.sh -RenderOffScreen -quality-level=Low`
 3. 运行三策略批量实验（客户端终端）：
    - `cd core/scripts/carla`
-  - `python run_all_scenarios.py --scenario_glob "scenario_01.json" --init_glob "ego_init_*.json" --policies smpc_var_risk smpc_open_loop smpc_fixed_risk --solver_backend gurobi --risk_profile upstream_code --with_notv --with_notv_cl`
+   - `./run_give_way_final_dissertation_batch.sh`
 4. 汇总结果：
-   - `cd core`
-   - `python scripts/compute_scenario_results.py`
+   - 主线脚本会自动运行 `core/scripts/postcarla_trajectory_gate.py`
 
 ## 与论文对齐建议
 
-- 先跑 `scenario_0*.json`（intersection）对齐论文核心对比（Proposed/Fixed/Open-loop）。
-- 再跑 `scenario_lk*.json`（lane-change 相关）。
-- 保持论文参数：`N=10`、`dt=0.2`；主复刻用 `--risk_profile upstream_code` 对齐原仓数值，严格 `epsilon=0.02` 用 `--risk_profile paper_eps_002` 单独作为消融/压力测试。
+- 本 dissertation 复现范围只保留 CARLA intersection give-way 场景，不复现 lane-change 或 hardware/VIL。
+- 当前单 init 入口是 `core/scripts/carla/scenarios/inits/ego_init_01.json`。
+- 50-init 全量入口是 `core/scripts/carla/scenarios/inits/paper_intersection_50/ego_init_*.json`，通过 `core/scripts/carla/run_give_way_50init_final_dissertation_batch.sh` 运行。
+- 当前主线使用 `adaptive_interaction_severity` risk profile；严格 `epsilon=0.02` 只作为可选压力测试/消融口径，不混入主线 baseline。
 
 ## 重要说明
 
 - 当前 `core/` 已包含运行实验所需的 MultiPath 部署模型与 anchors。
-- 现代化一键入口：`bash run_modern_reproduction.sh`
-- 若你更新了源仓，执行以下命令重组：
-  - `python tools/assemble_from_sources.py`
+- 不再保留 `tools/assemble_from_sources.py`，避免误运行后覆盖当前已修正的 `core/` 和 `docs/`。

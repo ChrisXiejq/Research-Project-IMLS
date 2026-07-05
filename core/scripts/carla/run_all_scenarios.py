@@ -5,7 +5,6 @@ import json
 import argparse
 import time
 import traceback
-import importlib.util
 import subprocess
 from datetime import datetime
 
@@ -27,10 +26,8 @@ def _prepare_drone_viz_params(scenario_dict, enable_camera_viz=True):
     return drone_viz_dict
 
 
-def _policy_output_name(policy_name, solver_backend):
-    if solver_backend == "gurobi":
-        return policy_name
-    return f"{policy_name}_{solver_backend}"
+def _policy_output_name(policy_name):
+    return policy_name
 
 
 def _write_fine_tune_config_snapshot(savedir: str, scenario_dict: dict) -> None:
@@ -79,40 +76,6 @@ def _prepare_prediction_params(scenario_dict):
     return pred_dict
 
 
-def _maybe_render_topdown_mp4(savedir, scenario_dict, log, args):
-    """Offline top-down MP4 from ``scenario_result.pkl`` (no CARLA)."""
-    if not getattr(args, "render_topdown_mp4", False):
-        return
-    pkl = os.path.join(savedir, "scenario_result.pkl")
-    if not os.path.isfile(pkl):
-        log.warning("Skip top-down render: missing %s", pkl)
-        return
-    csv_rel = scenario_dict.get("carla_params", {}).get("intersection_csv_loc")
-    carla_dir = os.path.dirname(os.path.abspath(__file__))
-    scenarios_dir = os.path.join(carla_dir, "scenarios")
-    csv_path = os.path.join(scenarios_dir, csv_rel) if csv_rel else None
-    if csv_path and not os.path.isfile(csv_path):
-        log.warning("Intersection CSV not found (%s); video will omit road polylines.", csv_path)
-        csv_path = None
-    outv = os.path.join(savedir, "rollout_topdown.mp4")
-    mod_path = os.path.join(os.path.dirname(carla_dir), "render_rollout_video.py")
-    try:
-        spec = importlib.util.spec_from_file_location("render_rollout_video", mod_path)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        mod.render_topdown_mp4(
-            pkl,
-            csv_path,
-            outv,
-            fps=float(args.render_topdown_fps),
-            width=int(args.render_topdown_width),
-            height=int(args.render_topdown_height),
-        )
-        log.info("Wrote top-down rollout video: %s", outv)
-    except Exception:
-        log.warning("Top-down video render failed; see traceback.", exc_info=True)
-
-
 def _infer_plot_init(init_glob):
     matches = glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/inits/", init_glob))
     if not matches:
@@ -127,7 +90,7 @@ def _infer_plot_init(init_glob):
 def _infer_plot_scenario(scenario_glob):
     matches = glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/", scenario_glob))
     if not matches:
-        return "scenario_01"
+        return "scenario_uk_give_way"
     return os.path.basename(sorted(matches)[0]).replace(".json", "")
 
 
@@ -180,10 +143,9 @@ def _run_postprocess(results_folder, args, log):
 
 
 def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, enable_camera_viz=True):
-    if scene =="intersection":
-        from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
-    else:
-        from scenarios.run_lk_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunLKScenario
+    if scene != "intersection":
+        raise ValueError(f"Unsupported scene type after cleanup: {scene}")
+    from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
 
 
     carla_params     = CarlaParams(**scenario_dict["carla_params"])
@@ -210,28 +172,19 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
 
             raise ValueError(f"Invalid vehicle role: {vp_dict['role']}")
 
-    if scene =="intersection":
-        runner = RunIntersectionScenario(carla_params,
-                                        drone_viz_params,
-                                        vehicles_params_list,
-                                        pred_params,
-                                        savedir)
-    else:
-        runner = RunLKScenario(carla_params,
-                                        drone_viz_params,
-                                        vehicles_params_list,
-                                        pred_params,
-                                        savedir)
+    runner = RunIntersectionScenario(carla_params,
+                                    drone_viz_params,
+                                    vehicles_params_list,
+                                    pred_params,
+                                    savedir)
     
     return runner.run_scenario()
 
 def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
-                 enable_camera_viz=True, solver_backend="gurobi",
-                 risk_profile="upstream_code"):
-    if scene =="intersection":
-        from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
-    else:
-        from scenarios.run_lk_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunLKScenario
+                 enable_camera_viz=True, risk_profile="upstream_code"):
+    if scene != "intersection":
+        raise ValueError(f"Unsupported scene type after cleanup: {scene}")
+    from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
     
     
     carla_params     = CarlaParams(**scenario_dict["carla_params"])
@@ -265,33 +218,25 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
             vp_dict.update(ego_init_dict)
             vp_dict["policy_type"] = policy_type
             vp_dict["smpc_config"] = policy_config
-            vp_dict["solver_backend"] = solver_backend
             vp_dict["risk_profile"] = risk_profile
             vehicles_params_list.append( VehicleParams(**vp_dict) )
         else:
 
             raise ValueError(f"Invalid vehicle role: {vp_dict['role']}")
 
-    if scene == "intersection":
-        runner = RunIntersectionScenario(carla_params,
-                                        drone_viz_params,
-                                        vehicles_params_list,
-                                        pred_params,
-                                        savedir)
-    else:
-        runner = RunLKScenario(carla_params,
-                                     drone_viz_params,
-                                     vehicles_params_list,
-                                     pred_params,
-                                     savedir)
+    runner = RunIntersectionScenario(carla_params,
+                                    drone_viz_params,
+                                    vehicles_params_list,
+                                    pred_params,
+                                    savedir)
     return runner.run_scenario()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run SMPC experiments in CARLA.")
-    parser.add_argument("--scenario_glob", default="scenario_01.json",
-                        help="Glob pattern under scenarios/. Default is the paper's intersection scenario; use scenario_0*.json for all local variants.")
-    parser.add_argument("--init_glob", default="ego_init_*.json",
-                        help="Glob pattern under scenarios/inits/. Example: ego_init_0*.json")
+    parser.add_argument("--scenario_glob", default="scenario_uk_give_way.json",
+                        help="Glob pattern under scenarios/. Default is the dissertation give-way intersection scenario.")
+    parser.add_argument("--init_glob", default="ego_init_01.json",
+                        help="Glob pattern under scenarios/inits/. Use paper_intersection_50/ego_init_*.json for the full 50-init batch.")
     parser.add_argument("--results_dir", default=None,
                         help="Optional absolute/relative output directory. Default: <core>/results")
     parser.add_argument("--policies", nargs="+",
@@ -306,16 +251,6 @@ if __name__ == '__main__':
     parser.add_argument("--disable_camera_viz", dest="enable_camera_viz", action="store_false",
                         help="Disable CARLA RGB camera sensor and carla_sim.avi generation for faster/headless runs.")
     parser.set_defaults(enable_camera_viz=True)
-    parser.add_argument(
-        "--render_topdown_mp4",
-        action="store_true",
-        help="After each successful subrun, write rollout_topdown.mp4 from scenario_result.pkl (OpenCV; no extra CARLA load).",
-    )
-    parser.add_argument("--render_topdown_fps", type=float, default=15.0, help="FPS for offline top-down MP4.")
-    parser.add_argument("--render_topdown_width", type=int, default=1280, help="Width in pixels for offline top-down MP4.")
-    parser.add_argument("--render_topdown_height", type=int, default=720, help="Height in pixels for offline top-down MP4.")
-    parser.add_argument("--solver_backend", choices=["gurobi", "ipopt_approx"], default="gurobi",
-                        help="Solver backend for SMPC policies. Use ipopt_approx when Gurobi is unavailable.")
     parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002", "adaptive_interaction_severity", "rule_aware_static_risk"], default="upstream_code",
                         help="Gurobi SMPC risk profile: upstream_code matches SMPC_MMPreds numerical settings; paper_eps_002 uses epsilon=0.02; adaptive_interaction_severity updates risk from rule-aware interaction severity; rule_aware_static_risk keeps rule-aware bypass but uses static upstream risk for ablation.")
     parser.add_argument(
@@ -368,17 +303,13 @@ if __name__ == '__main__':
             "scenario_glob": args.scenario_glob,
             "init_glob": args.init_glob,
             "policies": list(args.policies),
-            "solver_backend": args.solver_backend,
+            "solver_backend": "gurobi",
             "risk_profile": args.risk_profile,
             "tuning_config": args.tuning_config,
             "no_tuning_config": args.no_tuning_config,
             "with_notv": args.with_notv,
             "with_notv_cl": args.with_notv_cl,
             "enable_camera_viz": args.enable_camera_viz,
-            "render_topdown_mp4": args.render_topdown_mp4,
-            "render_topdown_fps": args.render_topdown_fps,
-            "render_topdown_width": args.render_topdown_width,
-            "render_topdown_height": args.render_topdown_height,
             "skip_postprocess": args.skip_postprocess,
             "postprocess_no_plots": args.postprocess_no_plots,
             "postprocess_plot_scenario": args.postprocess_plot_scenario,
@@ -414,10 +345,7 @@ if __name__ == '__main__':
             scenario_name,
             tuning_metadata.get("source_path") if tuning_metadata.get("applied") else "none",
         )
-        if "lk" in scenario_name:
-            scene = "highway"
-        else:
-            scene = "intersection"
+        scene = "intersection"
         inits_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/inits/")
         ego_init_list = sorted(glob.glob(os.path.join(inits_folder, args.init_glob)))
         if not ego_init_list:
@@ -474,7 +402,6 @@ if __name__ == '__main__':
                     )
                     if ok and scenario_ok:
                         _write_scenario_rollout_config(savedir, scenario_dict)
-                        _maybe_render_topdown_mp4(savedir, scenario_dict, log, args)
 
             if args.with_notv_cl:
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_notv_cl")
@@ -520,12 +447,11 @@ if __name__ == '__main__':
                     )
                     if ok and scenario_ok:
                         _write_scenario_rollout_config(savedir, scenario_dict)
-                        _maybe_render_topdown_mp4(savedir, scenario_dict, log, args)
 
             for ego_policy_config in args.policies:
-                output_policy_name = _policy_output_name(ego_policy_config, args.solver_backend)
+                output_policy_name = _policy_output_name(ego_policy_config)
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_{output_policy_name}")
-                print(f"Running {scenario_name} {ego_init_name} {ego_policy_config} ({args.solver_backend})")
+                print(f"Running {scenario_name} {ego_init_name} {ego_policy_config}")
                 label = f"{scenario_name}_{ego_init_name}_{ego_policy_config}"
                 t0 = time.perf_counter()
                 err = None
@@ -540,12 +466,11 @@ if __name__ == '__main__':
                             "label": label,
                             "savedir": savedir,
                             "policy": ego_policy_config,
-                            "solver_backend": args.solver_backend,
+                            "solver_backend": "gurobi",
                         },
                     )
                     scenario_ok = run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
                                                enable_camera_viz=args.enable_camera_viz,
-                                               solver_backend=args.solver_backend,
                                                risk_profile=args.risk_profile)
                     ok = bool(scenario_ok)
                 except Exception:
@@ -577,7 +502,6 @@ if __name__ == '__main__':
                     )
                     if ok and scenario_ok:
                         _write_scenario_rollout_config(savedir, scenario_dict)
-                        _maybe_render_topdown_mp4(savedir, scenario_dict, log, args)
 
     exp_log.append_jsonl(
         results_folder,

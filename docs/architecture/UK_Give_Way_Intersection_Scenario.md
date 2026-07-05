@@ -4,6 +4,48 @@ This note explains the current intersection scenario and the revised give-way sc
 
 For tuning history and measured effects, see `docs/architecture/Give_Way_SMPC_Experiment_Changelog.md`. Before changing yield/recovery parameters, consult that changelog to avoid repeating rejected configurations and to choose the next direction from prior evidence.
 
+## 0. Experiment Scope
+
+This dissertation experiment only targets the CARLA intersection reproduction of the original paper. It does **not** attempt to reproduce the paper's lane-change experiment or the hardware / vehicle-in-the-loop experiment.
+
+The current priority is to establish a stable, usable intersection baseline before expanding to full-scale intersection statistics. The active baseline is:
+
+```text
+core/results/20260628_103325_final_dissertation
+```
+
+Full-scale expansion should therefore mean more intersection initial conditions / seeds / ablations under this scenario family, not a switch to lane-change or hardware experiments.
+
+The active dissertation baseline uses:
+
+```text
+adaptive_interaction_severity
+```
+
+This is not a strict fixed-`epsilon=0.02` reproduction profile. It starts from the upstream SMPC numerical setting (`TIGHTENING=1.64`, about `epsilon=0.0505`), increases tightening toward the paper-style `epsilon=0.02` level when interaction severity is high, and relaxes after the priority target clears the conflict zone. This adaptive risk budget is part of the dissertation extension rather than a mismatch to hide.
+
+The original paper repository's 50 intersection initial conditions have been migrated to:
+
+```text
+core/scripts/carla/scenarios/inits/paper_intersection_50/
+```
+
+They are intentionally stored separately from the tuned single-case `ego_init_01.json`, because the paper initial set uses higher ego speeds (`8.03-9.85m/s`) than the validated give-way baseline (`6.0m/s`). Run a pilot subset before launching the full 50-initial batch.
+
+The active single-init file has now been moved to the first original paper initial condition:
+
+```text
+core/scripts/carla/scenarios/inits/ego_init_01.json
+```
+
+It exactly matches:
+
+```text
+core/scripts/carla/scenarios/inits/paper_intersection_50/ego_init_01.json
+```
+
+with `init_speed=9.364703726496288m/s`. This makes the next single-init run a feasibility test for the 50-init expansion, not a repeat of the lower-speed `6.0m/s` tuned baseline.
+
 ## 1. Is the Current Scenario Signalised?
 
 The give-way experiment should be treated as **unsignalised** from the controller's perspective.
@@ -172,14 +214,6 @@ python3 -m venv .venv-precarla
 .venv-precarla/bin/python core/scripts/precarla_validate_uk_give_way.py
 ```
 
-For a more complete local pre-CARLA scenario gate before using CARLA, run:
-
-```bash
-.venv-precarla/bin/python core/scripts/precarla_comprehensive_eval.py
-```
-
-This writes detailed JSON and Markdown reports to `core/results/precarla_comprehensive_eval/`. The comprehensive evaluation checks the base scenario, Gymnasium API compliance, nominal conflict timing, speed perturbations, safety-gap sensitivity, and whether the SMPC collision envelope covers the conservative CARLA-like vehicle footprint. This gate only proves that the scenario has a reasonable give-way solution; it does **not** prove that the closed-loop SMPC controller will find or execute that solution.
-
 The Python/Gymnasium gate is footprint-aware. It uses conservative CARLA-like rectangles for the moving vehicle body, inflates them with a small safety margin, and then checks for oriented-rectangle overlap. This matters because two vehicle centres can be several metres apart while their bodies still overlap visually in CARLA.
 
 The same script can still be run without the virtual environment by adding `--skip_gym_check`; that mode uses only the Python standard library:
@@ -211,13 +245,12 @@ python run_all_scenarios.py \
   --scenario_glob "scenario_uk_give_way.json" \
   --init_glob "ego_init_01.json" \
   --policies smpc_var_risk smpc_fixed_risk smpc_open_loop \
-  --solver_backend gurobi \
   --risk_profile upstream_code \
   --with_notv \
   --with_notv_cl
 ```
 
-This writes the original CARLA drone-view `carla_sim.avi` because `scenario_uk_give_way.json` has `drone_viz_params.save_avi=true`, and the batch runner now preserves that setting by default. Use `--disable_camera_viz` only for a faster headless run without AVI output. Avoid `--render_topdown_mp4` when the dissertation figure/video should use the original CARLA bird-eye style.
+This writes the original CARLA drone-view `carla_sim.avi` because `scenario_uk_give_way.json` has `drone_viz_params.save_avi=true`, and the batch runner now preserves that setting by default. Use `--disable_camera_viz` only for a faster headless run without AVI output.
 
 For a small pilot:
 
@@ -228,7 +261,6 @@ python run_all_scenarios.py \
   --scenario_glob "scenario_uk_give_way.json" \
   --init_glob "ego_init_0[1-5].json" \
   --policies smpc_var_risk smpc_fixed_risk smpc_open_loop \
-  --solver_backend gurobi \
   --risk_profile upstream_code \
   --with_notv \
   --with_notv_cl

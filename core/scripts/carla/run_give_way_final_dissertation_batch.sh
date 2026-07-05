@@ -17,7 +17,6 @@ cd "${SCRIPT_DIR}"
   --init_glob "ego_init_01.json" \
   --results_dir "${RESULTS_DIR}" \
   --policies smpc_var_risk smpc_fixed_risk smpc_open_loop \
-  --solver_backend gurobi \
   --risk_profile adaptive_interaction_severity \
   --with_notv \
   --with_notv_cl \
