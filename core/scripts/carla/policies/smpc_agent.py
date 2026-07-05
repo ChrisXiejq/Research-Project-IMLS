@@ -765,9 +765,9 @@ class SMPCAgent(object):
                 "hard_stop_conflict_distance": self.yield_hard_stop_conflict_distance,
                 "emergency_rule": (
                     "hard-stop yield + target not cleared + braking_distance_required; "
-                    "observed-track yield rolls at caution/creep speed only while there is still "
-                    "enough distance to the stop line, then hard-stops when stop-line braking "
-                    "distance, conflict distance, or target distance requires it"
+                    "observed-track yield rolls at caution/creep speed until target priority is "
+                    "confirmed by prediction, unless target-distance or conflict-distance hard-stop "
+                    "thresholds are reached"
                 ),
                 "conflict_radius": self.yield_conflict_radius,
                 "stop_buffer_distance": self.yield_stop_buffer_distance,
@@ -1624,6 +1624,7 @@ class SMPCAgent(object):
             target_enter_time = float(target_enter_idx) * self.dt
             target_exit_time = float(target_exit_idx) * self.dt
             target_has_priority = target_approaching_conflict
+        priority_confirmed = bool(target_has_priority and allow_priority_yield)
 
         max_brake = max(abs(self.yield_stop_decel), 1e-3)
         brake_distance = (float(speed) ** 2) / (2.0 * max_brake)
@@ -1652,7 +1653,7 @@ class SMPCAgent(object):
         observed_caution_braking_trigger = braking_distance_required
         hard_stop_target_close = target_distance_to_conflict <= self.yield_hard_stop_target_distance
         hard_stop_conflict_close = ego_dist_to_conflict <= self.yield_hard_stop_conflict_distance
-        hard_stop_stop_line_braking = braking_distance_required and target_has_priority
+        hard_stop_stop_line_braking = braking_distance_required and priority_confirmed
         cautious_candidate = (
             self.yield_observed_caution_enabled
             and not allow_priority_yield
@@ -1723,6 +1724,7 @@ class SMPCAgent(object):
             "prediction_valid": valid_flags,
             "prediction_source": source,
             "priority_from_prediction": bool(allow_priority_yield),
+            "priority_confirmed": bool(priority_confirmed),
             "cautious_candidate": bool(cautious_candidate),
             "observed_caution_distance_trigger": bool(observed_caution_distance_trigger),
             "observed_caution_braking_trigger": bool(observed_caution_braking_trigger),
@@ -1772,7 +1774,7 @@ class SMPCAgent(object):
             "target_release_clearance_margin": float(self.yield_release_clearance_margin),
             "target_enter_time": target_enter_time,
             "target_exit_time": target_exit_time,
-            "target_has_priority": bool(target_has_priority and allow_priority_yield),
+            "target_has_priority": bool(priority_confirmed),
             "observed_target_potential_priority": bool(target_approaching_conflict and not allow_priority_yield),
             "overlap_risk": bool(overlap_risk),
             "close_hold": bool(close_hold),
