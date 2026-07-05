@@ -399,3 +399,9 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Remove the `yield_hard_stop_steer_damping` experiment and restore the original route-following wait steering during hard-stop yield.
     - Compensate with stronger braking and earlier braking-distance margin instead of steering suppression: `yield_emergency_decel=-6.0 -> -7.0`, `yield_emergency_jerk_limit=8.0 -> 10.0`, and `yield_brake_distance_margin=3.5 -> 4.5`.
     - Keep unchanged: `yield_stop_buffer_distance=7.0`, `yield_footprint_clearance_margin=1.5`, target speed `6.0m/s`, target straight policy and offset, and accepted post-turn recovery. Target-speed increases remain a later controlled ablation, not part of this baseline repair.
+
+48. Local fix after visual review of `20260705_224207_final_dissertation`:
+    - `20260705_224207` is the best route-following yield result so far: required SMPC both PASS, no footprint collision, valid yield order, zero solver failures, and lane-entry `ey≈0.10m`, `epsi≈0.002rad`.
+    - The remaining visual issue is that the ego stops too far upstream: debug shows first stopped hold at `ego_distance_to_conflict≈8.391m` while the required footprint-aware clearance is `5.5m`.
+    - Minimal next trial: keep route-following wait steering and strong braking (`yield_emergency_decel=-7.0`, `yield_emergency_jerk_limit=10.0`), but reduce only `yield_brake_distance_margin` from `4.5m` to `3.5m`. This should delay hard-stop activation slightly and move the stopped pose closer without returning to the unsafe `-6.0/8.0` braking setup that stopped around `dconf≈4.24m`.
+    - Keep unchanged: `yield_stop_buffer_distance=7.0`, `yield_footprint_clearance_margin=1.5`, TV speed `6.0m/s`, target straight policy/offset, and post-turn recovery.
