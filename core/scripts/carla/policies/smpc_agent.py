@@ -63,7 +63,7 @@ class SMPCAgent(object):
                  yield_hard_stop_target_distance=12.0,
                  yield_hard_stop_conflict_distance=15.5,
                  yield_conflict_radius=4.0,
-                 yield_stop_buffer_distance=5.5,
+                 yield_stop_buffer_distance=7.0,
                  yield_brake_distance_margin=3.5,
                  yield_wait_steer_lookahead_distance=6.0,
                  yield_wait_steer_gain=1.0,
