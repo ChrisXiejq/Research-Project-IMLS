@@ -338,3 +338,8 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Debug shows hard-stop yielding begins around `dconf=10.65m` with ego speed still about `8.32m/s`, then the vehicle stops around `dconf=2.16m`, inside the `4.0m` conflict radius.
     - Local pending fix: do not increase emergency deceleration yet. Instead, keep `yield_caution_speed=3.5m/s`, `yield_caution_decel=-4.0m/s^2`, `yield_emergency_decel=-6.0m/s^2`, and `yield_emergency_jerk_limit=8.0m/s^3`, but move hard-stop thresholds earlier to `yield_hard_stop_target_distance=12.0m` and `yield_hard_stop_conflict_distance=14.0m`.
     - Expected effect: hard-stop should start near `dconf≈14m`, adding roughly `3m` of braking distance while preserving the rolling-caution phase and the accepted post-turn recovery behaviour.
+
+38. After `20260705_182730_final_dissertation`, the earlier hard-stop trigger improves timing but still leaves a small conflict-zone violation:
+    - Required SMPC policies again complete with zero solver failures and stable lane entry.
+    - Hard-stop yielding starts earlier (`step≈8`, `dconf≈13.04m`) but the vehicle still stops at `dconf≈3.21m`, about `0.8m` inside the `4.0m` conflict radius. Yield-order failure is now about `1.1-1.15s` early.
+    - Local pending fix: keep `yield_hard_stop_target_distance=12.0m` and keep emergency braking at `yield_emergency_decel=-6.0m/s^2`; only increase `yield_hard_stop_conflict_distance` from `14.0m` to `15.5m` to add a small braking-distance margin without increasing jerk/comfort cost.
