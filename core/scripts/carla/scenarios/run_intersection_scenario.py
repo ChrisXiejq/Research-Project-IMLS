@@ -18,6 +18,7 @@ from utils import experiment_logging as exp_log
 from policies.static_agent import StaticAgent
 from policies.smpc_agent import SMPCAgent
 from policies.mpc_agent import MPCAgent
+from policies.straight_line_agent import StraightLineAgent
 from policies.bl_smpc_agent import BLSMPCAgent
 
 from rasterizer.agent_history import AgentHistory
@@ -90,7 +91,7 @@ class VehicleParams:
     role          : str # either "ego" [dynamic, our agent], "static" [nonmoving vehicle], or "target" [dynamic vehicle, other agent]
     vehicle_type  : str # currently use one of {"vehicle.audi.tt", "vehicle.mercedes-benz.coupe"}
     vehicle_color : str # currently use "246, 246, 246" for static, "186, 0, 0" for ego, and "65, 63, 197" for dynamic
-    policy_type   : str # {"static", mpc", "smpc", "blsmpc"} -> which control policy to use for this agent
+    policy_type   : str # {"static", "straight", "mpc", "smpc", "blsmpc"} -> which control policy to use for this agent
 
     # Initial state and goal location selection.
     intersection_start_node_idx : int        # {0, 1, 2, 3} -> corresponds to a direction in the intersection_json above
@@ -209,6 +210,10 @@ def load_intersection(intersection_csv):
 def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=None):
     if vehicle_params.policy_type == "static":
         return StaticAgent(vehicle_actor, goal_transform.location)
+    elif vehicle_params.policy_type == "straight":
+        return StraightLineAgent(vehicle_actor, goal_transform.location,
+                                 nominal_speed_mps=vehicle_params.nominal_speed,
+                                 dt=vehicle_params.dt)
     elif vehicle_params.policy_type == "mpc":
 
         return MPCAgent(vehicle_actor, goal_transform.location, \
@@ -676,6 +681,7 @@ class RunIntersectionScenario:
                     ego_control = None
                     ego_traffic_light_state = None
                     ego_traffic_light_forced_stop = False
+                    target0_control = None
 
                     for idx_act, (act, policy) in enumerate(zip(self.vehicle_actors, self.vehicle_policies)):
                         policy_result = policy.run_step(pred_dict)
@@ -698,6 +704,8 @@ class RunIntersectionScenario:
                             ego_control = control
                             ego_traffic_light_state = traffic_light_state
                             ego_traffic_light_forced_stop = traffic_light_forced_stop
+                        if self.tv_vehicle_idxs and idx_act == self.tv_vehicle_idxs[0]:
+                            target0_control = control
                         if not policy.done():
                             z0 = np.append(t_elapsed, z0) # add the Carla timestamp
                             act_key = f"{act.attributes['role_name']}_{idx_act}"
@@ -734,6 +742,22 @@ class RunIntersectionScenario:
                             "priority_rule": self.priority_rule,
                             "pred_valid_tv0": pred0,
                         }
+                        if self.tv_vehicle_idxs:
+                            target0 = self.vehicle_actors[self.tv_vehicle_idxs[0]]
+                            target0_tf = target0.get_transform()
+                            target0_vel = target0.get_velocity()
+                            step_row.update({
+                                "target0_x": float(target0_tf.location.x),
+                                "target0_y_rhs": float(-target0_tf.location.y),
+                                "target0_yaw_deg": float(target0_tf.rotation.yaw),
+                                "target0_speed": float(np.linalg.norm([target0_vel.x, target0_vel.y])),
+                            })
+                            if target0_control is not None:
+                                step_row.update({
+                                    "target0_throttle": float(target0_control.throttle),
+                                    "target0_brake": float(target0_control.brake),
+                                    "target0_steer": float(target0_control.steer),
+                                })
                         exp_log.append_step_row(self.savedir, rows_buffer, step_row, flush_every=25)
 
                     if self.use_camera:

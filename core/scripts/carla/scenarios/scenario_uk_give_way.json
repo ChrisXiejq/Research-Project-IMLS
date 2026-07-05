@@ -81,7 +81,7 @@
 			"role"                        : "target",
 			"vehicle_type"                : "vehicle.mercedes-benz.coupe",
 			"vehicle_color"               : "186, 0, 0",
-			"policy_type"                 : "mpc",
+                        "policy_type"                 : "straight",
                         "traffic_role"                 : "priority_oncoming_straight",
                         "obey_traffic_lights"          : false,
 			"intersection_start_node_idx" :     2,

@@ -343,3 +343,10 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Required SMPC policies again complete with zero solver failures and stable lane entry.
     - Hard-stop yielding starts earlier (`step≈8`, `dconf≈13.04m`) but the vehicle still stops at `dconf≈3.21m`, about `0.8m` inside the `4.0m` conflict radius. Yield-order failure is now about `1.1-1.15s` early.
     - Local pending fix: keep `yield_hard_stop_target_distance=12.0m` and keep emergency braking at `yield_emergency_decel=-6.0m/s^2`; only increase `yield_hard_stop_conflict_distance` from `14.0m` to `15.5m` to add a small braking-distance margin without increasing jerk/comfort cost.
+
+39. After `20260705_184623_final_dissertation`, user video review shows the remaining failure is not primarily an ego yield-stop clearance issue:
+    - The ego visibly yields, and the post-CARLA gate reports valid yield order for both required SMPC policies.
+    - The target vehicle is configured as `traffic_role=priority_oncoming_straight`, but it is controlled by the generic obstacle-avoiding `MPCAgent`. In the video and debug positions, the target turns/veers toward the stopped ego instead of continuing straight through the intersection.
+    - This violates the scenario definition: the priority oncoming vehicle should continue straight, and the ego is responsible for yielding.
+    - Local fix: introduce `StraightLineAgent` for the priority target and set the give-way scenario target `policy_type` to `straight`. The new target controller tracks the fixed start-to-goal straight line and does not perform evasive turns around the ego.
+    - Additional reproducibility logging: `scenario_steps.csv` now records first-target position, speed, yaw, and control fields (`target0_*`) so future runs can verify target straightness without relying only on video review.
