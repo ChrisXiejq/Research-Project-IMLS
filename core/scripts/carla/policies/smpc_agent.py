@@ -64,6 +64,7 @@ class SMPCAgent(object):
                  yield_hard_stop_conflict_distance=15.5,
                  yield_conflict_radius=4.0,
                  yield_stop_buffer_distance=7.0,
+                 yield_footprint_clearance_margin=1.5,
                  yield_brake_distance_margin=3.5,
                  yield_wait_steer_lookahead_distance=6.0,
                  yield_wait_steer_gain=1.0,
@@ -142,6 +143,7 @@ class SMPCAgent(object):
         self.yield_hard_stop_conflict_distance = float(yield_hard_stop_conflict_distance)
         self.yield_conflict_radius = float(yield_conflict_radius)
         self.yield_stop_buffer_distance = float(yield_stop_buffer_distance)
+        self.yield_footprint_clearance_margin = float(yield_footprint_clearance_margin)
         self.yield_brake_distance_margin = float(yield_brake_distance_margin)
         self.yield_wait_steer_lookahead_distance = float(yield_wait_steer_lookahead_distance)
         self.yield_wait_steer_gain = float(yield_wait_steer_gain)
@@ -253,6 +255,11 @@ class SMPCAgent(object):
         if self.yield_stop_buffer_distance <= 0.0:
             raise ValueError(
                 f"yield_stop_buffer_distance must be positive, got {self.yield_stop_buffer_distance}"
+            )
+        if self.yield_footprint_clearance_margin < 0.0:
+            raise ValueError(
+                "yield_footprint_clearance_margin must be non-negative, "
+                f"got {self.yield_footprint_clearance_margin}"
             )
         if self.yield_brake_distance_margin < 0.0:
             raise ValueError(
@@ -764,6 +771,7 @@ class SMPCAgent(object):
                 ),
                 "conflict_radius": self.yield_conflict_radius,
                 "stop_buffer_distance": self.yield_stop_buffer_distance,
+                "footprint_clearance_margin": self.yield_footprint_clearance_margin,
                 "brake_distance_margin": self.yield_brake_distance_margin,
                 "wait_steer_lookahead_distance": self.yield_wait_steer_lookahead_distance,
                 "wait_steer_gain": self.yield_wait_steer_gain,
@@ -1598,7 +1606,11 @@ class SMPCAgent(object):
             max(self.yield_stop_speed, 0.2),
         )
         target_nominally_cleared_conflict = target_distance_to_conflict < -self.yield_conflict_radius
-        target_release_clearance_distance = self.yield_conflict_radius + self.yield_release_clearance_margin
+        ego_required_clearance = self.yield_conflict_radius + self.yield_footprint_clearance_margin
+        target_release_clearance_distance = self.yield_conflict_radius + max(
+            self.yield_release_clearance_margin,
+            self.yield_footprint_clearance_margin,
+        )
         target_cleared_conflict = target_distance_to_conflict < -target_release_clearance_distance
         target_approaching_conflict = (
             target_motion_line_min_distance <= self.yield_conflict_radius
@@ -1617,10 +1629,14 @@ class SMPCAgent(object):
         brake_distance = (float(speed) ** 2) / (2.0 * max_brake)
         brake_activation_distance = brake_distance + self.yield_brake_distance_margin
         braking_distance_required = ego_dist_to_stop <= brake_activation_distance
-        emergency_conflict_clearance = self.yield_conflict_radius + self.yield_emergency_conflict_margin
+        emergency_conflict_clearance = max(
+            self.yield_conflict_radius + self.yield_emergency_conflict_margin,
+            ego_required_clearance,
+        )
         emergency_safe_stop_s = conflict_s - emergency_conflict_clearance
         ego_dist_to_emergency_stop = emergency_safe_stop_s - ego_route_s
         emergency_braking_distance_required = ego_dist_to_emergency_stop <= brake_activation_distance
+        ego_inside_footprint_clearance = ego_dist_to_conflict < ego_required_clearance
         overlap_risk = (
             target_has_priority
             and target_enter_time <= ego_ttc_to_conflict + self.yield_ttc_margin
@@ -1738,6 +1754,9 @@ class SMPCAgent(object):
             "brake_activation_distance": brake_activation_distance,
             "brake_distance_margin": self.yield_brake_distance_margin,
             "braking_distance_required": bool(braking_distance_required),
+            "ego_required_clearance": float(ego_required_clearance),
+            "ego_inside_footprint_clearance": bool(ego_inside_footprint_clearance),
+            "footprint_clearance_margin": float(self.yield_footprint_clearance_margin),
             "emergency_conflict_clearance": float(emergency_conflict_clearance),
             "emergency_safe_stop_s": float(emergency_safe_stop_s),
             "ego_distance_to_emergency_stop": float(ego_dist_to_emergency_stop),
@@ -1839,7 +1858,10 @@ class SMPCAgent(object):
                 if geometry is None:
                     continue
                 target_priority_distance = geometry["target_distance_to_conflict"]
-                release_clearance_distance = self.yield_conflict_radius + self.yield_release_clearance_margin
+                release_clearance_distance = self.yield_conflict_radius + max(
+                    self.yield_release_clearance_margin,
+                    self.yield_footprint_clearance_margin,
+                )
                 if target_priority_distance < -release_clearance_distance:
                     target_priority_distance = float("inf")
                 candidate = (target_priority_distance, k, mode, target_path, geometry, "prediction", True)
@@ -1857,7 +1879,10 @@ class SMPCAgent(object):
                 if geometry is None:
                     continue
                 target_priority_distance = geometry["target_distance_to_conflict"]
-                release_clearance_distance = self.yield_conflict_radius + self.yield_release_clearance_margin
+                release_clearance_distance = self.yield_conflict_radius + max(
+                    self.yield_release_clearance_margin,
+                    self.yield_footprint_clearance_margin,
+                )
                 if target_priority_distance < -release_clearance_distance:
                     target_priority_distance = float("inf")
                 candidate = (target_priority_distance, k, 0, target_path, geometry, "observed_track", False)

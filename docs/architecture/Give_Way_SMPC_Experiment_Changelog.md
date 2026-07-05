@@ -375,3 +375,9 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - The previous fix worked structurally: both required SMPC policies completed with zero solver failures and good lane-entry heading, but both still had about `1.10s` footprint collision and entered the conflict circle about `1.05s` before the straight target cleared.
     - Debug confirms `hard_stop_stop_line_braking=True` from step 1, so the new trigger is active; the remaining issue is stop-line clearance. The ego still stopped at `ego_distance_to_conflict≈3.21m`, inside the `4.0m` conflict radius.
     - Local pending fix: increase only `yield_stop_buffer_distance` from `5.5m` to `7.0m`. This should add about `1.5m` final clearance while avoiding the physically unreachable `10.5m` stop line. Keep target offset `1.50m`, `StraightLineAgent` zero steering, hard-stop trigger logic, emergency decel, and accepted post-turn recovery unchanged.
+
+44. Local fix after `20260705_203724_final_dissertation`:
+    - The `7.0m` stop buffer improved rule order for `smpc_var_risk`, but both required SMPC policies still had about `1.05s` footprint collision. This means the center-circle yield criterion can pass while CARLA footprint replay still overlaps the straight target path.
+    - Do not keep blindly increasing `yield_stop_buffer_distance`; leave it at `7.0m`.
+    - Add `yield_footprint_clearance_margin=1.5m` as an explicit footprint-aware clearance margin. Target release clearance now uses `yield_conflict_radius + max(yield_release_clearance_margin, yield_footprint_clearance_margin)`, and emergency safe-stop diagnostics use at least `yield_conflict_radius + yield_footprint_clearance_margin`.
+    - New debug fields include `ego_required_clearance`, `ego_inside_footprint_clearance`, and `footprint_clearance_margin`, so the next run can distinguish residual low-level braking overshoot from an overly early target-release decision.
