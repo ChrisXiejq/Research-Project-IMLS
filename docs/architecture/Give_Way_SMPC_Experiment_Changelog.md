@@ -350,3 +350,10 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - This violates the scenario definition: the priority oncoming vehicle should continue straight, and the ego is responsible for yielding.
     - Local fix: introduce `StraightLineAgent` for the priority target and set the give-way scenario target `policy_type` to `straight`. The new target controller tracks the fixed start-to-goal straight line and does not perform evasive turns around the ego.
     - Additional reproducibility logging: `scenario_steps.csv` now records first-target position, speed, yaw, and control fields (`target0_*`) so future runs can verify target straightness without relying only on video review.
+
+40. After `20260705_191146_final_dissertation`, the generic `MPCAgent` contamination is removed, but the first `StraightLineAgent` implementation still fails the target-straight validation:
+    - Required SMPC policies complete and have no footprint collision (`min_center_distance≈6.10m`, `min_footprint_separation≈2.79m`), but the post-CARLA gate fails yield order because the target remains in the detected conflict zone long after ego enters.
+    - The new `target0_*` logs show the target is still not straight: `target0_y_rhs` drifts from about `3.35m` to `-10m`, target yaw changes from about `180deg` to `127-178deg`, and `target0_steer` saturates near `±0.18`.
+    - Root cause: the first `StraightLineAgent` lateral/heading feedback has the wrong effective sign under the CARLA/RHS steering convention, so it commands a turn instead of holding the priority target straight.
+    - Local fix: simplify `StraightLineAgent` to zero steering with speed hold and goal-proximity braking. This is intentionally conservative for the baseline: the priority target now maintains its initial straight heading instead of performing lateral correction that can introduce another coordinate-sign failure.
+    - Next validation run should first check `scenario_steps.csv` target fields: `target0_y_rhs` should remain near its initial value, `target0_yaw_deg` should stay near `180deg`, and `target0_steer` should remain near zero.

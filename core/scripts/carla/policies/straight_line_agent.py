@@ -38,9 +38,6 @@ class StraightLineAgent(object):
         self.path_left = np.array([-np.sin(self.path_yaw), np.cos(self.path_yaw)])
         self.goal_s = float(np.dot(self.goal_xy - self.start_xy, self.path_tangent))
 
-        self.k_lateral = 0.18
-        self.k_heading = 0.85
-        self.max_df = 0.22
         self.max_accel = 1.5
         self.max_decel = -2.0
         self.stop_distance = 4.0
@@ -64,9 +61,6 @@ class StraightLineAgent(object):
 
         path_rel = xy - self.start_xy
         s = float(np.dot(path_rel, self.path_tangent))
-        ey = float(np.dot(path_rel, self.path_left))
-        epsi = float(fth.fix_angle(psi - self.path_yaw))
-
         if self.goal_s > 0.0 and s >= self.goal_s - self.stop_distance:
             self.goal_reached = True
 
@@ -77,11 +71,7 @@ class StraightLineAgent(object):
         else:
             v_des = self.nominal_speed
             a_des = float(np.clip(0.8 * (v_des - speed), self.max_decel, self.max_accel))
-            df_des = float(np.clip(
-                -self.k_lateral * ey - self.k_heading * epsi,
-                -self.max_df,
-                self.max_df,
-            ))
+            df_des = 0.0
 
         control = self._low_level_control.update(speed, a_des, v_des, df_des)
         z0 = np.array([x, y, psi, speed])
