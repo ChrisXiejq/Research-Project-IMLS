@@ -455,3 +455,9 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Do not adopt the `yield_hard_stop_target_distance=10.5m` setting from the TV=10 trial, because `20260706_232551` introduced non-zero solver failures. Keep `yield_hard_stop_target_distance=12.0m`, `yield_stop_buffer_distance=7.0m`, `yield_caution_decel=-4.0`, and `yield_reference_decel=-3.75`.
     - Rationale: `13.0m` is the closest lower hard-stop conflict window that has already been exercised without solver failure in the TV=8.0m/s sensitivity run, while still being less aggressive than the rejected `12.8m` stronger-braking follow-up.
     - Validation target: preserve zero solver failure and yield order while checking whether first hard-stop and stopped/release dconf move slightly closer than the TV=9 stable configuration.
+
+57. Target-distance follow-up after `20260706_235540_final_dissertation`:
+    - `20260706_235540` validated the TV=9.0m/s, `yield_hard_stop_conflict_distance=13.0m` trial. Both required policies PASSed with zero solver failure and no footprint collision, but the waiting/release pose remained upstream at `dconf≈7.32m`.
+    - Debug evidence showed the hard-stop trigger was still target-distance dominated: first hard-stop had `hard_stop_target_close=True`, `hard_stop_conflict_close=False`, and target dconf≈`11.6-11.8m`.
+    - Local follow-up trial: reduce only `yield_hard_stop_target_distance=12.0m -> 11.5m`. Keep TV speed `9.0m/s`, `yield_hard_stop_conflict_distance=13.0m`, `yield_stop_buffer_distance=7.0m`, `yield_caution_decel=-4.0`, `yield_reference_decel=-3.75`, `yield_stop_decel=-5.0`, and `yield_emergency_decel=-7.0`.
+    - Rationale: `11.5m` is a conservative midpoint between the stable `12.0m` target-distance threshold and the rejected TV=10.0m/s, target-distance `10.5m` trial that introduced non-zero solver failures. Validation must reject the trial if solver failure becomes non-zero or footprint margin drops sharply.
