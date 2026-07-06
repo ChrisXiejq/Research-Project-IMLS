@@ -449,3 +449,9 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Restore the mainline yield parameters to the `20260706_000724` stable configuration: `yield_hard_stop_target_distance=12.0m`, `yield_hard_stop_conflict_distance=13.5m`, `yield_caution_decel=-4.0`, and `yield_reference_decel=-3.75`. Set straight-priority TV speed to `9.0m/s` as a middle-ground target-speed sensitivity while preserving the stable yield logic.
     - Remove `smpc_open_loop` from the main single-init and 50-init dissertation batch scripts. In this CARLA setup, open-loop does not represent a meaningful closed-loop give-way controller: it can show an unnatural slight-left then right-turn trajectory and often violates yield ordering. It remains available in code for diagnostic use, but it should not be a primary experiment baseline.
     - Main comparison going forward: `smpc_var_risk` vs `smpc_fixed_risk`, with `notv` and `notv_cl` retained only as route/completion references for the single-init batch.
+
+56. Small conflict-window reduction for the TV=9 mainline:
+    - Keep the TV=9.0m/s mainline and the stable `20260706_000724` braking style, but reduce only `yield_hard_stop_conflict_distance=13.5m -> 13.0m`.
+    - Do not adopt the `yield_hard_stop_target_distance=10.5m` setting from the TV=10 trial, because `20260706_232551` introduced non-zero solver failures. Keep `yield_hard_stop_target_distance=12.0m`, `yield_stop_buffer_distance=7.0m`, `yield_caution_decel=-4.0`, and `yield_reference_decel=-3.75`.
+    - Rationale: `13.0m` is the closest lower hard-stop conflict window that has already been exercised without solver failure in the TV=8.0m/s sensitivity run, while still being less aggressive than the rejected `12.8m` stronger-braking follow-up.
+    - Validation target: preserve zero solver failure and yield order while checking whether first hard-stop and stopped/release dconf move slightly closer than the TV=9 stable configuration.

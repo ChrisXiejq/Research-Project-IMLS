@@ -129,7 +129,7 @@ class VehicleParams:
     yield_emergency_jerk_limit : float = 10.0
     yield_emergency_conflict_margin : float = 1.25
     yield_hard_stop_target_distance : float = 12.0
-    yield_hard_stop_conflict_distance : float = 13.5
+    yield_hard_stop_conflict_distance : float = 13.0
     yield_conflict_radius : float = 4.0
     yield_stop_buffer_distance : float = 7.0
     yield_footprint_clearance_margin : float = 1.5
