@@ -16,16 +16,16 @@
       "yield_stop_speed": 0.2,
       "yield_caution_speed": 3.5,
       "yield_creep_speed": 1.5,
-      "yield_caution_decel": -4.5,
+      "yield_caution_decel": -4.0,
       "yield_reference_min_speed": 0.8,
-      "yield_reference_decel": -4.25,
+      "yield_reference_decel": -3.75,
       "yield_stop_decel": -5.0,
       "yield_emergency_brake_enabled": true,
       "yield_emergency_decel": -7.0,
       "yield_emergency_jerk_limit": 10.0,
       "yield_emergency_conflict_margin": 1.25,
       "yield_hard_stop_target_distance": 12.0,
-      "yield_hard_stop_conflict_distance": 12.8,
+      "yield_hard_stop_conflict_distance": 13.0,
       "yield_conflict_radius": 4.0,
       "yield_stop_buffer_distance": 7.0,
       "yield_footprint_clearance_margin": 1.5,
@@ -49,8 +49,8 @@
       "yield_recovery_accel": 1.8
     },
     "target": {
-      "nominal_speed": 6.0,
-      "init_speed": 6.0
+      "nominal_speed": 8.0,
+      "init_speed": 8.0
     }
   },
   "postcarla_gate": {
@@ -75,16 +75,16 @@
     "yield_stop_speed": "Near-stop target speed used by the control override at the yield line.",
     "yield_caution_speed": "Rolling speed target used when a priority target is observed but is not yet close enough to require a full hard stop. Reduced after 20260705_174648 because the 4.5m/s rolling phase left the ego near 8m/s when hard-stop yielding began.",
     "yield_creep_speed": "Low rolling speed used near the route-defined yield line before hard-stop conditions are met. It lets the ego continue creeping toward a safer waiting pose instead of stopping far upstream.",
-    "yield_caution_decel": "Comfort-oriented deceleration limit for rolling caution/creep phases. Strengthened to -4.5m/s^2 after 20260706_000724 became the best single-init milestone but still looked slightly far from the conflict zone. The intent is to reduce speed before hard-stop activation so the final hard stop can start later without looking like an abrupt emergency-only brake.",
+    "yield_caution_decel": "Comfort-oriented deceleration limit for rolling caution/creep phases. Kept at the 20260706_000724 milestone value because the stronger -4.5m/s^2 follow-up reduced footprint safety margin without moving the final stopped pose closer.",
     "yield_reference_min_speed": "Minimum speed used only by the pre-solve optimisation reference during hold_yield_line. The 0.8m/s value is restored because the 1.0m/s trial did not reduce var-risk failures and worsened fixed-risk hold failures; the control override still performs the final near-stop behaviour at yield_stop_speed.",
-    "yield_reference_decel": "Maximum deceleration used only by the pre-solve optimisation reference profile. It remains softer than yield_stop_decel so the optimiser sees a smoother speed cap before the final control override handles near-stop braking. Updated to -4.25m/s^2 together with yield_caution_decel=-4.5 after 20260706_000724, so the planned approach sheds more speed before the later hard-stop window.",
+    "yield_reference_decel": "Maximum deceleration used only by the pre-solve optimisation reference profile. It remains softer than yield_stop_decel so the optimiser sees a smoother speed cap before the final control override handles near-stop braking. Kept at the 20260706_000724 milestone value after the stronger -4.25m/s^2 follow-up did not improve the final stopped pose.",
     "yield_stop_decel": "Maximum desired deceleration applied by the rule-aware yielding controller. The value is set to -5.0m/s^2 so ego_init_01 can physically brake from the initial approach speed before the route-defined stop point.",
     "yield_emergency_brake_enabled": "Enables a bounded safety fallback only during active yield when the priority target has not cleared and the nominal braking-distance trigger is already active. It is intended for the original high-speed paper ego_init_01 case, where ordinary -5.0m/s^2 yielding still slid into the conflict zone.",
     "yield_emergency_decel": "Strongest desired deceleration for emergency yield braking. Set to -7.0m/s^2 after the neutral-steering trial passed safety but produced an unnatural pre-conflict straight hold. The ego now keeps route-following left-turn steering while relying on stronger braking to avoid front-footprint intrusion.",
     "yield_emergency_jerk_limit": "Maximum rate at which the emergency yield controller may increase braking demand, in m/s^3. Set to 10.0m/s^3 as a middle ground between the earlier abrupt 15.0m/s^3 trial and the too-weak 8.0m/s^3 route-steering trial.",
     "yield_emergency_conflict_margin": "Extra margin beyond yield_conflict_radius used only for debug/reproducibility of the emergency safe conflict boundary. It records whether the vehicle is still outside the conflict-boundary-safe stop target while emergency braking is active.",
     "yield_hard_stop_target_distance": "Target-distance threshold for switching from rolling caution/creep to hard-stop yielding. Increased after 20260705_180748 because starting hard-stop yielding around dconf=10.65m still let ego enter the conflict radius about 1.25s before the target cleared.",
-    "yield_hard_stop_conflict_distance": "Ego distance-to-conflict threshold that forces hard-stop yielding even if the target-distance threshold has not yet triggered. 20260706_000724 is now the best single-init milestone at 13.5m: both required SMPC policies pass, first hard-stop moves to step 8, and the stopped/release pose moves to dconf≈6.28m with min footprint separation still about 1.46-1.48m. The current 12.8m trial is a cautious follow-up to shrink the hard-stop window slightly while increasing pre-hard-stop deceleration, rather than relying on a visibly abrupt final brake.",
+    "yield_hard_stop_conflict_distance": "Ego distance-to-conflict threshold that forces hard-stop yielding even if the target-distance threshold has not yet triggered. 20260706_000724 remains the best single-init milestone at 13.5m: both required SMPC policies pass, first hard-stop moves to step 8, and the stopped/release pose moves to dconf≈6.28m with min footprint separation about 1.46-1.48m. The 12.8m stronger-braking follow-up did not move the final stopped pose and reduced margin to about 1.29m, so the current 13.0m trial is a smaller conflict-distance reduction on top of the 000724 braking style.",
     "yield_conflict_radius": "Radius around the fixed conflict point defined by the ego route and target current/predicted straight motion line.",
     "yield_stop_buffer_distance": "Distance before the fixed conflict point where the ego must wait while the straight-going target has priority. Restored to 7.0m after 20260705_215601 showed that increasing it to 9.0m did not move the actual stopped pose away from dconf≈4.24m and instead worsened yield order. The remaining issue is the hard-stop steering pose, not a farther upstream stop-line target.",
     "yield_footprint_clearance_margin": "Additional footprint-aware clearance beyond yield_conflict_radius. Added after 20260705_203724, where center-circle yield order could pass while the CARLA footprint replay still overlapped the straight target path. This margin is used for target release clearance and emergency safe-stop diagnostics without moving the configured route stop line.",
@@ -106,6 +106,6 @@
     "yield_recovery_max_lateral_error": "Temporary lateral-error guard used only after a completed yield, preventing stale-reference lock while still bounding recovery reference generation.",
     "yield_recovery_speed": "Maximum desired speed during post-yield recovery. Fixed as part of the accepted post-turn solution so the ego accelerates through the turn and lane-entry segment instead of crawling after the target clears.",
     "yield_recovery_accel": "Upper bound on desired acceleration during post-yield recovery. Fixed as part of the accepted post-turn solution to produce gradual acceleration after yielding without jumping to full throttle.",
-    "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target."
+    "nominal_speed": "Nominal unobstructed speed. The ego is allowed to slow down or nearly stop to yield to the straight-going target. For the target role this trial uses 8.0m/s as a sensitivity increase from the tuned 6.0m/s straight-priority baseline; the upstream scenario_01 used a faster target (nominal 10.0m/s, init 12.0m/s), but that is not directly adopted here because the right-hand-traffic adapted scenario and straight target controller differ from the original setup."
   }
 }
