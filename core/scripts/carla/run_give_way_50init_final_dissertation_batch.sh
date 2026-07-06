@@ -65,7 +65,7 @@ fi
   --scenario_glob "scenario_uk_give_way.json" \
   --init_glob "paper_intersection_50/ego_init_*.json" \
   --results_dir "${RESULTS_DIR}" \
-  --policies smpc_var_risk smpc_fixed_risk smpc_open_loop \
+  --policies smpc_var_risk smpc_fixed_risk \
   --risk_profile adaptive_interaction_severity \
   "${camera_args[@]}" \
   --postprocess_no_plots

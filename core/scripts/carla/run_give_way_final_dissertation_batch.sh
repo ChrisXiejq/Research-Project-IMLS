@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Final dissertation batch for the right-hand-traffic give-way scenario.
 # It keeps the validated +2.75m ego start geometry and runs the proposed
-# adaptive-risk method together with the baseline required for paper panels.
+# adaptive-risk method together with the fixed-risk SMPC baseline.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CORE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -56,7 +56,7 @@ cd "${SCRIPT_DIR}"
   --scenario_glob "scenario_uk_give_way.json" \
   --init_glob "ego_init_01.json" \
   --results_dir "${RESULTS_DIR}" \
-  --policies smpc_var_risk smpc_fixed_risk smpc_open_loop \
+  --policies smpc_var_risk smpc_fixed_risk \
   --risk_profile adaptive_interaction_severity \
   --with_notv \
   --with_notv_cl \
