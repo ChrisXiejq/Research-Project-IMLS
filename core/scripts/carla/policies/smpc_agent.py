@@ -1464,8 +1464,16 @@ class SMPCAgent(object):
         relaxed_tight = 1.2815515655446004  # Phi^{-1}(0.90), used only after target clearance.
         high_tight = float(smpc.PAPER_INTERSECTION_TIGHTENING)
         nominal_to_high_span = high_tight - upstream_tight
-        policy_map = "unified_mild_with_rule_yield_bypass"
+        policy_map = "phase_aware_preclearance_floor"
         mild_tightening_scale = 0.35
+        approach_preclearance_floor = 1.68
+        critical_preclearance_floor = 1.80
+        near_preclearance_floor = 1.85
+        ego_distance_to_conflict = yield_status.get("ego_distance_to_conflict")
+        try:
+            ego_distance_to_conflict = float(ego_distance_to_conflict)
+        except (TypeError, ValueError):
+            ego_distance_to_conflict = None
 
         phase_floor = 0.0
         if yield_phase == "approach_yield_line":
@@ -1477,10 +1485,35 @@ class SMPCAgent(object):
         elif yield_phase == "observe_priority_target":
             phase_floor = 0.20
 
+        distance_bucket = "unknown"
+        preclearance_tight_floor = None
+        preclearance_floor_reason = None
+        if ego_distance_to_conflict is not None:
+            if ego_distance_to_conflict > 25.0:
+                distance_bucket = "far"
+            elif ego_distance_to_conflict > 15.0:
+                distance_bucket = "approach"
+            elif ego_distance_to_conflict > 5.0:
+                distance_bucket = "critical"
+            else:
+                distance_bucket = "near"
+
+        if not target_cleared and yield_phase != "released_recovery":
+            if distance_bucket == "approach":
+                preclearance_tight_floor = approach_preclearance_floor
+                preclearance_floor_reason = "approach_preclearance"
+            elif distance_bucket == "critical":
+                preclearance_tight_floor = critical_preclearance_floor
+                preclearance_floor_reason = "critical_preclearance"
+            elif distance_bucket == "near":
+                preclearance_tight_floor = near_preclearance_floor
+                preclearance_floor_reason = "near_preclearance"
+
         if target_cleared or yield_phase == "released_recovery":
             effective_score = 0.0
             risk_scale = 0.0
             tightening = relaxed_tight
+            raw_tightening = relaxed_tight
             risk_phase = "relaxed_after_clearance"
         else:
             effective_score = float(np.clip(max(raw_score, phase_floor), 0.0, 1.0))
@@ -1491,14 +1524,27 @@ class SMPCAgent(object):
                 risk_scale = 0.70 + 0.30 * effective_score
             else:
                 risk_scale = mild_tightening_scale * effective_score
-            tightening = upstream_tight + risk_scale * nominal_to_high_span
+            raw_tightening = upstream_tight + risk_scale * nominal_to_high_span
+            if preclearance_tight_floor is not None:
+                tightening = max(raw_tightening, min(float(preclearance_tight_floor), high_tight))
+            else:
+                tightening = raw_tightening
             if effective_score >= 0.85:
                 risk_phase = "high"
             elif effective_score >= 0.45:
                 risk_phase = "medium"
             else:
                 risk_phase = "nominal"
+            if preclearance_tight_floor is not None and tightening > raw_tightening + 1.0e-9:
+                risk_phase = f"{risk_phase}_floor"
 
+        preclearance_floor_active = bool(
+            preclearance_tight_floor is not None
+            and not (target_cleared or yield_phase == "released_recovery")
+        )
+        preclearance_floor_raised = bool(
+            preclearance_floor_active and float(tightening) > float(raw_tightening) + 1.0e-9
+        )
         target_prob = float(smpc._standard_normal_cdf(tightening))
         return {
             "enabled": True,
@@ -1506,10 +1552,20 @@ class SMPCAgent(object):
             "phase": risk_phase,
             "policy_map": policy_map,
             "yield_phase": yield_phase,
+            "distance_bucket": distance_bucket,
+            "ego_distance_to_conflict": ego_distance_to_conflict,
             "raw_severity_score": raw_score,
             "effective_severity_score": effective_score,
             "phase_floor": float(phase_floor),
             "risk_scale": float(risk_scale),
+            "preclearance_tight_floor": (
+                None if preclearance_tight_floor is None else float(preclearance_tight_floor)
+            ),
+            "preclearance_floor_reason": preclearance_floor_reason,
+            "preclearance_floor_active": preclearance_floor_active,
+            "preclearance_floor_applied": preclearance_floor_raised,
+            "preclearance_floor_raised_tightening": preclearance_floor_raised,
+            "raw_tightening_before_floor": float(raw_tightening),
             "tightening": float(tightening),
             "target_prob": target_prob,
             "target_cleared_conflict": target_cleared,
@@ -1517,6 +1573,16 @@ class SMPCAgent(object):
                 "relaxed_after_clearance_tight": relaxed_tight,
                 "nominal_tight": upstream_tight,
                 "high_tight": high_tight,
+                "policy_map": policy_map,
+                "distance_buckets": {
+                    "far": "dconf > 25m",
+                    "approach": "15m < dconf <= 25m",
+                    "critical": "5m < dconf <= 15m",
+                    "near": "dconf <= 5m",
+                },
+                "approach_preclearance_floor": approach_preclearance_floor,
+                "critical_preclearance_floor": critical_preclearance_floor,
+                "near_preclearance_floor": near_preclearance_floor,
                 "approach_floor": 0.35,
                 "hold_floor": 0.45,
                 "cautious_floor": 0.25,

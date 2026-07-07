@@ -150,6 +150,84 @@ var risk 在 critical zone 的 tightening 高于 fixed risk
 
 这是最安全的第一步，因为它应该不改变当前最好的视频和 safety gate。
 
+## Stage 1C：Phase-Aware Risk Floor 实现
+
+当前 corrected single-init baseline 已经证明 fixed-static 和 adaptive-variable 的 solver risk 模式被正确分离：
+
+```text
+smpc_var_risk:
+  solver_risk_mode = adaptive_variable
+  solver_uses_adaptive_risk = 1
+
+smpc_fixed_risk:
+  solver_risk_mode = fixed_static
+  solver_uses_adaptive_risk = 0
+```
+
+但 20260707_190600 的 risk-by-conflict-distance 统计显示，旧的 adaptive mapping 在 critical / near bucket 中可能比 fixed-static 更宽松。因此，Stage 1C 将 adaptive risk 从单纯 interaction-severity-aware 改成：
+
+```text
+phase-aware pre-clearance floor + target-cleared relaxation
+```
+
+具体实现位置：
+
+```text
+core/scripts/carla/policies/smpc_agent.py
+  _adaptive_risk_allocation()
+
+core/scripts/risk_by_conflict_distance.py
+  phase-floor diagnostics and comparison columns
+```
+
+映射规则：
+
+```text
+target not cleared 且 yield_phase != released_recovery:
+  far:       no extra floor
+  approach: tightening >= 1.68
+  critical: tightening >= 1.80
+  near:     tightening >= 1.85
+
+target cleared 或 released_recovery:
+  tightening = 1.2815515655446004  # Phi^{-1}(0.90)
+```
+
+这个设计要证明的不是 “距离越近 risk 一定越大” 这种过强命题，而是：
+
+```text
+在 target clearance 之前，adaptive-variable-risk 对接近冲突区的 phase 施加比 fixed-static 更保守的 chance constraint；
+在 target clearance 之后，adaptive-variable-risk 允许比 fixed-static 更快放松，从而减少不必要保守性。
+```
+
+新增诊断字段：
+
+```text
+raw_tightening_before_floor
+preclearance_tight_floor
+preclearance_floor_active
+preclearance_floor_applied
+preclearance_floor_reason
+```
+
+其中 `risk_by_conflict_distance.py` 只在 solver 实际使用 adaptive risk 时统计 floor active/applied，避免 fixed-static policy 的 diagnostic mapping 被误读为实际 solver 约束。
+
+下一步必须先跑 single-init sanity check，而不是直接跑 5-init：
+
+```text
+期望 smpc_var_risk:
+  solver_failure = 0
+  footprint collision = False
+  yield_ok = True
+  approach/critical/near preclearance_floor_applied_frac > 0
+  critical/near risk_tightening_mean > fixed_static 1.64
+
+期望 smpc_fixed_risk:
+  solver_failure = 0
+  preclearance_floor_applied_frac = 0
+  solver_risk_mode = fixed_static
+```
+
 ## Stage 2：Soft-First SMPC 增强
 
 只有 Stage 1 证明 adaptive-risk 信号可测之后，才进入这一阶段。
