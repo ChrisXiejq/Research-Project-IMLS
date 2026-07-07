@@ -467,3 +467,8 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Keep TV speed `9.0m/s`, `yield_hard_stop_conflict_distance=13.0m`, `yield_stop_buffer_distance=7.0m`, `yield_caution_decel=-4.0`, and `yield_reference_decel=-3.75`.
     - The video rollout could continue to the fixed 30s cap after the useful scene ended because static parked actors never report `done()`. Update the rollout loop so only non-static vehicles participate in the completion condition.
     - After all non-static vehicles complete, keep a short one-second visual tail and then stop recording. This removes the idle final video segment while preserving post-CARLA completion and safety metrics.
+
+59. Revert target-distance threshold after `20260707_102456_final_dissertation`:
+    - `20260707_102456` validated the video-tail cleanup: the single-init batch runtime dropped to about `00:05:01` and the SMPC videos ended after useful completion rather than continuing to the 30s cap.
+    - However, `yield_hard_stop_target_distance=11.75m` did not retain the closer-release benefit from the 11.5m var-risk trial; both SMPC policies released near `dconf≈7.324m`, and fixed-risk still had one solver failure (`solver_failure≈0.005`).
+    - Restore `yield_hard_stop_target_distance=12.0m` for the mainline. Keep TV speed `9.0m/s`, `yield_hard_stop_conflict_distance=13.0m`, and the video-tail cleanup.

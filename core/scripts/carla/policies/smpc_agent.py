@@ -60,7 +60,7 @@ class SMPCAgent(object):
                  yield_emergency_decel=-7.0,
                  yield_emergency_jerk_limit=10.0,
                  yield_emergency_conflict_margin=1.25,
-                 yield_hard_stop_target_distance=11.75,
+                 yield_hard_stop_target_distance=12.0,
                  yield_hard_stop_conflict_distance=13.0,
                  yield_conflict_radius=4.0,
                  yield_stop_buffer_distance=7.0,
