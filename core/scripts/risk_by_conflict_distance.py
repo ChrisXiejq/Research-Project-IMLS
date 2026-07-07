@@ -240,13 +240,17 @@ def _load_gate_policy_metrics(results_dir: str) -> Dict[str, Dict[str, Any]]:
             continue
         pair = (item.get("pair_safety") or [{}])[0] or {}
         rule = (item.get("yield_rules") or [{}])[0] or {}
-        metrics[policy] = {
+        metric = {
             "solver_failure_frac": item.get("solver_failure_frac"),
             "min_footprint_separation": pair.get("min_footprint_separation_m"),
             "min_center_distance": pair.get("min_center_distance_m"),
             "footprint_collision": pair.get("footprint_collision"),
             "yield_ok": rule.get("target_clears_before_ego_enters"),
         }
+        scenario_dir = item.get("scenario_dir")
+        if scenario_dir:
+            metrics[os.path.basename(str(scenario_dir).rstrip(os.sep))] = metric
+        metrics[policy] = metric
     return metrics
 
 
@@ -831,7 +835,8 @@ def run(results_dir: str, policies: Sequence[str]) -> Dict[str, str]:
     step_rows: List[Dict[str, Any]] = []
 
     for scenario_dir, ident in _list_smpc_dirs(results_dir, policies):
-        step_rows.extend(_load_step_rows(scenario_dir, ident, gate_metrics.get(ident.policy, {})))
+        gate_policy = gate_metrics.get(ident.scenario_dir) or gate_metrics.get(ident.policy, {})
+        step_rows.extend(_load_step_rows(scenario_dir, ident, gate_policy))
 
     summary_rows = _summarise_rows(step_rows)
     comparison_rows = _comparison_rows(summary_rows)
