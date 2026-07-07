@@ -212,17 +212,54 @@ preclearance_floor_reason
 
 其中 `risk_by_conflict_distance.py` 只在 solver 实际使用 adaptive risk 时统计 floor active/applied，避免 fixed-static policy 的 diagnostic mapping 被误读为实际 solver 约束。
 
-下一步必须先跑 single-init sanity check，而不是直接跑 5-init：
+Stage 1C sanity check 结果：
 
 ```text
-期望 smpc_var_risk:
+result = 20260707_193121_final_dissertation
+
+required policies:
+  smpc_var_risk:   PASS, solver_failure = 0, footprint collision = False, yield_ok = True
+  smpc_fixed_risk: PASS, solver_failure = 0, footprint collision = False, yield_ok = True
+
+pre_clearance approach:
+  var risk tightening   = 1.68
+  fixed risk tightening = 1.64
+  var - fixed           = +0.04
+
+pre_clearance critical:
+  var risk tightening   = 1.80
+  fixed risk tightening = 1.64
+  var - fixed           = +0.16
+
+post_clearance critical / near:
+  var risk tightening   = 1.2816
+  fixed risk tightening = 1.64
+  var - fixed           = -0.3584
+```
+
+因此后续报告 adaptive risk 贡献时，必须使用 `clearance_phase` 拆分后的统计：
+
+```text
+pre_clearance:
+  证明 adaptive-variable-risk 在 target 尚未清空冲突区前更保守；
+
+post_clearance:
+  证明 adaptive-variable-risk 在 target 清空后可以放松，不继续保持 fixed risk 的保守程度。
+```
+
+不能再只使用 `critical` 或 `near` 的全 bucket mean，因为这会把 pre-clearance risk floor 和 post-clearance relaxed risk 混在一起，导致结论被平均值稀释。
+
+single-init sanity check 已通过。下一步可以进入 5-init precheck，但必须继续使用 `clearance_phase` 拆分后的 summary 判断 adaptive-risk 贡献：
+
+```text
+已验证 smpc_var_risk:
   solver_failure = 0
   footprint collision = False
   yield_ok = True
-  approach/critical/near preclearance_floor_applied_frac > 0
-  critical/near risk_tightening_mean > fixed_static 1.64
+  approach/critical pre_clearance preclearance_floor_applied_frac = 1
+  critical pre_clearance risk_tightening_mean = 1.80 > fixed_static 1.64
 
-期望 smpc_fixed_risk:
+已验证 smpc_fixed_risk:
   solver_failure = 0
   preclearance_floor_applied_frac = 0
   solver_risk_mode = fixed_static

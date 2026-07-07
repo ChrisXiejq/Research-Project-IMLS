@@ -39,6 +39,7 @@ STEP_COLUMNS = [
     "rolling_caution_active",
     "emergency_brake_active",
     "target_cleared_conflict",
+    "clearance_phase",
     "adaptive_risk_enabled",
     "solver_uses_adaptive_risk",
     "solver_risk_mode",
@@ -77,6 +78,7 @@ SUMMARY_COLUMNS = [
     "initial",
     "policy",
     "bucket",
+    "clearance_phase",
     "n_steps",
     "sim_time_start_s",
     "sim_time_end_s",
@@ -115,6 +117,7 @@ COMPARISON_COLUMNS = [
     "scenario",
     "initial",
     "bucket",
+    "clearance_phase",
     "var_steps",
     "fixed_steps",
     "var_minus_fixed_risk_tightening_mean",
@@ -382,6 +385,9 @@ def _extract_step_row(
     if solver_uses_adaptive is None:
         solver_uses_adaptive = bool(str(solver_risk_mode) == "adaptive_variable")
 
+    target_cleared_conflict = bool(ystatus.get("target_cleared_conflict", False))
+    clearance_phase = "post_clearance" if target_cleared_conflict else "pre_clearance"
+
     return {
         "scenario_dir": ident.scenario_dir,
         "scenario": ident.scenario,
@@ -401,7 +407,8 @@ def _extract_step_row(
             and not ystatus.get("hard_stop_required", False)
         ),
         "emergency_brake_active": bool(emergency),
-        "target_cleared_conflict": bool(ystatus.get("target_cleared_conflict", False)),
+        "target_cleared_conflict": target_cleared_conflict,
+        "clearance_phase": clearance_phase,
         "adaptive_risk_enabled": bool(adaptive.get("enabled", False)),
         "solver_uses_adaptive_risk": bool(solver_uses_adaptive),
         "solver_risk_mode": solver_risk_mode,
@@ -511,14 +518,27 @@ def _diff(var_value: Any, fixed_value: Any) -> Optional[float]:
 def _summarise_rows(step_rows: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     grouped: Dict[Tuple[Any, ...], List[Dict[str, Any]]] = defaultdict(list)
     for row in step_rows:
-        key = (row["scenario"], row["initial"], row["policy"], row["bucket"])
+        key = (
+            row["scenario"],
+            row["initial"],
+            row["policy"],
+            row["bucket"],
+            row["clearance_phase"],
+        )
         grouped[key].append(row)
 
     summary: List[Dict[str, Any]] = []
     bucket_order = {"far": 0, "approach": 1, "critical": 2, "near": 3, "unknown": 4}
-    for (scenario, initial, policy, bucket), rows in sorted(
+    clearance_phase_order = {"pre_clearance": 0, "post_clearance": 1}
+    for (scenario, initial, policy, bucket, clearance_phase), rows in sorted(
         grouped.items(),
-        key=lambda item: (item[0][0], item[0][1], item[0][2], bucket_order.get(item[0][3], 99)),
+        key=lambda item: (
+            item[0][0],
+            item[0][1],
+            item[0][2],
+            bucket_order.get(item[0][3], 99),
+            clearance_phase_order.get(item[0][4], 99),
+        ),
     ):
         summary.append(
             {
@@ -526,6 +546,7 @@ def _summarise_rows(step_rows: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]
                 "initial": initial,
                 "policy": policy,
                 "bucket": bucket,
+                "clearance_phase": clearance_phase,
                 "n_steps": len(rows),
                 "sim_time_start_s": _min(r.get("sim_time_s") for r in rows),
                 "sim_time_end_s": _max(r.get("sim_time_s") for r in rows),
@@ -566,14 +587,25 @@ def _summarise_rows(step_rows: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]
 def _comparison_rows(summary_rows: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     grouped: Dict[Tuple[Any, ...], Dict[str, Dict[str, Any]]] = defaultdict(dict)
     for row in summary_rows:
-        key = (row.get("scenario"), row.get("initial"), row.get("bucket"))
+        key = (
+            row.get("scenario"),
+            row.get("initial"),
+            row.get("bucket"),
+            row.get("clearance_phase"),
+        )
         grouped[key][str(row.get("policy"))] = row
 
     rows: List[Dict[str, Any]] = []
     bucket_order = {"far": 0, "approach": 1, "critical": 2, "near": 3, "unknown": 4}
-    for (scenario, initial, bucket), policies in sorted(
+    clearance_phase_order = {"pre_clearance": 0, "post_clearance": 1}
+    for (scenario, initial, bucket, clearance_phase), policies in sorted(
         grouped.items(),
-        key=lambda item: (item[0][0], item[0][1], bucket_order.get(item[0][2], 99)),
+        key=lambda item: (
+            item[0][0],
+            item[0][1],
+            bucket_order.get(item[0][2], 99),
+            clearance_phase_order.get(item[0][3], 99),
+        ),
     ):
         var_row = policies.get("smpc_var_risk")
         fixed_row = policies.get("smpc_fixed_risk")
@@ -584,6 +616,7 @@ def _comparison_rows(summary_rows: Sequence[Dict[str, Any]]) -> List[Dict[str, A
                 "scenario": scenario,
                 "initial": initial,
                 "bucket": bucket,
+                "clearance_phase": clearance_phase,
                 "var_steps": var_row.get("n_steps"),
                 "fixed_steps": fixed_row.get("n_steps"),
                 "var_minus_fixed_risk_tightening_mean": _diff(
@@ -726,6 +759,7 @@ def _write_markdown(
         "initial",
         "policy",
         "bucket",
+        "clearance_phase",
         "n_steps",
         "ego_dconf_mean",
         "supervisor_active_frac",
@@ -749,6 +783,7 @@ def _write_markdown(
         "scenario",
         "initial",
         "bucket",
+        "clearance_phase",
         "var_minus_fixed_risk_tightening_mean",
         "var_minus_fixed_diagnostic_risk_tightening_mean",
         "var_minus_fixed_floor_applied_frac",
@@ -784,9 +819,10 @@ def _write_markdown(
         f.write("## Interpretation Notes\n\n")
         f.write("- `risk_tightening_mean/max` and `risk_target_prob_mean` show the risk values actually used by the solver when new logs provide `solver_current_*`; older logs fall back to legacy `applied_*`/adaptive fields.\n")
         f.write("- `diagnostic_risk_tightening_mean` records the adaptive severity mapping even for fixed-risk runs; it is diagnostic and may differ from the actual solver risk.\n")
+        f.write("- `clearance_phase` separates pre-clearance interaction from post-clearance recovery. Use `pre_clearance` rows to evaluate whether adaptive risk is more conservative before the target clears the conflict zone.\n")
         f.write("- `hard_stop_override_frac` and `final_control_overridden_frac` show how much the rule-aware supervisor, rather than the raw SMPC action, controlled the final command.\n")
         f.write("- `policy_min_footprint_separation` is the policy-level post-CARLA gate minimum repeated for context; this script does not estimate per-step footprints.\n")
-        f.write("- A useful adaptive-risk contribution should appear as stronger tightening in `critical`/`near` buckets without increasing solver failures or supervisor override reliance.\n")
+        f.write("- A useful adaptive-risk contribution should appear as stronger pre-clearance tightening in `approach`/`critical`/`near` buckets without increasing solver failures or supervisor override reliance, followed by relaxed post-clearance risk when the target has cleared.\n")
 
 
 def run(results_dir: str, policies: Sequence[str]) -> Dict[str, str]:
