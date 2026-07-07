@@ -678,3 +678,352 @@ policies = smpc_var_risk, smpc_fixed_risk
 4. risk_by_conflict_distance_comparison.csv 是否显示 var/fixed solver risk 差异；
 5. 视频表现是否保持稳定。
 ```
+
+## Corrected Risk-Comparison Milestone
+
+已将以下结果定义为新的机制分析 milestone：
+
+```text
+result: 20260707_190600_final_dissertation
+code commit: 9e3ffddee6dacbea22c97fc83f1df096e4516d66
+short commit: 9e3ffdd
+tag: corrected-risk-comparison-20260707
+```
+
+它的定位不是“视觉停车距离最优”，而是：
+
+```text
+第一个完成 fixed-static vs adaptive-variable 正确对照的 milestone。
+```
+
+结果：
+
+```text
+smpc_var_risk:
+  PASS
+  solver_failure = 0.000
+  solver_risk_mode = adaptive_variable
+  solver_uses_adaptive_risk = 1
+  center dmin ≈ 5.046m
+  min footprint separation ≈ 1.678m
+
+smpc_fixed_risk:
+  PASS
+  solver_failure = 0.000
+  solver_risk_mode = fixed_static
+  solver_uses_adaptive_risk = 0
+  center dmin ≈ 5.046m
+  min footprint separation ≈ 1.678m
+```
+
+关键解释：
+
+```text
+两者最终轨迹仍然相似，不是因为 adaptive/fixed 没有分开，
+而是因为 critical bucket 中 yield supervisor 覆盖最终控制的比例仍约 0.512。
+```
+
+因此这次结果支持：
+
+```text
+fixed-risk 对照口径已经修正；
+rule-aware supervisor 遮蔽了部分最终轨迹差异；
+adaptive risk 的贡献需要通过 solver risk、nominal control 和多 init 统计证明。
+```
+
+## 修缮后的论文论点
+
+### 论文主问题
+
+本论文不应证明：
+
+```text
+adaptive-variable-risk 单独让 EV 在无信号路口安全停车让行。
+```
+
+更准确的主问题应是：
+
+```text
+在 multimodal prediction SMPC 框架下，如何把交通规则优先级、conflict-zone interaction severity
+和 chance-constraint risk allocation 结合起来，使 EV 能在无信号 give-way 路口稳定、安全、可解释地让行？
+```
+
+### 核心论点
+
+推荐主论点：
+
+```text
+This dissertation reproduces and adapts the intersection SMPC setting to a right-hand-traffic
+unsignalised give-way scenario, and extends the baseline with a rule-aware safety supervisor
+and interaction-severity-aware adaptive risk allocation. The supervisor guarantees traffic-rule
+safety, while adaptive risk allocation modulates the optimiser's chance-constraint conservatism
+according to the interaction phase. The contribution of adaptive risk is evaluated separately
+from supervisor intervention using corrected fixed-static baselines and conflict-distance
+bucket diagnostics.
+```
+
+中文表述：
+
+```text
+本实验复现并改造了原 SMPC intersection 场景，将其落到右行制无信号让行路口。
+系统由两层组成：rule-aware yield supervisor 负责交通规则和 footprint safety 兜底；
+adaptive-variable-risk 负责在 SMPC 优化层根据 interaction severity 动态调整 chance constraint
+保守程度。论文不把最终停车行为完全归因于 adaptive risk，而是通过 corrected fixed-static
+对照、conflict-distance 分段统计和 sensitivity/ablation 来证明 adaptive risk 的优化层贡献。
+```
+
+### 相比原 SMPC 论文的定位
+
+可以主张的复现部分：
+
+```text
+1. 复现 intersection 类型任务，而不是 lane change 或 hardware/VIL；
+2. 保留 multimodal prediction + SMPC chance constraints 的核心思想；
+3. 使用 paper ego_init_01 和迁移的 paper 50 initial conditions 作为扩展基础；
+4. 比较 SMPC variable/adaptive risk 与 fixed/static risk。
+```
+
+可以主张的扩展/创新部分：
+
+```text
+1. 将原 intersection 设置改造成右行制 unsignalised give-way 语义：
+   EV 左转让行，TV 直行优先。
+
+2. 引入 rule-aware yield supervisor：
+   解决纯 SMPC 在 CARLA closed-loop 中可能无法稳定满足交通规则的问题。
+
+3. 引入 footprint-aware post-CARLA safety gate：
+   不只看中心距离，还 replay footprint collision。
+
+4. 修正 fixed-risk 对照口径：
+   fixed-risk 不再接收 adaptive risk_tightening / target_prob。
+
+5. 引入 risk-by-conflict-distance 诊断：
+   把 optimizer risk、nominal control、final supervisor override 分开统计，
+   避免把 supervisor 的贡献误归因给 adaptive risk。
+```
+
+不能直接主张的内容：
+
+```text
+1. 不能说 adaptive risk 单独导致安全让行；
+2. 不能说当前单 init 已证明 adaptive risk 明显优于 fixed risk；
+3. 不能说 adaptive risk 是单调随 ego conflict distance 变近而更严格。
+```
+
+当前数据实际显示：
+
+```text
+approach bucket:
+  var risk tightening ≈ 1.676
+  fixed risk tightening = 1.640
+  var slightly more conservative
+
+critical bucket:
+  var risk tightening ≈ 1.498
+  fixed risk tightening = 1.640
+  var less conservative
+
+near bucket:
+  var risk tightening ≈ 1.282
+  fixed risk tightening = 1.640
+  var further relaxed
+```
+
+所以正确解释是：
+
+```text
+adaptive_interaction_severity 不是纯 distance-monotonic profile。
+它会根据 interaction severity、target clearance 和 phase 动态调整风险；
+当目标车已经接近或完成清场时，adaptive risk 会放松，而不是继续机械收紧。
+```
+
+## 后续对照实验设计
+
+### Experiment A：Corrected Single-Init Baseline
+
+目的：
+
+```text
+证明 corrected fixed-static vs adaptive-variable 对照已经成立，并且两个策略都能通过主线 single-init。
+```
+
+配置：
+
+```text
+TV speed = 9.0
+yield_hard_stop_target_distance = 12.0
+yield_hard_stop_conflict_distance = 13.0
+policies = smpc_var_risk, smpc_fixed_risk
+```
+
+已完成：
+
+```text
+20260707_190600_final_dissertation
+```
+
+结论：
+
+```text
+两者均 PASS，solver_failure=0；
+但最终轨迹相似，因为 critical supervisor override≈0.512。
+```
+
+论文用途：
+
+```text
+作为机制分析和后续多 init 的 corrected baseline。
+```
+
+### Experiment B：5-init / 10-init Corrected Aggregate
+
+目的：
+
+```text
+判断 corrected fixed-static 与 adaptive-variable 在多个 initial conditions 下是否出现统计差异。
+```
+
+指标：
+
+```text
+completion rate
+yield pass rate
+footprint collision rate
+solver failure rate
+min footprint separation
+center dmin
+completion time
+comfort metrics
+critical bucket solver risk
+critical bucket nominal accel
+critical bucket supervisor override fraction
+```
+
+可能结果解释：
+
+```text
+如果 var risk 成功率更高或 solver failure 更低：
+  支持 adaptive risk 提升稳定性。
+
+如果 var/fixed 都通过且最终轨迹接近：
+  支持 rule-aware SMPC baseline 稳定，但 adaptive risk 优势在强 supervisor 下不明显。
+
+如果 fixed risk 失败而 var risk 通过：
+  强支持 adaptive-variable-risk 的实用价值。
+
+如果两者都失败：
+  说明当前 supervisor/risk 配置还不足以扩展到 harder initial conditions。
+```
+
+### Experiment C：Supervisor-Intervention Analysis
+
+目的：
+
+```text
+证明最终轨迹差异为什么小，以及 adaptive risk 的贡献是否被 supervisor 遮蔽。
+```
+
+使用已有输出：
+
+```text
+risk_by_conflict_distance_summary.md
+risk_by_conflict_distance_comparison.csv
+```
+
+需要报告：
+
+```text
+critical bucket final_control_overridden_frac
+hard_stop_override_frac
+solver risk tightening
+nominal_accel_before_override
+final_accel_after_override
+```
+
+预期结论：
+
+```text
+当 override fraction 高时，视频和 final trajectory 差异会变小；
+adaptive risk 的贡献应从 nominal control / solver risk 统计中观察。
+```
+
+### Experiment D：Target-Distance Sensitivity / Harder Setting
+
+目的：
+
+```text
+在更紧的 supervisor threshold 下观察 var/fixed 差异。
+```
+
+已有候选：
+
+```text
+20260707_001331_final_dissertation
+target_distance = 11.5
+```
+
+观察：
+
+```text
+var risk solver_failure = 0
+fixed risk 出现 solver_failure
+```
+
+论文用途：
+
+```text
+作为 sensitivity evidence，而不是主 baseline。
+```
+
+注意：
+
+```text
+不能用它替代主线，因为主线要求两个 required policies 都稳定。
+```
+
+### Experiment E：Soft-Yield Ablation
+
+只在 A/B/C 完成后考虑。
+
+目的：
+
+```text
+减弱 supervisor 遮蔽，观察 adaptive risk 独立贡献。
+```
+
+原则：
+
+```text
+不直接删除 emergency fallback；
+只延迟或减弱 hard-stop final-control override；
+保留真正 imminent collision 的 safety fallback。
+```
+
+接受标准：
+
+```text
+var risk 比 fixed risk 有更低 solver failure、更大 planned margin 或更少 supervisor intervention；
+不能出现 footprint collision 或 yield order regression。
+```
+
+## 立即执行路线
+
+当前已经完成：
+
+```text
+1. 修正 fixed-risk 对照；
+2. 增加 risk-by-conflict-distance 诊断；
+3. 验证 20260707_190600 corrected single-init baseline；
+4. 确认当前 adaptive risk 是 interaction-severity-aware，而不是 distance-monotonic。
+```
+
+下一步应执行：
+
+```text
+1. 给当前 corrected milestone 打 tag；
+2. 把 20260707_190600 记录进 changelog；
+3. 保持控制逻辑不再继续调参；
+4. 跑 5-init corrected aggregate；
+5. 用 risk_by_conflict_distance_summary 和 comparison 文件分析多 init 结果。
+```
