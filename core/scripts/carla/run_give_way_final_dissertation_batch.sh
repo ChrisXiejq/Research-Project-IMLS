@@ -64,5 +64,6 @@ cd "${SCRIPT_DIR}"
   --postprocess_plot_init 1
 
 "${PYTHON_BIN}" "${CORE_DIR}/scripts/postcarla_trajectory_gate.py" "${RESULTS_DIR}"
+"${PYTHON_BIN}" "${CORE_DIR}/scripts/risk_by_conflict_distance.py" "${RESULTS_DIR}"
 
 echo "Final dissertation batch complete: ${RESULTS_DIR}"

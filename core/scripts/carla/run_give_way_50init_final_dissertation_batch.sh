@@ -71,5 +71,6 @@ fi
   --postprocess_no_plots
 
 "${PYTHON_BIN}" "${CORE_DIR}/scripts/postcarla_trajectory_gate.py" "${RESULTS_DIR}"
+"${PYTHON_BIN}" "${CORE_DIR}/scripts/risk_by_conflict_distance.py" "${RESULTS_DIR}"
 
 echo "50-init final dissertation batch complete: ${RESULTS_DIR}"

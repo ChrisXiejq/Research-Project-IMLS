@@ -2538,10 +2538,31 @@ class SMPCAgent(object):
                     update_dict["probs"] = joint_probs / np.sum(joint_probs)
 
             adaptive_risk = self._adaptive_risk_allocation(pre_solve_yield_status)
-            if adaptive_risk.get("enabled"):
-                update_dict["risk_tightening"] = adaptive_risk["tightening"]
-                update_dict["risk_target_prob"] = adaptive_risk["target_prob"]
-                update_dict["adaptive_risk_allocation"] = adaptive_risk
+            solver_uses_adaptive_risk = bool(
+                adaptive_risk.get("enabled")
+                and not self.fixed_risk
+                and not self.ol_flag
+                and not self.obca_flag
+            )
+            base_solver_tight = float(getattr(self.SMPC, "tight", smpc.UPSTREAM_CODE_TIGHTENING))
+            base_solver_target_prob = float(
+                getattr(self.SMPC, "target_prob", smpc.UPSTREAM_CODE_TARGET_PROB)
+            )
+            solver_risk_mode = "adaptive_variable" if solver_uses_adaptive_risk else "fixed_static"
+            solver_current_tight = (
+                float(adaptive_risk["tightening"]) if solver_uses_adaptive_risk else base_solver_tight
+            )
+            solver_current_target_prob = (
+                float(adaptive_risk["target_prob"]) if solver_uses_adaptive_risk else base_solver_target_prob
+            )
+            solver_risk_allocation = None
+            if solver_uses_adaptive_risk:
+                solver_risk_allocation = dict(adaptive_risk)
+                solver_risk_allocation["solver_applied"] = True
+                solver_risk_allocation["solver_risk_mode"] = solver_risk_mode
+                update_dict["risk_tightening"] = solver_current_tight
+                update_dict["risk_target_prob"] = solver_current_target_prob
+                update_dict["adaptive_risk_allocation"] = solver_risk_allocation
 
 
 
@@ -2559,9 +2580,18 @@ class SMPCAgent(object):
                     "risk_profile": self.risk_profile,
                     "tight": getattr(self.SMPC, "tight", None),
                     "target_prob": getattr(self.SMPC, "target_prob", None),
-                    "applied_tight": adaptive_risk["tightening"],
-                    "applied_target_prob": adaptive_risk["target_prob"],
-                    "adaptive": adaptive_risk,
+                    "solver_risk_mode": solver_risk_mode,
+                    "solver_uses_adaptive_risk": bool(solver_uses_adaptive_risk),
+                    "solver_current_tight": solver_current_tight,
+                    "solver_current_target_prob": solver_current_target_prob,
+                    "applied_tight": solver_current_tight,
+                    "applied_target_prob": solver_current_target_prob,
+                    "diagnostic_adaptive": adaptive_risk,
+                    "adaptive": (
+                        dict(adaptive_risk, solver_applied=True, solver_risk_mode=solver_risk_mode)
+                        if solver_uses_adaptive_risk
+                        else dict(adaptive_risk, solver_applied=False, solver_risk_mode=solver_risk_mode)
+                    ),
                 },
                 "collision_envelope": {
                     "d_min": self.d_min,
@@ -2654,7 +2684,11 @@ class SMPCAgent(object):
                     "collision_prob": collision_prob,
                     "reason": bypass_reason,
                     "risk_profile": self.risk_profile,
-                    "adaptive_risk_allocation": adaptive_risk,
+                    "solver_risk_mode": solver_risk_mode,
+                    "current_tight": solver_current_tight,
+                    "current_target_prob": solver_current_target_prob,
+                    "adaptive_risk_allocation": solver_risk_allocation,
+                    "diagnostic_adaptive_risk": adaptive_risk,
                 }
 
             elif self.ol_flag:
