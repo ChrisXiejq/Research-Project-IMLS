@@ -2,28 +2,91 @@
 
 ## 基线快照
 
-这份方案锚定当前稳定仓库状态：
+这份方案当前锚定的推荐基线已经从早期 safe baseline 更新为 phase-aware risk floor 后的 5-init 结果。
+
+当前代码基线：
 
 ```text
-stable commit: 7348b14fae287ba1bba8ee1accb9ada717c4372b
-short commit:  7348b14
-git tag:       stable-giveway-baseline-20260707
-working tree:  生成本方案时为 clean
+current milestone commit: 5cc87afa341b6d819e6760e30e5ccd0f79b73d79
+short commit:             5cc87af
+git tag:                  当前 HEAD 暂无 tag
+working tree:             更新本节时为 clean
 ```
 
-如果后续实验改坏，可以用 tag 回到当前稳定版本：
+历史回退点仍然保留：
+
+```text
+safe baseline tag:
+  stable-giveway-baseline-20260707 -> 7348b14
+
+corrected fixed/adaptive risk comparison:
+  corrected-risk-comparison-20260707 -> 9e3ffdd
+```
+
+如果后续实验改坏，优先从当前 milestone commit 开新分支恢复：
 
 ```bash
-git switch -c recover-stable-giveway stable-giveway-baseline-20260707
+git switch -c recover-phase-aware-risk 5cc87afa341b6d819e6760e30e5ccd0f79b73d79
 ```
 
-如果已经保存好需要保留的实验结果，并且想强制回退当前分支：
+当前推荐实验结果基线：
 
-```bash
-git reset --hard stable-giveway-baseline-20260707
+```text
+single-init sanity check:
+  result = 20260707_193121_final_dissertation
+  status = required policies PASS
+  role   = phase-aware risk floor 机制的单 init 验证
+
+5-init precheck milestone:
+  result = 20260707_195935_5init_phase_floor_final_dissertation
+  status = overall PASS
+  role   = 当前后续 10-init / 50-init 的推荐起点
 ```
 
-当前主线行为应该作为稳定 baseline 保持不变：
+5-init safety gate：
+
+```text
+smpc_var_risk:
+  5/5 PASS
+  solver_failure max = 0.000
+  footprint_collision = False
+  yield_ok = True
+  center_dmin min  = 5.0438 m
+  center_dmin mean = 5.7549 m
+  footprint min    = 1.6750 m
+  footprint mean   = 2.5889 m
+
+smpc_fixed_risk:
+  5/5 PASS
+  solver_failure max = 0.000
+  footprint_collision = False
+  yield_ok = True
+  center_dmin min  = 4.8741 m
+  center_dmin mean = 5.7175 m
+  footprint min    = 1.4717 m
+  footprint mean   = 2.5439 m
+```
+
+5-init phase-aware adaptive risk 证据：
+
+```text
+approach / pre_clearance:
+  var - fixed risk tightening = +0.04
+  var floor applied delta     = +1.0
+
+critical / pre_clearance:
+  var - fixed risk tightening = +0.16
+  var floor applied delta     = +1.0
+  var nominal accel delta     = -0.3063
+
+critical / post_clearance:
+  var - fixed risk tightening = -0.3584
+
+near / post_clearance:
+  var - fixed risk tightening = -0.3584
+```
+
+当前主线配置应该作为 phase-aware baseline 保持不变：
 
 ```text
 TV speed = 9.0 m/s
@@ -36,6 +99,16 @@ yield_stop_decel = -5.0 m/s^2
 yield_emergency_decel = -7.0 m/s^2
 policies = smpc_var_risk, smpc_fixed_risk
 video tail cleanup = enabled
+```
+
+结论：
+
+```text
+20260707_195935_5init_phase_floor_final_dissertation
+是当前最好的 5-init milestone candidate。
+
+之后的扩展实验应基于当前代码和配置继续跑，不再回到 20260707_190600 或更早结果作为主线。
+旧结果只作为历史 ablation / 修正过程记录使用。
 ```
 
 ## 目标
@@ -249,17 +322,19 @@ post_clearance:
 
 不能再只使用 `critical` 或 `near` 的全 bucket mean，因为这会把 pre-clearance risk floor 和 post-clearance relaxed risk 混在一起，导致结论被平均值稀释。
 
-single-init sanity check 已通过。下一步可以进入 5-init precheck，但必须继续使用 `clearance_phase` 拆分后的 summary 判断 adaptive-risk 贡献：
+single-init 和 5-init precheck 均已通过。后续继续使用 `clearance_phase` 拆分后的 summary 判断 adaptive-risk 贡献：
 
 ```text
-已验证 smpc_var_risk:
+5-init 已验证 smpc_var_risk:
+  5/5 PASS
   solver_failure = 0
   footprint collision = False
   yield_ok = True
   approach/critical pre_clearance preclearance_floor_applied_frac = 1
   critical pre_clearance risk_tightening_mean = 1.80 > fixed_static 1.64
 
-已验证 smpc_fixed_risk:
+5-init 已验证 smpc_fixed_risk:
+  5/5 PASS
   solver_failure = 0
   preclearance_floor_applied_frac = 0
   solver_risk_mode = fixed_static
@@ -354,12 +429,13 @@ diagnostic ablation:
 
 ## Stage 4：多 init 证据
 
-单 init 稳定后，再扩展：
+当前扩展状态：
 
 ```text
-5-init precheck
-10-init precheck
-50-init full experiment
+single-init sanity check: passed
+5-init precheck:          passed
+10-init precheck:         next recommended step
+50-init full experiment:  after 10-init remains stable
 ```
 
 主对比只保留：
@@ -388,17 +464,17 @@ risk tightening by conflict-distance bucket
 
 ## 推荐下一步
 
-优先实现 Stage 1：
+当前不建议继续改控制逻辑。下一步应先把已经通过的 5-init 作为 milestone 固化，然后做 10-init precheck：
 
 ```text
-1. 新增一个 postprocess 脚本，读取 smpc_debug_steps.jsonl 和 scenario_steps.csv
-2. 输出 risk_by_conflict_distance.csv
-3. 输出 var-risk vs fixed-risk 的 summary markdown
-4. 不改任何控制逻辑
-5. 用当前 single-init baseline 跑一次验证
+1. commit 当前文档更新
+2. 给 5-init milestone 打 tag
+3. 在服务器跑 10-init precheck：`core/scripts/carla/run_give_way_10init_final_dissertation_batch.sh`
+4. 拉取 10-init 结果，用 clearance_phase summary 分析
+5. 如果 10-init 仍然全部 PASS，再进入 50-init full experiment
 ```
 
-这样可以在不冒险破坏当前最好 baseline 的情况下，直接为 adaptive-variable-risk 的机制贡献提供数据证据。
+这样可以避免在 5-init 刚通过后继续调整参数导致 baseline 漂移。当前主要目标已经从“修控制”转为“扩大样本证明机制稳定”。
 
 ## Stage 1 实现状态
 
@@ -436,10 +512,10 @@ core/scripts/carla/run_give_way_50init_final_dissertation_batch.sh
 
 ## Stage 1 现状分析
 
-已用 Stage 1 脚本分析以下关键结果：
+以下是 phase-aware risk floor 之前的历史诊断结果，用于解释为什么后来需要修正 fixed-risk 对照和 adaptive-risk 映射。它们不再是当前推荐 baseline：
 
 ```text
-20260706_000724_final_dissertation  当前最稳 milestone，TV≈6，target_distance=12.0，conflict_distance=13.5
+20260706_000724_final_dissertation  早期稳定 milestone，TV≈6，target_distance=12.0，conflict_distance=13.5
 20260706_235540_final_dissertation  TV=9，target_distance=12.0，conflict_distance=13.0
 20260707_001331_final_dissertation  TV=9，target_distance=11.5，conflict_distance=13.0
 20260707_102456_final_dissertation  TV=9，target_distance=11.75，conflict_distance=13.0
@@ -509,9 +585,9 @@ smpc_fixed_risk:
 
 这说明在更激进的 target-distance threshold 下，`var risk` 的稳定性可能优于 `fixed risk`。但这组配置让 fixed-risk 出现 solver failure，因此不适合作为主 baseline，只适合作为 adaptive-risk sensitivity / ablation 证据。
 
-### 4. 当前最稳主线仍应保持保守
+### 4. 历史主线为什么选择保守配置
 
-目前主线应继续采用：
+这些历史结果说明主线应优先采用更保守、更稳定的配置，而不是用更激进的停车距离制造 var/fixed 差异：
 
 ```text
 TV speed = 9.0
@@ -526,7 +602,7 @@ policies = smpc_var_risk, smpc_fixed_risk
 
 ```text
 1. target_distance=11.5/11.75 虽然能制造 var/fixed 差异，但 fixed-risk 出现 solver failure；
-2. target_distance=12.0 更适合进入 5-init / 10-init precheck；
+2. target_distance=12.0 更适合进入多 init precheck；
 3. adaptive-risk 贡献应通过诊断和 ablation 证明，不应该通过牺牲主线稳定性来证明。
 ```
 
