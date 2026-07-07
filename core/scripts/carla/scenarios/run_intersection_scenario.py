@@ -128,7 +128,7 @@ class VehicleParams:
     yield_emergency_decel : float = -7.0
     yield_emergency_jerk_limit : float = 10.0
     yield_emergency_conflict_margin : float = 1.25
-    yield_hard_stop_target_distance : float = 11.5
+    yield_hard_stop_target_distance : float = 11.75
     yield_hard_stop_conflict_distance : float = 13.0
     yield_conflict_radius : float = 4.0
     yield_stop_buffer_distance : float = 7.0
@@ -571,6 +571,7 @@ class RunIntersectionScenario:
         self.timeout   = carla_params.timeout_period
         self.carla_fps = carla_params.fps
         self.max_iters = self.carla_fps*30 # limit scenario run to 30 seconds max
+        self.completion_tail_iters = max(1, int(round(self.carla_fps * 1.0)))
 
         # Needed for OpenCV/Carla world visualization.
         self.viz_params = drone_viz_params
@@ -663,7 +664,8 @@ class RunIntersectionScenario:
                 for _ in range(2):
                     sync_mode.tick(timeout=self.timeout)
 
-                # Loop until all vehicles have reached their goal or we've exceeded self.max_iters.
+                dynamic_completed_at = None
+                # Loop until all non-static vehicles have reached their goal or we've exceeded self.max_iters.
                 for loop_step in range(self.max_iters):
                     tick_data = sync_mode.tick(timeout=self.timeout)
                     snap = tick_data[0]
@@ -679,7 +681,7 @@ class RunIntersectionScenario:
 
                     # Run policies for each agent.
                     t_elapsed = snap.elapsed_seconds
-                    completed = True
+                    dynamic_completed = True
                     ego_feasible = None
                     ego_solve_time = None
                     ego_control = None
@@ -688,6 +690,7 @@ class RunIntersectionScenario:
                     target0_control = None
 
                     for idx_act, (act, policy) in enumerate(zip(self.vehicle_actors, self.vehicle_policies)):
+                        vehicle_role = self.vehicle_params_list[idx_act].role
                         policy_result = policy.run_step(pred_dict)
                         if len(policy_result) == 6:
                             control, z0, u0, is_feasible, solve_time, collision_prob = policy_result
@@ -710,7 +713,8 @@ class RunIntersectionScenario:
                             ego_traffic_light_forced_stop = traffic_light_forced_stop
                         if self.tv_vehicle_idxs and idx_act == self.tv_vehicle_idxs[0]:
                             target0_control = control
-                        if not policy.done():
+                        policy_done = policy.done()
+                        if not policy_done:
                             z0 = np.append(t_elapsed, z0) # add the Carla timestamp
                             act_key = f"{act.attributes['role_name']}_{idx_act}"
                             self.results_dict[act_key]["state_trajectory"].append(z0)
@@ -719,8 +723,9 @@ class RunIntersectionScenario:
                             self.results_dict[act_key]["solve_times"].append(solve_time)
                             self.results_dict[act_key]["collision_probs"].append(collision_prob)
 
-                        # true at the end of the loop only if all agents are done or if iter_ctr>=max_iters
-                        completed = completed and policy.done()
+                        # Static parked actors should not keep the rollout/video alive.
+                        if vehicle_role != "static":
+                            dynamic_completed = dynamic_completed and policy_done
                         act.apply_control(control)
 
                         if idx_act == self.ego_vehicle_idx:
@@ -806,9 +811,15 @@ class RunIntersectionScenario:
                         if self.viz_params.save_avi:
                             writer.write(img_drone)
 
-                    if completed:
-                        # All cars reached their destinations, end before self.max_iters.
-                        break
+                    if dynamic_completed:
+                        if dynamic_completed_at is None:
+                            dynamic_completed_at = loop_step
+                        if loop_step - dynamic_completed_at >= self.completion_tail_iters:
+                            # All moving cars reached their destinations; keep a short visual tail
+                            # and end before the fixed 30s cap.
+                            break
+                    else:
+                        dynamic_completed_at = None
 
                 # Save results and mark successful completion.
                 for act_key in self.results_dict:
@@ -848,7 +859,7 @@ class RunIntersectionScenario:
                     carla_fps=self.carla_fps,
                     results_dict=getattr(self, "results_dict", None),
                     error=run_error,
-                    extra=extra,
+                    extra={**extra, "completion_tail_iters": self.completion_tail_iters},
                 )
             except Exception as exc:
                 log.error("write_scenario_run_summary failed: %s", exc)

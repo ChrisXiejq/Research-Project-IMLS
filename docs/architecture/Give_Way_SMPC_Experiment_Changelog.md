@@ -461,3 +461,9 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Debug evidence showed the hard-stop trigger was still target-distance dominated: first hard-stop had `hard_stop_target_close=True`, `hard_stop_conflict_close=False`, and target dconf≈`11.6-11.8m`.
     - Local follow-up trial: reduce only `yield_hard_stop_target_distance=12.0m -> 11.5m`. Keep TV speed `9.0m/s`, `yield_hard_stop_conflict_distance=13.0m`, `yield_stop_buffer_distance=7.0m`, `yield_caution_decel=-4.0`, `yield_reference_decel=-3.75`, `yield_stop_decel=-5.0`, and `yield_emergency_decel=-7.0`.
     - Rationale: `11.5m` is a conservative midpoint between the stable `12.0m` target-distance threshold and the rejected TV=10.0m/s, target-distance `10.5m` trial that introduced non-zero solver failures. Validation must reject the trial if solver failure becomes non-zero or footprint margin drops sharply.
+
+58. Conservative target-distance midpoint and video tail cleanup:
+    - `20260707_001331` showed that `yield_hard_stop_target_distance=11.5m` moved `smpc_var_risk` release close to `dconf≈6.25m`, but `smpc_fixed_risk` had one solver failure. Move to `yield_hard_stop_target_distance=11.75m` as a conservative midpoint between the zero-failure `12.0m` setting and the more aggressive `11.5m` sensitivity result.
+    - Keep TV speed `9.0m/s`, `yield_hard_stop_conflict_distance=13.0m`, `yield_stop_buffer_distance=7.0m`, `yield_caution_decel=-4.0`, and `yield_reference_decel=-3.75`.
+    - The video rollout could continue to the fixed 30s cap after the useful scene ended because static parked actors never report `done()`. Update the rollout loop so only non-static vehicles participate in the completion condition.
+    - After all non-static vehicles complete, keep a short one-second visual tail and then stop recording. This removes the idle final video segment while preserving post-CARLA completion and safety metrics.
