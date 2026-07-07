@@ -1027,3 +1027,24 @@ var risk 比 fixed risk 有更低 solver failure、更大 planned margin 或更�
 4. 跑 5-init corrected aggregate；
 5. 用 risk_by_conflict_distance_summary 和 comparison 文件分析多 init 结果。
 ```
+
+已生成 5-init precheck 脚本：
+
+```text
+core/scripts/carla/run_give_way_5init_final_dissertation_batch.sh
+```
+
+该脚本使用：
+
+```text
+scenario_glob = scenario_uk_give_way.json
+init_glob = paper_intersection_50/ego_init_0[1-5].json
+policies = smpc_var_risk, smpc_fixed_risk
+risk_profile = adaptive_interaction_severity
+camera = disabled by default
+plots = disabled
+postcarla_trajectory_gate = enabled
+risk_by_conflict_distance = enabled
+```
+
+它是 10-init / 50-init 前的下一步执行入口。
