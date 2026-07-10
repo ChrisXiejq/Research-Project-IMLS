@@ -10,6 +10,20 @@ RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_5init_fin
 PYTHON_BIN="${PYTHON_BIN:-python}"
 ENABLE_CAMERA_VIZ="${ENABLE_CAMERA_VIZ:-0}"
 
+if [[ -z "${CARLA_ROOT:-}" ]]; then
+  cat >&2 <<'EOF'
+ERROR: CARLA_ROOT is not set.
+
+Please export the CARLA 0.9.14 root before running this batch, for example:
+  export CARLA_ROOT=/root/autodl-tmp/CARLA_0.9.14
+
+If you are unsure of the path, locate it with:
+  find /root -maxdepth 4 -type f -name CarlaUE4.sh 2>/dev/null
+then export CARLA_ROOT to the directory that contains CarlaUE4.sh.
+EOF
+  exit 2
+fi
+
 mkdir -p "${RESULTS_DIR}"
 START_EPOCH="$(date +%s)"
 START_TIME="$(date '+%Y-%m-%dT%H:%M:%S%z')"

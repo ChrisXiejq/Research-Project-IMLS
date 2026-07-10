@@ -246,15 +246,20 @@ def get_metric_dataframe(results_dir):
             re.split(re.escape(policy), scenario_dir, maxsplit=1)[0] + "notv",
             "scenario_result.pkl",
         )
-        if not os.path.exists(notv_pkl_path):
-            raise RuntimeError(f"Unable to find a notv scenario_result.pkl in location: {notv_pkl_path}")
 
-        # Load scenario dict for this policy and the notv case (for Hausdorff distance).
-        sr      = load_scenario_result(pkl_path)
-        notv_sr = load_scenario_result(notv_pkl_path)
+        # Multi-init dissertation batches intentionally run only var/fixed risk.
+        # Keep paper metrics available in that setting and leave notv-relative
+        # metrics as NaN instead of failing the whole postprocess.
+        sr = load_scenario_result(pkl_path)
 
         metrics_dict = sr.compute_metrics()
-        metrics_dict["hausdorff_dist_notv"] = sr.compute_ego_hausdorff_dist(notv_sr)
+        if os.path.exists(notv_pkl_path):
+            notv_sr = load_scenario_result(notv_pkl_path)
+            metrics_dict["hausdorff_dist_notv"] = sr.compute_ego_hausdorff_dist(notv_sr)
+            metrics_dict["notv_reference_available"] = True
+        else:
+            metrics_dict["hausdorff_dist_notv"] = np.nan
+            metrics_dict["notv_reference_available"] = False
         dmins = metrics_dict.pop("dmins_per_TV")
         if dmins:
             metrics_dict["dmin_TV"] = np.amin(dmins) # take the closest distance to any TV in the scene
@@ -289,6 +294,8 @@ def write_paper_summary(results_dir, df_full, df_final):
         "avg_longitudinal_jerk",
         "avg_lateral_jerk",
         "hausdorff_dist_notv",
+        "notv_reference_available",
+        "notv_reference_available_for_norm",
         "completion_goal_dist",
         "completion_ey",
         "completion_s_to_end",
@@ -313,6 +320,10 @@ def write_paper_summary(results_dir, df_full, df_final):
     with open(md_path, "w") as f:
         f.write("# Paper Metrics Summary\n\n")
         f.write("This file is generated automatically after the CARLA batch run.\n\n")
+        f.write(
+            "Note: var/fixed-only scaling batches may not include `notv` reference runs. "
+            "In that case `hausdorff_dist_notv` is empty and `*_norm` columns keep the raw metric values.\n\n"
+        )
         f.write("## Aggregate Metrics\n\n")
         f.write(_to_markdown(summary))
         f.write("\n\n")
@@ -705,7 +716,11 @@ def normalize_by_notv(df):
     df = df.assign( max_lateral_acceleration_norm = df.max_lateral_acceleration,
                     completion_time_norm = df.completion_time)
 
-    # Do the normalization per scenario / ego initial condition.
+    df = df.assign(notv_reference_available_for_norm=False)
+
+    # Do the normalization per scenario / ego initial condition when a notv
+    # reference exists. Var/fixed-only scaling batches keep raw values in the
+    # *_norm columns so aggregate paper metrics can still be generated.
     scene_inits = set( [f"{s}_{i}" for (s,i) in zip(df.scenario, df.initial)])
 
     for scene_init in scene_inits:
@@ -714,7 +729,7 @@ def normalize_by_notv(df):
         notv_inds = np.logical_and(s_i_inds, df.policy=="notv")
 
         if np.sum(notv_inds) != 1:
-            raise RuntimeError(f"Unable to find a unique notv execution for scenario {s}, initialization {i}.")
+            continue
 
         notv_ind       = np.where(notv_inds)[0].item()
         notv_lat_accel = df.max_lateral_acceleration[notv_ind]
@@ -725,6 +740,7 @@ def normalize_by_notv(df):
 
         time_normalized = df[s_i_inds].completion_time / notv_time
         df.loc[s_i_inds, "completion_time_norm"] = time_normalized
+        df.loc[s_i_inds, "notv_reference_available_for_norm"] = True
 
     return df
 
