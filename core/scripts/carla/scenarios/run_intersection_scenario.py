@@ -111,7 +111,7 @@ class VehicleParams:
     # SMPC specific parameters (ignored for any other policy_type).
     smpc_config : str = "full" # "var_risk", "open_loop", "fixed_risk"
     solver_backend : str = "gurobi"
-    risk_profile : str = "upstream_code" # "upstream_code", "paper_eps_002", "adaptive_interaction_severity", or "rule_aware_static_risk"
+    risk_profile : str = "upstream_code" # "upstream_code", "paper_eps_002", "adaptive_interaction_severity", "adaptive_interaction_severity_no_floor", or "rule_aware_static_risk"
     collision_d_min : float = 0.5
     collision_ellipse_half_length : float = 3.8
     collision_ellipse_half_width : float = 1.8

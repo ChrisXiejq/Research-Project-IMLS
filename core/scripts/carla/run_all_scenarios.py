@@ -251,8 +251,8 @@ if __name__ == '__main__':
     parser.add_argument("--disable_camera_viz", dest="enable_camera_viz", action="store_false",
                         help="Disable CARLA RGB camera sensor and carla_sim.avi generation for faster/headless runs.")
     parser.set_defaults(enable_camera_viz=True)
-    parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002", "adaptive_interaction_severity", "rule_aware_static_risk"], default="upstream_code",
-                        help="Gurobi SMPC risk profile: upstream_code matches SMPC_MMPreds numerical settings; paper_eps_002 uses epsilon=0.02; adaptive_interaction_severity updates risk from rule-aware interaction severity; rule_aware_static_risk keeps rule-aware bypass but uses static upstream risk for ablation.")
+    parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002", "adaptive_interaction_severity", "adaptive_interaction_severity_no_floor", "rule_aware_static_risk"], default="upstream_code",
+                        help="Gurobi SMPC risk profile: upstream_code matches SMPC_MMPreds numerical settings; paper_eps_002 uses epsilon=0.02; adaptive_interaction_severity updates risk from rule-aware interaction severity with the phase-aware pre-clearance floor; adaptive_interaction_severity_no_floor keeps the same adaptive mapping but disables the pre-clearance tightening floor for ablation; rule_aware_static_risk keeps rule-aware bypass but uses static upstream risk for ablation.")
     parser.add_argument(
         "--tuning_config",
         default=None,

@@ -465,11 +465,16 @@ class SMPCAgent(object):
 
         # MPC initialization (might take a while....)
         n_tv_mpc = n_tv_max if n_tv_max is not None else 1
+        solver_risk_profile = (
+            "adaptive_interaction_severity"
+            if (self.risk_profile or "").lower() == "adaptive_interaction_severity_no_floor"
+            else self.risk_profile
+        )
         if not self.ol_flag:
             if not self.obca_flag:
                 self.SMPC=smpc.SMPC_MMPreds(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag, fixed_risk=self.fixed_risk,
                                     L_F=self.lf, L_R=self.lr, fps=self.fps, N_TV_MAX=n_tv_mpc,
-                                    risk_profile=self.risk_profile)
+                                    risk_profile=solver_risk_profile)
             else:
                 self.SMPC=smpc.SMPC_MMPreds_OBCA(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag,
                                         L_F=self.lf, L_R=self.lr, fps=self.fps, pol_mode=self.obca_mode, N_TV_MAX=n_tv_mpc)
@@ -478,7 +483,7 @@ class SMPCAgent(object):
             self.SMPC=smpc.SMPC_MMPreds_OL(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes,
                                           L_F=self.lf, L_R=self.lr, fps=self.fps,
                                           N_TV_MAX=n_tvm,
-                                          risk_profile=self.risk_profile)
+                                          risk_profile=solver_risk_profile)
 
 
         self.goal_reached = False # flags when the end of the path is reached and agent should stop
@@ -1447,7 +1452,11 @@ class SMPCAgent(object):
         profile = (self.risk_profile or "upstream_code").lower()
         upstream_tight = float(smpc.UPSTREAM_CODE_TIGHTENING)
         upstream_prob = float(smpc.UPSTREAM_CODE_TARGET_PROB)
-        if profile != "adaptive_interaction_severity":
+        adaptive_profiles = {
+            "adaptive_interaction_severity",
+            "adaptive_interaction_severity_no_floor",
+        }
+        if profile not in adaptive_profiles:
             static_tight = float(getattr(self.SMPC, "tight", upstream_tight))
             static_prob = float(getattr(self.SMPC, "target_prob", upstream_prob))
             return {
@@ -1464,7 +1473,12 @@ class SMPCAgent(object):
         relaxed_tight = 1.2815515655446004  # Phi^{-1}(0.90), used only after target clearance.
         high_tight = float(smpc.PAPER_INTERSECTION_TIGHTENING)
         nominal_to_high_span = high_tight - upstream_tight
-        policy_map = "phase_aware_preclearance_floor"
+        use_preclearance_floor = profile == "adaptive_interaction_severity"
+        policy_map = (
+            "phase_aware_preclearance_floor"
+            if use_preclearance_floor
+            else "adaptive_interaction_severity_no_floor"
+        )
         mild_tightening_scale = 0.35
         approach_preclearance_floor = 1.68
         critical_preclearance_floor = 1.80
@@ -1498,7 +1512,7 @@ class SMPCAgent(object):
             else:
                 distance_bucket = "near"
 
-        if not target_cleared and yield_phase != "released_recovery":
+        if use_preclearance_floor and not target_cleared and yield_phase != "released_recovery":
             if distance_bucket == "approach":
                 preclearance_tight_floor = approach_preclearance_floor
                 preclearance_floor_reason = "approach_preclearance"
@@ -1574,6 +1588,7 @@ class SMPCAgent(object):
                 "nominal_tight": upstream_tight,
                 "high_tight": high_tight,
                 "policy_map": policy_map,
+                "preclearance_floor_enabled": use_preclearance_floor,
                 "distance_buckets": {
                     "far": "dconf > 25m",
                     "approach": "15m < dconf <= 25m",
@@ -1596,6 +1611,7 @@ class SMPCAgent(object):
         """Return why the rule supervisor should replace an SMPC solve, if any."""
         if (self.risk_profile or "").lower() not in {
             "adaptive_interaction_severity",
+            "adaptive_interaction_severity_no_floor",
             "rule_aware_static_risk",
         }:
             return None
