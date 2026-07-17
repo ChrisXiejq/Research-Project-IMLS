@@ -26,6 +26,25 @@ EOF
   exit 2
 fi
 
+if [[ ! -f "${CARLA_ROOT}/PythonAPI/carla/agents/navigation/global_route_planner.py" ]]; then
+  cat >&2 <<EOF
+ERROR: CARLA_ROOT does not look like a valid CARLA 0.9.14 root:
+  CARLA_ROOT=${CARLA_ROOT}
+
+Expected file not found:
+  ${CARLA_ROOT}/PythonAPI/carla/agents/navigation/global_route_planner.py
+
+Locate the correct root with:
+  find /root /root/autodl-tmp -maxdepth 5 -type f -name global_route_planner.py 2>/dev/null
+
+Then export CARLA_ROOT to the directory that contains PythonAPI, for example:
+  export CARLA_ROOT=/root/autodl-tmp/CARLA_0.9.14
+EOF
+  exit 2
+fi
+
+export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla:${CARLA_ROOT}/PythonAPI/carla/agents:${PYTHONPATH:-}"
+
 mkdir -p "${RESULTS_DIR}"
 cd "${SCRIPT_DIR}"
 
