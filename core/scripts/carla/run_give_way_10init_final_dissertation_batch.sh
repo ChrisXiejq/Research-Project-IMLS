@@ -75,7 +75,8 @@ fi
 
 TMP_INIT_DIR="${RESULTS_DIR}/_ego_init_01_10"
 mkdir -p "${TMP_INIT_DIR}"
-for idx in $(seq -w 1 10); do
+for idx_num in $(seq 1 10); do
+  idx="$(printf '%02d' "${idx_num}")"
   ln -sfn "${SCRIPT_DIR}/scenarios/inits/paper_intersection_50/ego_init_${idx}.json" \
     "${TMP_INIT_DIR}/ego_init_${idx}.json"
 done
