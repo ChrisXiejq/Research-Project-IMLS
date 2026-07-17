@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 import random
 import pickle
+import json
 import traceback
 
 scriptdir = os.path.abspath(__file__).split('carla')[0] + 'carla/'
@@ -111,7 +112,8 @@ class VehicleParams:
     # SMPC specific parameters (ignored for any other policy_type).
     smpc_config : str = "full" # "var_risk", "open_loop", "fixed_risk"
     solver_backend : str = "gurobi"
-    risk_profile : str = "upstream_code" # "upstream_code", "paper_eps_002", "adaptive_interaction_severity", "adaptive_interaction_severity_no_floor", or "rule_aware_static_risk"
+    risk_profile : str = "upstream_code" # "upstream_code", "paper_eps_002", adaptive risk variants, or "rule_aware_static_risk"
+    adaptive_risk_config : Optional[Dict[str, Any]] = None
     collision_d_min : float = 0.5
     collision_ellipse_half_length : float = 3.8
     collision_ellipse_half_width : float = 1.8
@@ -186,6 +188,12 @@ class PredictionParams:
 
     # Flag to render traffic lights on rasterized image for prediction.
     render_traffic_lights : bool = False
+
+    # Optional prediction dataset logging for calibration/fine-tuning.
+    prediction_logging_enabled : bool = False
+    prediction_logging_stride : int = 1
+    prediction_logging_horizon : int = 10
+    prediction_logging_save_raster : bool = False
 
     # TODO: future work includes things like how often to update preds (if not at the Carla fps).
 
@@ -299,7 +307,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             lane_entry_heading_cost_enabled=vehicle_params.lane_entry_heading_cost_enabled,
                             lane_entry_heading_cost_goal_window=vehicle_params.lane_entry_heading_cost_goal_window,
                             lane_entry_heading_cost_weight=vehicle_params.lane_entry_heading_cost_weight,
-                            lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi)
+                            lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi,
+                            adaptive_risk_config=vehicle_params.adaptive_risk_config)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -368,7 +377,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             lane_entry_heading_cost_enabled=vehicle_params.lane_entry_heading_cost_enabled,
                             lane_entry_heading_cost_goal_window=vehicle_params.lane_entry_heading_cost_goal_window,
                             lane_entry_heading_cost_weight=vehicle_params.lane_entry_heading_cost_weight,
-                            lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi)
+                            lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi,
+                            adaptive_risk_config=vehicle_params.adaptive_risk_config)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -435,7 +445,8 @@ def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=N
                             lane_entry_heading_cost_enabled=vehicle_params.lane_entry_heading_cost_enabled,
                             lane_entry_heading_cost_goal_window=vehicle_params.lane_entry_heading_cost_goal_window,
                             lane_entry_heading_cost_weight=vehicle_params.lane_entry_heading_cost_weight,
-                            lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi)
+                            lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi,
+                            adaptive_risk_config=vehicle_params.adaptive_risk_config)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 
@@ -601,6 +612,148 @@ class RunIntersectionScenario:
                 forced_stop = True
         return control, state, forced_stop
 
+    def _json_safe(self, value):
+        if isinstance(value, np.ndarray):
+            return self._json_safe(value.tolist())
+        if isinstance(value, (np.floating, float)):
+            value = float(value)
+            return value if np.isfinite(value) else None
+        if isinstance(value, (np.integer, int)):
+            return int(value)
+        if isinstance(value, (np.bool_, bool)):
+            return bool(value)
+        if isinstance(value, list):
+            return [self._json_safe(v) for v in value]
+        if isinstance(value, tuple):
+            return [self._json_safe(v) for v in value]
+        if isinstance(value, dict):
+            return {str(k): self._json_safe(v) for k, v in value.items()}
+        return value
+
+    def _actor_state_for_prediction_log(self, actor):
+        tf = actor.get_transform()
+        vel = actor.get_velocity()
+        return {
+            "x": float(tf.location.x),
+            "y_rhs": float(-tf.location.y),
+            "yaw_deg": float(tf.rotation.yaw),
+            "speed": float(np.linalg.norm([vel.x, vel.y])),
+        }
+
+    def _append_prediction_jsonl(self, filename, payload):
+        with open(os.path.join(self._prediction_log_dir, filename), "a", encoding="utf-8") as f:
+            f.write(json.dumps(self._json_safe(payload), separators=(",", ":")) + "\n")
+
+    def _record_prediction_sample(
+        self,
+        target_actor,
+        target_vehicle_idx,
+        target_agent_id,
+        img_tv,
+        past_states_tv,
+        R_target_to_world,
+        t_target_to_world,
+        gmm_pred_tv,
+    ):
+        if not getattr(self, "_prediction_logging_enabled", False):
+            return
+        loop_step = int(getattr(self, "_current_loop_step", -1))
+        if loop_step < 0 or loop_step % self._prediction_logging_stride != 0:
+            return
+
+        sample_id = len(self._prediction_samples)
+        raster_relpath = None
+        if self._prediction_logging_save_raster:
+            raster_relpath = f"rasters/sample_{sample_id:06d}.png"
+            raster_path = os.path.join(self._prediction_log_dir, raster_relpath)
+            img_arr = np.asarray(img_tv)
+            if img_arr.dtype != np.uint8:
+                img_arr = np.clip(img_arr, 0, 255).astype(np.uint8)
+            cv2.imwrite(raster_path, img_arr)
+
+        sample = {
+            "sample_id": sample_id,
+            "step": loop_step,
+            "sim_time_s": float(getattr(self, "_current_sim_time", np.nan)),
+            "target_vehicle_idx": int(target_vehicle_idx),
+            "target_actor_id": int(target_agent_id),
+            "raster_relpath": raster_relpath,
+            "past_states_local": np.asarray(past_states_tv[:-1], dtype=float),
+            "target_to_world_R": np.asarray(R_target_to_world, dtype=float),
+            "target_to_world_t": np.asarray(t_target_to_world, dtype=float),
+            "mode_probabilities": np.asarray(gmm_pred_tv.mode_probabilities, dtype=float),
+            "pred_mus_world": np.asarray(gmm_pred_tv.mus[:, :self.ego_N, :], dtype=float),
+            "pred_sigmas_world": np.asarray(gmm_pred_tv.sigmas[:, :self.ego_N, :, :], dtype=float),
+            "ego_state": self._actor_state_for_prediction_log(self.vehicle_actors[self.ego_vehicle_idx]),
+            "target_state": self._actor_state_for_prediction_log(target_actor),
+            "horizon_steps": int(self._prediction_logging_horizon),
+            "dt": float(self.vehicle_params_list[self.ego_vehicle_idx].dt),
+            "model_weights": getattr(self, "_prediction_model_weights", None),
+            "model_anchors": getattr(self, "_prediction_model_anchors", None),
+        }
+        self._prediction_samples.append(sample)
+        self._append_prediction_jsonl("prediction_dataset_raw.jsonl", sample)
+
+    def _interp_xy_at_times(self, trajectory, query_times):
+        trajectory = np.asarray(trajectory)
+        if trajectory.ndim != 2 or trajectory.shape[0] < 2 or trajectory.shape[1] < 3:
+            return [[None, None] for _ in query_times], [False for _ in query_times]
+        times = trajectory[:, 0].astype(float)
+        xy = trajectory[:, 1:3].astype(float)
+        labels = []
+        valid = []
+        for query_time in query_times:
+            if query_time < times[0] or query_time > times[-1]:
+                labels.append([None, None])
+                valid.append(False)
+                continue
+            labels.append([
+                float(np.interp(query_time, times, xy[:, 0])),
+                float(np.interp(query_time, times, xy[:, 1])),
+            ])
+            valid.append(True)
+        return labels, valid
+
+    def _finalize_prediction_dataset(self):
+        if not getattr(self, "_prediction_logging_enabled", False):
+            return
+        labeled_path = os.path.join(self._prediction_log_dir, "prediction_dataset_labeled.jsonl")
+        open(labeled_path, "w", encoding="utf-8").close()
+        valid_count = 0
+        for sample in self._prediction_samples:
+            target_idx = int(sample["target_vehicle_idx"])
+            target_role = self.vehicle_actors[target_idx].attributes.get("role_name", "target")
+            target_key = f"{target_role}_{target_idx}"
+            target_traj = self.results_dict.get(target_key, {}).get("state_trajectory", [])
+            horizon = min(int(sample["horizon_steps"]), self.ego_N)
+            dt = float(sample["dt"])
+            query_times = [float(sample["sim_time_s"]) + (k + 1) * dt for k in range(horizon)]
+            future_xy, future_valid = self._interp_xy_at_times(target_traj, query_times)
+            labeled = dict(sample)
+            labeled["future_times_s"] = query_times
+            labeled["future_xy_world"] = future_xy
+            labeled["future_valid_mask"] = future_valid
+            valid_count += int(any(future_valid))
+            self._append_prediction_jsonl("prediction_dataset_labeled.jsonl", labeled)
+
+        manifest = {
+            "enabled": True,
+            "sample_count": len(self._prediction_samples),
+            "samples_with_any_future_label": valid_count,
+            "raw_jsonl": "prediction_dataset_raw.jsonl",
+            "labeled_jsonl": "prediction_dataset_labeled.jsonl",
+            "save_raster": bool(self._prediction_logging_save_raster),
+            "stride": int(self._prediction_logging_stride),
+            "horizon": int(self._prediction_logging_horizon),
+            "ego_N": int(self.ego_N),
+            "ego_num_modes": int(self.ego_num_modes),
+            "dt": float(self.vehicle_params_list[self.ego_vehicle_idx].dt),
+            "model_weights": getattr(self, "_prediction_model_weights", None),
+            "model_anchors": getattr(self, "_prediction_model_anchors", None),
+        }
+        with open(os.path.join(self._prediction_log_dir, "prediction_dataset_manifest.json"), "w", encoding="utf-8") as f:
+            json.dump(self._json_safe(manifest), f, indent=2)
+
     def run_scenario(self):
         # Return flag to indicate if this ran to completion.
         ran_successfully = False
@@ -672,6 +825,8 @@ class RunIntersectionScenario:
                     img = tick_data[1] if self.use_camera else None
 
                     # Handle predictions.
+                    self._current_loop_step = loop_step
+                    self._current_sim_time = float(snap.elapsed_seconds)
                     self.agent_history.update(snap, self.world)
                     tvs_positions, tvs_mode_probs, tvs_mode_dists, tvs_valid_pred = self._make_predictions()
                     pred_dict={ "tvs_positions": tvs_positions,
@@ -837,6 +992,7 @@ class RunIntersectionScenario:
                     log.warning("map_viz_snapshot export skipped: %s", exc)
                 pkl_name = os.path.join(self.savedir, "scenario_result.pkl")
                 pickle.dump(self.results_dict, open(pkl_name, "wb"))
+                self._finalize_prediction_dataset()
                 ran_successfully = True
 
         except Exception:
@@ -918,6 +1074,16 @@ class RunIntersectionScenario:
                 gmm_pred_tv = self.pred_model.predict_instance(img_tv, past_states_tv[:-1])
                 gmm_pred_tv.transform(R_target_to_world, t_target_to_world)
                 gmm_pred_tv=gmm_pred_tv.get_top_k_GMM(self.ego_num_modes)
+                self._record_prediction_sample(
+                    target_actor,
+                    self.tv_vehicle_idxs[0],
+                    target_agent_id,
+                    img_tv,
+                    past_states_tv,
+                    R_target_to_world,
+                    t_target_to_world,
+                    gmm_pred_tv,
+                )
                 
                 tvs_mode_probs = [gmm_pred_tv.mode_probabilities]
                 tvs_mode_dists = [[gmm_pred_tv.mus[:, :self.ego_N, :]], [gmm_pred_tv.sigmas[:, :self.ego_N, :, :]]]
@@ -1074,6 +1240,32 @@ class RunIntersectionScenario:
         self.rasterizer    = SemBoxRasterizer(self.world.get_map().get_topology(), render_traffic_lights=\
                                                  prediction_params.render_traffic_lights)
         prefix             = os.path.abspath(__file__).split('carla')[0] + 'models/'
+        self._prediction_model_weights = prediction_params.model_weights
+        self._prediction_model_anchors = prediction_params.model_anchors
+        self._prediction_logging_enabled = bool(prediction_params.prediction_logging_enabled)
+        self._prediction_logging_stride = max(1, int(prediction_params.prediction_logging_stride))
+        self._prediction_logging_horizon = max(1, int(prediction_params.prediction_logging_horizon))
+        self._prediction_logging_save_raster = bool(prediction_params.prediction_logging_save_raster)
+        self._prediction_samples = []
+        self._prediction_log_dir = os.path.join(self.savedir, "prediction_dataset")
+        if self._prediction_logging_enabled:
+            os.makedirs(self._prediction_log_dir, exist_ok=True)
+            if self._prediction_logging_save_raster:
+                os.makedirs(os.path.join(self._prediction_log_dir, "rasters"), exist_ok=True)
+            open(os.path.join(self._prediction_log_dir, "prediction_dataset_raw.jsonl"), "w", encoding="utf-8").close()
+            with open(os.path.join(self._prediction_log_dir, "prediction_dataset_config.json"), "w", encoding="utf-8") as f:
+                json.dump(
+                    {
+                        "model_weights": prediction_params.model_weights,
+                        "model_anchors": prediction_params.model_anchors,
+                        "render_traffic_lights": bool(prediction_params.render_traffic_lights),
+                        "stride": self._prediction_logging_stride,
+                        "horizon": self._prediction_logging_horizon,
+                        "save_raster": self._prediction_logging_save_raster,
+                    },
+                    f,
+                    indent=2,
+                )
         self.pred_model    = DeployMultiPath(prefix+prediction_params.model_weights, \
                                              np.load(prefix+prediction_params.model_anchors))
 

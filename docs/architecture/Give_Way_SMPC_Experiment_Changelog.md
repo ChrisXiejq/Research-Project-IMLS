@@ -483,3 +483,28 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Mechanism finding: current `adaptive_interaction_severity` is not a monotonic "closer to conflict zone means stricter risk" rule. In `20260707_190600`, var-risk tightening is slightly above fixed in the approach bucket (`1.676` vs `1.640`) but below fixed in the critical/near buckets (`1.498/1.282` vs `1.640`). The correct dissertation wording should therefore be "interaction-severity-aware adaptive risk allocation", not a purely distance-monotonic risk allocation claim.
     - Next research step: keep this corrected comparison as the mechanism-analysis baseline, then use 5-init/10-init aggregate statistics plus targeted sensitivity/ablation runs to test whether adaptive risk improves solver stability, planned braking, or safety margins when supervisor intervention is reduced or when initial conditions are harder.
     - Add `run_give_way_5init_final_dissertation_batch.sh` as the immediate precheck script. It runs paper intersection `ego_init_01` through `ego_init_05`, only `smpc_var_risk` and `smpc_fixed_risk`, with post-CARLA gate and `risk_by_conflict_distance` diagnostics enabled.
+
+61. Frozen dissertation main experiment after 50-init validation and adaptive-risk ablation:
+    - Freeze the current main dissertation experiment instead of continuing main-parameter tuning. Frozen main result: `core/results/20260710_164024_50init_phase_floor_final_dissertation`.
+    - Frozen mechanism ablation: `core/results/20260711_120356_10init_adaptive_risk_ablation`.
+    - Frozen reproduction code base: tags `frozen-main-50init-phase-aware-risk-20260716` and `phase-aware-risk-50init-best-base-20260710`, commit `eea6c53f547304af92f697d683f3f12d8af70226`. Current `HEAD` may include later development and should not be conflated with the frozen 50-init result.
+    - Main result: 100/100 required SMPC rollouts PASS across `smpc_fixed_risk` and `smpc_var_risk`; no footprint collision, no yield-rule violation, and successful completion.
+    - Main interpretation: final trajectory safety is guaranteed by the rule-aware supervisor. The adaptive-risk contribution should be claimed at the SMPC solver/risk layer: before target clearance, the adaptive policy applies stronger chance-constraint tightening; after target clearance, it relaxes the tightening.
+    - Key 50-init mechanism evidence: `critical / pre_clearance` adaptive-minus-fixed tightening is about `+0.1597`; `critical / post_clearance` and `near / post_clearance` are about `-0.3584`.
+    - Key ablation evidence: disabling the pre-clearance risk floor reduces the `critical / pre_clearance` adaptive-minus-fixed tightening gap from about `+0.1600` to about `+0.0603`, while both ablation variants pass the safety gate.
+    - Generated paper-core figures under `docs/paper/figures/`. Next work should focus on writing Results/Discussion and, if needed, limited mechanism ablations rather than further tuning the frozen main experiment.
+
+62. Comprehensive adaptive-risk ablation support:
+    - Add parameterised adaptive-risk mapping support without changing frozen defaults. `adaptive_risk_config` can now override `relaxed_after_clearance_tight`, pre-clearance floor values, phase-floor scores, `mild_tightening_scale`, and the boolean floor/relaxation switches.
+    - Add two primary mechanism profiles: `adaptive_interaction_severity_no_relax` and `adaptive_interaction_severity_no_phase_awareness`. Existing `adaptive_interaction_severity` and `adaptive_interaction_severity_no_floor` behaviour is preserved by default.
+    - Thread `adaptive_risk_config` through `run_all_scenarios.py -> VehicleParams -> SMPCAgent`, and record the effective config in `batch_config.json`.
+    - Add `run_give_way_10init_comprehensive_adaptive_risk_ablation.sh` with `VARIANT_SET=primary|sensitivity|all`. The script writes a JSONL manifest and per-variant adaptive-risk config snapshots.
+    - Keep fixed-risk baseline isolation unchanged: adaptive risk updates are still applied only when the solver uses adaptive variable risk.
+
+63. Prediction dataset logging for model-side optimisation:
+    - Add optional prediction logging to `PredictionParams`, disabled by default so frozen main experiments are unchanged.
+    - New `run_all_scenarios.py` flags: `--enable_prediction_logging`, `--prediction_logging_stride`, `--prediction_logging_horizon`, and `--prediction_logging_save_raster`.
+    - Each enabled subrun writes `prediction_dataset/prediction_dataset_raw.jsonl`, `prediction_dataset/prediction_dataset_labeled.jsonl`, `prediction_dataset/prediction_dataset_manifest.json`, and optional raster PNG inputs under `prediction_dataset/rasters/`.
+    - Raw samples contain MultiPath inputs/outputs: target past states, raster path, mode probabilities, predicted GMM means/covariances, ego/target states, transform matrices, model weights, and anchor file.
+    - Labeled samples are produced after the rollout by aligning each prediction timestamp with the executed target trajectory from `scenario_result.pkl`, providing future target XY labels and validity masks for calibration/fine-tuning.
+    - Add `run_give_way_prediction_dataset_collection.sh` as the recommended server entry point for collecting calibration or fine-tuning data without changing the main experiment scripts.

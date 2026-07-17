@@ -102,6 +102,7 @@ class SMPCAgent(object):
                  lane_entry_heading_cost_goal_window=8.0,
                  lane_entry_heading_cost_weight=0.2,
                  lane_entry_heading_cost_max_abs_epsi=0.35,
+                 adaptive_risk_config=None,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -381,6 +382,14 @@ class SMPCAgent(object):
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
         self.risk_profile = risk_profile
+        if adaptive_risk_config is None:
+            adaptive_risk_config = {}
+        if not isinstance(adaptive_risk_config, dict):
+            raise TypeError(
+                "adaptive_risk_config must be a dict or None, "
+                f"got {type(adaptive_risk_config).__name__}"
+            )
+        self.adaptive_risk_config = dict(adaptive_risk_config)
 
         self.fixed_risk=False
         self.obca_flag=obca
@@ -467,7 +476,11 @@ class SMPCAgent(object):
         n_tv_mpc = n_tv_max if n_tv_max is not None else 1
         solver_risk_profile = (
             "adaptive_interaction_severity"
-            if (self.risk_profile or "").lower() == "adaptive_interaction_severity_no_floor"
+            if (self.risk_profile or "").lower() in {
+                "adaptive_interaction_severity_no_floor",
+                "adaptive_interaction_severity_no_relax",
+                "adaptive_interaction_severity_no_phase_awareness",
+            }
             else self.risk_profile
         )
         if not self.ol_flag:
@@ -1455,6 +1468,8 @@ class SMPCAgent(object):
         adaptive_profiles = {
             "adaptive_interaction_severity",
             "adaptive_interaction_severity_no_floor",
+            "adaptive_interaction_severity_no_relax",
+            "adaptive_interaction_severity_no_phase_awareness",
         }
         if profile not in adaptive_profiles:
             static_tight = float(getattr(self.SMPC, "tight", upstream_tight))
@@ -1470,19 +1485,44 @@ class SMPCAgent(object):
         raw_score = float(yield_status.get("severity_score", 0.0) or 0.0)
         yield_phase = yield_status.get("phase", "free_drive")
         target_cleared = bool(yield_status.get("target_cleared_conflict", False))
-        relaxed_tight = 1.2815515655446004  # Phi^{-1}(0.90), used only after target clearance.
+        cfg = getattr(self, "adaptive_risk_config", {}) or {}
+        relaxed_tight = float(
+            cfg.get("relaxed_after_clearance_tight", 1.2815515655446004)
+        )  # Phi^{-1}(0.90), used only after target clearance by default.
         high_tight = float(smpc.PAPER_INTERSECTION_TIGHTENING)
         nominal_to_high_span = high_tight - upstream_tight
-        use_preclearance_floor = profile == "adaptive_interaction_severity"
-        policy_map = (
-            "phase_aware_preclearance_floor"
-            if use_preclearance_floor
-            else "adaptive_interaction_severity_no_floor"
+        profile_default_preclearance_floor = profile in {
+            "adaptive_interaction_severity",
+            "adaptive_interaction_severity_no_relax",
+        }
+        profile_default_post_clearance_relaxation = profile in {
+            "adaptive_interaction_severity",
+            "adaptive_interaction_severity_no_floor",
+        }
+        use_preclearance_floor = bool(
+            cfg.get("preclearance_floor_enabled", profile_default_preclearance_floor)
         )
-        mild_tightening_scale = 0.35
-        approach_preclearance_floor = 1.68
-        critical_preclearance_floor = 1.80
-        near_preclearance_floor = 1.85
+        use_post_clearance_relaxation = bool(
+            cfg.get(
+                "post_clearance_relaxation_enabled",
+                profile_default_post_clearance_relaxation,
+            )
+        )
+        variant_name = str(cfg.get("variant_name", profile))
+        policy_map = str(
+            cfg.get(
+                "policy_map",
+                (
+                    "phase_aware_preclearance_floor"
+                    if use_preclearance_floor and use_post_clearance_relaxation
+                    else variant_name
+                ),
+            )
+        )
+        mild_tightening_scale = float(cfg.get("mild_tightening_scale", 0.35))
+        approach_preclearance_floor = float(cfg.get("approach_preclearance_floor", 1.68))
+        critical_preclearance_floor = float(cfg.get("critical_preclearance_floor", 1.80))
+        near_preclearance_floor = float(cfg.get("near_preclearance_floor", 1.85))
         ego_distance_to_conflict = yield_status.get("ego_distance_to_conflict")
         try:
             ego_distance_to_conflict = float(ego_distance_to_conflict)
@@ -1491,13 +1531,13 @@ class SMPCAgent(object):
 
         phase_floor = 0.0
         if yield_phase == "approach_yield_line":
-            phase_floor = 0.35
+            phase_floor = float(cfg.get("approach_floor", 0.35))
         elif yield_phase == "hold_yield_line":
-            phase_floor = 0.45
+            phase_floor = float(cfg.get("hold_floor", 0.45))
         elif yield_phase == "cautious_approach_observed_target":
-            phase_floor = 0.25
+            phase_floor = float(cfg.get("cautious_floor", 0.25))
         elif yield_phase == "observe_priority_target":
-            phase_floor = 0.20
+            phase_floor = float(cfg.get("observe_floor", 0.20))
 
         distance_bucket = "unknown"
         preclearance_tight_floor = None
@@ -1526,9 +1566,14 @@ class SMPCAgent(object):
         if target_cleared or yield_phase == "released_recovery":
             effective_score = 0.0
             risk_scale = 0.0
-            tightening = relaxed_tight
-            raw_tightening = relaxed_tight
-            risk_phase = "relaxed_after_clearance"
+            if use_post_clearance_relaxation:
+                tightening = relaxed_tight
+                raw_tightening = relaxed_tight
+                risk_phase = "relaxed_after_clearance"
+            else:
+                tightening = upstream_tight
+                raw_tightening = upstream_tight
+                risk_phase = "static_after_clearance"
         else:
             effective_score = float(np.clip(max(raw_score, phase_floor), 0.0, 1.0))
             # The rule supervisor already enforces deterministic yielding in approach/hold.
@@ -1563,6 +1608,7 @@ class SMPCAgent(object):
         return {
             "enabled": True,
             "risk_profile": self.risk_profile,
+            "adaptive_risk_variant": variant_name,
             "phase": risk_phase,
             "policy_map": policy_map,
             "yield_phase": yield_phase,
@@ -1589,6 +1635,8 @@ class SMPCAgent(object):
                 "high_tight": high_tight,
                 "policy_map": policy_map,
                 "preclearance_floor_enabled": use_preclearance_floor,
+                "post_clearance_relaxation_enabled": use_post_clearance_relaxation,
+                "adaptive_risk_variant": variant_name,
                 "distance_buckets": {
                     "far": "dconf > 25m",
                     "approach": "15m < dconf <= 25m",
@@ -1612,6 +1660,8 @@ class SMPCAgent(object):
         if (self.risk_profile or "").lower() not in {
             "adaptive_interaction_severity",
             "adaptive_interaction_severity_no_floor",
+            "adaptive_interaction_severity_no_relax",
+            "adaptive_interaction_severity_no_phase_awareness",
             "rule_aware_static_risk",
         }:
             return None

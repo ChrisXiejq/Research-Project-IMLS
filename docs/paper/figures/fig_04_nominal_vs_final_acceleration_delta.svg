@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="560" viewBox="0 0 980 560">
+<rect width="100%" height="100%" fill="white"/>
+<text x="490.0" y="32.0" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" fill="#222222" text-anchor="middle">Nominal vs Final Acceleration Difference</text>
+<text transform="rotate(-90 24 262.5)" x="24.0" y="262.5" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#222222" text-anchor="middle">Var - fixed acceleration</text>
+<line x1="95" y1="455.0" x2="945" y2="455.0" stroke="#D8D8D8" stroke-width="1"/>
+<text x="85.0" y="459.0" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#222222" text-anchor="end">-0.60</text>
+<line x1="95" y1="358.8" x2="945" y2="358.8" stroke="#D8D8D8" stroke-width="1"/>
+<text x="85.0" y="362.8" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#222222" text-anchor="end">-0.40</text>
+<line x1="95" y1="262.5" x2="945" y2="262.5" stroke="#D8D8D8" stroke-width="1"/>
+<text x="85.0" y="266.5" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#222222" text-anchor="end">-0.20</text>
+<line x1="95" y1="166.2" x2="945" y2="166.2" stroke="#D8D8D8" stroke-width="1"/>
+<text x="85.0" y="170.2" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#222222" text-anchor="end">-0.00</text>
+<line x1="95" y1="70.0" x2="945" y2="70.0" stroke="#D8D8D8" stroke-width="1"/>
+<text x="85.0" y="74.0" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#222222" text-anchor="end">0.20</text>
+<line x1="95" y1="166.2" x2="945" y2="166.2" stroke="#555" stroke-width="1.2"/>
+<rect x="129.0" y="166.2" width="69.2" height="10.7" fill="#E15759"/>
+<text x="163.6" y="191.0" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="normal" fill="#222222" text-anchor="middle">-0.022</text>
+<rect x="341.5" y="166.2" width="69.2" height="192.6" fill="#E15759"/>
+<text x="376.1" y="372.8" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="normal" fill="#222222" text-anchor="middle">-0.400</text>
+<rect x="554.0" y="166.2" width="69.2" height="3.7" fill="#E15759"/>
+<text x="588.6" y="183.9" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="normal" fill="#222222" text-anchor="middle">-0.008</text>
+<rect x="766.5" y="166.2" width="69.2" height="0.3" fill="#E15759"/>
+<text x="801.1" y="180.5" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="normal" fill="#222222" text-anchor="middle">-0.001</text>
+<rect x="201.2" y="166.2" width="69.2" height="0.1" fill="#76B7B2"/>
+<text x="235.9" y="180.3" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="normal" fill="#222222" text-anchor="middle">-0.000</text>
+<rect x="413.8" y="166.2" width="69.2" height="1.5" fill="#76B7B2"/>
+<text x="448.4" y="181.8" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="normal" fill="#222222" text-anchor="middle">-0.003</text>
+<rect x="626.2" y="166.2" width="69.2" height="1.3" fill="#76B7B2"/>
+<text x="660.9" y="181.5" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="normal" fill="#222222" text-anchor="middle">-0.003</text>
+<rect x="838.8" y="162.9" width="69.2" height="3.3" fill="#76B7B2"/>
+<text x="873.4" y="156.9" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="normal" fill="#222222" text-anchor="middle">+0.007</text>
+<text x="201.2" y="482.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">Approach</text>
+<text x="201.2" y="495.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">pre-clearance</text>
+<text x="413.8" y="482.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">Critical</text>
+<text x="413.8" y="495.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">pre-clearance</text>
+<text x="626.2" y="482.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">Critical</text>
+<text x="626.2" y="495.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">post-clearance</text>
+<text x="838.8" y="482.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">Near</text>
+<text x="838.8" y="495.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">post-clearance</text>
+<rect x="695" y="38" width="12" height="12" fill="#E15759"/>
+<text x="713.0" y="48.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="start">Nominal accel delta</text>
+<rect x="695" y="56" width="12" height="12" fill="#76B7B2"/>
+<text x="713.0" y="66.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="start">Final accel delta</text>
+<text x="95.0" y="542.0" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#222222" text-anchor="start">Critical pre-clearance shows solver-layer conservatism; final control is largely shaped by the supervisor.</text>
+</svg>

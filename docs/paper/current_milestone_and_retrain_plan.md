@@ -2,6 +2,21 @@
 
 ## 1. 当前最好实验节点
 
+当前主实验已经冻结，不再继续调主参数。冻结范围如下：
+
+```text
+frozen main result:
+  core/results/20260710_164024_50init_phase_floor_final_dissertation
+
+frozen mechanism ablation:
+  core/results/20260711_120356_10init_adaptive_risk_ablation
+
+frozen dissertation claim:
+  rule-aware supervisor guarantees final traffic-rule and footprint safety;
+  phase-aware adaptive-variable risk changes the SMPC solver-layer
+  chance-constraint conservatism and nominal planning behaviour.
+```
+
 当前最好的主实验节点是：
 
 ```text
@@ -61,40 +76,49 @@ critical / pre-clearance:
 
 ## 2. 当前 Git 节点
 
-当前代码节点：
+冻结主实验对应的代码节点：
 
 ```text
-HEAD:
-  2e6f11161b27d42f4676313a29770b9dcc9040e6
+tag:
+  phase-aware-risk-50init-best-base-20260710
+  frozen-main-50init-phase-aware-risk-20260716
+
+commit:
+  eea6c53f547304af92f697d683f3f12d8af70226
 
 short:
-  2e6f111
+  eea6c53
 
-branch:
-  main
-
-remote:
-  origin/main
-
-latest commit message:
+commit message:
   feat: add
 ```
 
-当前 HEAD 上已有 milestone tag：
+当前工作区最新代码节点：
 
 ```text
-phase-aware-risk-50init-best-base-20260710
+HEAD:
+  2b9e145
+
+latest commit message:
+  feat: add sea factor
 ```
 
-这个 tag 应作为当前最好的代码 base：
+说明：
 
 ```text
-best code base:
-  phase-aware-risk-50init-best-base-20260710
-  -> 2e6f11161b27d42f4676313a29770b9dcc9040e6
+主实验冻结和复现实验应优先引用:
+  frozen-main-50init-phase-aware-risk-20260716
+  或 phase-aware-risk-50init-best-base-20260710
+  -> eea6c53f547304af92f697d683f3f12d8af70226
+
+当前 HEAD 已经包含后续开发变化，不应直接等同于 frozen 50-init result。
 ```
 
-注意：当前还有若干论文文档是未提交状态，主要包括结果表、导师汇报附件等。这些不影响代码复现实验，但如果要完整保存论文写作节点，建议另行提交一个 docs commit。
+本轮冻结后的论文图表位于：
+
+```text
+docs/paper/figures/
+```
 
 ## 3. 如果下一步演进是 Retrain 模型，首先要明确目标
 
@@ -338,4 +362,3 @@ CARLA 数据采集 + prediction metric pipeline:
 ```text
 The current contribution is mainly on rule-aware supervision and phase-aware adaptive risk allocation in the SMPC layer. Retraining the prediction model is a possible extension, but it would require a separate data and training pipeline. For the current dissertation scope, I plan to keep the validated 50-init closed-loop results as the main evidence, and treat prediction-model retraining or calibration as future work or an optional additional study.
 ```
-

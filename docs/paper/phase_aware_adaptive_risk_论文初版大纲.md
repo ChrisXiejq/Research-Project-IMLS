@@ -190,7 +190,9 @@ Open-loop 不作为主比较，因为该场景的核心是闭环让行和交互�
 | single-init sanity check | `20260707_193121_final_dissertation` | 验证 phase-aware floor 单 init 生效 | 已完成 |
 | 5-init precheck | `20260707_195935_5init_phase_floor_final_dissertation` | 验证机制小规模稳定性 | 已完成 |
 | 10-init precheck | `20260707_221143_10init_phase_floor_final_dissertation` | 扩大初始条件覆盖 | 已完成 |
-| 50-init full experiment | 待生成 | 最终论文主结果 | 待运行 |
+| 50-init full experiment | `20260710_164024_50init_phase_floor_final_dissertation` | 最终论文主结果 | 已完成，100/100 required SMPC rollouts PASS |
+
+当前 50-init 主实验已经冻结为论文主结果，不建议继续通过调参替换该节点。后续工作应优先围绕该节点生成论文图表、结果分析和有限机制消融。
 
 ### 6.4 指标体系
 

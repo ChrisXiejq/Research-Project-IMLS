@@ -64,7 +64,7 @@ def _write_scenario_rollout_config(savedir: str, scenario_dict: dict) -> None:
     )
 
 
-def _prepare_prediction_params(scenario_dict):
+def _prepare_prediction_params(scenario_dict, args=None):
     pred_dict = dict(scenario_dict.get("prediction_params", {}))
     traffic_control = (
         scenario_dict.get("carla_params", {}).get("traffic_control")
@@ -73,6 +73,15 @@ def _prepare_prediction_params(scenario_dict):
     traffic_control_norm = str(traffic_control).lower().strip()
     if traffic_control_norm.startswith("signalised"):
         pred_dict.setdefault("render_traffic_lights", True)
+    if args is not None:
+        if getattr(args, "enable_prediction_logging", False):
+            pred_dict["prediction_logging_enabled"] = True
+        if getattr(args, "prediction_logging_stride", None) is not None:
+            pred_dict["prediction_logging_stride"] = int(args.prediction_logging_stride)
+        if getattr(args, "prediction_logging_horizon", None) is not None:
+            pred_dict["prediction_logging_horizon"] = int(args.prediction_logging_horizon)
+        if getattr(args, "prediction_logging_save_raster", False):
+            pred_dict["prediction_logging_save_raster"] = True
     return pred_dict
 
 
@@ -142,7 +151,25 @@ def _run_postprocess(results_folder, args, log):
     return payload
 
 
-def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, enable_camera_viz=True):
+def _load_adaptive_risk_config(args):
+    """Load optional adaptive-risk mapping overrides for ablation runs."""
+    if args.adaptive_risk_config_json and args.adaptive_risk_config_file:
+        raise ValueError(
+            "Use only one of --adaptive_risk_config_json or --adaptive_risk_config_file"
+        )
+    if args.adaptive_risk_config_file:
+        with open(args.adaptive_risk_config_file, "r", encoding="utf-8") as f:
+            config = json.load(f)
+    elif args.adaptive_risk_config_json:
+        config = json.loads(args.adaptive_risk_config_json)
+    else:
+        config = {}
+    if not isinstance(config, dict):
+        raise ValueError("adaptive risk config must decode to a JSON object")
+    return config
+
+
+def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, enable_camera_viz=True, args=None):
     if scene != "intersection":
         raise ValueError(f"Unsupported scene type after cleanup: {scene}")
     from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
@@ -150,7 +177,7 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
 
     carla_params     = CarlaParams(**scenario_dict["carla_params"])
     drone_viz_params = DroneVizParams(**_prepare_drone_viz_params(scenario_dict, enable_camera_viz))
-    pred_params      = PredictionParams(**_prepare_prediction_params(scenario_dict))
+    pred_params      = PredictionParams(**_prepare_prediction_params(scenario_dict, args))
 
     vehicles_params_list = []
 
@@ -181,7 +208,8 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
     return runner.run_scenario()
 
 def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
-                 enable_camera_viz=True, risk_profile="upstream_code"):
+                 enable_camera_viz=True, risk_profile="upstream_code",
+                 adaptive_risk_config=None, args=None):
     if scene != "intersection":
         raise ValueError(f"Unsupported scene type after cleanup: {scene}")
     from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
@@ -189,7 +217,7 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
     
     carla_params     = CarlaParams(**scenario_dict["carla_params"])
     drone_viz_params = DroneVizParams(**_prepare_drone_viz_params(scenario_dict, enable_camera_viz))
-    pred_params      = PredictionParams(**_prepare_prediction_params(scenario_dict))
+    pred_params      = PredictionParams(**_prepare_prediction_params(scenario_dict, args))
 
     vehicles_params_list = []
 
@@ -219,6 +247,8 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
             vp_dict["policy_type"] = policy_type
             vp_dict["smpc_config"] = policy_config
             vp_dict["risk_profile"] = risk_profile
+            if adaptive_risk_config:
+                vp_dict["adaptive_risk_config"] = dict(adaptive_risk_config)
             vehicles_params_list.append( VehicleParams(**vp_dict) )
         else:
 
@@ -251,8 +281,18 @@ if __name__ == '__main__':
     parser.add_argument("--disable_camera_viz", dest="enable_camera_viz", action="store_false",
                         help="Disable CARLA RGB camera sensor and carla_sim.avi generation for faster/headless runs.")
     parser.set_defaults(enable_camera_viz=True)
-    parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002", "adaptive_interaction_severity", "adaptive_interaction_severity_no_floor", "rule_aware_static_risk"], default="upstream_code",
-                        help="Gurobi SMPC risk profile: upstream_code matches SMPC_MMPreds numerical settings; paper_eps_002 uses epsilon=0.02; adaptive_interaction_severity updates risk from rule-aware interaction severity with the phase-aware pre-clearance floor; adaptive_interaction_severity_no_floor keeps the same adaptive mapping but disables the pre-clearance tightening floor for ablation; rule_aware_static_risk keeps rule-aware bypass but uses static upstream risk for ablation.")
+    parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002", "adaptive_interaction_severity", "adaptive_interaction_severity_no_floor", "adaptive_interaction_severity_no_relax", "adaptive_interaction_severity_no_phase_awareness", "rule_aware_static_risk"], default="upstream_code",
+                        help="Gurobi SMPC risk profile. Adaptive variants share the same solver backend but differ in pre-clearance floor and post-clearance relaxation settings for ablation.")
+    parser.add_argument(
+        "--adaptive_risk_config_json",
+        default=None,
+        help="Optional JSON object overriding adaptive risk mapping values for ablation runs.",
+    )
+    parser.add_argument(
+        "--adaptive_risk_config_file",
+        default=None,
+        help="Optional JSON file overriding adaptive risk mapping values for ablation runs.",
+    )
     parser.add_argument(
         "--tuning_config",
         default=None,
@@ -274,9 +314,18 @@ if __name__ == '__main__':
                         help="Scenario name for automatic trajectory figures. Default: first matched scenario.")
     parser.add_argument("--postprocess_plot_init", type=int, default=None,
                         help="ego_init index for automatic trajectory figures. Default: first matched init.")
+    parser.add_argument("--enable_prediction_logging", action="store_true",
+                        help="Write per-rollout prediction dataset JSONL files for model calibration/fine-tuning.")
+    parser.add_argument("--prediction_logging_stride", type=int, default=None,
+                        help="Record one prediction sample every N simulator steps when prediction logging is enabled.")
+    parser.add_argument("--prediction_logging_horizon", type=int, default=None,
+                        help="Number of future target steps to label in prediction_dataset_labeled.jsonl.")
+    parser.add_argument("--prediction_logging_save_raster", action="store_true",
+                        help="Also save rasterized prediction input images as PNG files for future fine-tuning.")
     parser.add_argument("--no_console_log", action="store_true",
                         help="Do not duplicate experiment logs to stdout (file + jsonl still written).")
     args = parser.parse_args()
+    adaptive_risk_config = _load_adaptive_risk_config(args)
 
     scenario_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/")
     scenarios_list = sorted(glob.glob(os.path.join(scenario_folder, args.scenario_glob)))
@@ -305,6 +354,7 @@ if __name__ == '__main__':
             "policies": list(args.policies),
             "solver_backend": "gurobi",
             "risk_profile": args.risk_profile,
+            "adaptive_risk_config": adaptive_risk_config,
             "tuning_config": args.tuning_config,
             "no_tuning_config": args.no_tuning_config,
             "with_notv": args.with_notv,
@@ -314,6 +364,10 @@ if __name__ == '__main__':
             "postprocess_no_plots": args.postprocess_no_plots,
             "postprocess_plot_scenario": args.postprocess_plot_scenario,
             "postprocess_plot_init": args.postprocess_plot_init,
+            "enable_prediction_logging": args.enable_prediction_logging,
+            "prediction_logging_stride": args.prediction_logging_stride,
+            "prediction_logging_horizon": args.prediction_logging_horizon,
+            "prediction_logging_save_raster": args.prediction_logging_save_raster,
             "results_folder": os.path.abspath(results_folder),
         },
     )
@@ -372,7 +426,7 @@ if __name__ == '__main__':
                         results_folder,
                         {"event": "subrun_start", "label": label, "savedir": savedir},
                     )
-                    scenario_ok = run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, enable_camera_viz=args.enable_camera_viz)
+                    scenario_ok = run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, enable_camera_viz=args.enable_camera_viz, args=args)
                     ok = bool(scenario_ok)
                 except Exception:
                     err = traceback.format_exc()
@@ -417,7 +471,7 @@ if __name__ == '__main__':
                         results_folder,
                         {"event": "subrun_start", "label": label, "savedir": savedir},
                     )
-                    scenario_ok = run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=True, enable_camera_viz=args.enable_camera_viz)
+                    scenario_ok = run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=True, enable_camera_viz=args.enable_camera_viz, args=args)
                     ok = bool(scenario_ok)
                 except Exception:
                     err = traceback.format_exc()
@@ -471,7 +525,9 @@ if __name__ == '__main__':
                     )
                     scenario_ok = run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
                                                enable_camera_viz=args.enable_camera_viz,
-                                               risk_profile=args.risk_profile)
+                                               risk_profile=args.risk_profile,
+                                               adaptive_risk_config=adaptive_risk_config,
+                                               args=args)
                     ok = bool(scenario_ok)
                 except Exception:
                     err = traceback.format_exc()

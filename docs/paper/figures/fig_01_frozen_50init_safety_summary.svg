@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="271" viewBox="0 0 980 271">
+<rect width="100%" height="100%" fill="white"/>
+<text x="490.0" y="34.0" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" fill="#222222" text-anchor="middle">Frozen 50-init Main Result: Safety Gate Summary</text>
+<rect x="35" y="46" width="910" height="42" fill="#F5F7FA" stroke="#E0E0E0"/>
+<text x="45.0" y="72.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#222222" text-anchor="start">Policy</text>
+<text x="312.5" y="72.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#222222" text-anchor="middle">PASS</text>
+<text x="482.5" y="72.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#222222" text-anchor="middle">Solver failure max/mean</text>
+<text x="670.0" y="72.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#222222" text-anchor="middle">Footprint sep. min/mean</text>
+<text x="850.0" y="72.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#222222" text-anchor="middle">Center dmin min/mean</text>
+<rect x="35" y="88" width="910" height="42" fill="#FFFFFF" stroke="#E0E0E0"/>
+<text x="45.0" y="114.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="start">smpc_fixed_risk</text>
+<text x="312.5" y="114.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">50/50</text>
+<text x="482.5" y="114.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">0.0244 / 0.0057</text>
+<text x="670.0" y="114.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">0.9596 / 2.1504 m</text>
+<text x="850.0" y="114.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">4.4465 / 5.4112 m</text>
+<rect x="35" y="130" width="910" height="42" fill="#FAFAFA" stroke="#E0E0E0"/>
+<text x="45.0" y="156.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="start">smpc_var_risk</text>
+<text x="312.5" y="156.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">50/50</text>
+<text x="482.5" y="156.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">0.0293 / 0.0062</text>
+<text x="670.0" y="156.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">0.8745 / 2.1504 m</text>
+<text x="850.0" y="156.0" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#222222" text-anchor="middle">4.3771 / 5.4114 m</text>
+<text x="45.0" y="247.0" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#222222" text-anchor="start">Source: postcarla_trajectory_gate.json. Required SMPC rollouts: 100/100 PASS.</text>
+</svg>
