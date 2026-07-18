@@ -66,12 +66,15 @@ def make_batch(batch, no_image=False):
     return samples, np.asarray(images, dtype=np.float32), np.asarray(past_states, dtype=np.float32), np.asarray(labels, dtype=np.float32)
 
 
-def raw_to_modes(raw_pred, anchors):
-    num_anchors, horizon, _ = anchors.shape
-    trajectories = raw_pred[:, :-num_anchors].reshape((-1, num_anchors, horizon, 5))
+def raw_to_modes(raw_pred, anchors, label_horizon):
+    num_anchors, model_horizon, _ = anchors.shape
+    trajectories = raw_pred[:, :-num_anchors].reshape((-1, num_anchors, model_horizon, 5))
     logits = raw_pred[:, -num_anchors:]
     probs = tf.nn.softmax(logits, axis=-1).numpy()
-    mus = trajectories[:, :, :, :2] + anchors[None, :, :, :]
+    mus = (
+        trajectories[:, :, :label_horizon, :2]
+        + anchors[None, :, :label_horizon, :]
+    )
     return probs, mus
 
 
@@ -80,8 +83,10 @@ def evaluate(args):
     result_dir = os.path.abspath(os.path.join(merged_dir, os.pardir))
     jsonl_path = os.path.join(merged_dir, f"{args.split}.jsonl")
     anchors = np.load(args.anchors).astype(np.float32)
+    if anchors.shape[1] < args.horizon:
+        raise ValueError(f"Anchor horizon {anchors.shape[1]} is shorter than --horizon {args.horizon}")
     if anchors.shape[1] != args.horizon:
-        raise ValueError(f"Anchor horizon {anchors.shape[1]} does not match --horizon {args.horizon}")
+        print(f"Evaluating first {args.horizon} steps of {anchors.shape[1]}-step model output.")
 
     model = tf.keras.models.load_model(args.model, compile=False)
     top_ade = []
@@ -103,7 +108,7 @@ def evaluate(args):
             continue
         samples, images, past_states, labels = make_batch(batch, no_image=args.no_image)
         pred = model.predict_on_batch([images, past_states])
-        probs, mus = raw_to_modes(pred, anchors)
+        probs, mus = raw_to_modes(pred, anchors, args.horizon)
         for b in range(len(samples)):
             mode_ade = np.mean(np.linalg.norm(mus[b] - labels[b][None, :, :], axis=-1), axis=-1)
             mode_fde = np.linalg.norm(mus[b, :, -1, :] - labels[b, -1, :][None, :], axis=-1)
@@ -123,7 +128,7 @@ def evaluate(args):
     if batch:
         samples, images, past_states, labels = make_batch(batch, no_image=args.no_image)
         pred = model.predict_on_batch([images, past_states])
-        probs, mus = raw_to_modes(pred, anchors)
+        probs, mus = raw_to_modes(pred, anchors, args.horizon)
         for b in range(len(samples)):
             mode_ade = np.mean(np.linalg.norm(mus[b] - labels[b][None, :, :], axis=-1), axis=-1)
             mode_fde = np.linalg.norm(mus[b, :, -1, :] - labels[b, -1, :][None, :], axis=-1)

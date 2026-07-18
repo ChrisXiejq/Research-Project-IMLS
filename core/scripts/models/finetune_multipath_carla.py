@@ -120,8 +120,9 @@ def make_dataset(jsonl_path: str, result_dir: str, horizon: int, batch_size: int
     return dataset
 
 
-def multipath_loss(anchors_np: np.ndarray):
+def multipath_loss(anchors_np: np.ndarray, label_horizon: int):
     anchors = tf.constant(anchors_np, dtype=tf.float32)
+    label_anchors = tf.constant(anchors_np[:, :label_horizon, :], dtype=tf.float32)
     num_anchors = int(anchors_np.shape[0])
     num_timesteps = int(anchors_np.shape[1])
 
@@ -134,7 +135,7 @@ def multipath_loss(anchors_np: np.ndarray):
         anchor_probs = tf.nn.softmax(y_pred[:, -num_anchors:])
 
         distance_to_anchors = tf.reduce_sum(
-            tf.norm(anchors[None, :, :, :] - y_true[:, None, :, :], axis=-1),
+            tf.norm(label_anchors[None, :, :, :] - y_true[:, None, :, :], axis=-1),
             axis=-1,
         )
         nearest_mode = tf.argmin(distance_to_anchors, axis=-1, output_type=tf.int32)
@@ -144,13 +145,14 @@ def multipath_loss(anchors_np: np.ndarray):
         selected_probs = tf.gather_nd(anchor_probs, nearest_indices)
         class_loss = -tf.math.log(tf.maximum(selected_probs, 1.0e-8))
 
-        trajectories_xy = trajectories[:, :, :, :2] + anchors[None, :, :, :]
+        trajectories_label = trajectories[:, :, :label_horizon, :]
+        trajectories_xy = trajectories_label[:, :, :, :2] + label_anchors[None, :, :, :]
         selected_trajs = tf.gather_nd(trajectories_xy, nearest_indices)
         residual = y_true - selected_trajs
         dx = residual[:, :, 0]
         dy = residual[:, :, 1]
 
-        selected_params = tf.gather_nd(trajectories, nearest_indices)
+        selected_params = tf.gather_nd(trajectories_label, nearest_indices)
         log_std1 = tf.clip_by_value(tf.abs(selected_params[:, :, 2]), 0.0, 5.0)
         log_std2 = tf.clip_by_value(tf.abs(selected_params[:, :, 3]), 0.0, 5.0)
         std1 = tf.exp(log_std1)
@@ -172,8 +174,9 @@ def multipath_loss(anchors_np: np.ndarray):
     return loss
 
 
-def top_mode_ade_metric(anchors_np: np.ndarray):
+def top_mode_ade_metric(anchors_np: np.ndarray, label_horizon: int):
     anchors = tf.constant(anchors_np, dtype=tf.float32)
+    label_anchors = tf.constant(anchors_np[:, :label_horizon, :], dtype=tf.float32)
     num_anchors = int(anchors_np.shape[0])
     num_timesteps = int(anchors_np.shape[1])
 
@@ -186,7 +189,8 @@ def top_mode_ade_metric(anchors_np: np.ndarray):
         anchor_probs = tf.nn.softmax(y_pred[:, -num_anchors:])
         top_mode = tf.argmax(anchor_probs, axis=-1, output_type=tf.int32)
         top_indices = tf.stack([tf.range(batch_size, dtype=tf.int32), top_mode], axis=-1)
-        trajectories_xy = trajectories[:, :, :, :2] + anchors[None, :, :, :]
+        trajectories_label = trajectories[:, :, :label_horizon, :]
+        trajectories_xy = trajectories_label[:, :, :, :2] + label_anchors[None, :, :, :]
         top_trajs = tf.gather_nd(trajectories_xy, top_indices)
         return tf.reduce_mean(tf.norm(top_trajs - y_true, axis=-1))
 
@@ -229,8 +233,12 @@ def main():
         raise FileNotFoundError("Expected train.jsonl and val.jsonl under merged_dir")
 
     anchors = np.load(args.anchors).astype(np.float32)
+    if anchors.shape[1] < args.horizon:
+        raise ValueError(f"Anchor horizon {anchors.shape[1]} is shorter than --horizon {args.horizon}")
     if anchors.shape[1] != args.horizon:
-        raise ValueError(f"Anchor horizon {anchors.shape[1]} does not match --horizon {args.horizon}")
+        print(
+            f"Using first {args.horizon} steps of {anchors.shape[1]}-step model output for CARLA labels."
+        )
 
     train_count = count_usable_samples(train_jsonl, result_dir, args.horizon, args.max_train_samples)
     val_count = count_usable_samples(val_jsonl, result_dir, args.horizon, args.max_val_samples)
@@ -242,8 +250,8 @@ def main():
     trainable_info = set_trainable_layers(model, args.freeze)
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=args.learning_rate, clipnorm=10.0),
-        loss=multipath_loss(anchors),
-        metrics=[top_mode_ade_metric(anchors)],
+        loss=multipath_loss(anchors, args.horizon),
+        metrics=[top_mode_ade_metric(anchors, args.horizon)],
     )
     model.summary()
 
