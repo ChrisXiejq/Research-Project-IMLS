@@ -70,6 +70,11 @@ runs/
 *.pt
 *.pth
 
+# Fine-tuned model outputs generated locally/on GPU servers.
+core/scripts/models/*_carla_finetuned*/
+core/scripts/models/*_carla_finetuned*_history.json
+core/scripts/models/*_carla_finetuned*_training_log.csv
+
 # --- TensorFlow ---
 *.tfevents*
 
