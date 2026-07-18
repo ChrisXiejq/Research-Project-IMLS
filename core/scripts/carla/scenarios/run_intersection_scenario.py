@@ -197,6 +197,11 @@ class PredictionParams:
 
     # TODO: future work includes things like how often to update preds (if not at the Carla fps).
 
+def resolve_model_asset_path(model_root: str, asset_path: str) -> str:
+    if os.path.isabs(asset_path):
+        return asset_path
+    return os.path.join(model_root, asset_path)
+
 """
 Util functions for Carla. # TODO: move this elsewhere.
 """
@@ -1242,6 +1247,8 @@ class RunIntersectionScenario:
         prefix             = os.path.abspath(__file__).split('carla')[0] + 'models/'
         self._prediction_model_weights = prediction_params.model_weights
         self._prediction_model_anchors = prediction_params.model_anchors
+        self._prediction_model_weights_resolved = resolve_model_asset_path(prefix, prediction_params.model_weights)
+        self._prediction_model_anchors_resolved = resolve_model_asset_path(prefix, prediction_params.model_anchors)
         self._prediction_logging_enabled = bool(prediction_params.prediction_logging_enabled)
         self._prediction_logging_stride = max(1, int(prediction_params.prediction_logging_stride))
         self._prediction_logging_horizon = max(1, int(prediction_params.prediction_logging_horizon))
@@ -1258,6 +1265,8 @@ class RunIntersectionScenario:
                     {
                         "model_weights": prediction_params.model_weights,
                         "model_anchors": prediction_params.model_anchors,
+                        "model_weights_resolved": self._prediction_model_weights_resolved,
+                        "model_anchors_resolved": self._prediction_model_anchors_resolved,
                         "render_traffic_lights": bool(prediction_params.render_traffic_lights),
                         "stride": self._prediction_logging_stride,
                         "horizon": self._prediction_logging_horizon,
@@ -1266,8 +1275,8 @@ class RunIntersectionScenario:
                     f,
                     indent=2,
                 )
-        self.pred_model    = DeployMultiPath(prefix+prediction_params.model_weights, \
-                                             np.load(prefix+prediction_params.model_anchors))
+        self.pred_model    = DeployMultiPath(self._prediction_model_weights_resolved, \
+                                             np.load(self._prediction_model_anchors_resolved))
 
         # Try to do a sample prediction, initialize and check GPU model is working fine.
         blank_image = np.zeros((self.rasterizer.sem_rast.raster_height,

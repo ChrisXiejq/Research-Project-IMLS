@@ -74,6 +74,10 @@ def _prepare_prediction_params(scenario_dict, args=None):
     if traffic_control_norm.startswith("signalised"):
         pred_dict.setdefault("render_traffic_lights", True)
     if args is not None:
+        if getattr(args, "prediction_model_weights", None):
+            pred_dict["model_weights"] = args.prediction_model_weights
+        if getattr(args, "prediction_model_anchors", None):
+            pred_dict["model_anchors"] = args.prediction_model_anchors
         if getattr(args, "enable_prediction_logging", False):
             pred_dict["prediction_logging_enabled"] = True
         if getattr(args, "prediction_logging_stride", None) is not None:
@@ -314,6 +318,10 @@ if __name__ == '__main__':
                         help="Scenario name for automatic trajectory figures. Default: first matched scenario.")
     parser.add_argument("--postprocess_plot_init", type=int, default=None,
                         help="ego_init index for automatic trajectory figures. Default: first matched init.")
+    parser.add_argument("--prediction_model_weights", default=None,
+                        help="Override PredictionParams.model_weights, relative to core/scripts/models unless absolute.")
+    parser.add_argument("--prediction_model_anchors", default=None,
+                        help="Override PredictionParams.model_anchors, relative to core/scripts/models unless absolute.")
     parser.add_argument("--enable_prediction_logging", action="store_true",
                         help="Write per-rollout prediction dataset JSONL files for model calibration/fine-tuning.")
     parser.add_argument("--prediction_logging_stride", type=int, default=None,
@@ -364,6 +372,8 @@ if __name__ == '__main__':
             "postprocess_no_plots": args.postprocess_no_plots,
             "postprocess_plot_scenario": args.postprocess_plot_scenario,
             "postprocess_plot_init": args.postprocess_plot_init,
+            "prediction_model_weights": args.prediction_model_weights,
+            "prediction_model_anchors": args.prediction_model_anchors,
             "enable_prediction_logging": args.enable_prediction_logging,
             "prediction_logging_stride": args.prediction_logging_stride,
             "prediction_logging_horizon": args.prediction_logging_horizon,
