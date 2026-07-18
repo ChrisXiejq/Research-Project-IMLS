@@ -126,5 +126,7 @@ done
 
 "${PYTHON_BIN}" "${CORE_DIR}/scripts/postcarla_trajectory_gate.py" "${RESULTS_DIR}"
 "${PYTHON_BIN}" "${CORE_DIR}/scripts/risk_by_conflict_distance.py" "${RESULTS_DIR}"
+"${PYTHON_BIN}" "${CORE_DIR}/../docs/paper/generate_finetuned_predictor_validation_figures.py" \
+  --results-dir "${RESULTS_DIR}"
 
 echo "10-init fine-tuned predictor validation complete: ${RESULTS_DIR}"
