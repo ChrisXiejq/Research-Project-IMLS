@@ -1,0 +1,6 @@
+metric,previous_frozen,current_finetuned,delta,higher_is_better,previous_pretrained,relative_improvement_percent,lower_is_better,delta_pp
+worst_case_footprint_separation_m,0.8745084324592041,0.8832791237189278,0.00877069125972374,True,,,,
+worst_case_center_distance_m,4.377135532356896,4.383095867523524,0.00596033516662775,True,,,,
+top1_ADE_mean_m,,0.027083374559879303,,,4.033664703369141,99.32856653808489,True,
+top1_FDE_mean_m,,0.03661229461431503,,,7.525932312011719,99.51351815168627,True,
+top_prob_mode_is_best_percent,,100.0,,True,0.9836065573770493,,,99.01639344262296

@@ -478,74 +478,44 @@ This work presents a phase-aware adaptive risk allocation strategy for SMPC in a
 | Fig. 5 | risk tightening by clearance phase | 可生成 | `risk_by_conflict_distance_summary.csv` |
 | Fig. 6 | nominal vs final acceleration | 可生成 | `smpc_debug_steps.jsonl` |
 | Table 1 | experiment configuration | 已有 | batch config / tuning config |
-| Table 2 | safety gate summary | 已有 1/5/10-init | `postcarla_trajectory_gate.json` |
-| Table 3 | phase-aware risk comparison | 已有 1/5/10-init | `risk_by_conflict_distance_comparison.csv` |
-| Table 4 | paper metrics summary | 需 50-init 后补全 | `paper_metrics_summary.csv` |
+| Table 2 | safety gate summary | 已有 50-init | `postcarla_trajectory_gate.json` |
+| Table 3 | phase-aware risk comparison | 已有 50-init | `risk_by_conflict_distance_comparison.csv` |
+| Table 4 | model-side fine-tuning metrics | 已有 | fixed test split evaluation |
 | Table 5 | limitations / ablation summary | 可写 | discussion |
 
 ## 11. 下一步工作
 
-短期：
+短期已完成：
 
-1. 跑 50-init full experiment。
-2. 拉取并分析 50-init 结果。
-3. 确认生成：
-   - `postcarla_trajectory_gate.md/json`
-   - `risk_by_conflict_distance_summary.md/json/csv`
-   - `risk_by_conflict_distance_comparison.csv`
-   - `paper_metrics_summary.md/csv`
-   - `df_full.csv`
-   - `df_norm.csv`
-   - `df_final.csv`
-4. 将本文档中的 1/5/10-init 表格扩展为最终 50-init 主表。
+1. 50-init control-side frozen result 已完成。
+2. 10-init phase-floor ablation 已完成。
+3. CARLA prediction dataset collection 已完成。
+4. MultiPath fine-tuning 和 same-test-set evaluation 已完成。
+5. Fine-tuned predictor 50-init closed-loop validation 已完成。
+6. 核心 graphical results 已生成。
 
-中期：
+接下来主要是写作整理：
 
-1. 生成论文图。
-2. 写 Methodology 和 Experimental Setup。
-3. 写 Results 时严格区分：
+1. 写 Methodology 和 Experimental Setup。
+2. 写 Results 时严格区分：
    - solver risk layer
    - nominal control layer
    - final supervisor-controlled trajectory layer
-4. 写 Discussion，解释 supervisor 的必要性和 adaptive risk 的真实贡献。
-
-可选增强：
-
-1. 做 sensitivity ablation：
-   - no phase floor
-   - weaker floor
-   - stronger floor
-2. 做 supervisor intervention ablation：
-   - current supervisor
-   - weakened hard-stop
-3. 做 speed variation：
-   - TV speed 8 / 9 / 10 m/s
+3. 写 Discussion，解释 supervisor 的必要性、adaptive risk 的真实贡献，以及为什么 fine-tuning 的主要提升体现在模型侧。
+4. 生成并筛选 bird's-eye 视频，用于 qualitative demonstration。
 
 ## 12. 当前 milestone 记录
 
-当前代码 HEAD：
+完整 milestone 记录已合并到：
 
 ```text
-eea6c53f547304af92f697d683f3f12d8af70226
+docs/paper/current_project_status.md
 ```
 
-主要结果：
+当前最好 integrated milestone：
 
 ```text
-single-init:
-  20260707_193121_final_dissertation
-
-5-init:
-  20260707_195935_5init_phase_floor_final_dissertation
-
-10-init:
-  20260707_221143_10init_phase_floor_final_dissertation
+core/results/20260718_104740_50init_finetuned_predictor_validation
 ```
 
-当前推荐基线：
-
-```text
-phase-aware adaptive risk floor + fixed-static risk corrected comparison
-```
-
-50-init 完成前，论文结论应写为“preliminary results / scaling precheck”。50-init 完成并通过后，再将其升级为 final dissertation result。
+该结果应作为当前最新版本：SMPC+Supervisor 是控制侧提升，fine-tuned MultiPath 是模型侧提升，二者组合形成当前最好验证结果。
