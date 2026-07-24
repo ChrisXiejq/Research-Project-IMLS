@@ -13,6 +13,26 @@ The current dissertation story should be controlled as a two-stage improvement:
 
 The intended thesis claim is cumulative: the control-side contribution provides closed-loop rule-aware safety, and the model-side contribution improves prediction reliability while preserving the safety result in the integrated pipeline.
 
+### Next-Stage Direction After Supervisor Feedback
+
+The current best integrated milestone remains the reference point, but the next experimental stage should focus on explanation and ablation rather than simply producing more aggregate 50-init runs.
+
+Guiding document:
+
+```text
+docs/paper/next_experiment_action_guide_after_supervisor_feedback.md
+```
+
+The next stage should prioritise:
+
+- diagnosing why the ego vehicle stops too early and behaves conservatively;
+- quantifying how much the supervisor shapes the final executed action;
+- comparing fixed-risk and adaptive-risk SMPC under full and reduced-intervention supervisor settings;
+- analysing MPC infeasibility cases separately instead of only reporting aggregate feasibility;
+- sanity-checking the fine-tuned predictor result to rule out split leakage or metric inconsistency.
+
+Future code changes and experiments should be checked against this direction before execution.
+
 ## 2. Current Best Integrated Milestone
 
 ```text

@@ -6,6 +6,8 @@ This folder is organised by document purpose. Use this file as the entry point.
 
 - `paper/current_project_status.md`  
   Canonical status and milestone summary. This is the main source for current best results, fine-tuned predictor validation, phase-aware risk evidence, graphical results, and paper-safe claims.
+- `paper/next_experiment_action_guide_after_supervisor_feedback.md`
+  Guiding plan for the next experimental stage after supervisor feedback. Use this as the direction guide for new analysis, code changes, and experiments.
 
 ## Paper Writing
 

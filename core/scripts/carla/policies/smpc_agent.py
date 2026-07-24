@@ -83,6 +83,7 @@ class SMPCAgent(object):
                  yield_recovery_max_lateral_error=12.0,
                  yield_recovery_speed=5.5,
                  yield_recovery_accel=1.8,
+                 yield_supervisor_mode="full",
                  completion_s_margin=6.0,
                  completion_goal_dist=8.0,
                  completion_lateral_error=4.0,
@@ -163,6 +164,12 @@ class SMPCAgent(object):
         self.yield_recovery_max_lateral_error = float(yield_recovery_max_lateral_error)
         self.yield_recovery_speed = float(yield_recovery_speed)
         self.yield_recovery_accel = float(yield_recovery_accel)
+        self.yield_supervisor_mode = str(yield_supervisor_mode or "full").strip().lower()
+        if self.yield_supervisor_mode not in {"full", "reduced_intervention"}:
+            raise ValueError(
+                "yield_supervisor_mode must be 'full' or 'reduced_intervention', "
+                f"got {yield_supervisor_mode!r}"
+            )
         self.completion_s_margin = float(completion_s_margin)
         self.completion_goal_dist = float(completion_goal_dist)
         self.completion_lateral_error = float(completion_lateral_error)
@@ -768,6 +775,7 @@ class SMPCAgent(object):
             },
             "yield_stop_supervisor": {
                 "enabled": self.yield_stop_enabled,
+                "mode": self.yield_supervisor_mode,
                 "stop_speed": self.yield_stop_speed,
                 "caution_speed": self.yield_caution_speed,
                 "creep_speed": self.yield_creep_speed,
@@ -1671,6 +1679,15 @@ class SMPCAgent(object):
             return None
 
         phase = yield_status.get("phase")
+        if self.yield_supervisor_mode == "reduced_intervention":
+            if (
+                bool(yield_status.get("active", False))
+                and bool(yield_status.get("hard_stop_required", False))
+                and phase in {"approach_yield_line", "hold_yield_line"}
+            ):
+                return "reduced_intervention_hard_safety_yield_control"
+            return None
+
         if (
             bool(yield_status.get("active", False))
             and phase in {"approach_yield_line", "hold_yield_line"}
@@ -1795,18 +1812,50 @@ class SMPCAgent(object):
             and (observed_caution_distance_trigger or observed_caution_braking_trigger)
             and not_far_past_conflict
         )
-        active = (
-            allow_priority_yield
-            and target_has_priority
-            and approaching_stop_line
-            and not_far_past_conflict
-            and (braking_distance_required or overlap_risk or close_hold)
-        ) or cautious_candidate
-        hard_stop_required = (
-            active
-            and not target_cleared_conflict
-            and (hard_stop_stop_line_braking or hard_stop_target_close or hard_stop_conflict_close)
-        )
+        if self.yield_supervisor_mode == "reduced_intervention":
+            reduced_overlap_guard = (
+                overlap_risk and ego_dist_to_conflict <= self.yield_activation_distance
+            )
+            active = (
+                allow_priority_yield
+                and target_has_priority
+                and not target_cleared_conflict
+                and not_far_past_conflict
+                and (
+                    emergency_braking_distance_required
+                    or close_hold
+                    or reduced_overlap_guard
+                    or ego_inside_footprint_clearance
+                )
+            ) or (
+                cautious_candidate
+                and (
+                    emergency_braking_distance_required
+                    or ego_dist_to_conflict <= self.yield_activation_distance
+                )
+            )
+            hard_stop_required = (
+                active
+                and not target_cleared_conflict
+                and (
+                    emergency_braking_distance_required
+                    or ego_inside_footprint_clearance
+                    or close_hold
+                )
+            )
+        else:
+            active = (
+                allow_priority_yield
+                and target_has_priority
+                and approaching_stop_line
+                and not_far_past_conflict
+                and (braking_distance_required or overlap_risk or close_hold)
+            ) or cautious_candidate
+            hard_stop_required = (
+                active
+                and not target_cleared_conflict
+                and (hard_stop_stop_line_braking or hard_stop_target_close or hard_stop_conflict_close)
+            )
         if active and not allow_priority_yield:
             phase = "cautious_approach_observed_target"
         elif active and ego_dist_to_stop <= self.yield_hold_distance:
@@ -1845,6 +1894,7 @@ class SMPCAgent(object):
 
         return {
             "active": bool(active),
+            "supervisor_mode": self.yield_supervisor_mode,
             "phase": phase,
             "priority_rule": "turning_gives_way_to_oncoming_straight",
             "reason": reason,
