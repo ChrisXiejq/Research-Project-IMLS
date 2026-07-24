@@ -9,6 +9,7 @@
 - **give-way-smpc-tuning**: Before changing the UK give-way SMPC experiment, read the experiment changelog and base the next parameter change on measured past effects. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 - **server-result-pull-method**: For this project, pull server experiment results with direct `scp -r` from `root@connect.cqa1.seetacloud.com:/root/autodl-tmp/Research-Project-IMLS/core/results/<timestamp>`; do not tar unless explicitly requested. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 - **server-carla-environment**: Before any server-side CARLA/SMPC run, configure `carla_modern`, `CARLA_ROOT`, `PYTHONPATH`, `GUROBI_HOME`, `GUROBI_VERSION=110`, `GRB_LICENSE_FILE`, and verify `ca.has_conic("gurobi") == True`; do not use `ca.has_nlpsol("gurobi")` as the pass/fail check. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-server-carla-environment.md`
+- **reduced-supervisor-iteration-rule**: For supervisor ablation iterations, do not keep failed versions as `v1/v2/v3` runtime modes; overwrite `reduced_intervention` with the current best candidate and rely on git/results directories for history.
 
 ## Project Records
 

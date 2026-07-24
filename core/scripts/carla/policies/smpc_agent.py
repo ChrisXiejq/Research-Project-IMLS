@@ -1686,6 +1686,13 @@ class SMPCAgent(object):
                 and phase in {"approach_yield_line", "hold_yield_line"}
             ):
                 return "reduced_intervention_hard_safety_yield_control"
+            recovery_reason = self._recovery_handoff_reason(
+                yield_status,
+                speed,
+                prefix="reduced_intervention",
+            )
+            if recovery_reason is not None:
+                return recovery_reason
             return None
 
         if (
@@ -1699,6 +1706,15 @@ class SMPCAgent(object):
         if not bool(yield_status.get("target_cleared_conflict", False)):
             return None
 
+        return self._recovery_handoff_reason(
+            yield_status,
+            speed,
+            prefix="deterministic_rule_yield",
+        )
+
+    def _recovery_handoff_reason(self, yield_status, speed, prefix):
+        """Return a short post-clearance rejoin handoff reason, if needed."""
+        phase = yield_status.get("phase")
         handoff_steps = min(
             15,
             max(1, int(np.ceil(0.25 * float(self.yield_recovery_steps)))),
@@ -1711,7 +1727,7 @@ class SMPCAgent(object):
         )
         low_speed_handoff = float(speed) <= max(2.0, 0.5 * float(self.yield_recovery_speed))
         if (recovery_handoff_start or early_recovery_phase) and low_speed_handoff:
-            return "deterministic_rule_yield_recovery_handoff"
+            return f"{prefix}_recovery_handoff"
         return None
 
     def _should_bypass_smpc_for_rule_yield(self, yield_status, speed):
@@ -2105,7 +2121,37 @@ class SMPCAgent(object):
         self._rule_yield_phase = status.get("phase", "free_drive")
         return status
 
-    def _apply_rule_aware_yield_control(self, yield_status, u0, v_des, speed):
+    def _reduced_recovery_stabilization_active(
+        self,
+        lateral_error=None,
+        heading_error=None,
+        completion_metrics=None,
+    ):
+        """Keep reduced mode from drifting near route completion after target clearance."""
+        if self.yield_supervisor_mode != "reduced_intervention":
+            return False
+        if not (self.yield_recovery_enabled and self._yield_recovery_steps_remaining > 0):
+            return False
+        lateral_abs = abs(float(lateral_error)) if lateral_error is not None else 0.0
+        heading_abs = abs(float(heading_error)) if heading_error is not None else 0.0
+        s_after_goal = None
+        if completion_metrics is not None:
+            s_after_goal = completion_metrics.get("s_after_route_goal")
+        near_goal = bool(s_after_goal is not None and float(s_after_goal) >= -8.0)
+        lateral_guard = max(2.0, 0.5 * float(self.completion_lateral_error))
+        heading_guard = max(0.12, 0.75 * float(self.completion_heading_error))
+        return bool(near_goal or lateral_abs >= lateral_guard or heading_abs >= heading_guard)
+
+    def _apply_rule_aware_yield_control(
+        self,
+        yield_status,
+        u0,
+        v_des,
+        speed,
+        lateral_error=None,
+        heading_error=None,
+        completion_metrics=None,
+    ):
         u0_flat = np.asarray(u0, dtype=float).reshape(-1)
         v_des_float = float(np.asarray(v_des, dtype=float).reshape(-1)[0])
 
@@ -2268,22 +2314,41 @@ class SMPCAgent(object):
             "accel": self.yield_recovery_accel,
         }
         if recovery_active_for_control:
+            reduced_stabilization = self._reduced_recovery_stabilization_active(
+                lateral_error=lateral_error,
+                heading_error=heading_error,
+                completion_metrics=completion_metrics,
+            )
+            recovery_speed_cap = (
+                min(float(self.yield_recovery_speed), 4.0)
+                if reduced_stabilization
+                else float(self.yield_recovery_speed)
+            )
+            recovery_accel_cap = (
+                min(float(self.yield_recovery_accel), 0.8)
+                if reduced_stabilization
+                else float(self.yield_recovery_accel)
+            )
             restart_accel = 0.0
-            if float(speed) < self.yield_recovery_speed:
+            if float(speed) < recovery_speed_cap:
                 restart_accel = min(
-                    self.yield_recovery_accel,
-                    max(0.2, 0.4 * (self.yield_recovery_speed - float(speed))),
+                    recovery_accel_cap,
+                    max(0.2, 0.4 * (recovery_speed_cap - float(speed))),
                 )
+            elif reduced_stabilization:
+                restart_accel = min(0.0, float(u0_flat[0]))
             u0_new = np.array([
                 min(
-                    self.yield_recovery_accel,
+                    recovery_accel_cap,
                     max(float(u0_flat[0]), restart_accel),
                 ),
                 float(u0_flat[1]),
             ], dtype=float)
+            if reduced_stabilization and float(speed) > recovery_speed_cap:
+                u0_new[0] = min(float(u0_new[0]), 0.0)
             v_des_new = min(
                 max(v_des_float, self.yield_stop_speed),
-                self.yield_recovery_speed,
+                recovery_speed_cap,
             )
             self.control_prev = u0_new
             self._yield_last_applied_accel = float(u0_new[0])
@@ -2299,6 +2364,9 @@ class SMPCAgent(object):
                 "df_des": float(u0_new[1]),
                 "v_des": float(v_des_new),
                 "restart_accel": float(restart_accel),
+                "reduced_stabilization": bool(reduced_stabilization),
+                "recovery_speed_cap": float(recovery_speed_cap),
+                "recovery_accel_cap": float(recovery_accel_cap),
             }
         else:
             u0_new = np.asarray(u0, dtype=float).reshape(-1)
@@ -2315,6 +2383,9 @@ class SMPCAgent(object):
         t_ref_new,
         yield_status,
         recovery_active_for_reference,
+        lateral_error=None,
+        heading_error=None,
+        completion_metrics=None,
     ):
         """Shape the pre-solve reference without making the SMPC problem infeasible.
 
@@ -2447,22 +2518,39 @@ class SMPCAgent(object):
                 if not recovery_active_for_reference:
                     return ref_status
 
+        reduced_stabilization = self._reduced_recovery_stabilization_active(
+            lateral_error=lateral_error,
+            heading_error=heading_error,
+            completion_metrics=completion_metrics,
+        )
+        recovery_speed_cap = (
+            min(float(self.yield_recovery_speed), 4.0)
+            if reduced_stabilization
+            else float(self.yield_recovery_speed)
+        )
+        recovery_accel_cap = (
+            min(float(self.yield_recovery_accel), 0.8)
+            if reduced_stabilization
+            else float(self.yield_recovery_accel)
+        )
         self.feas_ref_states_new[:, 3] = np.minimum(
             self.feas_ref_states_new[:, 3],
-            self.yield_recovery_speed,
+            recovery_speed_cap,
         )
         self.feas_ref_inputs_new[:, 0] = np.clip(
             self.feas_ref_inputs_new[:, 0],
             self.yield_stop_decel,
-            self.yield_recovery_accel,
+            recovery_accel_cap,
         )
         ref_status.update({
             "mode": "post_yield_rejoin_reference",
-            "speed_cap": float(self.yield_recovery_speed),
-            "accel_upper_bound": float(self.yield_recovery_accel),
+            "speed_cap": float(recovery_speed_cap),
+            "accel_upper_bound": float(recovery_accel_cap),
             "profile": {
                 "type": "constant_recovery_cap",
-                "recovery_speed": float(self.yield_recovery_speed),
+                "recovery_speed": float(recovery_speed_cap),
+                "nominal_recovery_speed": float(self.yield_recovery_speed),
+                "reduced_stabilization": bool(reduced_stabilization),
             },
         })
         return ref_status
@@ -2637,6 +2725,9 @@ class SMPCAgent(object):
                 t_ref_new,
                 pre_solve_yield_status,
                 recovery_active_for_reference,
+                lateral_error=ey,
+                heading_error=epsi,
+                completion_metrics=completion_metrics,
             )
             if (
                 self.prev_opt
@@ -2945,6 +3036,9 @@ class SMPCAgent(object):
                 u0,
                 v_des,
                 speed,
+                lateral_error=ey,
+                heading_error=epsi,
+                completion_metrics=completion_metrics,
             )
             debug_payload["yield_stop_supervisor"] = yield_status
             debug_payload["rule_aware_yield"] = yield_status

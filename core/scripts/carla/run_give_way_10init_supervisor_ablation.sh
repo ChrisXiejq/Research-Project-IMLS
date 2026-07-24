@@ -5,7 +5,8 @@ set -euo pipefail
 # Runs:
 #   1) full supervisor: current baseline behaviour
 #   2) reduced_intervention supervisor: keeps hard safety guard but reduces
-#      unnecessary deterministic yield intervention so SMPC behaviour is more visible.
+#      unnecessary deterministic yield intervention so SMPC behaviour is more visible,
+#      while retaining a post-clearance rejoin stabilisation guard.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CORE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -183,10 +184,13 @@ config = {
 
 if mode == "reduced_intervention":
     ego = config["vehicle_role_overrides"]["ego"]
-    # Keep the hard safety guard, but shorten post-clearance deterministic
-    # recovery and require the emergency safe-stop trigger before hard override.
-    ego["yield_recovery_steps"] = 20
+    # Keep reduced pre-clearance intervention, but retain enough post-clearance
+    # rejoin window to stabilise route completion. This remains shorter and less
+    # deterministic than the full supervisor.
+    ego["yield_recovery_steps"] = 90
     ego["yield_release_clearance_margin"] = 0.5
+    ego["yield_recovery_speed"] = 4.5
+    ego["yield_recovery_accel"] = 1.0
 
 with open(out_path, "w", encoding="utf-8") as f:
     json.dump(config, f, indent=2)
@@ -244,11 +248,10 @@ for mode in ${SUPERVISOR_MODES}; do
 done
 
 cat > "${RESULTS_DIR}/README.txt" <<EOF
-10-init supervisor ablation complete.
+Supervisor ablation complete.
 
 Subdirectories:
-  full_supervisor
-  reduced_intervention_supervisor
+  Generated according to SUPERVISOR_MODES=${SUPERVISOR_MODES}
 
 Compare:
   diagnostics_after_supervisor_feedback/step1_diagnostic_report.md
