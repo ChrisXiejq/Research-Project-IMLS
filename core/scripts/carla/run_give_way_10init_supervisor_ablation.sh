@@ -38,6 +38,46 @@ fi
 
 export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla:${CARLA_ROOT}/PythonAPI/carla/agents:${PYTHONPATH:-}"
 
+if [[ -z "${GUROBI_HOME:-}" && -d "${REPO_DIR}/gurobi/gurobi1103/linux64" ]]; then
+  export GUROBI_HOME="${REPO_DIR}/gurobi/gurobi1103/linux64"
+fi
+if [[ -z "${GUROBI_VERSION:-}" ]]; then
+  export GUROBI_VERSION="110"
+fi
+if [[ -z "${GRB_LICENSE_FILE:-}" && -f "${REPO_DIR}/gurobi/gurobi.lic" ]]; then
+  export GRB_LICENSE_FILE="${REPO_DIR}/gurobi/gurobi.lic"
+fi
+if [[ -n "${GUROBI_HOME:-}" ]]; then
+  export LD_LIBRARY_PATH="${GUROBI_HOME}/lib:${LD_LIBRARY_PATH:-}"
+fi
+
+"${PYTHON_BIN}" - <<'PY'
+import os
+import sys
+
+import casadi as ca
+
+ok = bool(ca.has_conic("gurobi"))
+print(
+    "CasADi/Gurobi preflight:",
+    {
+        "casadi": ca.__version__,
+        "has_conic_gurobi": ok,
+        "has_nlpsol_gurobi": bool(ca.has_nlpsol("gurobi")),
+        "GUROBI_HOME": os.environ.get("GUROBI_HOME"),
+        "GUROBI_VERSION": os.environ.get("GUROBI_VERSION"),
+        "GRB_LICENSE_FILE": os.environ.get("GRB_LICENSE_FILE"),
+    },
+)
+if not ok:
+    print(
+        "ERROR: CasADi conic Gurobi plugin is unavailable. "
+        "This experiment uses ca.Opti('conic'), so ca.has_conic('gurobi') must be True.",
+        file=sys.stderr,
+    )
+    sys.exit(2)
+PY
+
 MODEL_DIR="${CORE_DIR}/scripts/models/${PREDICTION_MODEL_WEIGHTS}"
 if [[ "${PREDICTION_MODEL_WEIGHTS}" = /* ]]; then
   MODEL_DIR="${PREDICTION_MODEL_WEIGHTS}"

@@ -43,6 +43,8 @@ This folder is organised by document purpose. Use this file as the entry point.
   Mapping between architecture diagrams and code.
 - `architecture/Give_Way_SMPC_Experiment_Changelog.md`  
   Detailed historical changelog. Use for traceability, not as the current status source.
+- `architecture/Server_CARLA_Environment_Runbook.md`
+  Server startup commands and mandatory CasADi/Gurobi conic-solver preflight for CARLA/SMPC experiments.
 - `architecture/Experiment Flow.png`, `architecture/SMPC.png`  
   Architecture diagrams.
 
