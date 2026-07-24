@@ -436,6 +436,7 @@ class SMPCAgent(object):
         self._yield_stop_seen = False
         self._yield_stop_active_prev = False
         self._yield_recovery_steps_remaining = 0
+        self._yield_clear_path_release_steps_remaining = 0
         self._rule_yield_phase = "idle"
         self._yield_last_applied_accel = None
         self._yield_geometry = None
@@ -1838,12 +1839,31 @@ class SMPCAgent(object):
             float(self.yield_release_clearance_margin),
             0.5,
         )
-        reduced_clear_path_release = (
+        raw_reduced_clear_path_release = (
             self.yield_supervisor_mode == "reduced_intervention"
             and target_has_priority
             and target_nominally_cleared_conflict
             and target_distance_to_conflict <= -reduced_clear_path_margin
             and target_speed_est >= max(0.2, self.yield_stop_speed)
+        )
+        if self.yield_supervisor_mode != "reduced_intervention":
+            self._yield_clear_path_release_steps_remaining = 0
+        elif raw_reduced_clear_path_release:
+            self._yield_clear_path_release_steps_remaining = max(
+                int(self._yield_clear_path_release_steps_remaining),
+                10,
+            )
+        elif self._yield_clear_path_release_steps_remaining > 0:
+            if float(speed) >= max(0.8, float(self.yield_creep_speed)):
+                self._yield_clear_path_release_steps_remaining = 0
+            else:
+                self._yield_clear_path_release_steps_remaining = max(
+                    0,
+                    int(self._yield_clear_path_release_steps_remaining) - 1,
+                )
+        reduced_clear_path_release = bool(
+            raw_reduced_clear_path_release
+            or self._yield_clear_path_release_steps_remaining > 0
         )
         reduced_conflict_hold = (
             target_has_priority
@@ -2018,6 +2038,13 @@ class SMPCAgent(object):
             ),
             "reduced_conflict_hold": bool(reduced_conflict_hold),
             "reduced_clear_path_release": bool(reduced_clear_path_release),
+            "raw_reduced_clear_path_release": bool(raw_reduced_clear_path_release),
+            "reduced_clear_path_release_latched": bool(
+                reduced_clear_path_release and not raw_reduced_clear_path_release
+            ),
+            "reduced_clear_path_release_steps_remaining": int(
+                self._yield_clear_path_release_steps_remaining
+            ),
             "reduced_clear_path_margin": float(reduced_clear_path_margin),
             "reduced_direct_takeover_required": bool(reduced_direct_takeover_required),
             "reduced_direct_takeover_margin": float(reduced_direct_takeover_margin),
