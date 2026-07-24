@@ -1682,7 +1682,7 @@ class SMPCAgent(object):
         if self.yield_supervisor_mode == "reduced_intervention":
             if (
                 bool(yield_status.get("active", False))
-                and bool(yield_status.get("hard_stop_required", False))
+                and bool(yield_status.get("direct_takeover_required", False))
                 and phase in {"approach_yield_line", "hold_yield_line"}
             ):
                 return "reduced_intervention_hard_safety_yield_control"
@@ -1867,6 +1867,14 @@ class SMPCAgent(object):
             reduced_overlap_guard = (
                 overlap_risk and ego_dist_to_conflict <= self.yield_activation_distance
             )
+            reduced_direct_takeover_required = (
+                not target_cleared_conflict
+                and (
+                    ego_inside_footprint_clearance
+                    or reduced_conflict_hold
+                    or ego_dist_to_emergency_stop <= max(0.75, self.yield_stop_speed * 2.0)
+                )
+            )
             active = (
                 allow_priority_yield
                 and target_has_priority
@@ -1894,6 +1902,7 @@ class SMPCAgent(object):
                     or reduced_conflict_hold
                 )
             )
+            direct_takeover_required = bool(active and hard_stop_required and reduced_direct_takeover_required)
         else:
             active = (
                 allow_priority_yield
@@ -1907,6 +1916,8 @@ class SMPCAgent(object):
                 and not target_cleared_conflict
                 and (hard_stop_stop_line_braking or hard_stop_target_close or hard_stop_conflict_close)
             )
+            reduced_direct_takeover_required = False
+            direct_takeover_required = bool(hard_stop_required)
         if active and not allow_priority_yield:
             phase = "cautious_approach_observed_target"
         elif active and ego_dist_to_stop <= self.yield_hold_distance:
@@ -1962,6 +1973,7 @@ class SMPCAgent(object):
             "observed_caution_distance_trigger": bool(observed_caution_distance_trigger),
             "observed_caution_braking_trigger": bool(observed_caution_braking_trigger),
             "hard_stop_required": bool(hard_stop_required),
+            "direct_takeover_required": bool(direct_takeover_required),
             "hard_stop_stop_line_braking": bool(hard_stop_stop_line_braking),
             "hard_stop_target_close": bool(hard_stop_target_close),
             "hard_stop_conflict_close": bool(hard_stop_conflict_close),
@@ -1995,6 +2007,7 @@ class SMPCAgent(object):
                 reduced_emergency_braking_distance_required
             ),
             "reduced_conflict_hold": bool(reduced_conflict_hold),
+            "reduced_direct_takeover_required": bool(reduced_direct_takeover_required),
             "ego_required_clearance": float(ego_required_clearance),
             "ego_inside_footprint_clearance": bool(ego_inside_footprint_clearance),
             "footprint_clearance_margin": float(self.yield_footprint_clearance_margin),
@@ -2200,6 +2213,36 @@ class SMPCAgent(object):
             distance_to_stop = max(float(yield_status.get("ego_distance_to_stop", 0.0)), 0.5)
             required_stop_decel = -(float(speed) ** 2) / (2.0 * distance_to_stop)
             hard_stop_required = bool(yield_status.get("hard_stop_required", False))
+            direct_takeover_required = bool(yield_status.get("direct_takeover_required", hard_stop_required))
+            if self.yield_supervisor_mode == "reduced_intervention" and not direct_takeover_required:
+                guard_speed = (
+                    self.yield_creep_speed
+                    if float(yield_status.get("ego_distance_to_conflict", np.inf))
+                    <= max(float(yield_status.get("ego_required_clearance", self.yield_conflict_radius)), self.yield_conflict_radius)
+                    else self.yield_caution_speed
+                )
+                v_des_new = min(v_des_float, float(guard_speed))
+                self._yield_last_applied_accel = None
+                self._yield_stop_active_prev = False
+                yield_status["applied"] = {
+                    "mode": "preclearance_reference_only_guard",
+                    "a_des": float(u0_flat[0]),
+                    "df_des": float(u0_flat[1]) if len(u0_flat) > 1 else 0.0,
+                    "v_des": float(v_des_new),
+                    "required_stop_decel": float(required_stop_decel),
+                    "hard_stop_required": bool(hard_stop_required),
+                    "direct_takeover_required": False,
+                    "guard_speed": float(guard_speed),
+                    "note": "SMPC final control preserved; reduced supervisor only shaped reference/speed target.",
+                }
+                yield_status["recovery"] = {
+                    "enabled": self.yield_recovery_enabled,
+                    "active": False,
+                    "started": False,
+                    "applied": None,
+                    "steps_remaining_after": int(self._yield_recovery_steps_remaining),
+                }
+                return u0_flat, v_des_new, yield_status
             nominal_a_des = max(
                 self.yield_stop_decel,
                 min(float(u0_flat[0]), required_stop_decel),
@@ -2281,6 +2324,7 @@ class SMPCAgent(object):
                 "required_stop_decel": float(required_stop_decel),
                 "nominal_a_des": float(nominal_a_des),
                 "hard_stop_required": bool(hard_stop_required),
+                "direct_takeover_required": bool(direct_takeover_required),
                 "rolling_speed_target": float(
                     self.yield_stop_speed
                     if hard_stop_required
@@ -2495,6 +2539,11 @@ class SMPCAgent(object):
         if yield_active:
             start_idx = int(max(0, min(t_ref_new, len(self.feas_ref_states_new) - 1)))
             hard_stop_required = bool(yield_status.get("hard_stop_required", False))
+            if (
+                self.yield_supervisor_mode == "reduced_intervention"
+                and not bool(yield_status.get("direct_takeover_required", hard_stop_required))
+            ):
+                hard_stop_required = False
             if not hard_stop_required:
                 rolling_speed = (
                     self.yield_creep_speed
