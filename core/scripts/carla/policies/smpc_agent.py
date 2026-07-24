@@ -1834,10 +1834,15 @@ class SMPCAgent(object):
         reduced_emergency_braking_distance_required = (
             ego_dist_to_emergency_stop <= reduced_brake_activation_distance
         )
+        reduced_clear_path_margin = max(
+            float(self.yield_conflict_radius),
+            float(ego_required_clearance),
+        )
         reduced_clear_path_release = (
             self.yield_supervisor_mode == "reduced_intervention"
+            and target_has_priority
             and target_nominally_cleared_conflict
-            and ego_dist_to_conflict <= ego_required_clearance
+            and target_distance_to_conflict <= -reduced_clear_path_margin
             and target_speed_est >= max(0.2, self.yield_stop_speed)
         )
         reduced_conflict_hold = (
@@ -2013,6 +2018,7 @@ class SMPCAgent(object):
             ),
             "reduced_conflict_hold": bool(reduced_conflict_hold),
             "reduced_clear_path_release": bool(reduced_clear_path_release),
+            "reduced_clear_path_margin": float(reduced_clear_path_margin),
             "reduced_direct_takeover_required": bool(reduced_direct_takeover_required),
             "reduced_direct_takeover_margin": float(reduced_direct_takeover_margin),
             "ego_required_clearance": float(ego_required_clearance),
