@@ -318,6 +318,8 @@ smpc_fixed_risk
 - 更 aggressive 的 var/fixed separation 版本虽然让 first stop 更靠近 conflict point，并出现少量 var/fixed 差异，但 `solver_failure_frac` 超过 gate 阈值，因此不能作为正式结果；
 - 后续小回退版本 `20260725_003211_1init_reduced_stable_boundary_video` 虽然视频显示 ego 在 target 几乎离开时仍 hard-stop，并且 target clear 后仍原地停顿数秒，但它暴露了一个有价值的问题：如果 ego 进入冲突区时 target 已经驶过、前方路径已经 clear，就不应该机械地停一次；
 - 当前策略不是简单回到更早停车，而是沿 `20260725_003211` 暴露出的方向修复 clearance/release logic：保留谨慎接近，但增加 clear-path late-stop veto，让 reduced supervisor 在 target nominally passed 时及时释放。
+- `20260725_005822_1init_reduced_clear_path_release_video` 说明 clear-path release 方向有效，但实现方式有两个不可接受的问题：ego 在 target 离开后仍有 near-zero-speed 停顿，且 release 分支绕开了原有 post-yield recovery / rejoin reference，导致转弯后没有稳定进入正确车道；
+- 因此 clear-path release 不能作为一条独立控制分支绕开 recovery。正确方向是：target nominally passed 时提前进入 `released_recovery`，但仍复用已有 `post_yield_rejoin_reference` 和 recovery handoff，保留转弯后正确车道保持。
 
 当前是否已经足够隔离 supervisor：
 
@@ -489,11 +491,13 @@ fine-tuned MultiPath
    - 如果 gate PASS，再跑 5-init reduced；
    - 重点检查 `solver_failure_frac <= 0.05`、无 collision、无 give-way violation、completion 正常；
    - 行为目标不是固定 first stop distance，而是：该停时能安全停，target 已驶过且路径 clear 时不机械停车，target clear 后能及时释放。
+   - release 逻辑必须保留原有 post-yield rejoin / lane recovery；不能为了更快释放破坏转弯后进入正确车道和后续直行。
 
 2. 对 1-init video 增加 qualitative behaviour gate：
    - ego 应该在检测到 oncoming target 后继续谨慎接近，而不是远距离停车；
    - ego 不应在 target 几乎已经离开、前方路径视觉上已 clear 时才突然 hard-stop；
    - target clear 后 ego 应尽快 release，不应出现数秒 near-zero-speed 停顿；
+   - ego 转弯后必须进入正确车道并保持直行；如果 release 版本破坏 post-turn lane keeping，即使 safety gate PASS 也不能升级；
    - 如果 quantitative gate PASS 但 video gate FAIL，该版本只能作为反例，不进入 5-init/10-init。
 
 3. 如果 5-init reduced 通过，冻结 `reduced_intervention`：

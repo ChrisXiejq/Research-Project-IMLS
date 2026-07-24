@@ -1929,7 +1929,7 @@ class SMPCAgent(object):
             phase = "approach_yield_line"
         elif target_has_priority and ego_dist_to_stop > self.yield_activation_distance:
             phase = "observe_priority_target"
-        elif self._yield_recovery_steps_remaining > 0:
+        elif reduced_clear_path_release or self._yield_recovery_steps_remaining > 0:
             phase = "released_recovery"
         else:
             phase = "free_drive"
@@ -1942,6 +1942,8 @@ class SMPCAgent(object):
             reason = "braking_distance_yield"
         elif active:
             reason = "target_has_priority_before_stop_line"
+        elif reduced_clear_path_release:
+            reason = "target_nominally_cleared_clear_path_release"
         else:
             reason = "no_active_yield_needed"
 
@@ -2379,48 +2381,15 @@ class SMPCAgent(object):
             return u0_new, v_des_new, yield_status
 
         yield_status["applied"] = None
-        if self.yield_supervisor_mode == "reduced_intervention" and bool(
-            yield_status.get("reduced_clear_path_release", False)
-        ):
-            release_speed_cap = float(self.yield_recovery_speed)
-            release_accel_cap = float(self.yield_recovery_accel)
-            release_accel = 0.0
-            if float(speed) < release_speed_cap:
-                release_accel = min(
-                    release_accel_cap,
-                    max(0.4, 0.5 * (release_speed_cap - float(speed))),
-                )
-            u0_new = np.asarray(u0, dtype=float).reshape(-1).copy()
-            u0_new[0] = max(float(u0_new[0]), release_accel)
-            v_des_new = min(max(v_des_float, self.yield_creep_speed), release_speed_cap)
-            self.control_prev = u0_new
-            self._yield_last_applied_accel = float(u0_new[0])
-            self._yield_stop_active_prev = False
-            self._yield_recovery_steps_remaining = 0
-            self._rule_yield_phase = "released_recovery"
-            yield_status["phase"] = "released_recovery"
-            yield_status["applied"] = {
-                "mode": "reduced_clear_path_release",
-                "a_des": float(u0_new[0]),
-                "df_des": float(u0_new[1]) if len(u0_new) > 1 else 0.0,
-                "v_des": float(v_des_new),
-                "release_accel": float(release_accel),
-                "release_speed_cap": float(release_speed_cap),
-                "note": "Target has nominally passed the conflict zone; reduced supervisor releases instead of forcing a late stop.",
-            }
-            yield_status["recovery"] = {
-                "enabled": self.yield_recovery_enabled,
-                "active": False,
-                "started": False,
-                "applied": None,
-                "steps_remaining_after": int(self._yield_recovery_steps_remaining),
-            }
-            return u0_new, v_des_new, yield_status
+        clear_path_release = bool(
+            self.yield_supervisor_mode == "reduced_intervention"
+            and yield_status.get("reduced_clear_path_release", False)
+        )
         recovery_started = False
         if (
             self.yield_recovery_enabled
             and self._yield_stop_seen
-            and self._yield_stop_active_prev
+            and (self._yield_stop_active_prev or clear_path_release)
             and self.yield_recovery_steps > 0
         ):
             self._yield_recovery_steps_remaining = max(
@@ -2436,6 +2405,7 @@ class SMPCAgent(object):
             "enabled": self.yield_recovery_enabled,
             "started": recovery_started,
             "active": recovery_active_for_control,
+            "clear_path_release": bool(clear_path_release),
             "steps_remaining_before": int(self._yield_recovery_steps_remaining),
             "speed": self.yield_recovery_speed,
             "accel": self.yield_recovery_accel,

@@ -14,6 +14,7 @@
 - **server-sync-boundary**: The user syncs code to the server; do not upload or overwrite server code unless explicitly asked for that exact operation. Pulling result files for analysis is allowed when requested. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 - **supervisor-feedback-decision-gate**: Every tuning or experiment decision for the give-way dissertation must map to the supervisor's four comments: reduce conservative early stopping, analyze MPC infeasibility separately, sanity-check fine-tuned prediction metrics, or quantify supervisor dominance via ablation. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 - **give-way-video-behaviour-gate**: Do not rank reduced-supervisor results by first-stop distance alone; if ego stops when target has almost cleared and remains stopped on an apparently clear path, treat it as a clear-path release problem to fix, not just a failed candidate. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
+- **post-turn-lane-keeping-non-regression**: Clear-path release must not bypass post-yield recovery/rejoin reference; turning into the correct lane and continuing straight after the intersection is a required video gate. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 
 ## Project Records
 
