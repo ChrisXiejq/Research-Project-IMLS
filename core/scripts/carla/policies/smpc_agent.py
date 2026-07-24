@@ -1690,6 +1690,8 @@ class SMPCAgent(object):
                 yield_status,
                 speed,
                 prefix="reduced_intervention",
+                max_handoff_steps=4,
+                speed_threshold=max(1.2, 2.0 * float(self.yield_stop_speed)),
             )
             if recovery_reason is not None:
                 return recovery_reason
@@ -1712,12 +1714,24 @@ class SMPCAgent(object):
             prefix="deterministic_rule_yield",
         )
 
-    def _recovery_handoff_reason(self, yield_status, speed, prefix):
+    def _recovery_handoff_reason(
+        self,
+        yield_status,
+        speed,
+        prefix,
+        max_handoff_steps=None,
+        speed_threshold=None,
+    ):
         """Return a short post-clearance rejoin handoff reason, if needed."""
         phase = yield_status.get("phase")
-        handoff_steps = min(
+        default_handoff_steps = min(
             15,
             max(1, int(np.ceil(0.25 * float(self.yield_recovery_steps)))),
+        )
+        handoff_steps = (
+            default_handoff_steps
+            if max_handoff_steps is None
+            else max(1, min(default_handoff_steps, int(max_handoff_steps)))
         )
         recovery_handoff_start = bool(self._yield_stop_seen and self._yield_stop_active_prev)
         early_recovery_phase = (
@@ -1725,7 +1739,12 @@ class SMPCAgent(object):
             and self._yield_recovery_steps_remaining
             >= max(0, self.yield_recovery_steps - handoff_steps)
         )
-        low_speed_handoff = float(speed) <= max(2.0, 0.5 * float(self.yield_recovery_speed))
+        low_speed_limit = (
+            max(2.0, 0.5 * float(self.yield_recovery_speed))
+            if speed_threshold is None
+            else float(speed_threshold)
+        )
+        low_speed_handoff = float(speed) <= low_speed_limit
         if (recovery_handoff_start or early_recovery_phase) and low_speed_handoff:
             return f"{prefix}_recovery_handoff"
         return None
@@ -2319,6 +2338,42 @@ class SMPCAgent(object):
                 heading_error=heading_error,
                 completion_metrics=completion_metrics,
             )
+            reduced_mode = self.yield_supervisor_mode == "reduced_intervention"
+            reduced_handoff_steps = 4
+            recovery_steps_elapsed = max(
+                0,
+                int(self.yield_recovery_steps) - int(self._yield_recovery_steps_remaining),
+            )
+            reduced_control_handoff = bool(
+                reduced_mode
+                and (
+                    recovery_started
+                    or recovery_steps_elapsed < reduced_handoff_steps
+                    or reduced_stabilization
+                )
+            )
+            if reduced_mode and not reduced_control_handoff:
+                u0_new = np.asarray(u0, dtype=float).reshape(-1)
+                v_des_new = v_des
+                self._yield_last_applied_accel = None
+                self._yield_recovery_steps_remaining = max(
+                    0,
+                    self._yield_recovery_steps_remaining - 1,
+                )
+                self._rule_yield_phase = "released_recovery"
+                yield_status["phase"] = "released_recovery"
+                recovery_status["applied"] = {
+                    "mode": "post_yield_reference_only",
+                    "reduced_stabilization": False,
+                    "reduced_control_handoff": False,
+                    "recovery_steps_elapsed": int(recovery_steps_elapsed),
+                    "reduced_handoff_steps": int(reduced_handoff_steps),
+                    "v_des": float(np.asarray(v_des_new, dtype=float).reshape(-1)[0]),
+                }
+                recovery_status["steps_remaining_after"] = int(self._yield_recovery_steps_remaining)
+                self._yield_stop_active_prev = False
+                yield_status["recovery"] = recovery_status
+                return u0_new, v_des_new, yield_status
             recovery_speed_cap = (
                 min(float(self.yield_recovery_speed), 4.0)
                 if reduced_stabilization
@@ -2365,6 +2420,9 @@ class SMPCAgent(object):
                 "v_des": float(v_des_new),
                 "restart_accel": float(restart_accel),
                 "reduced_stabilization": bool(reduced_stabilization),
+                "reduced_control_handoff": bool(reduced_control_handoff),
+                "recovery_steps_elapsed": int(recovery_steps_elapsed),
+                "reduced_handoff_steps": int(reduced_handoff_steps),
                 "recovery_speed_cap": float(recovery_speed_cap),
                 "recovery_accel_cap": float(recovery_accel_cap),
             }
