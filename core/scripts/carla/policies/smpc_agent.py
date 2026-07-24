@@ -2385,11 +2385,14 @@ class SMPCAgent(object):
             self.yield_supervisor_mode == "reduced_intervention"
             and yield_status.get("reduced_clear_path_release", False)
         )
+        clear_path_release_start = bool(
+            clear_path_release and self._yield_recovery_steps_remaining <= 0
+        )
         recovery_started = False
         if (
             self.yield_recovery_enabled
             and self._yield_stop_seen
-            and (self._yield_stop_active_prev or clear_path_release)
+            and (self._yield_stop_active_prev or clear_path_release_start)
             and self.yield_recovery_steps > 0
         ):
             self._yield_recovery_steps_remaining = max(
@@ -2406,6 +2409,7 @@ class SMPCAgent(object):
             "started": recovery_started,
             "active": recovery_active_for_control,
             "clear_path_release": bool(clear_path_release),
+            "clear_path_release_start": bool(clear_path_release_start),
             "steps_remaining_before": int(self._yield_recovery_steps_remaining),
             "speed": self.yield_recovery_speed,
             "accel": self.yield_recovery_accel,
@@ -2479,8 +2483,13 @@ class SMPCAgent(object):
             ], dtype=float)
             if reduced_stabilization and float(speed) > recovery_speed_cap:
                 u0_new[0] = min(float(u0_new[0]), 0.0)
+            recovery_speed_floor = (
+                min(recovery_speed_cap, max(self.yield_creep_speed, 0.5 * self.yield_caution_speed))
+                if clear_path_release
+                else self.yield_stop_speed
+            )
             v_des_new = min(
-                max(v_des_float, self.yield_stop_speed),
+                max(v_des_float, recovery_speed_floor),
                 recovery_speed_cap,
             )
             self.control_prev = u0_new
@@ -2503,6 +2512,7 @@ class SMPCAgent(object):
                 "reduced_handoff_steps": int(reduced_handoff_steps),
                 "recovery_speed_cap": float(recovery_speed_cap),
                 "recovery_accel_cap": float(recovery_accel_cap),
+                "recovery_speed_floor": float(recovery_speed_floor),
             }
         else:
             u0_new = np.asarray(u0, dtype=float).reshape(-1)
