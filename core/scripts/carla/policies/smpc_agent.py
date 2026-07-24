@@ -1834,6 +1834,12 @@ class SMPCAgent(object):
         reduced_emergency_braking_distance_required = (
             ego_dist_to_emergency_stop <= reduced_brake_activation_distance
         )
+        reduced_clear_path_release = (
+            self.yield_supervisor_mode == "reduced_intervention"
+            and target_nominally_cleared_conflict
+            and ego_dist_to_conflict <= ego_required_clearance
+            and target_speed_est >= max(0.2, self.yield_stop_speed)
+        )
         reduced_conflict_hold = (
             target_has_priority
             and ego_dist_to_conflict <= max(ego_required_clearance + 0.75, self.yield_conflict_radius + 1.0)
@@ -1871,6 +1877,7 @@ class SMPCAgent(object):
                 allow_priority_yield
                 and target_has_priority
                 and not target_cleared_conflict
+                and not reduced_clear_path_release
                 and not_far_past_conflict
                 and (
                     reduced_emergency_braking_distance_required
@@ -1888,6 +1895,7 @@ class SMPCAgent(object):
             hard_stop_required = (
                 active
                 and not target_cleared_conflict
+                and not reduced_clear_path_release
                 and (
                     reduced_emergency_braking_distance_required
                     or ego_inside_footprint_clearance
@@ -2002,6 +2010,7 @@ class SMPCAgent(object):
                 reduced_emergency_braking_distance_required
             ),
             "reduced_conflict_hold": bool(reduced_conflict_hold),
+            "reduced_clear_path_release": bool(reduced_clear_path_release),
             "reduced_direct_takeover_required": bool(reduced_direct_takeover_required),
             "reduced_direct_takeover_margin": float(reduced_direct_takeover_margin),
             "ego_required_clearance": float(ego_required_clearance),
@@ -2370,6 +2379,43 @@ class SMPCAgent(object):
             return u0_new, v_des_new, yield_status
 
         yield_status["applied"] = None
+        if self.yield_supervisor_mode == "reduced_intervention" and bool(
+            yield_status.get("reduced_clear_path_release", False)
+        ):
+            release_speed_cap = float(self.yield_recovery_speed)
+            release_accel_cap = float(self.yield_recovery_accel)
+            release_accel = 0.0
+            if float(speed) < release_speed_cap:
+                release_accel = min(
+                    release_accel_cap,
+                    max(0.4, 0.5 * (release_speed_cap - float(speed))),
+                )
+            u0_new = np.asarray(u0, dtype=float).reshape(-1).copy()
+            u0_new[0] = max(float(u0_new[0]), release_accel)
+            v_des_new = min(max(v_des_float, self.yield_creep_speed), release_speed_cap)
+            self.control_prev = u0_new
+            self._yield_last_applied_accel = float(u0_new[0])
+            self._yield_stop_active_prev = False
+            self._yield_recovery_steps_remaining = 0
+            self._rule_yield_phase = "released_recovery"
+            yield_status["phase"] = "released_recovery"
+            yield_status["applied"] = {
+                "mode": "reduced_clear_path_release",
+                "a_des": float(u0_new[0]),
+                "df_des": float(u0_new[1]) if len(u0_new) > 1 else 0.0,
+                "v_des": float(v_des_new),
+                "release_accel": float(release_accel),
+                "release_speed_cap": float(release_speed_cap),
+                "note": "Target has nominally passed the conflict zone; reduced supervisor releases instead of forcing a late stop.",
+            }
+            yield_status["recovery"] = {
+                "enabled": self.yield_recovery_enabled,
+                "active": False,
+                "started": False,
+                "applied": None,
+                "steps_remaining_after": int(self._yield_recovery_steps_remaining),
+            }
+            return u0_new, v_des_new, yield_status
         recovery_started = False
         if (
             self.yield_recovery_enabled
