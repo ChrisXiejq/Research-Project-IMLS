@@ -1822,6 +1822,22 @@ class SMPCAgent(object):
         ego_dist_to_emergency_stop = emergency_safe_stop_s - ego_route_s
         emergency_braking_distance_required = ego_dist_to_emergency_stop <= brake_activation_distance
         ego_inside_footprint_clearance = ego_dist_to_conflict < ego_required_clearance
+        reduced_max_brake = max(
+            abs(self.yield_emergency_decel if self.yield_emergency_brake_enabled else self.yield_stop_decel),
+            1e-3,
+        )
+        reduced_brake_distance = (float(speed) ** 2) / (2.0 * reduced_max_brake)
+        reduced_brake_activation_distance = reduced_brake_distance + min(
+            self.yield_brake_distance_margin,
+            0.5,
+        )
+        reduced_emergency_braking_distance_required = (
+            ego_dist_to_emergency_stop <= reduced_brake_activation_distance
+        )
+        reduced_conflict_hold = (
+            target_has_priority
+            and ego_dist_to_conflict <= max(ego_required_clearance + 0.75, self.yield_conflict_radius + 1.0)
+        )
         overlap_risk = (
             target_has_priority
             and target_enter_time <= ego_ttc_to_conflict + self.yield_ttc_margin
@@ -1857,15 +1873,15 @@ class SMPCAgent(object):
                 and not target_cleared_conflict
                 and not_far_past_conflict
                 and (
-                    emergency_braking_distance_required
-                    or close_hold
+                    reduced_emergency_braking_distance_required
+                    or reduced_conflict_hold
                     or reduced_overlap_guard
                     or ego_inside_footprint_clearance
                 )
             ) or (
                 cautious_candidate
                 and (
-                    emergency_braking_distance_required
+                    reduced_emergency_braking_distance_required
                     or ego_dist_to_conflict <= self.yield_activation_distance
                 )
             )
@@ -1873,9 +1889,9 @@ class SMPCAgent(object):
                 active
                 and not target_cleared_conflict
                 and (
-                    emergency_braking_distance_required
+                    reduced_emergency_braking_distance_required
                     or ego_inside_footprint_clearance
-                    or close_hold
+                    or reduced_conflict_hold
                 )
             )
         else:
@@ -1973,6 +1989,12 @@ class SMPCAgent(object):
             "brake_activation_distance": brake_activation_distance,
             "brake_distance_margin": self.yield_brake_distance_margin,
             "braking_distance_required": bool(braking_distance_required),
+            "reduced_brake_distance": float(reduced_brake_distance),
+            "reduced_brake_activation_distance": float(reduced_brake_activation_distance),
+            "reduced_emergency_braking_distance_required": bool(
+                reduced_emergency_braking_distance_required
+            ),
+            "reduced_conflict_hold": bool(reduced_conflict_hold),
             "ego_required_clearance": float(ego_required_clearance),
             "ego_inside_footprint_clearance": bool(ego_inside_footprint_clearance),
             "footprint_clearance_margin": float(self.yield_footprint_clearance_margin),
