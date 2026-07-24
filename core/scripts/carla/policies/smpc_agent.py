@@ -1684,7 +1684,11 @@ class SMPCAgent(object):
             if (
                 bool(yield_status.get("active", False))
                 and bool(yield_status.get("direct_takeover_required", False))
-                and phase in {"approach_yield_line", "hold_yield_line"}
+                and phase in {
+                    "approach_yield_line",
+                    "hold_yield_line",
+                    "cautious_approach_observed_target",
+                }
             ):
                 return "reduced_intervention_hard_safety_yield_control"
             recovery_reason = self._recovery_handoff_reason(
@@ -1869,6 +1873,14 @@ class SMPCAgent(object):
             target_has_priority
             and ego_dist_to_conflict <= max(ego_required_clearance + 0.75, self.yield_conflict_radius + 1.0)
         )
+        reduced_low_speed_wait_hold = (
+            target_has_priority
+            and not target_nominally_cleared_conflict
+            and not reduced_clear_path_release
+            and float(speed) <= max(2.0, 4.0 * float(self.yield_stop_speed))
+            and ego_dist_to_conflict <= ego_required_clearance + 1.25
+            and target_distance_to_conflict <= target_release_clearance_distance
+        )
         overlap_risk = (
             target_has_priority
             and target_enter_time <= ego_ttc_to_conflict + self.yield_ttc_margin
@@ -1907,6 +1919,7 @@ class SMPCAgent(object):
                 and (
                     reduced_emergency_braking_distance_required
                     or reduced_conflict_hold
+                    or reduced_low_speed_wait_hold
                     or reduced_overlap_guard
                     or ego_inside_footprint_clearance
                 )
@@ -1925,6 +1938,7 @@ class SMPCAgent(object):
                     reduced_emergency_braking_distance_required
                     or ego_inside_footprint_clearance
                     or reduced_conflict_hold
+                    or reduced_low_speed_wait_hold
                 )
             )
             reduced_direct_takeover_required = bool(hard_stop_required)
@@ -2037,6 +2051,7 @@ class SMPCAgent(object):
                 reduced_emergency_braking_distance_required
             ),
             "reduced_conflict_hold": bool(reduced_conflict_hold),
+            "reduced_low_speed_wait_hold": bool(reduced_low_speed_wait_hold),
             "reduced_clear_path_release": bool(reduced_clear_path_release),
             "raw_reduced_clear_path_release": bool(raw_reduced_clear_path_release),
             "reduced_clear_path_release_latched": bool(
