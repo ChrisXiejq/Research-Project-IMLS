@@ -1867,15 +1867,6 @@ class SMPCAgent(object):
             reduced_overlap_guard = (
                 overlap_risk and ego_dist_to_conflict <= self.yield_activation_distance
             )
-            reduced_direct_takeover_margin = max(2.25, self.yield_stop_speed * 6.0)
-            reduced_direct_takeover_required = (
-                not target_cleared_conflict
-                and (
-                    ego_inside_footprint_clearance
-                    or reduced_conflict_hold
-                    or ego_dist_to_emergency_stop <= reduced_direct_takeover_margin
-                )
-            )
             active = (
                 allow_priority_yield
                 and target_has_priority
@@ -1903,7 +1894,9 @@ class SMPCAgent(object):
                     or reduced_conflict_hold
                 )
             )
-            direct_takeover_required = bool(active and hard_stop_required and reduced_direct_takeover_required)
+            reduced_direct_takeover_required = bool(hard_stop_required)
+            reduced_direct_takeover_margin = 0.0
+            direct_takeover_required = bool(hard_stop_required)
         else:
             active = (
                 allow_priority_yield

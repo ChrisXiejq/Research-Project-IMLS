@@ -13,6 +13,7 @@
 - **promising-reduced-supervisor-candidate**: The 20260724 reduced early-stop candidate is considered promising by the user; preserve the direction and next optimize for var/fixed separation without sacrificing safety. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 - **server-sync-boundary**: The user syncs code to the server; do not upload or overwrite server code unless explicitly asked for that exact operation. Pulling result files for analysis is allowed when requested. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 - **supervisor-feedback-decision-gate**: Every tuning or experiment decision for the give-way dissertation must map to the supervisor's four comments: reduce conservative early stopping, analyze MPC infeasibility separately, sanity-check fine-tuned prediction metrics, or quantify supervisor dominance via ablation. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
+- **give-way-video-behaviour-gate**: Do not rank reduced-supervisor results by first-stop distance alone; reject late hard-stop / delayed-release artifacts where ego stops when target has almost cleared and remains stopped on an apparently clear path. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 
 ## Project Records
 

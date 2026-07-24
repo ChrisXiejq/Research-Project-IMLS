@@ -2,6 +2,25 @@
 
 这个文档是后续实验、代码修改和结果分析的方向约束。后续不要再单纯堆更多 50-init aggregate result，而是要围绕导师指出的问题，把当前 best milestone 解释清楚，并找出下一版方法真正可以改进的地方。
 
+## 0. 决策门槛：每次判断都必须回到导师反馈
+
+后续每一次判断、代码修改、服务器运行和结果解释，都必须先确认它服务于导师反馈中的至少一个问题：
+
+1. 解释并减少 conservative early stop：ego 不应在距离 conflict point 很远时被不必要地强制停车，而应在安全前提下继续谨慎接近，并在 target vehicle 清空 ego path 后及时释放。
+2. 解释 feasibility / infeasibility：如果 feasibility 指 MPC optimisation feasibility，就不能只报告 aggregate percentage，必须分析 infeasible step 发生在哪些 rollout、phase、distance-to-conflict 和 policy 下。
+3. 验证 fine-tuned prediction 结果可信度：`0.98% -> 100%` 的 mode-ranking 提升不能直接当作通用预测能力提升，必须通过 split、metric、same-test-set 和 leakage sanity check 支撑。
+4. 隔离 supervisor contribution：如果 fixed-risk 和 adaptive-risk 的 final trajectory 很相似，必须判断是不是 shared supervisor / safety filter 主导了最终行为，并通过 ablation 量化这一点。
+
+当前总目标不是单纯让某一次 rollout 更好看，而是形成可写进论文的证据链：
+
+```text
+先证明原始 conservative behaviour 主要来自哪里，
+再证明 reduced-intervention supervisor 能减少不必要接管但仍保持 safety，
+再在 supervisor 影响被量化或削弱后，寻找 adaptive-risk 相比 fixed-risk 的可解释优势。
+```
+
+因此，任何“为了拉开 var/fixed 差距而削弱 hard safety guard”的改动都不符合目标。adaptive-risk 的优势必须来自风险分配、clearance 后风险释放、solver-layer 行为或更困难场景下的 safety/performance trade-off，而不是来自破坏 baseline 或取消安全约束。
+
 ## 1. 当前起点
 
 当前 best milestone：
@@ -32,6 +51,14 @@ core/results/20260718_104740_50init_finetuned_predictor_validation
 - adaptive-risk 增加计算成本，但 aggregate 指标提升不明显；
 - feasibility 只报百分比不够，需要分析 infeasible step；
 - fine-tuning 结果提升太大，需要做 sanity check，避免被质疑有数据泄漏或 metric 问题。
+
+当前阶段判断：
+
+- 已经有初步证据说明 shared supervisor 会显著影响 final behaviour，但还不能说已经足够隔离 supervisor 影响；
+- reduced-intervention supervisor 已经改善 early-stop behaviour，但还需要 5-init/10-init 稳定性和正式 ablation 支撑；
+- 当前尚未可靠证明 adaptive-risk / var-risk 相比 fixed-risk 的优势，因为 promising reduced 版本下两者 final trajectory 仍然接近；
+- aggressive 地减少 supervisor 接管可以制造少量 var/fixed 差异，但如果带来 solver infeasibility 或 gate FAIL，不能作为论文证据；
+- 下一阶段应该停止无边界地调 supervisor，把 reduced supervisor 稳定下来后，转向 supervisor ablation、infeasibility phase analysis 和 adaptive-risk intensity / scenario difficulty sweep。
 
 ## 2. 导师反馈对应的研究问题
 
@@ -247,7 +274,7 @@ core/results/20260718_104740_50init_finetuned_predictor_validation/diagnostics_a
 当前实现状态：
 
 ```text
-代码已实现，等待服务器运行 10-init ablation。
+代码已实现，并已完成多轮 1-init/5-init 诊断性 supervisor ablation。
 ```
 
 已实现内容：
@@ -281,6 +308,42 @@ smpc_fixed_risk
 - post-CARLA safety gate；
 - risk-by-conflict-distance diagnostics；
 - Step 1 同款 supervisor feedback diagnostic report。
+
+当前 Step 2 阶段性结论：
+
+- `full supervisor` 可以保持当前 best milestone 的安全性，但会强烈主导 final behaviour，导致 fixed-risk 和 adaptive-risk 的 executed trajectory 接近；
+- 初始 `reduced_intervention` 版本证明减少 supervisor 接管是有价值的，但过弱时会带来 completion robustness 问题；
+- 当前 promising reduced early-stop candidate 将第一次停车距离从 full 的约 `7.3m` 改善到约 `4.2m`，等待时间和 clearance 后释放延迟也下降，说明它确实回应了导师关于 conservative behaviour 的反馈；
+- 但当前 promising reduced 版本下 fixed-risk 和 adaptive-risk 仍然非常接近，还不能证明 adaptive-risk 优势；
+- 更 aggressive 的 var/fixed separation 版本虽然让 first stop 更靠近 conflict point，并出现少量 var/fixed 差异，但 `solver_failure_frac` 超过 gate 阈值，因此不能作为正式结果；
+- 后续小回退版本 `20260725_003211_1init_reduced_stable_boundary_video` 虽然 gate PASS，但视频显示 ego 在 target 几乎离开时才 late hard-stop，并且 target clear 后仍原地停顿数秒；这不是 realistic cautious approach，不能作为更优 reduced candidate；
+- 当前策略应回到 `20260724_235104_1init_reduced_early_stop_video` 的方向：保留约 `4m` 左右的自然停车距离和更合理的释放行为，不继续追求更小的 first-stop distance。
+
+当前是否已经足够隔离 supervisor：
+
+```text
+还不够。
+```
+
+已经完成的是第一层隔离：`full` vs `reduced_intervention`。这能说明 shared supervisor 确实会掩盖 solver-layer 差异，但还不足以量化 adaptive-risk 本身的贡献。后续至少需要以下证据之一：
+
+- final action 与 nominal SMPC action 的差异在 reduced supervisor 下明显减小；
+- fixed-risk 与 adaptive-risk 的 nominal behaviour 本身有差异，但 full supervisor 把 final behaviour 抹平；
+- reduced supervisor 下 adaptive-risk 在 safety margin、post-clearance release、smoothness、completion time 或 intervention fraction 上出现稳定优势；
+- diagnostic-only / hard-safety-only supervisor 结果表明 adaptive-risk 的优势存在于 solver layer，而不是 supervisor 规则制造出来的。
+
+当前是否已经证明 adaptive-risk / var-risk 优势：
+
+```text
+还没有。
+```
+
+当前只能说：
+
+- adaptive-risk 的 phase-aware 风险释放机制仍然可解释；
+- 原 full-supervisor milestone 的 aggregate safety result 可保留；
+- reduced supervisor 让方法更接近导师期望的 realistic cautious approach；
+- 但 adaptive-risk 相对 fixed-risk 的优势还需要通过更清晰的 ablation 或更有区分度的 scenario/risk-intensity sweep 来证明。
 
 ### Step 3. fine-tuning sanity check
 
@@ -419,27 +482,54 @@ fine-tuned MultiPath
 
 当前优先级：
 
-1. 完成当前 best 50-init 的 post-hoc 诊断：
-   - early-stop；
-   - supervisor activity；
-   - solver bypass；
-   - nominal-final control difference；
-   - infeasibility phase。
+1. 验证回到 `20260724_235104` 方向后的 `reduced_intervention`：
+   - 先回退 late hard-stop / delayed release 方向，恢复到更接近 `20260724_235104_1init_reduced_early_stop_video` 的 reduced supervisor；
+   - 先跑 1-init + video；
+   - 如果 gate PASS，再跑 5-init reduced；
+   - 重点检查 `solver_failure_frac <= 0.05`、无 collision、无 give-way violation、completion 正常；
+   - 行为目标是 first stop distance 保持在约 `3.5-4.5m`，不要退回 full supervisor 的远距离早停，也不要变成 target almost-cleared 后的 late hard-stop。
 
-2. 生成中文诊断报告。
+2. 对 1-init video 增加 qualitative behaviour gate：
+   - ego 应该在检测到 oncoming target 后继续谨慎接近，而不是远距离停车；
+   - ego 不应在 target 几乎已经离开、前方路径视觉上已 clear 时才突然 hard-stop；
+   - target clear 后 ego 应尽快 release，不应出现数秒 near-zero-speed 停顿；
+   - 如果 quantitative gate PASS 但 video gate FAIL，该版本只能作为反例，不进入 5-init/10-init。
 
-3. 根据诊断结果决定 reduced-intervention supervisor 应该改哪里。
+3. 如果 5-init reduced 通过，冻结 `reduced_intervention`：
+   - 不再继续为了单次视频效果深挖 supervisor 调参；
+   - 把它作为 supervisor ablation 的 stable reduced condition；
+   - 保留当前 best full supervisor milestone 作为安全 baseline。
 
-4. 暴露 supervisor modes：
-   - `full`；
-   - `reduced_intervention`；
-   - 可选 `diagnostic_off`。
+4. 做正式 supervisor contribution ablation：
+   - `fixed-risk + full supervisor`；
+   - `adaptive-risk + full supervisor`；
+   - `fixed-risk + reduced_intervention supervisor`；
+   - `adaptive-risk + reduced_intervention supervisor`；
+   - 可选加入 `diagnostic-only / hard-safety-only`，只用于证明 supervisor 是否主导 final action，不作为最终方法。
 
-5. 跑 10-init supervisor ablation。
+5. 对 ablation 结果强制输出 solver-layer 与 final-layer 分离指标：
+   - nominal SMPC acceleration；
+   - final executed acceleration；
+   - nominal-final acceleration delta；
+   - supervisor active fraction；
+   - solver bypass fraction；
+   - stop distance、waiting time、delay after target clearance；
+   - fixed-risk vs adaptive-risk 的 trajectory/control difference。
 
-6. 做 fine-tuning sanity check。
+6. 单独做 infeasibility phase analysis：
+   - 按 `policy`、`supervisor mode`、`phase`、`distance_to_conflict`、`solver status` 聚合；
+   - 区分 critical/pre-clearance、hold-yield-line、post-clearance recovery；
+   - 解释 infeasible 后 supervisor/fallback 是否保证 safety。
 
-7. 如果 reduced supervisor 保持安全并改善行为，再跑 50-init。
+7. 做 adaptive-risk intensity / scenario difficulty sweep：
+   - 目的不是调 supervisor，而是找出 var-risk 相对 fixed-risk 的真实优势出现在哪类风险强度或交互难度下；
+   - 优先观察 safety margin、smoothness、completion time、post-clearance release 和 supervisor intervention fraction；
+   - 如果 var-risk 只在 nominal layer 有优势但 final layer 被 supervisor 抹平，也要如实写出来。
+
+8. 补充 fine-tuning sanity 的最终证据：
+   - 保留当前第一轮无 GPU sanity check 结论；
+   - 如时间允许，补 shuffled-label / mismatched-label sanity test 或更多 held-out examples；
+   - 论文中避免把 `100%` 说成通用预测能力完全解决，只说改善了当前 held-out CARLA split 的 mode ranking / probability calibration。
 
 ## 8. 后续工作规则
 
@@ -450,6 +540,7 @@ fine-tuned MultiPath
 - 分离 SMPC nominal behaviour 和 supervisor filtered behaviour；
 - 分析 infeasibility；
 - 验证 fine-tuning evaluation 是否可信；
+- 证明 adaptive-risk / var-risk 在被正确隔离 supervisor 影响后，相比 fixed-risk 至少有一个稳定、可解释的优势；
 - 生成支持上述结论的 graphical evidence。
 
 不服务于这些目标的工作，默认降级为低优先级。
