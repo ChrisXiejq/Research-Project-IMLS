@@ -1835,8 +1835,8 @@ class SMPCAgent(object):
             ego_dist_to_emergency_stop <= reduced_brake_activation_distance
         )
         reduced_clear_path_margin = max(
-            float(self.yield_conflict_radius),
-            float(ego_required_clearance),
+            float(self.yield_release_clearance_margin),
+            0.5,
         )
         reduced_clear_path_release = (
             self.yield_supervisor_mode == "reduced_intervention"
@@ -2443,6 +2443,15 @@ class SMPCAgent(object):
             if reduced_mode and not reduced_control_handoff:
                 u0_new = np.asarray(u0, dtype=float).reshape(-1)
                 v_des_new = v_des
+                reference_only_speed_floor = None
+                if clear_path_release:
+                    reference_only_speed_floor = min(
+                        float(self.yield_recovery_speed),
+                        max(float(self.yield_creep_speed), 0.5 * float(self.yield_caution_speed)),
+                    )
+                    v_des_arr = np.asarray(v_des_new, dtype=float).copy()
+                    v_des_arr[...] = np.maximum(v_des_arr, reference_only_speed_floor)
+                    v_des_new = v_des_arr
                 self._yield_last_applied_accel = None
                 self._yield_recovery_steps_remaining = max(
                     0,
@@ -2457,6 +2466,11 @@ class SMPCAgent(object):
                     "recovery_steps_elapsed": int(recovery_steps_elapsed),
                     "reduced_handoff_steps": int(reduced_handoff_steps),
                     "v_des": float(np.asarray(v_des_new, dtype=float).reshape(-1)[0]),
+                    "reference_only_speed_floor": (
+                        None
+                        if reference_only_speed_floor is None
+                        else float(reference_only_speed_floor)
+                    ),
                 }
                 recovery_status["steps_remaining_after"] = int(self._yield_recovery_steps_remaining)
                 self._yield_stop_active_prev = False
