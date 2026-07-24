@@ -16,6 +16,7 @@ ENABLE_CAMERA_VIZ="${ENABLE_CAMERA_VIZ:-0}"
 INIT_COUNT="${INIT_COUNT:-10}"
 PREDICTION_MODEL_WEIGHTS="${PREDICTION_MODEL_WEIGHTS:-l5kit_multipath_10_carla_finetuned_head_best}"
 PREDICTION_MODEL_ANCHORS="${PREDICTION_MODEL_ANCHORS:-l5kit_clusters_16.npy}"
+SUPERVISOR_MODES="${SUPERVISOR_MODES:-full reduced_intervention}"
 
 if [[ -z "${CARLA_ROOT:-}" ]]; then
   cat >&2 <<'EOF'
@@ -175,14 +176,32 @@ run_mode() {
     "${camera_args[@]}" \
     --postprocess_no_plots
 
-  "${PYTHON_BIN}" "${CORE_DIR}/scripts/postcarla_trajectory_gate.py" "${mode_dir}"
-  "${PYTHON_BIN}" "${CORE_DIR}/scripts/risk_by_conflict_distance.py" "${mode_dir}"
-  "${PYTHON_BIN}" "${REPO_DIR}/docs/paper/diagnose_supervisor_feedback_step1.py" \
-    --results-dir "${mode_dir}"
+  if ! "${PYTHON_BIN}" "${CORE_DIR}/scripts/postcarla_trajectory_gate.py" "${mode_dir}"; then
+    echo "WARNING: post-CARLA gate reported FAIL for ${mode}; continuing diagnostics." >&2
+  fi
+  if ! "${PYTHON_BIN}" "${CORE_DIR}/scripts/risk_by_conflict_distance.py" "${mode_dir}"; then
+    echo "WARNING: risk-by-conflict-distance diagnostics failed for ${mode}; continuing." >&2
+  fi
+  if ! "${PYTHON_BIN}" "${REPO_DIR}/docs/paper/diagnose_supervisor_feedback_step1.py" \
+    --results-dir "${mode_dir}"; then
+    echo "WARNING: supervisor feedback diagnostics failed for ${mode}; continuing." >&2
+  fi
 }
 
-run_mode "full" "full_supervisor"
-run_mode "reduced_intervention" "reduced_intervention_supervisor"
+for mode in ${SUPERVISOR_MODES}; do
+  case "${mode}" in
+    full)
+      run_mode "full" "full_supervisor"
+      ;;
+    reduced_intervention)
+      run_mode "reduced_intervention" "reduced_intervention_supervisor"
+      ;;
+    *)
+      echo "ERROR: unsupported supervisor mode in SUPERVISOR_MODES: ${mode}" >&2
+      exit 2
+      ;;
+  esac
+done
 
 cat > "${RESULTS_DIR}/README.txt" <<EOF
 10-init supervisor ablation complete.

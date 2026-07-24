@@ -306,6 +306,39 @@ smpc_fixed_risk
 预测问题已经完全解决，或者 fine-tuning 必然带来显著 closed-loop safety 提升。
 ```
 
+当前完成状态：
+
+```text
+已完成第一轮无 GPU sanity check。
+```
+
+诊断脚本：
+
+```text
+docs/paper/diagnose_multipath_sanity_step3.py
+```
+
+诊断输出：
+
+```text
+core/results/20260717_232553_prediction_dataset_collection/prediction_dataset_merged/sanity_check_step3/
+```
+
+当前结论：
+
+- 未发现 split 泄漏、样本重复或 raster 缺失这类阻塞性问题；
+- pretrained 和 fine-tuned 使用同一 test split，样本数均为 `305`；
+- pretrained 的 `minADE` 已经较低，但 `top1 ADE/FDE` 很差，说明主要问题是 mode probability ranking；
+- fine-tuned 后 `top1 ADE == minADE`，说明最高概率 mode 被校准到了几何最佳 mode；
+- 但 test split 的最佳 mode 全部集中在 mode 7，场景多样性有限，所以不能把 `100%` 表述为通用预测能力完全解决；
+- 合理叙事是：模型侧 fine-tuning 改善了 CARLA held-out split 上的 mode ranking / probability calibration。
+
+GPU 需求判断：
+
+- split/metrics/leakage sanity check 不需要 GPU；
+- 重新跑 SavedModel test evaluation 可用 CPU，但 GPU 更快；
+- 重新 fine-tune、shuffled-label training、更多模型对照才需要 GPU。
+
 ### Step 4. 如果 10-init 结果有希望，再跑 50-init
 
 只有当 Step 1 和 Step 2 说明 reduced supervisor 有潜力时，才跑昂贵的 50-init。
