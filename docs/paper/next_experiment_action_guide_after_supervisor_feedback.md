@@ -56,9 +56,11 @@ core/results/20260718_104740_50init_finetuned_predictor_validation
 
 - 已经有初步证据说明 shared supervisor 会显著影响 final behaviour，但还不能说已经足够隔离 supervisor 影响；
 - reduced-intervention supervisor 已经完成当前 5-init 稳定候选验证，当前冻结版本为 `20260725_023251_5init_reduced_clear_path_release`；
+- formal 5-init supervisor ablation 已完成，结果目录为 `core/results/20260725_125938_5init_formal_supervisor_ablation`；
+- formal ablation 已经足够支撑“full supervisor 强烈主导 conservative early-stop，并掩盖 fixed/adaptive final behaviour 差异”，但还不足以支撑“adaptive-risk 在最终轨迹上显著优于 fixed-risk”；
 - 当前尚未可靠证明 adaptive-risk / var-risk 相比 fixed-risk 的优势，因为 promising reduced 版本下两者 final trajectory 仍然接近；
 - aggressive 地减少 supervisor 接管可以制造少量 var/fixed 差异，但如果带来 solver infeasibility、video behaviour artifact 或 post-turn lane keeping 回归，不能作为论文证据；
-- 下一阶段停止继续调 reduced supervisor，把当前冻结版本作为 stable reduced condition，转向 supervisor ablation、infeasibility phase analysis、fine-tuning sanity 补充和 adaptive-risk intensity / scenario difficulty sweep；
+- 下一阶段停止继续调 reduced supervisor，把当前冻结版本作为 stable reduced condition，转向 adaptive-risk intensity / scenario difficulty sweep 和必要的 fine-tuning sanity 补充；
 - 在完成导师四条反馈对应的证据链前，不进入新的 50-init milestone 实验。
 
 ## 2. 导师反馈对应的研究问题
@@ -350,15 +352,36 @@ core/results/20260725_023251_5init_reduced_clear_path_release
 当前是否已经足够隔离 supervisor：
 
 ```text
-还不够。
+已完成第一层正式隔离，但还没完成 adaptive-risk 贡献隔离。
 ```
 
-已经完成的是第一层隔离：`full` vs `reduced_intervention`。这能说明 shared supervisor 确实会掩盖 solver-layer 差异，但还不足以量化 adaptive-risk 本身的贡献。后续至少需要以下证据之一：
+已经完成的是第一层正式隔离：`full` vs `reduced_intervention`。这能说明 shared supervisor 确实会掩盖 solver-layer 差异，但还不足以量化 adaptive-risk 本身的贡献。后续至少需要以下证据之一：
 
 - final action 与 nominal SMPC action 的差异在 reduced supervisor 下明显减小；
 - fixed-risk 与 adaptive-risk 的 nominal behaviour 本身有差异，但 full supervisor 把 final behaviour 抹平；
 - reduced supervisor 下 adaptive-risk 在 safety margin、post-clearance release、smoothness、completion time 或 intervention fraction 上出现稳定优势；
 - diagnostic-only / hard-safety-only supervisor 结果表明 adaptive-risk 的优势存在于 solver layer，而不是 supervisor 规则制造出来的。
+
+Formal 5-init supervisor ablation 已完成：
+
+```text
+core/results/20260725_125938_5init_formal_supervisor_ablation
+```
+
+正式报告：
+
+```text
+core/results/20260725_125938_5init_formal_supervisor_ablation/formal_supervisor_ablation_analysis/formal_supervisor_ablation_report.md
+```
+
+核心结论：
+
+- full 和 reduced-intervention supervisor 都通过 post-CARLA safety gate；
+- reduced supervisor 在 fixed-risk 下把 first-stop distance 从 `8.403m` 降到 `5.263m`，waiting time 从 `8.040s` 降到 `4.200s`，clearance delay 从 `3.720s` 降到 `1.440s`；
+- reduced supervisor 在 adaptive-risk 下把 first-stop distance 从 `8.402m` 降到 `5.263m`，waiting time 从 `8.120s` 降到 `4.160s`，clearance delay 从 `3.720s` 降到 `1.400s`；
+- supervisor active fraction 和 solver bypass fraction 同时下降，说明原 conservative early-stop 主要由 full supervisor / yield logic 主导；
+- reduced supervisor 下仍有少量 infeasible steps，集中在 `critical/pre-clearance` 的 `approach_yield_line` 和 `cautious_approach_observed_target`，但仍低于 gate 阈值；
+- fixed-risk 与 adaptive-risk 的 final behaviour 差异仍然很小，因此这个结果是 supervisor contribution evidence，不是 var-risk superiority evidence。
 
 当前是否已经证明 adaptive-risk / var-risk 优势：
 
@@ -442,9 +465,9 @@ GPU 需求判断：
 
 50-init 前必须完成：
 
-- supervisor contribution ablation，证明 full/reduced supervisor 对 final behaviour 的影响；
-- solver-layer 与 final-layer 分离分析，说明 adaptive-risk 的贡献是否被 supervisor 抹平；
-- infeasibility phase analysis，解释剩余 infeasible steps 发生在哪些 phase / init / policy；
+- supervisor contribution ablation，证明 full/reduced supervisor 对 final behaviour 的影响；当前 5-init formal ablation 已完成；
+- solver-layer 与 final-layer 分离分析，说明 adaptive-risk 的贡献是否被 supervisor 抹平；当前 formal report 已完成第一版；
+- infeasibility phase analysis，解释剩余 infeasible steps 发生在哪些 phase / init / policy；当前 formal report 已完成第一版；
 - fine-tuning sanity 的可写论文版本，避免过度声称 `100%`；
 - 至少一个 adaptive-risk vs fixed-risk 的稳定、可解释优势，或明确说明优势只存在于 solver layer / 特定难度区间。
 
@@ -524,27 +547,58 @@ fine-tuned MultiPath
 
 当前优先级：
 
-1. 冻结当前 `reduced_intervention` candidate：
+1. 已冻结当前 `reduced_intervention` candidate：
    - 冻结结果目录：`core/results/20260725_023251_5init_reduced_clear_path_release`；
    - 不再继续为了单次视频效果、first-stop distance 或 var/fixed 表面差异调 supervisor；
    - 保留当前 best full supervisor milestone 作为安全 baseline；
    - 当前 frozen reduced 只作为 stable reduced condition，用来回答导师关于 conservative behaviour 和 supervisor dominance 的问题。
 
-2. 对后续所有代表性 video 保留 qualitative behaviour gate：
+2. 已完成正式 supervisor contribution ablation：
+   - 结果目录：`core/results/20260725_125938_5init_formal_supervisor_ablation`；
+   - 报告：`formal_supervisor_ablation_analysis/formal_supervisor_ablation_report.md`；
+   - 结论：reduced supervisor 明显减少 early-stop、等待和 post-clearance delay，同时 full supervisor 确实掩盖 fixed/adaptive final differences；
+   - 限制：adaptive-risk final-layer 优势仍弱，不能把该 ablation 写成 var-risk 胜利。
+
+3. 下一步立即做 adaptive-risk intensity / scenario difficulty sweep：
+   - 固定 `YIELD_SUPERVISOR_MODE=reduced_intervention`；
+   - 先跑 `INIT_COUNT=5`，不要直接上 50-init；
+   - 第一轮用 `VARIANT_SET=sensitivity`，比较 risk floor、post-clearance relaxation 和 severity gain；
+   - 每个 variant 都同时跑 `smpc_var_risk` 和 `smpc_fixed_risk`；
+   - 观察重点是 safety margin、completion time、post-clearance release、supervisor intervention fraction、solver-layer vs final-layer action consistency；
+   - 如果所有 final-layer 差异仍小，就把结论写成 supervisor masking / scenario not discriminative，而不是继续调 supervisor。
+
+推荐 5-init 命令：
+
+```bash
+conda activate carla_modern
+
+export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
+export PYTHONPATH=$CARLA_ROOT/PythonAPI/carla:$CARLA_ROOT/PythonAPI/carla/agents:$PYTHONPATH
+
+export GUROBI_HOME=/root/autodl-tmp/Research-Project-IMLS/gurobi/gurobi1103/linux64
+export GUROBI_VERSION=110
+export GRB_LICENSE_FILE=/root/autodl-tmp/Research-Project-IMLS/gurobi/gurobi.lic
+export LD_LIBRARY_PATH=$GUROBI_HOME/lib:${LD_LIBRARY_PATH:-}
+
+cd /root/autodl-tmp/Research-Project-IMLS/core/scripts/carla
+
+YIELD_SUPERVISOR_MODE=reduced_intervention \
+VARIANT_SET=sensitivity \
+INIT_COUNT=5 \
+ENABLE_CAMERA_VIZ=0 \
+PYTHON_BIN=python \
+RESULTS_DIR=/root/autodl-tmp/Research-Project-IMLS/core/results/$(date +%Y%m%d_%H%M%S)_5init_reduced_varrisk_sensitivity \
+./run_give_way_10init_comprehensive_adaptive_risk_ablation.sh
+```
+
+4. 对后续所有代表性 video 保留 qualitative behaviour gate：
    - ego 应该在检测到 oncoming target 后继续谨慎接近，而不是远距离停车；
    - ego 不应在 target 几乎已经离开、前方路径视觉上已 clear 时才突然 hard-stop；
    - target clear 后 ego 应尽快 release，不应出现数秒 near-zero-speed 停顿；
    - ego 转弯后必须进入正确车道并保持直行；如果 release 版本破坏 post-turn lane keeping，即使 safety gate PASS 也不能升级；
    - 如果 quantitative gate PASS 但 video gate FAIL，该版本只能作为反例，不进入 milestone。
 
-3. 做正式 supervisor contribution ablation：
-   - `fixed-risk + full supervisor`；
-   - `adaptive-risk + full supervisor`；
-   - `fixed-risk + reduced_intervention supervisor`；
-   - `adaptive-risk + reduced_intervention supervisor`；
-   - 可选加入 `diagnostic-only / hard-safety-only`，只用于证明 supervisor 是否主导 final action，不作为最终方法。
-
-4. 对 ablation 结果强制输出 solver-layer 与 final-layer 分离指标：
+5. 对 var-risk sweep 结果强制输出 solver-layer 与 final-layer 分离指标：
    - nominal SMPC acceleration；
    - final executed acceleration；
    - nominal-final acceleration delta；
@@ -553,15 +607,10 @@ fine-tuned MultiPath
    - stop distance、waiting time、delay after target clearance；
    - fixed-risk vs adaptive-risk 的 trajectory/control difference。
 
-5. 单独做 infeasibility phase analysis：
+6. 对 var-risk sweep 单独做 infeasibility phase analysis：
    - 按 `policy`、`supervisor mode`、`phase`、`distance_to_conflict`、`solver status` 聚合；
    - 区分 critical/pre-clearance、hold-yield-line、post-clearance recovery；
    - 解释 infeasible 后 supervisor/fallback 是否保证 safety。
-
-6. 做 adaptive-risk intensity / scenario difficulty sweep：
-   - 目的不是调 supervisor，而是找出 var-risk 相对 fixed-risk 的真实优势出现在哪类风险强度或交互难度下；
-   - 优先观察 safety margin、smoothness、completion time、post-clearance release 和 supervisor intervention fraction；
-   - 如果 var-risk 只在 nominal layer 有优势但 final layer 被 supervisor 抹平，也要如实写出来。
 
 7. 补充 fine-tuning sanity 的最终证据：
    - 保留当前第一轮无 GPU sanity check 结论；
