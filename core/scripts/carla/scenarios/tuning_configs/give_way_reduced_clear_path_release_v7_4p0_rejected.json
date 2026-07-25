@@ -1,7 +1,7 @@
 {
-  "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 8,
-  "description": "Current 5-init validation candidate after v7 4.0m still failed fixed_aggressive init01. Version 8 keeps reduced-intervention cautious-settle logic but targets a 4.5m stop clearance to recover fixed-risk safety while staying closer than the v5 rollback baseline.",
+  "config_name": "give_way_reduced_clear_path_release_v7_4p0_rejected",
+  "version": 7,
+  "description": "Archived 4.0m stop-clearance candidate. It improved over v6 3.5m in 20260725_225031_5init_fixed_risk_frontier_v7_stop_clearance_4p0, with init02-init05 passing fixed_aggressive, but init01 still failed with a 0.50s footprint collision and give-way violation. Keep only as a lesson; do not use as a baseline.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
@@ -22,11 +22,11 @@
       "yield_stop_line_creep_clearance_slack": 1.0,
       "yield_stop_line_creep_accel": 0.6,
       "yield_stop_line_creep_safety_margin": 0.0,
-      "yield_stop_line_creep_min_clearance_override": 4.5,
+      "yield_stop_line_creep_min_clearance_override": 4.0,
       "yield_dynamic_stop_clearance_enabled": true,
       "yield_stop_clearance_slack": 1.0,
       "yield_stop_min_clearance_margin": 0.5,
-      "yield_stop_clearance_override": 4.5,
+      "yield_stop_clearance_override": 4.0,
       "yield_caution_decel": -4.0,
       "yield_reference_min_speed": 0.8,
       "yield_reference_decel": -3.75,
