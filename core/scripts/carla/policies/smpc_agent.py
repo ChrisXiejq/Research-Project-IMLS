@@ -87,6 +87,10 @@ class SMPCAgent(object):
                  yield_observed_caution_enabled=True,
                  yield_observed_caution_distance=12.0,
                  yield_observed_caution_min_target_speed=0.5,
+                 smpc_intersection_approach_speed_shaping_enabled=False,
+                 smpc_intersection_approach_distance=16.0,
+                 smpc_intersection_approach_speed=5.0,
+                 smpc_intersection_approach_decel=-3.0,
                  yield_steer_damping=0.25,
                  yield_recovery_enabled=True,
                  yield_recovery_steps=180,
@@ -181,6 +185,12 @@ class SMPCAgent(object):
         self.yield_observed_caution_enabled = bool(yield_observed_caution_enabled)
         self.yield_observed_caution_distance = float(yield_observed_caution_distance)
         self.yield_observed_caution_min_target_speed = float(yield_observed_caution_min_target_speed)
+        self.smpc_intersection_approach_speed_shaping_enabled = bool(
+            smpc_intersection_approach_speed_shaping_enabled
+        )
+        self.smpc_intersection_approach_distance = float(smpc_intersection_approach_distance)
+        self.smpc_intersection_approach_speed = float(smpc_intersection_approach_speed)
+        self.smpc_intersection_approach_decel = float(smpc_intersection_approach_decel)
         self.yield_steer_damping = float(yield_steer_damping)
         self.yield_recovery_enabled = bool(yield_recovery_enabled)
         self.yield_recovery_steps = int(yield_recovery_steps)
@@ -366,6 +376,21 @@ class SMPCAgent(object):
             raise ValueError(
                 "yield_observed_caution_min_target_speed must be non-negative, "
                 f"got {self.yield_observed_caution_min_target_speed}"
+            )
+        if self.smpc_intersection_approach_distance < 0.0:
+            raise ValueError(
+                "smpc_intersection_approach_distance must be non-negative, "
+                f"got {self.smpc_intersection_approach_distance}"
+            )
+        if self.smpc_intersection_approach_speed < self.yield_stop_speed:
+            raise ValueError(
+                "smpc_intersection_approach_speed must be >= yield_stop_speed, "
+                f"got {self.smpc_intersection_approach_speed} < {self.yield_stop_speed}"
+            )
+        if self.smpc_intersection_approach_decel >= 0.0:
+            raise ValueError(
+                "smpc_intersection_approach_decel must be negative, "
+                f"got {self.smpc_intersection_approach_decel}"
             )
         if not 0.0 <= self.yield_steer_damping <= 1.0:
             raise ValueError(f"yield_steer_damping must be in [0, 1], got {self.yield_steer_damping}")
@@ -897,6 +922,14 @@ class SMPCAgent(object):
                 "observed_caution_enabled": self.yield_observed_caution_enabled,
                 "observed_caution_distance": self.yield_observed_caution_distance,
                 "observed_caution_min_target_speed": self.yield_observed_caution_min_target_speed,
+                "smpc_intersection_approach_speed_shaping_enabled": (
+                    self.smpc_intersection_approach_speed_shaping_enabled
+                ),
+                "smpc_intersection_approach_distance": (
+                    self.smpc_intersection_approach_distance
+                ),
+                "smpc_intersection_approach_speed": self.smpc_intersection_approach_speed,
+                "smpc_intersection_approach_decel": self.smpc_intersection_approach_decel,
                 "steer_damping": self.yield_steer_damping,
                 "recovery_enabled": self.yield_recovery_enabled,
                 "recovery_steps": self.yield_recovery_steps,
@@ -2908,15 +2941,73 @@ class SMPCAgent(object):
             "accel_upper_bound": None,
             "profile": None,
         }
+        ego_dist_to_conflict = float(yield_status.get("ego_distance_to_conflict", np.inf))
+        approach_speed_shaping_active = bool(
+            self.smpc_intersection_approach_speed_shaping_enabled
+            and not yield_active
+            and not recovery_active_for_reference
+            and np.isfinite(ego_dist_to_conflict)
+            and ego_dist_to_conflict <= self.smpc_intersection_approach_distance
+            and bool(yield_status.get("target_approaching_conflict", False))
+            and bool(yield_status.get("cautious_candidate", False))
+        )
+        ref_status["smpc_intersection_approach"] = {
+            "enabled": bool(self.smpc_intersection_approach_speed_shaping_enabled),
+            "active": bool(approach_speed_shaping_active),
+            "distance_threshold": float(self.smpc_intersection_approach_distance),
+            "ego_distance_to_conflict": (
+                float(ego_dist_to_conflict) if np.isfinite(ego_dist_to_conflict) else None
+            ),
+            "target_approaching_conflict": bool(
+                yield_status.get("target_approaching_conflict", False)
+            ),
+            "cautious_candidate": bool(yield_status.get("cautious_candidate", False)),
+        }
         post_clearance_alignment_active = bool(
             yield_status.get("target_cleared_conflict", False)
             and self.exit_alignment_post_clearance_goal_window > 0.0
         )
-        if not yield_active and not recovery_active_for_reference and not post_clearance_alignment_active:
+        if (
+            not yield_active
+            and not recovery_active_for_reference
+            and not post_clearance_alignment_active
+            and not approach_speed_shaping_active
+        ):
             return ref_status
 
         self.feas_ref_states_new = np.asarray(self.feas_ref_states_new, dtype=float).copy()
         self.feas_ref_inputs_new = np.asarray(self.feas_ref_inputs_new, dtype=float).copy()
+
+        if approach_speed_shaping_active:
+            start_idx = int(max(0, min(t_ref_new, len(self.feas_ref_states_new) - 1)))
+            speed_cap = float(self.smpc_intersection_approach_speed)
+            self.feas_ref_states_new[start_idx:, 3] = np.minimum(
+                self.feas_ref_states_new[start_idx:, 3],
+                speed_cap,
+            )
+            if start_idx > 0:
+                self.feas_ref_states_new[:start_idx, 3] = np.minimum(
+                    self.feas_ref_states_new[:start_idx, 3],
+                    speed_cap,
+                )
+            self.feas_ref_inputs_new[:, 0] = np.clip(
+                self.feas_ref_inputs_new[:, 0],
+                self.smpc_intersection_approach_decel,
+                self.yield_recovery_accel,
+            )
+            ref_status.update({
+                "mode": "smpc_intersection_approach_reference",
+                "speed_cap": speed_cap,
+                "accel_upper_bound": float(self.yield_recovery_accel),
+                "profile": {
+                    "type": "pre_yield_smpc_speed_reference",
+                    "ego_distance_to_conflict": float(ego_dist_to_conflict),
+                    "speed_cap": speed_cap,
+                    "approach_decel": float(self.smpc_intersection_approach_decel),
+                    "trigger": "target_approaching_conflict_and_cautious_candidate",
+                },
+            })
+            return ref_status
 
         if yield_active:
             start_idx = int(max(0, min(t_ref_new, len(self.feas_ref_states_new) - 1)))

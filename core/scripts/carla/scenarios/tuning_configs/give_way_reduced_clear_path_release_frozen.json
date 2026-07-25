@@ -1,7 +1,7 @@
 {
   "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 8,
-  "description": "Current 5-init validation candidate after v7 4.0m still failed fixed_aggressive init01. Version 8 keeps reduced-intervention cautious-settle logic but targets a 4.5m stop clearance to recover fixed-risk safety while staying closer than the v5 rollback baseline.",
+  "version": 9,
+  "description": "Init01 SMPC-layer candidate after v8 4.5m still failed footprint safety. Version 9 keeps the reduced supervisor unchanged and adds SMPC-only intersection-approach reference speed shaping so the optimizer slows before entering the give-way conflict area.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
@@ -51,6 +51,10 @@
       "yield_observed_caution_enabled": true,
       "yield_observed_caution_distance": 12.0,
       "yield_observed_caution_min_target_speed": 0.5,
+      "smpc_intersection_approach_speed_shaping_enabled": true,
+      "smpc_intersection_approach_distance": 16.0,
+      "smpc_intersection_approach_speed": 5.0,
+      "smpc_intersection_approach_decel": -3.0,
       "yield_steer_damping": 0.25,
       "yield_recovery_enabled": true,
       "yield_recovery_steps": 90,
