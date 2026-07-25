@@ -1,7 +1,7 @@
 {
-  "config_name": "give_way_reduced_clear_path_release_frozen",
+  "config_name": "give_way_reduced_clear_path_release_v6_best",
   "version": 6,
-  "description": "Current best reduced-intervention supervisor baseline. Version 6 was validated by 20260725_204210_video_gate_frontier_init05_stop_clearance_3p5_v6: closer first stop, zero clearance delay, and PASS post-CARLA gate. It keeps cautious-settle logic and explicitly targets a 3.5m stop clearance without changing yield_conflict_radius.",
+  "description": "Frozen current-best reduced-intervention supervisor baseline from 20260725_204210_video_gate_frontier_init05_stop_clearance_3p5_v6. It improves the accepted v5 baseline by using a 3.5m stop-clearance override while keeping cautious stop-line creep, zero clearance delay, and PASS post-CARLA gate. Do not overwrite this file when testing later candidates.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
