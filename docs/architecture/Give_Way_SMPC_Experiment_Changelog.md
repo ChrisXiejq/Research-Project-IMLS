@@ -492,7 +492,7 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Main interpretation: final trajectory safety is guaranteed by the rule-aware supervisor. The adaptive-risk contribution should be claimed at the SMPC solver/risk layer: before target clearance, the adaptive policy applies stronger chance-constraint tightening; after target clearance, it relaxes the tightening.
     - Key 50-init mechanism evidence: `critical / pre_clearance` adaptive-minus-fixed tightening is about `+0.1597`; `critical / post_clearance` and `near / post_clearance` are about `-0.3584`.
     - Key ablation evidence: disabling the pre-clearance risk floor reduces the `critical / pre_clearance` adaptive-minus-fixed tightening gap from about `+0.1600` to about `+0.0603`, while both ablation variants pass the safety gate.
-    - Generated paper-core figures under `docs/paper/figures/`. Next work should focus on writing Results/Discussion and, if needed, limited mechanism ablations rather than further tuning the frozen main experiment.
+    - Generated a historical paper-core figure package. That old generated package has since been removed from the active docs because the dissertation direction was revised after supervisor feedback; use `docs/paper/dissertation_guidance_after_supervisor_feedback.md` for the current writing plan.
 
 62. Comprehensive adaptive-risk ablation support:
     - Add parameterised adaptive-risk mapping support without changing frozen defaults. `adaptive_risk_config` can now override `relaxed_after_clearance_tight`, pre-clearance floor values, phase-floor scores, `mild_tightening_scale`, and the boolean floor/relaxation switches.

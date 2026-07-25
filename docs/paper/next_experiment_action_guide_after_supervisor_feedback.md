@@ -16,10 +16,24 @@
 ```text
 先证明原始 conservative behaviour 主要来自哪里，
 再证明 reduced-intervention supervisor 能减少不必要接管但仍保持 safety，
-再在 supervisor 影响被量化或削弱后，寻找 adaptive-risk 相比 fixed-risk 的可解释优势。
+再在 supervisor 影响被量化或削弱后，证明 adaptive-risk 相比固定风险族的可解释优势。
 ```
 
 因此，任何“为了拉开 var/fixed 差距而削弱 hard safety guard”的改动都不符合目标。adaptive-risk 的优势必须来自风险分配、clearance 后风险释放、solver-layer 行为或更困难场景下的 safety/performance trade-off，而不是来自破坏 baseline 或取消安全约束。
+
+借鉴原论文 `Predictive Control for Autonomous Driving With Uncertain, Multimodal Predictions` 后，本文后续主张需要调整为更严谨的版本：
+
+```text
+原论文证明的是：在没有外层 rule-aware supervisor 抹平最终动作的 SMPC 架构中，优化 risk levels 相比单一 fixed risk 能提升 feasibility、comfort 和 safety/performance trade-off。
+
+本文要证明的是：在更接近安全部署的 give-way 场景中，adaptive-risk 的贡献需要和 rule-aware supervisor 分层解释。adaptive-risk 不应只和一个固定 epsilon baseline 比，而应和 fixed-risk frontier 比；如果它在相同 safety / infeasibility 水平下减少 supervisor intervention、改善 solver feasibility、缩短 post-clearance delay 或保持更好的 safety-performance Pareto trade-off，就构成 proposal 的优势。
+```
+
+因此，后续不再追求“adaptive-risk 在单个 fixed-risk baseline 上 final trajectory 大幅胜出”这个脆弱结论。新的 proof target 是：
+
+```text
+Adaptive variable risk provides a better risk-allocation mechanism than a family of fixed-risk baselines, while the supervisor analysis explains why final executed trajectories may still look similar in a rule-constrained give-way scenario.
+```
 
 ## 1. 当前起点
 
@@ -58,9 +72,9 @@ core/results/20260718_104740_50init_finetuned_predictor_validation
 - reduced-intervention supervisor 已经完成当前 5-init 稳定候选验证，当前冻结版本为 `20260725_023251_5init_reduced_clear_path_release`；
 - formal 5-init supervisor ablation 已完成，结果目录为 `core/results/20260725_125938_5init_formal_supervisor_ablation`；
 - formal ablation 已经足够支撑“full supervisor 强烈主导 conservative early-stop，并掩盖 fixed/adaptive final behaviour 差异”，但还不足以支撑“adaptive-risk 在最终轨迹上显著优于 fixed-risk”；
-- 当前尚未可靠证明 adaptive-risk / var-risk 相比 fixed-risk 的优势，因为 promising reduced 版本下两者 final trajectory 仍然接近；
+- 当前尚未可靠证明 adaptive-risk / var-risk 相比 fixed-risk 的优势，因为 promising reduced 版本下两者 final trajectory 仍然接近，且当前 fixed-risk baseline 还不是 fixed-risk frontier；
 - aggressive 地减少 supervisor 接管可以制造少量 var/fixed 差异，但如果带来 solver infeasibility、video behaviour artifact 或 post-turn lane keeping 回归，不能作为论文证据；
-- 下一阶段停止继续调 reduced supervisor，把当前冻结版本作为 stable reduced condition，转向 adaptive-risk intensity / scenario difficulty sweep 和必要的 fine-tuning sanity 补充；
+- 下一阶段停止继续调 reduced supervisor，把当前冻结版本作为 stable reduced condition，转向 adaptive-risk intensity / scenario difficulty sweep、fixed-risk frontier baseline 和必要的 fine-tuning sanity 补充；
 - 在完成导师四条反馈对应的证据链前，不进入新的 50-init milestone 实验。
 
 ## 2. 导师反馈对应的研究问题
@@ -112,6 +126,33 @@ adaptive-risk 是否在 solver layer 有贡献，但被同一个 supervisor filt
 - solver-layer risk tightening；
 - final executed trajectory difference；
 - safety margin、completion time、stop distance、waiting time。
+
+### Q2b. adaptive-risk 是否优于 fixed-risk frontier？
+
+原论文的 `Proposed` 不是靠交通规则 supervisor 取胜，而是通过优化 multimodal chance constraints 的 risk levels，让 optimizer 在 feasibility、comfort、safety 和 mobility 之间取得更好的折中。为了借鉴这个优势，本文不能只比较一个固定的 `smpc_fixed_risk`，而应该比较一组 fixed-risk baselines。
+
+要回答的问题：
+
+```text
+adaptive-risk 是否在相同或更好的 safety / feasibility 水平下，优于一组 fixed-risk risk-level settings，而不是只优于一个固定 baseline？
+```
+
+需要看的证据：
+
+- fixed-risk conservative / medium / aggressive 的 feasibility、safety margin、completion time、release delay；
+- adaptive-risk 是否处在 fixed-risk Pareto frontier 之上或更靠近优选区域；
+- adaptive-risk 是否用动态 risk allocation 实现了 fixed-risk 难以同时做到的行为：
+  - pre-clearance 更保守；
+  - post-clearance 更快 release；
+  - solver infeasibility 不增加或更少；
+  - supervisor active / bypass fraction 更低；
+  - nominal-final action delta 更小。
+
+判断规则：
+
+- 如果 adaptive-risk 只比一个 fixed-risk baseline 好，但 fixed-risk sweep 中存在另一个 fixed setting 同时更安全、更快，则不能声称 proposal 有优势。
+- 如果 fixed conservative 安全但太慢、fixed aggressive 快但 infeasible 或 supervisor intervention 增加，而 adaptive-risk 在两者之间形成更好的 safety-performance compromise，则可以声称 proposal 有优势。
+- 如果 adaptive-risk 的优势主要存在于 solver layer，但 final layer 被 supervisor 抹平，仍可写成“adaptive risk improves optimizer-level risk allocation, while rule-aware supervisor masks final action differences in safety-critical phases”。
 
 ### Q3. infeasible step 什么时候发生，为什么发生？
 
@@ -396,6 +437,42 @@ core/results/20260725_125938_5init_formal_supervisor_ablation/formal_supervisor_
 - reduced supervisor 让方法更接近导师期望的 realistic cautious approach；
 - 但 adaptive-risk 相对 fixed-risk 的优势还需要通过更清晰的 ablation 或更有区分度的 scenario/risk-intensity sweep 来证明。
 
+### Step 2b. 借鉴原论文后的 revised proof strategy
+
+原论文的 intersection 结果能证明 `Proposed` 优于 `Fixed Risk`，关键在于：
+
+- final executed control 基本来自 SMPC，没有外层 rule-aware supervisor 把 fixed/proposed 的动作过滤成相似轨迹；
+- `Proposed` 优化 risk levels，`Fixed Risk` 固定 risk level，因此差异直接体现在 feasibility、comfort、safety 和 mobility 指标上；
+- 评价指标直接服务于 optimizer-level contribution：SMPC feasibility、collision probability、trajectory deviation、jerk、solve time；
+- fixed-risk baseline 是一个 ablation，但不是一组 fixed epsilon frontier。
+
+本文不能简单照搬原论文结论，因为 give-way 场景有 right-of-way 规则，supervisor 是合理且必要的。本文应融合原论文思路，把 proposal 优势改成以下三层证明：
+
+```text
+Layer 1: Supervisor masking evidence
+full supervisor 会把 fixed/adaptive final behaviour 抹平；reduced supervisor 能减少不必要接管但保留 safety。
+
+Layer 2: Optimizer-level risk-allocation evidence
+在相同 predictor、同一 reduced supervisor、同一 init/difficulty 下，adaptive-risk 在 solver layer 显示 phase-aware risk tightening/release，并降低 infeasibility 或 nominal-final mismatch。
+
+Layer 3: Fixed-risk frontier / Pareto evidence
+adaptive-risk 不只和一个 fixed-risk 比，而是和 conservative/medium/aggressive fixed-risk settings 比。如果它在 safety、feasibility、release delay、completion time、supervisor intervention 之间形成更好的 Pareto trade-off，就构成 proposal 优势。
+```
+
+后续可写论文主张：
+
+```text
+Compared with a family of fixed-risk SMPC baselines, the proposed phase-aware adaptive-risk SMPC allocates conservatism according to the give-way interaction phase. In safety-critical pre-clearance phases, the rule-aware supervisor may mask final-action differences, but solver-layer diagnostics and fixed-risk frontier analysis show that adaptive risk provides a more favourable safety-performance trade-off without weakening traffic-rule safety.
+```
+
+后续不能写：
+
+```text
+adaptive-risk universally dominates fixed-risk in final trajectory metrics.
+```
+
+因为当前 formal supervisor ablation 已经显示 final trajectory 很容易被 shared supervisor 主导。
+
 ### Step 3. fine-tuning sanity check
 
 在继续把 100% mode-ranking 作为强结果前，需要先验证 evaluation pipeline。
@@ -468,8 +545,9 @@ GPU 需求判断：
 - supervisor contribution ablation，证明 full/reduced supervisor 对 final behaviour 的影响；当前 5-init formal ablation 已完成；
 - solver-layer 与 final-layer 分离分析，说明 adaptive-risk 的贡献是否被 supervisor 抹平；当前 formal report 已完成第一版；
 - infeasibility phase analysis，解释剩余 infeasible steps 发生在哪些 phase / init / policy；当前 formal report 已完成第一版；
+- fixed-risk frontier baseline，至少覆盖 conservative / medium / aggressive 三档 fixed-risk setting，避免只赢一个弱 baseline；
 - fine-tuning sanity 的可写论文版本，避免过度声称 `100%`；
-- 至少一个 adaptive-risk vs fixed-risk 的稳定、可解释优势，或明确说明优势只存在于 solver layer / 特定难度区间。
+- 至少一个 adaptive-risk vs fixed-risk frontier 的稳定、可解释优势，或明确说明优势只存在于 solver layer / 特定难度区间。
 
 候选新 milestone：
 
@@ -485,8 +563,9 @@ fine-tuned MultiPath
 - 无 footprint collision；
 - 无 give-way violation；
 - early-stop distance 降低或无效等待时间缩短；
-- adaptive-risk 相比 fixed-risk 至少在一个行为指标上更清楚：
+- adaptive-risk 相比 fixed-risk frontier 至少在一个行为指标或 trade-off 上更清楚：
   - worst-case footprint separation；
+  - SMPC feasibility / infeasibility fraction；
   - conflict approach smoothness；
   - completion time；
   - supervisor intervention fraction；
@@ -525,7 +604,14 @@ fine-tuned MultiPath
    - target clearance；
    - supervisor active flag。
 
-6. fine-tuning sanity：
+6. fixed-risk frontier / Pareto plot：
+   - fixed-risk conservative / medium / aggressive；
+   - adaptive-risk selected setting；
+   - x-axis 可用 completion time / post-clearance delay；
+   - y-axis 可用 safety margin / infeasible fraction / supervisor active fraction；
+   - 标出被 Pareto dominated 的 fixed settings 和 adaptive-risk 的位置。
+
+7. fine-tuning sanity：
    - pretrained vs fine-tuned top-1/minADE；
    - mode probability examples；
    - split integrity summary。
@@ -537,7 +623,7 @@ fine-tuned MultiPath
 - 不要在新 50-init safety pass 前替代当前 best milestone。
 - 不要把 no-supervisor 当最终方法；它只能做 contribution diagnostic。
 - 不要为了让 adaptive-risk 更明显而取消 hard safety guard。
-- fixed-risk baseline 必须保持静态，不能被 adaptive-risk 改动污染。
+- fixed-risk baseline 必须保持静态，不能被 adaptive-risk 改动污染；但必须扩展为 fixed-risk frontier，而不是只保留单个 fixed-risk baseline。
 - adaptive-risk 的改动必须独立、可开关、可记录。
 - 不要只优化 aggregate metrics；必须加入 stop distance、waiting time、post-clearance delay 等行为指标。
 - 不要声称直接超过 reference paper，因为场景和架构不同。
@@ -559,12 +645,13 @@ fine-tuned MultiPath
    - 结论：reduced supervisor 明显减少 early-stop、等待和 post-clearance delay，同时 full supervisor 确实掩盖 fixed/adaptive final differences；
    - 限制：adaptive-risk final-layer 优势仍弱，不能把该 ablation 写成 var-risk 胜利。
 
-3. 下一步立即做 adaptive-risk intensity / scenario difficulty sweep：
+3. 当前正在做 adaptive-risk intensity sweep：
    - 固定 `YIELD_SUPERVISOR_MODE=reduced_intervention`；
    - 先跑 `INIT_COUNT=5`，不要直接上 50-init；
    - 第一轮用 `VARIANT_SET=sensitivity`，比较 risk floor、post-clearance relaxation 和 severity gain；
    - 每个 variant 都同时跑 `smpc_var_risk` 和 `smpc_fixed_risk`；
    - 观察重点是 safety margin、completion time、post-clearance release、supervisor intervention fraction、solver-layer vs final-layer action consistency；
+   - 该实验的作用是筛选 adaptive-risk 设置和判断 solver-layer contribution，不足以单独证明 proposal 优于 fixed-risk frontier；
    - 如果所有 final-layer 差异仍小，就把结论写成 supervisor masking / scenario not discriminative，而不是继续调 supervisor。
 
 推荐 5-init 命令：
@@ -591,14 +678,28 @@ RESULTS_DIR=/root/autodl-tmp/Research-Project-IMLS/core/results/$(date +%Y%m%d_%
 ./run_give_way_10init_comprehensive_adaptive_risk_ablation.sh
 ```
 
-4. 对后续所有代表性 video 保留 qualitative behaviour gate：
+4. 当前 sensitivity sweep 完成后，新增 fixed-risk frontier baseline：
+   - 目的：借鉴原论文 `Proposed vs Fixed Risk` 的思想，但把 fixed baseline 扩展为一组 fixed-risk settings，避免只赢一个弱 baseline；
+   - 固定同一个 `reduced_intervention` supervisor、同一个 predictor、同一组 init；
+   - fixed-risk 至少三档：
+     - conservative：更高 tightening / 更低允许风险，预期更安全但更慢、更易 early stop；
+     - medium：当前默认 fixed-risk；
+     - aggressive：更低 tightening / 更高允许风险，预期更快但可能 infeasible 或需要更多 supervisor 接管；
+   - adaptive-risk 选择 sensitivity sweep 中最合理的一档，而不是为了赢 baseline 事后任意调参；
+   - 判断方式不是单一指标胜负，而是 Pareto trade-off：
+     - same safety 下 completion / release delay 是否更好；
+     - same completion 下 safety margin / infeasible fraction 是否更好；
+     - same infeasibility 下 supervisor active / bypass fraction 是否更低；
+     - solver-layer risk allocation 是否符合 pre-clearance tighten / post-clearance relax 的机制解释。
+
+5. 对后续所有代表性 video 保留 qualitative behaviour gate：
    - ego 应该在检测到 oncoming target 后继续谨慎接近，而不是远距离停车；
    - ego 不应在 target 几乎已经离开、前方路径视觉上已 clear 时才突然 hard-stop；
    - target clear 后 ego 应尽快 release，不应出现数秒 near-zero-speed 停顿；
    - ego 转弯后必须进入正确车道并保持直行；如果 release 版本破坏 post-turn lane keeping，即使 safety gate PASS 也不能升级；
    - 如果 quantitative gate PASS 但 video gate FAIL，该版本只能作为反例，不进入 milestone。
 
-5. 对 var-risk sweep 结果强制输出 solver-layer 与 final-layer 分离指标：
+6. 对 var-risk sweep 和 fixed-risk frontier 结果强制输出 solver-layer 与 final-layer 分离指标：
    - nominal SMPC acceleration；
    - final executed acceleration；
    - nominal-final acceleration delta；
@@ -607,18 +708,18 @@ RESULTS_DIR=/root/autodl-tmp/Research-Project-IMLS/core/results/$(date +%Y%m%d_%
    - stop distance、waiting time、delay after target clearance；
    - fixed-risk vs adaptive-risk 的 trajectory/control difference。
 
-6. 对 var-risk sweep 单独做 infeasibility phase analysis：
+7. 对 var-risk sweep 和 fixed-risk frontier 单独做 infeasibility phase analysis：
    - 按 `policy`、`supervisor mode`、`phase`、`distance_to_conflict`、`solver status` 聚合；
    - 区分 critical/pre-clearance、hold-yield-line、post-clearance recovery；
    - 解释 infeasible 后 supervisor/fallback 是否保证 safety。
 
-7. 补充 fine-tuning sanity 的最终证据：
+8. 补充 fine-tuning sanity 的最终证据：
    - 保留当前第一轮无 GPU sanity check 结论；
    - 如时间允许，补 shuffled-label / mismatched-label sanity test 或更多 held-out examples；
    - 论文中避免把 `100%` 说成通用预测能力完全解决，只说改善了当前 held-out CARLA split 的 mode ranking / probability calibration。
 
-8. 完成上述任务后，再决定是否进入 50-init：
-   - 如果 reduced condition 在 ablation 中有清晰价值，且 var-risk 有至少一个稳定优势，再跑 50-init 验证新 milestone；
+9. 完成上述任务后，再决定是否进入 50-init：
+   - 如果 reduced condition 在 ablation 中有清晰价值，且 var-risk 相对 fixed-risk frontier 有至少一个稳定优势，再跑 50-init 验证新 milestone；
    - 如果 var-risk 优势只存在于 solver layer，也可以不急于 50-init，而是把结论写成 supervisor masking / limitation；
    - 不允许在这些证据缺失时，为了补 aggregate table 直接进入 50-init。
 

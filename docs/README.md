@@ -4,36 +4,26 @@ This folder is organised by document purpose. Use this file as the entry point.
 
 ## Current Status
 
-- `paper/current_project_status.md`  
-  Canonical status and milestone summary. This is the main source for current best results, fine-tuned predictor validation, phase-aware risk evidence, graphical results, and paper-safe claims.
+- `paper/dissertation_guidance_after_supervisor_feedback.md`
+  Canonical dissertation guidance after the supervisor feedback. This is the main source for the final research goal, hypotheses, experiment plan, paper-safe claims, and 50-init decision gate.
 - `paper/next_experiment_action_guide_after_supervisor_feedback.md`
-  Guiding plan for the next experimental stage after supervisor feedback. Use this as the direction guide for new analysis, code changes, and experiments.
+  Operational action guide for the next experimental stage. Use this for concrete experiment sequencing, commands, and current evidence tracking.
 
 ## Paper Writing
 
-- `paper/phase_aware_adaptive_risk_论文初版大纲.md`  
-  Dissertation outline and chapter-level writing plan.
 - `paper/phase_aware_adaptive_risk_相关文献整理.md`  
   Related-work notes focused on phase-aware adaptive-risk SMPC.
-- `paper/supervisor_progress_update_phase_aware_adaptive_risk.md`  
-  Short supervisor update note.
-- `paper/supervisor_progress_update_phase_aware_adaptive_risk.docx`  
-  Editable supervisor update attachment.
 
 ## Results and Figures
 
-- `paper/figures/`  
-  Frozen control-side paper figures.
-- `paper/generate_core_figures.py`  
-  Generates frozen control-side SVG figures.
 - `paper/generate_finetuned_predictor_validation_figures.py`  
   Generates post-hoc SVG figures for fine-tuned predictor validation runs.
-- `paper/generate_original_paper_style_results.py`  
-  Generates result tables and figures following the reference paper's Table-I style.
-- `paper/generate_original_paper_style_timeseries.py`  
-  Generates original-paper-style multi-panel closed-loop time-series SVG figures from `smpc_debug_steps.jsonl`.
-- `paper/original_paper_style_results/`  
-  Original-paper-style result package, including CSV tables, aggregate SVG figures, multi-panel time-series SVG figures, and the comparison analysis against the reference paper.
+- `paper/generate_formal_supervisor_ablation_report.py`
+  Generates the formal supervisor ablation report and CSV summaries for full vs reduced-intervention supervisor analysis.
+- `paper/diagnose_supervisor_feedback_step1.py`
+  Post-hoc diagnostic script for supervisor feedback issues: conservative stopping, supervisor masking, and infeasibility phases.
+- `paper/diagnose_multipath_sanity_step3.py`
+  Fine-tuned predictor sanity diagnostics.
 
 ## Architecture and Experiment History
 
@@ -62,4 +52,4 @@ This folder is organised by document purpose. Use this file as the entry point.
 
 ## Cleanup Policy
 
-Obsolete intermediate plans, old result tables, 10-init-only model validation notes, and temporary contribution-strengthening notes have been merged into `paper/current_project_status.md` and removed from this folder.
+Obsolete intermediate plans, old original-paper-style generated tables/figures, and outdated scripts have been merged into `paper/dissertation_guidance_after_supervisor_feedback.md` and removed from this folder. Historical experiment details remain in `architecture/Give_Way_SMPC_Experiment_Changelog.md`; current decisions should follow the two guidance documents in `paper/`.
