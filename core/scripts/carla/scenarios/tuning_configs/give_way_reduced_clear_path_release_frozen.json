@@ -1,7 +1,7 @@
 {
   "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 6,
-  "description": "Current best reduced-intervention supervisor baseline. Version 6 was validated by 20260725_204210_video_gate_frontier_init05_stop_clearance_3p5_v6: closer first stop, zero clearance delay, and PASS post-CARLA gate. It keeps cautious-settle logic and explicitly targets a 3.5m stop clearance without changing yield_conflict_radius.",
+  "version": 7,
+  "description": "Current 5-init validation candidate after v6 3.5m proved too aggressive for fixed_aggressive in 5-init. Version 7 keeps reduced-intervention cautious-settle logic but targets a 4.0m stop clearance, matching yield_conflict_radius while staying closer than the v5 rollback baseline.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
@@ -22,11 +22,11 @@
       "yield_stop_line_creep_clearance_slack": 1.0,
       "yield_stop_line_creep_accel": 0.6,
       "yield_stop_line_creep_safety_margin": 0.0,
-      "yield_stop_line_creep_min_clearance_override": 3.5,
+      "yield_stop_line_creep_min_clearance_override": 4.0,
       "yield_dynamic_stop_clearance_enabled": true,
       "yield_stop_clearance_slack": 1.0,
       "yield_stop_min_clearance_margin": 0.5,
-      "yield_stop_clearance_override": 3.5,
+      "yield_stop_clearance_override": 4.0,
       "yield_caution_decel": -4.0,
       "yield_reference_min_speed": 0.8,
       "yield_reference_decel": -3.75,

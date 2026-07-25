@@ -1,7 +1,7 @@
 {
-  "config_name": "give_way_reduced_clear_path_release_v6_best",
+  "config_name": "give_way_reduced_clear_path_release_v6_3p5_init05_only_rejected",
   "version": 6,
-  "description": "Frozen current-best reduced-intervention supervisor baseline from 20260725_204210_video_gate_frontier_init05_stop_clearance_3p5_v6. It improves the accepted v5 baseline by using a 3.5m stop-clearance override while keeping cautious stop-line creep, zero clearance delay, and PASS post-CARLA gate. Do not overwrite this file when testing later candidates.",
+  "description": "Archived aggressive 3.5m stop-clearance candidate. It looked good in init05 video gate 20260725_204210_video_gate_frontier_init05_stop_clearance_3p5_v6, but failed 5-init fixed_aggressive validation in 20260725_205336_5init_fixed_risk_frontier_v6_best with footprint collisions in init01-init03. Keep only as a lesson; do not use as a baseline.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,

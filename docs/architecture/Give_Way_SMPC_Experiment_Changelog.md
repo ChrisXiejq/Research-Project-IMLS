@@ -510,17 +510,19 @@ Current dissertation candidate is `20260627_201840` (`risk_profile=adaptive_inte
     - Labeled samples are produced after the rollout by aligning each prediction timestamp with the executed target trajectory from `scenario_result.pkl`, providing future target XY labels and validity masks for calibration/fine-tuning.
     - Add `run_give_way_prediction_dataset_collection.sh` as the recommended server entry point for collecting calibration or fine-tuning data without changing the main experiment scripts.
 
-64. Reduced early-stop v6 becomes the current best baseline:
+64. Reduced early-stop v6 3.5m candidate and v7 4.0m follow-up:
     - After supervisor feedback, the dissertation baseline moved away from `full` supervisor as the main system. `full` supervisor is now a comparison condition that exposes supervisor masking; `reduced_intervention` with reduced early-stop is the main baseline.
     - A failed video gate (`20260725_190422_video_gate_frontier_init05`) showed that using a minimal tuning config containing only `yield_supervisor_mode=reduced_intervention` regresses stop behaviour. Future video/frontier/sweep runs must use the full frozen reduced tuning config.
     - v3 introduced cautious stop-line creep so ego no longer hard-stops about 1m before the route stop line. `20260725_200326_video_gate_frontier_init05_stop_line_creep_v3` restored first stop to about `5.25m`, wait to `5.2-5.4s`, and kept post-CARLA gate PASS.
     - v4 introduced dynamic stop clearance, but `20260725_201746_video_gate_frontier_init05_dynamic_clearance_v4` showed that moving the stop line to `4.5m` alone was insufficient: hard-stop still blocked creep about `0.7m` before the stop line.
     - v5 changed the guard from "stop when entering the original footprint clearance" to "stop only near the dynamic safety guard", producing `20260725_202955_video_gate_frontier_init05_cautious_settle_v5`: first stop about `5.10-5.12m`, wait `2.2s`, clearance delay `0.0s`, and post-CARLA gate PASS. This remains the rollback baseline in `give_way_reduced_clear_path_release_v5_baseline.json`.
-    - v6 is now the accepted best baseline. It keeps `yield_conflict_radius=4.0` but explicitly targets a closer stop line using `yield_stop_clearance_override=3.5`, `yield_stop_line_creep_min_clearance_override=3.5`, and `yield_stop_line_creep_safety_margin=0.0`.
-    - Validated v6 result: `core/results/20260725_204210_video_gate_frontier_init05_stop_clearance_3p5_v6`. Adaptive first stop `4.366m`, fixed first stop `4.383m`, wait `2.2s`, clearance delay `0.0s`; post-CARLA gate PASS for both (`center dmin` adaptive `4.514m`, fixed `4.575m`, no footprint collision, yield OK).
-    - Current best configs:
-      - Active default: `core/scripts/carla/scenarios/tuning_configs/give_way_reduced_clear_path_release_frozen.json`
-      - Explicit frozen best: `core/scripts/carla/scenarios/tuning_configs/give_way_reduced_clear_path_release_v6_best.json`
+    - v6 kept `yield_conflict_radius=4.0` but explicitly targeted a closer stop line using `yield_stop_clearance_override=3.5`, `yield_stop_line_creep_min_clearance_override=3.5`, and `yield_stop_line_creep_safety_margin=0.0`.
+    - v6 init05 video-gate result: `core/results/20260725_204210_video_gate_frontier_init05_stop_clearance_3p5_v6`. Adaptive first stop `4.366m`, fixed first stop `4.383m`, wait `2.2s`, clearance delay `0.0s`; post-CARLA gate PASS for both (`center dmin` adaptive `4.514m`, fixed `4.575m`, no footprint collision, yield OK).
+    - v6 failed the 5-init fixed-risk frontier precheck in `core/results/20260725_205336_5init_fixed_risk_frontier_v6_best`: only `fixed_aggressive` ran, and init01-init03 failed post-CARLA gate due to footprint collision (`center dmin` `3.036m`, `3.479m`, `3.434m` respectively; init01 also failed yield order). Therefore v6 3.5m is not a泛用 baseline.
+    - Current configs:
+      - Active default v7 candidate: `core/scripts/carla/scenarios/tuning_configs/give_way_reduced_clear_path_release_frozen.json`
+      - Archived rejected 3.5m candidate: `core/scripts/carla/scenarios/tuning_configs/give_way_reduced_clear_path_release_v6_3p5_init05_only_rejected.json`
       - Rollback baseline: `core/scripts/carla/scenarios/tuning_configs/give_way_reduced_clear_path_release_v5_baseline.json`
-    - Interpretation: v6 is a supervisor-level baseline improvement. It should not be claimed as adaptive-risk superiority, because fixed and adaptive both benefit. Adaptive-risk claims still require fixed-risk frontier comparison and solver-layer phase-aware tightening/relaxation evidence.
-    - Next required experiment: run 5-init fixed-risk frontier under v6 before any 50-init or difficulty sweep.
+    - v7 follow-up: keep cautious stop-line creep and prompt release, but set both explicit stop-clearance overrides to `4.0m`, matching `yield_conflict_radius=4.0` instead of the failed 3.5m candidate.
+    - Interpretation: close-stop tuning is a supervisor-level baseline improvement. It should not be claimed as adaptive-risk superiority, because fixed and adaptive both benefit. Adaptive-risk claims still require fixed-risk frontier comparison and solver-layer phase-aware tightening/relaxation evidence.
+    - Next required experiment: run 5-init fixed-risk frontier under v7 before any 50-init or difficulty sweep.
