@@ -1672,6 +1672,9 @@ class SMPCAgent(object):
             "adaptive_interaction_severity_no_relax",
             "adaptive_interaction_severity_no_phase_awareness",
             "rule_aware_static_risk",
+            "fixed_frontier_aggressive",
+            "fixed_frontier_medium",
+            "fixed_frontier_conservative",
         }:
             return None
         if self.ol_flag or self.obca_flag:

@@ -16,6 +16,9 @@ PAPER_INTERSECTION_TARGET_PROB = 1.0 - PAPER_INTERSECTION_EPSILON
 PAPER_INTERSECTION_TIGHTENING = 2.053748910631823
 UPSTREAM_CODE_TIGHTENING = 1.64
 UPSTREAM_CODE_TARGET_PROB = _standard_normal_cdf(UPSTREAM_CODE_TIGHTENING)
+FIXED_FRONTIER_AGGRESSIVE_TIGHTENING = 1.2815515655446004
+FIXED_FRONTIER_MEDIUM_TIGHTENING = UPSTREAM_CODE_TIGHTENING
+FIXED_FRONTIER_CONSERVATIVE_TIGHTENING = PAPER_INTERSECTION_TIGHTENING
 
 
 def _risk_profile_values(risk_profile, tightening_override=None):
@@ -31,8 +34,15 @@ def _risk_profile_values(risk_profile, tightening_override=None):
         "smpc_mmpreds",
         "adaptive_interaction_severity",
         "rule_aware_static_risk",
+        "fixed_frontier_medium",
     }:
         return UPSTREAM_CODE_TIGHTENING, UPSTREAM_CODE_TARGET_PROB
+    if normalized in {"fixed_frontier_aggressive", "fixed_aggressive"}:
+        tightening = FIXED_FRONTIER_AGGRESSIVE_TIGHTENING
+        return tightening, _standard_normal_cdf(tightening)
+    if normalized in {"fixed_frontier_conservative", "fixed_conservative"}:
+        tightening = FIXED_FRONTIER_CONSERVATIVE_TIGHTENING
+        return tightening, _standard_normal_cdf(tightening)
     if normalized in {"paper", "paper_eps_002", "eps_002"}:
         return PAPER_INTERSECTION_TIGHTENING, PAPER_INTERSECTION_TARGET_PROB
     raise ValueError(f"Unsupported SMPC risk profile: {risk_profile}")
@@ -63,6 +73,9 @@ def _mode_component(joint_index, vehicle_index, n_modes, n_tvs, risk_profile=Non
         "smpc_mmpreds",
         "adaptive_interaction_severity",
         "rule_aware_static_risk",
+        "fixed_frontier_aggressive",
+        "fixed_frontier_medium",
+        "fixed_frontier_conservative",
     }:
         return 0
     return _joint_mode_component(joint_index, vehicle_index, n_modes)

@@ -4,15 +4,13 @@ This folder is organised by document purpose. Use this file as the entry point.
 
 ## Current Status
 
-- `paper/dissertation_guidance_after_supervisor_feedback.md`
-  Canonical dissertation guidance after the supervisor feedback. This is the main source for the final research goal, hypotheses, experiment plan, paper-safe claims, and 50-init decision gate.
-- `paper/next_experiment_action_guide_after_supervisor_feedback.md`
-  Operational action guide for the next experimental stage. Use this for concrete experiment sequencing, commands, and current evidence tracking.
+- `paper/论文实验与写作统一指导.md`
+  当前唯一 canonical 指导文档。包含老师反馈、最终论点、baseline 设计、实验路线、文献借鉴、paper-safe claims 和 50-init decision gate。后续实验和论文写作优先参考此文件。
 
 ## Paper Writing
 
-- `paper/phase_aware_adaptive_risk_相关文献整理.md`  
-  Related-work notes focused on phase-aware adaptive-risk SMPC.
+- `paper/论文实验与写作统一指导.md`
+  同时作为论文大纲、Related Work 组织方式和 Results / Discussion 写作边界。
 
 ## Results and Figures
 
@@ -52,4 +50,4 @@ This folder is organised by document purpose. Use this file as the entry point.
 
 ## Cleanup Policy
 
-Obsolete intermediate plans, old original-paper-style generated tables/figures, and outdated scripts have been merged into `paper/dissertation_guidance_after_supervisor_feedback.md` and removed from this folder. Historical experiment details remain in `architecture/Give_Way_SMPC_Experiment_Changelog.md`; current decisions should follow the two guidance documents in `paper/`.
+Obsolete intermediate plans, old original-paper-style generated tables/figures, outdated scripts, older English guidance, the separate action guide, and the separate phase-aware literature note have been merged into `paper/论文实验与写作统一指导.md` and removed from this folder. Historical experiment details remain in `architecture/Give_Way_SMPC_Experiment_Changelog.md`; current decisions should follow the unified Chinese guidance document in `paper/`.

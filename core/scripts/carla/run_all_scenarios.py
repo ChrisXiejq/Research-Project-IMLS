@@ -299,8 +299,27 @@ if __name__ == '__main__':
     parser.add_argument("--disable_camera_viz", dest="enable_camera_viz", action="store_false",
                         help="Disable CARLA RGB camera sensor and carla_sim.avi generation for faster/headless runs.")
     parser.set_defaults(enable_camera_viz=True)
-    parser.add_argument("--risk_profile", choices=["upstream_code", "paper_eps_002", "adaptive_interaction_severity", "adaptive_interaction_severity_no_floor", "adaptive_interaction_severity_no_relax", "adaptive_interaction_severity_no_phase_awareness", "rule_aware_static_risk"], default="upstream_code",
-                        help="Gurobi SMPC risk profile. Adaptive variants share the same solver backend but differ in pre-clearance floor and post-clearance relaxation settings for ablation.")
+    parser.add_argument(
+        "--risk_profile",
+        choices=[
+            "upstream_code",
+            "paper_eps_002",
+            "adaptive_interaction_severity",
+            "adaptive_interaction_severity_no_floor",
+            "adaptive_interaction_severity_no_relax",
+            "adaptive_interaction_severity_no_phase_awareness",
+            "rule_aware_static_risk",
+            "fixed_frontier_aggressive",
+            "fixed_frontier_medium",
+            "fixed_frontier_conservative",
+        ],
+        default="upstream_code",
+        help=(
+            "Gurobi SMPC risk profile. Adaptive variants share the same solver "
+            "backend but differ in pre-clearance floor and post-clearance "
+            "relaxation settings for ablation."
+        ),
+    )
     parser.add_argument(
         "--adaptive_risk_config_json",
         default=None,
