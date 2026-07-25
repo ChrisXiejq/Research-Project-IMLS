@@ -16,6 +16,7 @@
 - **give-way-video-behaviour-gate**: Do not rank reduced-supervisor results by first-stop distance alone; if ego stops when target has almost cleared and remains stopped on an apparently clear path, treat it as a clear-path release problem to fix, not just a failed candidate. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 - **give-way-stop-not-mandatory**: In give-way turning, ego should stop only while target still conflicts or ego is in the conflict zone before target passes; if target already passed ego's expected conflict/stop area, ego should continue cautiously without a mechanical stop. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
 - **post-turn-lane-keeping-non-regression**: Clear-path release must not bypass post-yield recovery/rejoin reference; turning into the correct lane and continuing straight after the intersection is a required video gate. → `/Users/bytedance/.agents/-Users-bytedance-my-Dissertation-Research-Project-IMLS/captured-learning/task-give-way-smpc-tuning.md`
+- **frozen-reduced-supervisor-candidate**: Freeze `reduced_intervention` at `core/results/20260725_023251_5init_reduced_clear_path_release`; stop supervisor micro-tuning and use this stable condition for supervisor ablation, infeasibility analysis, and var-risk contribution tests before any new 50-init run.
 
 ## Project Records
 

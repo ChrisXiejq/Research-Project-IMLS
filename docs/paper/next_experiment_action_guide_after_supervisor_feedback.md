@@ -55,10 +55,11 @@ core/results/20260718_104740_50init_finetuned_predictor_validation
 当前阶段判断：
 
 - 已经有初步证据说明 shared supervisor 会显著影响 final behaviour，但还不能说已经足够隔离 supervisor 影响；
-- reduced-intervention supervisor 已经改善 early-stop behaviour，但还需要 5-init/10-init 稳定性和正式 ablation 支撑；
+- reduced-intervention supervisor 已经完成当前 5-init 稳定候选验证，当前冻结版本为 `20260725_023251_5init_reduced_clear_path_release`；
 - 当前尚未可靠证明 adaptive-risk / var-risk 相比 fixed-risk 的优势，因为 promising reduced 版本下两者 final trajectory 仍然接近；
-- aggressive 地减少 supervisor 接管可以制造少量 var/fixed 差异，但如果带来 solver infeasibility 或 gate FAIL，不能作为论文证据；
-- 下一阶段应该停止无边界地调 supervisor，把 reduced supervisor 稳定下来后，转向 supervisor ablation、infeasibility phase analysis 和 adaptive-risk intensity / scenario difficulty sweep。
+- aggressive 地减少 supervisor 接管可以制造少量 var/fixed 差异，但如果带来 solver infeasibility、video behaviour artifact 或 post-turn lane keeping 回归，不能作为论文证据；
+- 下一阶段停止继续调 reduced supervisor，把当前冻结版本作为 stable reduced condition，转向 supervisor ablation、infeasibility phase analysis、fine-tuning sanity 补充和 adaptive-risk intensity / scenario difficulty sweep；
+- 在完成导师四条反馈对应的证据链前，不进入新的 50-init milestone 实验。
 
 ## 2. 导师反馈对应的研究问题
 
@@ -321,6 +322,30 @@ smpc_fixed_risk
 - 更精确的原则是：停车不是 mandatory manoeuvre。只有当 TV 与 EV 预计路径仍存在冲突，或者 EV 已经进入冲突区但 TV 还没驶过时，才应停车；如果 TV 已经越过 EV 的预计冲突/停车区域，EV 应继续谨慎通过，而不是为了让行逻辑机械停车。
 - `20260725_005822_1init_reduced_clear_path_release_video` 说明 clear-path release 方向有效，但实现方式有两个不可接受的问题：ego 在 target 离开后仍有 near-zero-speed 停顿，且 release 分支绕开了原有 post-yield recovery / rejoin reference，导致转弯后没有稳定进入正确车道；
 - 因此 clear-path release 不能作为一条独立控制分支绕开 recovery。正确方向是：target nominally passed 时提前进入 `released_recovery`，但仍复用已有 `post_yield_rejoin_reference` 和 recovery handoff，保留转弯后正确车道保持。
+- 当前冻结 reduced supervisor candidate：
+
+```text
+core/results/20260725_023251_5init_reduced_clear_path_release
+```
+
+冻结理由：
+
+- 5-init / 10 rollouts 全部 safety gate PASS；
+- `completion=True`、`yield_ok=True`、`footprint_collision=False`；
+- 转弯后 lane/heading completion 正常，`forced_reference_linearization_frac=0`；
+- 上一轮失败的 `init_02` / `init_05` critical pre-clearance infeasibility 已被压到 gate 阈值内：
+  - `init_02 fixed: 0.079 -> 0.000`
+  - `init_02 var: 0.073 -> 0.000`
+  - `init_05 fixed: 0.070 -> 0.004`
+  - `init_05 var: 0.057 -> 0.005`
+- 平均 `delay_after_clearance` 约 `1.4s`，比原始 conservative full supervisor 更适合作为 reduced-intervention 诊断条件；
+- 该版本仍保留 hard safety hold 和 post-yield rejoin / lane recovery，没有为了 release 速度破坏安全或车道保持。
+
+冻结含义：
+
+- 后续不再为了单个 1-init video 或更小 first-stop distance 继续微调 supervisor；
+- 该版本作为 `reduced_intervention` 的 stable condition 参与 ablation；
+- 如果后续发现严重 non-regression，再回到该冻结点重新诊断，而不是继续叠加局部规则。
 
 当前是否已经足够隔离 supervisor：
 
@@ -407,7 +432,21 @@ GPU 需求判断：
 
 ### Step 4. 如果 10-init 结果有希望，再跑 50-init
 
-只有当 Step 1 和 Step 2 说明 reduced supervisor 有潜力时，才跑昂贵的 50-init。
+只有当 Step 1 和 Step 2 说明 reduced supervisor 有潜力时，才考虑昂贵的 50-init。
+
+当前约束：
+
+```text
+在完成导师四条反馈对应的诊断和 ablation 前，不进入新的 50-init milestone 实验。
+```
+
+50-init 前必须完成：
+
+- supervisor contribution ablation，证明 full/reduced supervisor 对 final behaviour 的影响；
+- solver-layer 与 final-layer 分离分析，说明 adaptive-risk 的贡献是否被 supervisor 抹平；
+- infeasibility phase analysis，解释剩余 infeasible steps 发生在哪些 phase / init / policy；
+- fine-tuning sanity 的可写论文版本，避免过度声称 `100%`；
+- 至少一个 adaptive-risk vs fixed-risk 的稳定、可解释优势，或明确说明优势只存在于 solver layer / 特定难度区间。
 
 候选新 milestone：
 
@@ -485,36 +524,27 @@ fine-tuned MultiPath
 
 当前优先级：
 
-1. 验证 clear-path release 版 `reduced_intervention`：
-   - 沿 `20260725_003211_1init_reduced_stable_boundary_video` 暴露出的方向修复，而不是默认 ego 必须在路中间停一次；
-   - 当 target 已 nominally passed conflict zone 且 ego 已接近/进入冲突区时，reduced supervisor 应触发 clear-path release，避免 target almost-cleared 后的机械 hard-stop；
-   - 先跑 1-init + video；
-   - 如果 gate PASS，再跑 5-init reduced；
-   - 重点检查 `solver_failure_frac <= 0.05`、无 collision、无 give-way violation、completion 正常；
-   - 行为目标不是固定 first stop distance，而是：该停时能安全停，target 已驶过且路径 clear 时不机械停车，target clear 后能及时释放。
-   - 若 target 已越过 ego 的预计冲突/停车区域，reduced supervisor 不应先要求 ego 停下再 release；应直接进入 clear-path release / recovery。
-   - release 逻辑必须保留原有 post-yield rejoin / lane recovery；不能为了更快释放破坏转弯后进入正确车道和后续直行。
+1. 冻结当前 `reduced_intervention` candidate：
+   - 冻结结果目录：`core/results/20260725_023251_5init_reduced_clear_path_release`；
+   - 不再继续为了单次视频效果、first-stop distance 或 var/fixed 表面差异调 supervisor；
+   - 保留当前 best full supervisor milestone 作为安全 baseline；
+   - 当前 frozen reduced 只作为 stable reduced condition，用来回答导师关于 conservative behaviour 和 supervisor dominance 的问题。
 
-2. 对 1-init video 增加 qualitative behaviour gate：
+2. 对后续所有代表性 video 保留 qualitative behaviour gate：
    - ego 应该在检测到 oncoming target 后继续谨慎接近，而不是远距离停车；
    - ego 不应在 target 几乎已经离开、前方路径视觉上已 clear 时才突然 hard-stop；
    - target clear 后 ego 应尽快 release，不应出现数秒 near-zero-speed 停顿；
    - ego 转弯后必须进入正确车道并保持直行；如果 release 版本破坏 post-turn lane keeping，即使 safety gate PASS 也不能升级；
-   - 如果 quantitative gate PASS 但 video gate FAIL，该版本只能作为反例，不进入 5-init/10-init。
+   - 如果 quantitative gate PASS 但 video gate FAIL，该版本只能作为反例，不进入 milestone。
 
-3. 如果 5-init reduced 通过，冻结 `reduced_intervention`：
-   - 不再继续为了单次视频效果深挖 supervisor 调参；
-   - 把它作为 supervisor ablation 的 stable reduced condition；
-   - 保留当前 best full supervisor milestone 作为安全 baseline。
-
-4. 做正式 supervisor contribution ablation：
+3. 做正式 supervisor contribution ablation：
    - `fixed-risk + full supervisor`；
    - `adaptive-risk + full supervisor`；
    - `fixed-risk + reduced_intervention supervisor`；
    - `adaptive-risk + reduced_intervention supervisor`；
    - 可选加入 `diagnostic-only / hard-safety-only`，只用于证明 supervisor 是否主导 final action，不作为最终方法。
 
-5. 对 ablation 结果强制输出 solver-layer 与 final-layer 分离指标：
+4. 对 ablation 结果强制输出 solver-layer 与 final-layer 分离指标：
    - nominal SMPC acceleration；
    - final executed acceleration；
    - nominal-final acceleration delta；
@@ -523,20 +553,25 @@ fine-tuned MultiPath
    - stop distance、waiting time、delay after target clearance；
    - fixed-risk vs adaptive-risk 的 trajectory/control difference。
 
-6. 单独做 infeasibility phase analysis：
+5. 单独做 infeasibility phase analysis：
    - 按 `policy`、`supervisor mode`、`phase`、`distance_to_conflict`、`solver status` 聚合；
    - 区分 critical/pre-clearance、hold-yield-line、post-clearance recovery；
    - 解释 infeasible 后 supervisor/fallback 是否保证 safety。
 
-7. 做 adaptive-risk intensity / scenario difficulty sweep：
+6. 做 adaptive-risk intensity / scenario difficulty sweep：
    - 目的不是调 supervisor，而是找出 var-risk 相对 fixed-risk 的真实优势出现在哪类风险强度或交互难度下；
    - 优先观察 safety margin、smoothness、completion time、post-clearance release 和 supervisor intervention fraction；
    - 如果 var-risk 只在 nominal layer 有优势但 final layer 被 supervisor 抹平，也要如实写出来。
 
-8. 补充 fine-tuning sanity 的最终证据：
+7. 补充 fine-tuning sanity 的最终证据：
    - 保留当前第一轮无 GPU sanity check 结论；
    - 如时间允许，补 shuffled-label / mismatched-label sanity test 或更多 held-out examples；
    - 论文中避免把 `100%` 说成通用预测能力完全解决，只说改善了当前 held-out CARLA split 的 mode ranking / probability calibration。
+
+8. 完成上述任务后，再决定是否进入 50-init：
+   - 如果 reduced condition 在 ablation 中有清晰价值，且 var-risk 有至少一个稳定优势，再跑 50-init 验证新 milestone；
+   - 如果 var-risk 优势只存在于 solver layer，也可以不急于 50-init，而是把结论写成 supervisor masking / limitation；
+   - 不允许在这些证据缺失时，为了补 aggregate table 直接进入 50-init。
 
 ## 8. 后续工作规则
 

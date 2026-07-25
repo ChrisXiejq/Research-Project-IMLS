@@ -75,6 +75,10 @@ core/scripts/models/*_carla_finetuned*/
 core/scripts/models/*_carla_finetuned*_history.json
 core/scripts/models/*_carla_finetuned*_training_log.csv
 
+# Required frozen fine-tuned predictor for CARLA give-way experiments.
+!core/scripts/models/l5kit_multipath_10_carla_finetuned_head_best/
+!core/scripts/models/l5kit_multipath_10_carla_finetuned_head_best/**
+
 # --- TensorFlow ---
 *.tfevents*
 
