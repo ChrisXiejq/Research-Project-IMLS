@@ -20,6 +20,7 @@ PREDICTION_MODEL_WEIGHTS="${PREDICTION_MODEL_WEIGHTS:-l5kit_multipath_10_carla_f
 PREDICTION_MODEL_ANCHORS="${PREDICTION_MODEL_ANCHORS:-l5kit_clusters_16.npy}"
 RESUME_COMPLETED="${RESUME_COMPLETED:-0}"
 INCLUDE_PERFORMANCE_ADAPTIVE="${INCLUDE_PERFORMANCE_ADAPTIVE:-0}"
+FROZEN_REDUCED_TUNING_CONFIG="${FROZEN_REDUCED_TUNING_CONFIG:-${SCRIPT_DIR}/scenarios/tuning_configs/give_way_reduced_clear_path_release_frozen.json}"
 
 if [[ -z "${CARLA_ROOT:-}" ]]; then
   cat >&2 <<'EOF'
@@ -165,73 +166,14 @@ for idx_num in $(seq 1 "${INIT_COUNT}"); do
 done
 
 TUNING_CONFIG="${RESULTS_DIR}/tuning_reduced_intervention.json"
-"${PYTHON_BIN}" - "${TUNING_CONFIG}" <<'PY'
-import json
-import sys
-
-out_path = sys.argv[1]
-config = {
-    "config_name": "fixed_risk_frontier_reduced_intervention",
-    "version": 1,
-    "description": "Frozen reduced-intervention supervisor for fixed-risk frontier.",
-    "vehicle_role_overrides": {
-        "ego": {
-            "nominal_speed": 6.0,
-            "N": 10,
-            "dt": 0.2,
-            "num_modes": 3,
-            "collision_d_min": 0.5,
-            "collision_ellipse_half_length": 3.8,
-            "collision_ellipse_half_width": 1.8,
-            "reference_regen_max_lateral_error": 1.5,
-            "yield_stop_enabled": True,
-            "yield_stop_speed": 0.2,
-            "yield_caution_speed": 3.5,
-            "yield_creep_speed": 1.5,
-            "yield_caution_decel": -4.0,
-            "yield_reference_min_speed": 0.8,
-            "yield_reference_decel": -3.75,
-            "yield_stop_decel": -5.0,
-            "yield_emergency_brake_enabled": True,
-            "yield_emergency_decel": -7.0,
-            "yield_emergency_jerk_limit": 10.0,
-            "yield_emergency_conflict_margin": 1.25,
-            "yield_hard_stop_target_distance": 12.0,
-            "yield_hard_stop_conflict_distance": 13.0,
-            "yield_conflict_radius": 4.0,
-            "yield_stop_buffer_distance": 7.0,
-            "yield_footprint_clearance_margin": 1.5,
-            "yield_brake_distance_margin": 3.5,
-            "yield_wait_steer_lookahead_distance": 6.0,
-            "yield_wait_steer_gain": 1.0,
-            "yield_ttc_margin": 0.8,
-            "yield_activation_distance": 12.0,
-            "yield_hold_distance": 3.0,
-            "yield_release_time": 0.3,
-            "yield_release_clearance_margin": 0.5,
-            "yield_observed_caution_enabled": True,
-            "yield_observed_caution_distance": 12.0,
-            "yield_observed_caution_min_target_speed": 0.5,
-            "yield_steer_damping": 0.25,
-            "yield_recovery_enabled": True,
-            "yield_recovery_steps": 90,
-            "yield_recovery_regen_period": 2,
-            "yield_recovery_max_lateral_error": 12.0,
-            "yield_recovery_speed": 4.5,
-            "yield_recovery_accel": 1.0,
-            "yield_supervisor_mode": "reduced_intervention",
-        },
-        "target": {
-            "nominal_speed": 9.0,
-            "init_speed": 9.0,
-        },
-    },
-}
-
-with open(out_path, "w", encoding="utf-8") as f:
-    json.dump(config, f, indent=2)
-    f.write("\n")
-PY
+if [[ ! -f "${FROZEN_REDUCED_TUNING_CONFIG}" ]]; then
+  cat >&2 <<EOF
+ERROR: frozen reduced-intervention tuning config not found:
+  ${FROZEN_REDUCED_TUNING_CONFIG}
+EOF
+  exit 2
+fi
+cp "${FROZEN_REDUCED_TUNING_CONFIG}" "${TUNING_CONFIG}"
 
 cat > "${RESULTS_DIR}/frontier_manifest.jsonl" <<EOF
 {"event":"batch_start","script":"$(basename "$0")","init_count":${INIT_COUNT},"yield_supervisor_mode":"${YIELD_SUPERVISOR_MODE}","scenario_glob":"scenario_uk_give_way.json","frontier":["fixed_aggressive","fixed_medium","fixed_conservative","adaptive_floor_weak"],"include_performance_adaptive":${INCLUDE_PERFORMANCE_ADAPTIVE}}
