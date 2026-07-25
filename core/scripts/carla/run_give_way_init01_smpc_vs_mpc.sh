@@ -15,6 +15,7 @@ RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_init01_sm
 PYTHON_BIN="${PYTHON_BIN:-python}"
 INIT_ID="${INIT_ID:-01}"
 ENABLE_CAMERA_VIZ="${ENABLE_CAMERA_VIZ:-0}"
+SKIP_COMPLETED_SUBRUNS="${SKIP_COMPLETED_SUBRUNS:-0}"
 PREDICTION_MODEL_WEIGHTS="${PREDICTION_MODEL_WEIGHTS:-l5kit_multipath_10_carla_finetuned_head_best}"
 PREDICTION_MODEL_ANCHORS="${PREDICTION_MODEL_ANCHORS:-l5kit_clusters_16.npy}"
 FROZEN_REDUCED_TUNING_CONFIG="${FROZEN_REDUCED_TUNING_CONFIG:-${SCRIPT_DIR}/scenarios/tuning_configs/give_way_reduced_clear_path_release_frozen.json}"
@@ -155,6 +156,11 @@ else
   camera_args+=(--disable_camera_viz)
 fi
 
+resume_args=()
+if [[ "${SKIP_COMPLETED_SUBRUNS}" == "1" ]]; then
+  resume_args+=(--skip_completed_subruns)
+fi
+
 TMP_INIT_DIR="${RESULTS_DIR}/_ego_init_${INIT_ID}"
 mkdir -p "${TMP_INIT_DIR}"
 ln -sfn "${SCRIPT_DIR}/scenarios/inits/paper_intersection_50/ego_init_${INIT_ID}.json" \
@@ -218,6 +224,7 @@ run_arm() {
     --prediction_model_weights "${PREDICTION_MODEL_WEIGHTS}" \
     --prediction_model_anchors "${PREDICTION_MODEL_ANCHORS}" \
     "${camera_args[@]}" \
+    "${resume_args[@]}" \
     --postprocess_no_plots \
     "$@"
 

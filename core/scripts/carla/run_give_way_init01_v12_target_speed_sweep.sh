@@ -12,10 +12,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CORE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REPO_DIR="$(cd "${CORE_DIR}/.." && pwd)"
 RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_init01_v12_target_speed_sweep}"
-PYTHON_BIN="${PYTHON_BIN:-python}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 INIT_ID="${INIT_ID:-01}"
 TARGET_SPEEDS="${TARGET_SPEEDS:-8.0 8.5 9.0 9.5 10.0}"
 BASE_TUNING_CONFIG="${BASE_TUNING_CONFIG:-${SCRIPT_DIR}/scenarios/tuning_configs/give_way_reduced_clear_path_release_v12_current_best.json}"
+RESUME="${RESUME:-0}"
 
 if [[ "${INIT_ID}" != "01" ]]; then
   cat >&2 <<EOF
@@ -35,9 +36,14 @@ fi
 
 mkdir -p "${RESULTS_DIR}/tuning_configs"
 
-cat > "${RESULTS_DIR}/sweep_manifest.jsonl" <<EOF
-{"event":"sweep_start","script":"$(basename "$0")","init_id":"${INIT_ID}","target_speeds":"${TARGET_SPEEDS}","base_tuning_config":"${BASE_TUNING_CONFIG}","fixed_shared_baseline":"v12_current_best","varied_parameter":"target.nominal_speed/init_speed"}
+if [[ "${RESUME}" == "1" && -f "${RESULTS_DIR}/sweep_manifest.jsonl" ]]; then
+  printf '{"event":"sweep_resume_start","script":"%s","init_id":"%s","target_speeds":"%s","base_tuning_config":"%s","fixed_shared_baseline":"v12_current_best","varied_parameter":"target.nominal_speed/init_speed","resume":1}\n' \
+    "$(basename "$0")" "${INIT_ID}" "${TARGET_SPEEDS}" "${BASE_TUNING_CONFIG}" >> "${RESULTS_DIR}/sweep_manifest.jsonl"
+else
+  cat > "${RESULTS_DIR}/sweep_manifest.jsonl" <<EOF
+{"event":"sweep_start","script":"$(basename "$0")","init_id":"${INIT_ID}","target_speeds":"${TARGET_SPEEDS}","base_tuning_config":"${BASE_TUNING_CONFIG}","fixed_shared_baseline":"v12_current_best","varied_parameter":"target.nominal_speed/init_speed","resume":${RESUME}}
 EOF
+fi
 
 make_speed_tuning() {
   local speed="$1"
@@ -74,12 +80,34 @@ format_label() {
   printf "target_speed_%s" "${speed//./p}"
 }
 
+speed_complete() {
+  local speed_dir="$1"
+  local arm
+  for arm in smpc_fixed_aggressive smpc_fixed_medium smpc_fixed_conservative smpc_adaptive_floor_weak; do
+    if [[ ! -f "${speed_dir}/${arm}/postcarla_trajectory_gate.json" ]]; then
+      return 1
+    fi
+    if [[ ! -f "${speed_dir}/${arm}/paper_metrics_summary.csv" ]]; then
+      return 1
+    fi
+  done
+  return 0
+}
+
 for speed in ${TARGET_SPEEDS}; do
   label="$(format_label "${speed}")"
   speed_dir="${RESULTS_DIR}/${label}"
   tuning_config="${RESULTS_DIR}/tuning_configs/${label}.json"
 
   make_speed_tuning "${speed}" "${tuning_config}"
+
+  if [[ "${RESUME}" == "1" ]] && speed_complete "${speed_dir}"; then
+    echo "Skipping completed v12 sweep point: ${label}"
+    printf '{"event":"difficulty_skipped_completed","label":"%s","target_speed":%s,"results_dir":"%s"}\n' \
+      "${label}" "${speed}" "${speed_dir}" >> "${RESULTS_DIR}/sweep_manifest.jsonl"
+    continue
+  fi
+
   printf '{"event":"difficulty_start","label":"%s","target_speed":%s,"tuning_config":"%s"}\n' \
     "${label}" "${speed}" "${tuning_config}" >> "${RESULTS_DIR}/sweep_manifest.jsonl"
 
@@ -87,6 +115,7 @@ for speed in ${TARGET_SPEEDS}; do
   RESULTS_DIR="${speed_dir}" \
   FROZEN_REDUCED_TUNING_CONFIG="${tuning_config}" \
   INIT_ID="${INIT_ID}" \
+  SKIP_COMPLETED_SUBRUNS="${RESUME}" \
   "${SCRIPT_DIR}/run_give_way_init01_fixed_frontier_vs_adaptive.sh"
 
   printf '{"event":"difficulty_end","label":"%s","target_speed":%s,"results_dir":"%s"}\n' \
