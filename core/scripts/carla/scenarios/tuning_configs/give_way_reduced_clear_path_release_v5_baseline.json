@@ -1,7 +1,7 @@
 {
-  "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 6,
-  "description": "Experimental closer-stop candidate derived from the accepted v5 baseline. Version 6 keeps the reduced-intervention cautious-settle logic but explicitly targets a 3.5m stop clearance. The accepted v5 baseline is frozen separately in give_way_reduced_clear_path_release_v5_baseline.json.",
+  "config_name": "give_way_reduced_clear_path_release_v5_baseline",
+  "version": 5,
+  "description": "Frozen accepted reduced-intervention baseline from 20260725_202955_video_gate_frontier_init05_cautious_settle_v5. This is the current qualitative baseline: cautious settle-to-stop-line, zero clearance delay in init05 video gate, and PASS post-CARLA gate. Do not overwrite this file when testing closer stop-line candidates.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
@@ -21,12 +21,10 @@
       "yield_stop_line_creep_deadband": 0.35,
       "yield_stop_line_creep_clearance_slack": 1.0,
       "yield_stop_line_creep_accel": 0.6,
-      "yield_stop_line_creep_safety_margin": 0.0,
-      "yield_stop_line_creep_min_clearance_override": 3.5,
+      "yield_stop_line_creep_safety_margin": 0.25,
       "yield_dynamic_stop_clearance_enabled": true,
       "yield_stop_clearance_slack": 1.0,
       "yield_stop_min_clearance_margin": 0.5,
-      "yield_stop_clearance_override": 3.5,
       "yield_caution_decel": -4.0,
       "yield_reference_min_speed": 0.8,
       "yield_reference_decel": -3.75,

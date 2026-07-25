@@ -58,9 +58,11 @@ class SMPCAgent(object):
                  yield_stop_line_creep_clearance_slack=0.75,
                  yield_stop_line_creep_accel=0.6,
                  yield_stop_line_creep_safety_margin=0.25,
+                 yield_stop_line_creep_min_clearance_override=0.0,
                  yield_dynamic_stop_clearance_enabled=False,
                  yield_stop_clearance_slack=1.0,
                  yield_stop_min_clearance_margin=0.5,
+                 yield_stop_clearance_override=0.0,
                  yield_caution_decel=-4.0,
                  yield_reference_min_speed=0.8,
                  yield_reference_decel=-3.75,
@@ -148,9 +150,13 @@ class SMPCAgent(object):
         self.yield_stop_line_creep_clearance_slack = float(yield_stop_line_creep_clearance_slack)
         self.yield_stop_line_creep_accel = float(yield_stop_line_creep_accel)
         self.yield_stop_line_creep_safety_margin = float(yield_stop_line_creep_safety_margin)
+        self.yield_stop_line_creep_min_clearance_override = float(
+            yield_stop_line_creep_min_clearance_override
+        )
         self.yield_dynamic_stop_clearance_enabled = bool(yield_dynamic_stop_clearance_enabled)
         self.yield_stop_clearance_slack = float(yield_stop_clearance_slack)
         self.yield_stop_min_clearance_margin = float(yield_stop_min_clearance_margin)
+        self.yield_stop_clearance_override = float(yield_stop_clearance_override)
         self.yield_caution_decel = float(yield_caution_decel)
         self.yield_reference_min_speed = float(yield_reference_min_speed)
         self.yield_reference_decel = float(yield_reference_decel)
@@ -264,6 +270,11 @@ class SMPCAgent(object):
                 "yield_stop_line_creep_safety_margin must be non-negative, "
                 f"got {self.yield_stop_line_creep_safety_margin}"
             )
+        if self.yield_stop_line_creep_min_clearance_override < 0.0:
+            raise ValueError(
+                "yield_stop_line_creep_min_clearance_override must be non-negative, "
+                f"got {self.yield_stop_line_creep_min_clearance_override}"
+            )
         if self.yield_stop_clearance_slack < 0.0:
             raise ValueError(
                 "yield_stop_clearance_slack must be non-negative, "
@@ -273,6 +284,11 @@ class SMPCAgent(object):
             raise ValueError(
                 "yield_stop_min_clearance_margin must be non-negative, "
                 f"got {self.yield_stop_min_clearance_margin}"
+            )
+        if self.yield_stop_clearance_override < 0.0:
+            raise ValueError(
+                "yield_stop_clearance_override must be non-negative, "
+                f"got {self.yield_stop_clearance_override}"
             )
         if self.yield_caution_decel >= 0.0:
             raise ValueError(f"yield_caution_decel must be negative, got {self.yield_caution_decel}")
@@ -865,6 +881,10 @@ class SMPCAgent(object):
                 "stop_line_creep_clearance_slack": self.yield_stop_line_creep_clearance_slack,
                 "stop_line_creep_accel": self.yield_stop_line_creep_accel,
                 "stop_line_creep_safety_margin": self.yield_stop_line_creep_safety_margin,
+                "stop_line_creep_min_clearance_override": (
+                    self.yield_stop_line_creep_min_clearance_override
+                ),
+                "stop_clearance_override": self.yield_stop_clearance_override,
                 "footprint_clearance_margin": self.yield_footprint_clearance_margin,
                 "brake_distance_margin": self.yield_brake_distance_margin,
                 "wait_steer_lookahead_distance": self.yield_wait_steer_lookahead_distance,
@@ -1442,6 +1462,8 @@ class SMPCAgent(object):
                 float(self.yield_conflict_radius) + float(self.yield_stop_min_clearance_margin),
                 ego_required_clearance - float(self.yield_stop_clearance_slack),
             )
+            if self.yield_stop_clearance_override > 0.0:
+                dynamic_stop_clearance = float(self.yield_stop_clearance_override)
             stop_clearance = (
                 min(float(self.yield_stop_buffer_distance), dynamic_stop_clearance)
                 if self.yield_dynamic_stop_clearance_enabled
@@ -1469,6 +1491,7 @@ class SMPCAgent(object):
                 "stop_clearance": float(stop_clearance),
                 "dynamic_stop_clearance_enabled": bool(self.yield_dynamic_stop_clearance_enabled),
                 "dynamic_stop_clearance": float(dynamic_stop_clearance),
+                "stop_clearance_override": float(self.yield_stop_clearance_override),
                 "stop_clearance_slack": float(self.yield_stop_clearance_slack),
                 "stop_min_clearance_margin": float(self.yield_stop_min_clearance_margin),
                 "wait_steer_ref": float(self.feas_ref_inputs[input_idx, 1]),
@@ -2181,6 +2204,9 @@ class SMPCAgent(object):
             "dynamic_stop_clearance": float(
                 geometry.get("dynamic_stop_clearance", np.nan)
             ),
+            "stop_clearance_override": float(
+                geometry.get("stop_clearance_override", np.nan)
+            ),
             "stop_clearance_slack": float(
                 geometry.get("stop_clearance_slack", np.nan)
             ),
@@ -2468,6 +2494,10 @@ class SMPCAgent(object):
                     float(self.yield_conflict_radius),
                     ego_required_clearance - float(self.yield_stop_line_creep_clearance_slack),
                 )
+                if self.yield_stop_line_creep_min_clearance_override > 0.0:
+                    min_allowed_clearance = float(
+                        self.yield_stop_line_creep_min_clearance_override
+                    )
                 creep_safety_margin = float(self.yield_stop_line_creep_safety_margin)
                 dynamic_clearance_margin = ego_distance_to_conflict - min_allowed_clearance
                 inside_dynamic_stop_guard = dynamic_clearance_margin <= creep_safety_margin
@@ -2484,6 +2514,9 @@ class SMPCAgent(object):
                     "clearance_at_stop_line": float(clearance_at_stop_line),
                     "ego_required_clearance": float(ego_required_clearance),
                     "min_allowed_clearance": float(min_allowed_clearance),
+                    "min_clearance_override": float(
+                        self.yield_stop_line_creep_min_clearance_override
+                    ),
                     "dynamic_clearance_margin": float(dynamic_clearance_margin),
                     "safety_margin": float(creep_safety_margin),
                     "blocked_by_dynamic_stop_guard": bool(inside_dynamic_stop_guard),
