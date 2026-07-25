@@ -57,6 +57,7 @@ class SMPCAgent(object):
                  yield_stop_line_creep_deadband=0.35,
                  yield_stop_line_creep_clearance_slack=0.75,
                  yield_stop_line_creep_accel=0.6,
+                 yield_stop_line_creep_safety_margin=0.25,
                  yield_dynamic_stop_clearance_enabled=False,
                  yield_stop_clearance_slack=1.0,
                  yield_stop_min_clearance_margin=0.5,
@@ -146,6 +147,7 @@ class SMPCAgent(object):
         self.yield_stop_line_creep_deadband = float(yield_stop_line_creep_deadband)
         self.yield_stop_line_creep_clearance_slack = float(yield_stop_line_creep_clearance_slack)
         self.yield_stop_line_creep_accel = float(yield_stop_line_creep_accel)
+        self.yield_stop_line_creep_safety_margin = float(yield_stop_line_creep_safety_margin)
         self.yield_dynamic_stop_clearance_enabled = bool(yield_dynamic_stop_clearance_enabled)
         self.yield_stop_clearance_slack = float(yield_stop_clearance_slack)
         self.yield_stop_min_clearance_margin = float(yield_stop_min_clearance_margin)
@@ -256,6 +258,11 @@ class SMPCAgent(object):
             raise ValueError(
                 "yield_stop_line_creep_accel must be non-negative, "
                 f"got {self.yield_stop_line_creep_accel}"
+            )
+        if self.yield_stop_line_creep_safety_margin < 0.0:
+            raise ValueError(
+                "yield_stop_line_creep_safety_margin must be non-negative, "
+                f"got {self.yield_stop_line_creep_safety_margin}"
             )
         if self.yield_stop_clearance_slack < 0.0:
             raise ValueError(
@@ -857,6 +864,7 @@ class SMPCAgent(object):
                 "stop_line_creep_deadband": self.yield_stop_line_creep_deadband,
                 "stop_line_creep_clearance_slack": self.yield_stop_line_creep_clearance_slack,
                 "stop_line_creep_accel": self.yield_stop_line_creep_accel,
+                "stop_line_creep_safety_margin": self.yield_stop_line_creep_safety_margin,
                 "footprint_clearance_margin": self.yield_footprint_clearance_margin,
                 "brake_distance_margin": self.yield_brake_distance_margin,
                 "wait_steer_lookahead_distance": self.yield_wait_steer_lookahead_distance,
@@ -2460,11 +2468,13 @@ class SMPCAgent(object):
                     float(self.yield_conflict_radius),
                     ego_required_clearance - float(self.yield_stop_line_creep_clearance_slack),
                 )
+                creep_safety_margin = float(self.yield_stop_line_creep_safety_margin)
+                dynamic_clearance_margin = ego_distance_to_conflict - min_allowed_clearance
+                inside_dynamic_stop_guard = dynamic_clearance_margin <= creep_safety_margin
                 reduced_stop_line_creep_allowed = bool(
                     ego_distance_to_stop > float(self.yield_stop_line_creep_deadband)
-                    and clearance_at_stop_line >= min_allowed_clearance
-                    and not bool(yield_status.get("ego_inside_footprint_clearance", False))
-                    and not bool(yield_status.get("reduced_low_speed_wait_hold", False))
+                    and clearance_at_stop_line + 1e-6 >= min_allowed_clearance
+                    and not inside_dynamic_stop_guard
                 )
                 reduced_stop_line_creep_diagnostics = {
                     "enabled": True,
@@ -2474,6 +2484,9 @@ class SMPCAgent(object):
                     "clearance_at_stop_line": float(clearance_at_stop_line),
                     "ego_required_clearance": float(ego_required_clearance),
                     "min_allowed_clearance": float(min_allowed_clearance),
+                    "dynamic_clearance_margin": float(dynamic_clearance_margin),
+                    "safety_margin": float(creep_safety_margin),
+                    "blocked_by_dynamic_stop_guard": bool(inside_dynamic_stop_guard),
                     "deadband": float(self.yield_stop_line_creep_deadband),
                     "clearance_slack": float(self.yield_stop_line_creep_clearance_slack),
                     "blocked_by_footprint_clearance": bool(

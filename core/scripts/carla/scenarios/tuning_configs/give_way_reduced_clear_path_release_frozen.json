@@ -1,7 +1,7 @@
 {
   "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 4,
-  "description": "Reduced-intervention supervisor tuning derived from 20260725_023251_5init_reduced_clear_path_release. Version 4 uses a dynamic clearance-based stop line plus continuous route-s projection, so the close stop is governed by conflict-radius/footprint safety margins rather than scenario-specific path-point discretisation.",
+  "version": 5,
+  "description": "Reduced-intervention supervisor tuning derived from 20260725_023251_5init_reduced_clear_path_release. Version 5 keeps the dynamic clearance-based stop line and continuous route-s projection, and allows cautious low-speed settling toward the stop line until the dynamic safety guard is reached.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
@@ -21,6 +21,7 @@
       "yield_stop_line_creep_deadband": 0.35,
       "yield_stop_line_creep_clearance_slack": 1.0,
       "yield_stop_line_creep_accel": 0.6,
+      "yield_stop_line_creep_safety_margin": 0.25,
       "yield_dynamic_stop_clearance_enabled": true,
       "yield_stop_clearance_slack": 1.0,
       "yield_stop_min_clearance_margin": 0.5,
