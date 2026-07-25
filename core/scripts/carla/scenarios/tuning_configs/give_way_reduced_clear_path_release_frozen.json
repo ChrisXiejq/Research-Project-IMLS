@@ -1,7 +1,7 @@
 {
   "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 2,
-  "description": "Reduced-intervention supervisor tuning derived from 20260725_023251_5init_reduced_clear_path_release. Version 2 keeps the accepted clear-path release/recovery settings but moves the yield stop point slightly closer after 20260725_192457_video_gate_frontier_init05_frozen_reduced still stopped at dconf about 6.285m.",
+  "version": 3,
+  "description": "Reduced-intervention supervisor tuning derived from 20260725_023251_5init_reduced_clear_path_release. Version 3 keeps the accepted clear-path release/recovery settings, uses a closer stop line, and enables reduced-mode stop-line creep so braking-distance yield does not hard-stop about 1m before the stop line.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
@@ -16,6 +16,11 @@
       "yield_stop_speed": 0.2,
       "yield_caution_speed": 3.5,
       "yield_creep_speed": 1.5,
+      "yield_stop_line_creep_enabled": true,
+      "yield_stop_line_creep_speed": 0.8,
+      "yield_stop_line_creep_deadband": 0.35,
+      "yield_stop_line_creep_clearance_slack": 0.75,
+      "yield_stop_line_creep_accel": 0.6,
       "yield_caution_decel": -4.0,
       "yield_reference_min_speed": 0.8,
       "yield_reference_decel": -3.75,

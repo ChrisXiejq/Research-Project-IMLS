@@ -52,6 +52,11 @@ class SMPCAgent(object):
                  yield_stop_speed=0.2,
                  yield_caution_speed=3.5,
                  yield_creep_speed=1.5,
+                 yield_stop_line_creep_enabled=True,
+                 yield_stop_line_creep_speed=0.8,
+                 yield_stop_line_creep_deadband=0.35,
+                 yield_stop_line_creep_clearance_slack=0.75,
+                 yield_stop_line_creep_accel=0.6,
                  yield_caution_decel=-4.0,
                  yield_reference_min_speed=0.8,
                  yield_reference_decel=-3.75,
@@ -133,6 +138,11 @@ class SMPCAgent(object):
         self.yield_stop_speed = float(yield_stop_speed)
         self.yield_caution_speed = float(yield_caution_speed)
         self.yield_creep_speed = float(yield_creep_speed)
+        self.yield_stop_line_creep_enabled = bool(yield_stop_line_creep_enabled)
+        self.yield_stop_line_creep_speed = float(yield_stop_line_creep_speed)
+        self.yield_stop_line_creep_deadband = float(yield_stop_line_creep_deadband)
+        self.yield_stop_line_creep_clearance_slack = float(yield_stop_line_creep_clearance_slack)
+        self.yield_stop_line_creep_accel = float(yield_stop_line_creep_accel)
         self.yield_caution_decel = float(yield_caution_decel)
         self.yield_reference_min_speed = float(yield_reference_min_speed)
         self.yield_reference_decel = float(yield_reference_decel)
@@ -215,6 +225,31 @@ class SMPCAgent(object):
             raise ValueError(
                 "yield_creep_speed must be >= yield_stop_speed, "
                 f"got {self.yield_creep_speed} < {self.yield_stop_speed}"
+            )
+        if self.yield_stop_line_creep_speed < self.yield_stop_speed:
+            raise ValueError(
+                "yield_stop_line_creep_speed must be >= yield_stop_speed, "
+                f"got {self.yield_stop_line_creep_speed} < {self.yield_stop_speed}"
+            )
+        if self.yield_stop_line_creep_speed > self.yield_creep_speed:
+            raise ValueError(
+                "yield_stop_line_creep_speed must be <= yield_creep_speed, "
+                f"got {self.yield_stop_line_creep_speed} > {self.yield_creep_speed}"
+            )
+        if self.yield_stop_line_creep_deadband < 0.0:
+            raise ValueError(
+                "yield_stop_line_creep_deadband must be non-negative, "
+                f"got {self.yield_stop_line_creep_deadband}"
+            )
+        if self.yield_stop_line_creep_clearance_slack < 0.0:
+            raise ValueError(
+                "yield_stop_line_creep_clearance_slack must be non-negative, "
+                f"got {self.yield_stop_line_creep_clearance_slack}"
+            )
+        if self.yield_stop_line_creep_accel < 0.0:
+            raise ValueError(
+                "yield_stop_line_creep_accel must be non-negative, "
+                f"got {self.yield_stop_line_creep_accel}"
             )
         if self.yield_caution_decel >= 0.0:
             raise ValueError(f"yield_caution_decel must be negative, got {self.yield_caution_decel}")
@@ -2301,6 +2336,114 @@ class SMPCAgent(object):
                     "steps_remaining_after": int(self._yield_recovery_steps_remaining),
                 }
                 return u0_flat, v_des_new, yield_status
+            reduced_stop_line_creep_allowed = False
+            reduced_stop_line_creep_diagnostics = None
+            if (
+                self.yield_supervisor_mode == "reduced_intervention"
+                and self.yield_stop_line_creep_enabled
+                and direct_takeover_required
+                and hard_stop_required
+                and not bool(yield_status.get("target_cleared_conflict", False))
+            ):
+                ego_distance_to_stop = float(yield_status.get("ego_distance_to_stop", np.inf))
+                ego_distance_to_conflict = float(yield_status.get("ego_distance_to_conflict", np.inf))
+                ego_required_clearance = float(
+                    yield_status.get("ego_required_clearance", self.yield_conflict_radius)
+                )
+                clearance_at_stop_line = ego_distance_to_conflict - max(ego_distance_to_stop, 0.0)
+                min_allowed_clearance = max(
+                    float(self.yield_conflict_radius),
+                    ego_required_clearance - float(self.yield_stop_line_creep_clearance_slack),
+                )
+                reduced_stop_line_creep_allowed = bool(
+                    ego_distance_to_stop > float(self.yield_stop_line_creep_deadband)
+                    and clearance_at_stop_line >= min_allowed_clearance
+                    and not bool(yield_status.get("ego_inside_footprint_clearance", False))
+                    and not bool(yield_status.get("reduced_low_speed_wait_hold", False))
+                )
+                reduced_stop_line_creep_diagnostics = {
+                    "enabled": True,
+                    "allowed": bool(reduced_stop_line_creep_allowed),
+                    "ego_distance_to_stop": float(ego_distance_to_stop),
+                    "ego_distance_to_conflict": float(ego_distance_to_conflict),
+                    "clearance_at_stop_line": float(clearance_at_stop_line),
+                    "ego_required_clearance": float(ego_required_clearance),
+                    "min_allowed_clearance": float(min_allowed_clearance),
+                    "deadband": float(self.yield_stop_line_creep_deadband),
+                    "clearance_slack": float(self.yield_stop_line_creep_clearance_slack),
+                    "blocked_by_footprint_clearance": bool(
+                        yield_status.get("ego_inside_footprint_clearance", False)
+                    ),
+                    "blocked_by_low_speed_wait_hold": bool(
+                        yield_status.get("reduced_low_speed_wait_hold", False)
+                    ),
+                }
+            if reduced_stop_line_creep_allowed:
+                creep_speed_target = min(
+                    float(self.yield_creep_speed),
+                    max(float(self.yield_stop_speed), float(self.yield_stop_line_creep_speed)),
+                )
+                if float(speed) < creep_speed_target - 0.10:
+                    a_des = min(
+                        float(self.yield_stop_line_creep_accel),
+                        max(0.15, 0.8 * (creep_speed_target - float(speed))),
+                    )
+                elif float(speed) > creep_speed_target + 0.20:
+                    distance_to_stop_for_creep = max(
+                        float(yield_status.get("ego_distance_to_stop", np.inf)),
+                        max(float(self.yield_stop_line_creep_deadband), 0.1),
+                    )
+                    required_creep_decel = -(
+                        max(float(speed) ** 2 - creep_speed_target ** 2, 0.0)
+                    ) / (2.0 * distance_to_stop_for_creep)
+                    a_des = max(
+                        float(self.yield_emergency_decel),
+                        min(-0.2, required_creep_decel),
+                    )
+                else:
+                    a_des = 0.0
+                wait_steer_ref = float(yield_status.get("wait_steer_ref", 0.0)) * self.yield_wait_steer_gain
+                wait_steer_ref = float(np.clip(wait_steer_ref, self.SMPC.DF_MIN, self.SMPC.DF_MAX))
+                damped_steer = self.yield_steer_damping * float(u0_flat[1])
+                df_des = wait_steer_ref if abs(wait_steer_ref) >= 0.03 else damped_steer
+                steering_mode = (
+                    "wait_steer_ref"
+                    if abs(wait_steer_ref) >= 0.03
+                    else "damped_steer"
+                )
+                df_des = float(np.clip(df_des, self.SMPC.DF_MIN, self.SMPC.DF_MAX))
+                u0_new = np.array([a_des, df_des], dtype=float)
+                v_des_new = creep_speed_target
+                self.control_prev = u0_new
+                self._yield_last_applied_accel = float(u0_new[0])
+                self._yield_stop_seen = True
+                self._yield_stop_active_prev = True
+                self._yield_recovery_steps_remaining = 0
+                yield_status["applied"] = {
+                    "mode": "reduced_stop_line_creep_control",
+                    "a_des": float(u0_new[0]),
+                    "df_des": float(u0_new[1]),
+                    "v_des": float(v_des_new),
+                    "hard_stop_required": bool(hard_stop_required),
+                    "direct_takeover_required": bool(direct_takeover_required),
+                    "creep_speed_target": float(creep_speed_target),
+                    "wait_steer_ref": float(wait_steer_ref),
+                    "damped_steer": float(damped_steer),
+                    "steering_mode": steering_mode,
+                    "stop_line_creep": reduced_stop_line_creep_diagnostics,
+                    "note": (
+                        "Reduced supervisor keeps yielding active but creeps to the "
+                        "route stop line before holding, avoiding an early hard stop."
+                    ),
+                }
+                yield_status["recovery"] = {
+                    "enabled": self.yield_recovery_enabled,
+                    "active": False,
+                    "started": False,
+                    "applied": None,
+                    "steps_remaining_after": int(self._yield_recovery_steps_remaining),
+                }
+                return u0_new, v_des_new, yield_status
             nominal_a_des = max(
                 self.yield_stop_decel,
                 min(float(u0_flat[0]), required_stop_decel),
@@ -2395,6 +2538,7 @@ class SMPCAgent(object):
                 "wait_steer_ref": float(wait_steer_ref),
                 "damped_steer": float(damped_steer),
                 "steering_mode": steering_mode,
+                "stop_line_creep": reduced_stop_line_creep_diagnostics,
                 "emergency_brake": {
                     "enabled": self.yield_emergency_brake_enabled,
                     "active": bool(emergency_active),
