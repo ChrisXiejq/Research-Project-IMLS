@@ -227,6 +227,14 @@ def dominates(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
     return bool(comparisons) and all(ok for ok, _ in comparisons) and any(strict for _, strict in comparisons)
 
 
+def is_complete(row: Dict[str, Any]) -> bool:
+    return (
+        row.get("gate_status") != "missing"
+        and as_float(row.get("n_rollouts")) > 0
+        and math.isfinite(as_float(row.get("completion_time")))
+    )
+
+
 def generate_report(out_path: Path, result_dir: Path, rows: List[Dict[str, Any]]) -> None:
     adaptive_rows = [r for r in rows if r["method_group"] == "adaptive-risk"]
     fixed_rows = [r for r in rows if r["method_group"] == "fixed-risk"]
@@ -300,6 +308,12 @@ def generate_report(out_path: Path, result_dir: Path, rows: List[Dict[str, Any]]
         lines.append("Frontier decision unavailable because adaptive or fixed rows are missing.")
     else:
         for adaptive in adaptive_rows:
+            if not is_complete(adaptive):
+                lines.append(
+                    f"- `{adaptive['method']}` is incomplete or missing postprocess outputs. "
+                    "Pareto dominance is unavailable until the interrupted run is resumed."
+                )
+                continue
             dominating = [fixed for fixed in fixed_rows if dominates(fixed, adaptive)]
             dominated_fixed = [fixed for fixed in fixed_rows if dominates(adaptive, fixed)]
             if dominating:
@@ -382,4 +396,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
