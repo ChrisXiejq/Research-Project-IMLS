@@ -1,7 +1,7 @@
 {
   "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 1,
-  "description": "Frozen reduced-intervention supervisor tuning from 20260725_023251_5init_reduced_clear_path_release. Use this for supervisor ablation follow-ups, fixed-risk frontier, video gates, and difficulty sweeps.",
+  "version": 2,
+  "description": "Reduced-intervention supervisor tuning derived from 20260725_023251_5init_reduced_clear_path_release. Version 2 keeps the accepted clear-path release/recovery settings but moves the yield stop point slightly closer after 20260725_192457_video_gate_frontier_init05_frozen_reduced still stopped at dconf about 6.285m.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
@@ -27,7 +27,7 @@
       "yield_hard_stop_target_distance": 12.0,
       "yield_hard_stop_conflict_distance": 13.0,
       "yield_conflict_radius": 4.0,
-      "yield_stop_buffer_distance": 7.0,
+      "yield_stop_buffer_distance": 6.0,
       "yield_footprint_clearance_margin": 1.5,
       "yield_brake_distance_margin": 3.5,
       "yield_wait_steer_lookahead_distance": 6.0,

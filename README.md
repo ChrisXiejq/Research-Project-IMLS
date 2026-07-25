@@ -10,23 +10,25 @@
 - `docs/paper/Predictive_Control_for_Autonomous_Driving_With_Uncertain_Multimodal_Predictions.pdf`：原论文 PDF
 - `docs/architecture/`：流程图与代码架构映射
 
-## 复现实验步骤（基础版，完整可跑）
+## 当前实验入口
 
-1. 先按环境手册搭好环境（推荐 `docs/guides/AutoDL_现代稳定版复现手册.md`）。
+1. 先阅读 `docs/paper/论文实验与写作统一指导.md`。这是当前唯一 canonical 指导文档。
 2. 启动 CARLA 服务端（单独终端）：
    - `cd $CARLA_ROOT && ./CarlaUE4.sh -RenderOffScreen -quality-level=Low`
-3. 运行三策略批量实验（客户端终端）：
+3. 当前 reduced early-stop 主基准和 ablation 只使用以下入口：
    - `cd core/scripts/carla`
-   - `./run_give_way_final_dissertation_batch.sh`
-4. 汇总结果：
-   - 主线脚本会自动运行 `core/scripts/postcarla_trajectory_gate.py`
+   - `./run_give_way_10init_supervisor_ablation.sh`
+   - `./run_give_way_5init_fixed_risk_frontier.sh`
+   - `./run_give_way_video_gate_frontier.sh`
+4. 所有当前入口都应使用 `core/scripts/carla/scenarios/tuning_configs/give_way_reduced_clear_path_release_frozen.json`。不要恢复旧 final-dissertation batch 脚本。
 
 ## 与论文对齐建议
 
 - 本 dissertation 复现范围只保留 CARLA intersection give-way 场景，不复现 lane-change 或 hardware/VIL。
-- 当前单 init 入口是 `core/scripts/carla/scenarios/inits/ego_init_01.json`。
-- 50-init 全量入口是 `core/scripts/carla/scenarios/inits/paper_intersection_50/ego_init_*.json`，通过 `core/scripts/carla/run_give_way_50init_final_dissertation_batch.sh` 运行。
-- 当前主线使用 `adaptive_interaction_severity` risk profile；严格 `epsilon=0.02` 只作为可选压力测试/消融口径，不混入主线 baseline。
+- 当前主基准是 frozen `reduced_intervention` early-stop / clear-path-release tuning。
+- `full` supervisor 只作为 supervisor masking 的对比试验，不作为主系统。
+- 在完成 video gate 和 frozen reduced baseline 下的 frontier 证据前，不进入 50-init 全量实验。
+- 当前主线 adaptive arm 使用 `adaptive_interaction_severity` + `floor_weak`；fixed-risk baseline 应使用 fixed-risk frontier，而不是单一 fixed-risk baseline。
 
 ## 重要说明
 

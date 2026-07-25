@@ -110,11 +110,10 @@ export LD_LIBRARY_PATH=$GUROBI_HOME/lib:${LD_LIBRARY_PATH:-}
 
 cd core/scripts/carla
 
-SUPERVISOR_MODES="full reduced_intervention" \
+SUPERVISOR_MODES="reduced_intervention full" \
 INIT_COUNT=5 \
 ENABLE_CAMERA_VIZ=0 \
 PYTHON_BIN=python \
 RESULTS_DIR=/root/autodl-tmp/Research-Project-IMLS/core/results/$(date +%Y%m%d_%H%M%S)_5init_supervisor_ablation \
 ./run_give_way_10init_supervisor_ablation.sh
 ```
-

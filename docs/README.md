@@ -18,6 +18,8 @@ This folder is organised by document purpose. Use this file as the entry point.
   Generates post-hoc SVG figures for fine-tuned predictor validation runs.
 - `paper/generate_formal_supervisor_ablation_report.py`
   Generates the formal supervisor ablation report and CSV summaries for full vs reduced-intervention supervisor analysis.
+- `paper/generate_fixed_risk_frontier_report.py`
+  Generates the fixed-risk frontier report and CSV summaries. Use this with the frozen reduced early-stop baseline to compare fixed aggressive/medium/conservative against `adaptive_floor_weak`.
 - `paper/diagnose_supervisor_feedback_step1.py`
   Post-hoc diagnostic script for supervisor feedback issues: conservative stopping, supervisor masking, and infeasibility phases.
 - `paper/diagnose_multipath_sanity_step3.py`
