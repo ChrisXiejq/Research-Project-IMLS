@@ -64,6 +64,20 @@ def _write_scenario_rollout_config(savedir: str, scenario_dict: dict) -> None:
     )
 
 
+def _savedir_completed_successfully(savedir: str) -> bool:
+    """Return True only for a completed rollout that is safe to skip on resume."""
+    pkl_path = os.path.join(savedir, "scenario_result.pkl")
+    summary_path = os.path.join(savedir, "scenario_run_summary.json")
+    if not (os.path.isfile(pkl_path) and os.path.isfile(summary_path)):
+        return False
+    try:
+        with open(summary_path, "r", encoding="utf-8") as f:
+            summary = json.load(f)
+    except Exception:
+        return False
+    return bool(summary.get("ran_successfully", False))
+
+
 def _prepare_prediction_params(scenario_dict, args=None):
     pred_dict = dict(scenario_dict.get("prediction_params", {}))
     traffic_control = (
@@ -318,6 +332,8 @@ if __name__ == '__main__':
                         help="Scenario name for automatic trajectory figures. Default: first matched scenario.")
     parser.add_argument("--postprocess_plot_init", type=int, default=None,
                         help="ego_init index for automatic trajectory figures. Default: first matched init.")
+    parser.add_argument("--skip_completed_subruns", action="store_true",
+                        help="Resume mode: skip rollout directories with scenario_result.pkl and ran_successfully=true.")
     parser.add_argument("--prediction_model_weights", default=None,
                         help="Override PredictionParams.model_weights, relative to core/scripts/models unless absolute.")
     parser.add_argument("--prediction_model_anchors", default=None,
@@ -517,6 +533,32 @@ if __name__ == '__main__':
                 savedir = os.path.join(results_folder, f"{scenario_name}_{ego_init_name}_{output_policy_name}")
                 print(f"Running {scenario_name} {ego_init_name} {ego_policy_config}")
                 label = f"{scenario_name}_{ego_init_name}_{ego_policy_config}"
+                if args.skip_completed_subruns and _savedir_completed_successfully(savedir):
+                    metrics = exp_log.collect_savedir_metrics(savedir)
+                    log.info("Skipping completed subrun: %s", label)
+                    exp_log.append_jsonl(
+                        results_folder,
+                        {
+                            "event": "subrun_skipped_completed",
+                            "label": label,
+                            "savedir": os.path.abspath(savedir),
+                            "policy": ego_policy_config,
+                            "metrics": metrics,
+                        },
+                    )
+                    subrun_status.append(
+                        {
+                            "label": label,
+                            "ok": True,
+                            "savedir": savedir,
+                            "policy": ego_policy_config,
+                            "scenario_completed": True,
+                            "duration_s": 0.0,
+                            "metrics": metrics,
+                            "skipped_completed": True,
+                        }
+                    )
+                    continue
                 t0 = time.perf_counter()
                 err = None
                 ok = False

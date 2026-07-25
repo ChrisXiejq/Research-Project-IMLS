@@ -16,6 +16,7 @@ VARIANT_SET="${VARIANT_SET:-primary}"
 YIELD_SUPERVISOR_MODE="${YIELD_SUPERVISOR_MODE:-full}"
 PREDICTION_MODEL_WEIGHTS="${PREDICTION_MODEL_WEIGHTS:-l5kit_multipath_10_carla_finetuned_head_best}"
 PREDICTION_MODEL_ANCHORS="${PREDICTION_MODEL_ANCHORS:-l5kit_clusters_16.npy}"
+RESUME_COMPLETED="${RESUME_COMPLETED:-0}"
 
 if [[ -z "${CARLA_ROOT:-}" ]]; then
   cat >&2 <<'EOF'
@@ -152,6 +153,11 @@ else
   camera_args+=(--disable_camera_viz)
 fi
 
+resume_args=()
+if [[ "${RESUME_COMPLETED}" == "1" ]]; then
+  resume_args+=(--skip_completed_subruns)
+fi
+
 TMP_INIT_DIR="${RESULTS_DIR}/_ego_init_01_${INIT_COUNT}"
 mkdir -p "${TMP_INIT_DIR}"
 for idx_num in $(seq 1 "${INIT_COUNT}"); do
@@ -268,6 +274,7 @@ run_variant() {
     --prediction_model_weights "${PREDICTION_MODEL_WEIGHTS}" \
     --prediction_model_anchors "${PREDICTION_MODEL_ANCHORS}" \
     "${camera_args[@]}" \
+    "${resume_args[@]}" \
     --postprocess_no_plots
 
   "${PYTHON_BIN}" "${CORE_DIR}/scripts/postcarla_trajectory_gate.py" "${variant_dir}"
@@ -351,6 +358,7 @@ cat > "${RESULTS_DIR}/ablation_summary.md" <<EOF
 
 Variant set: \`${VARIANT_SET}\`
 Yield supervisor mode: \`${YIELD_SUPERVISOR_MODE}\`
+Resume completed subruns: \`${RESUME_COMPLETED}\`
 
 This run keeps the same scenario, initial states, selected supervisor, and
 fixed-risk baseline. Only the adaptive-risk mapping used by \`smpc_var_risk\`
