@@ -1,7 +1,7 @@
 {
-  "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 11,
-  "description": "Init01 planner-ownership stress candidate. Version 11 keeps v10 executable SMPC approach braking but reduces early deterministic supervisor takeover in reduced_intervention mode: observed-target cautious approach is handled by the SMPC approach reference unless emergency/footprint/low-speed hold guards are reached. This stress test is shared by fixed-risk and adaptive-risk SMPC so adaptive advantage must come from variable risk allocation, not exclusive supervisor changes.",
+  "config_name": "give_way_reduced_clear_path_release_v10_executable_approach_brake",
+  "version": 10,
+  "description": "Archived successful init01 SMPC-layer candidate. Version 10 keeps the reduced supervisor unchanged and fixes the SMPC reference-to-actuation path by forcing shaped-reference linearization and executable approach deceleration before the give-way conflict area. Server result 20260726_000309_init01_smpc_vs_mpc_v10_executable_approach_brake passed both fixed-risk and adaptive-risk SMPC init01 gates.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
@@ -55,7 +55,7 @@
       "smpc_intersection_approach_distance": 16.0,
       "smpc_intersection_approach_speed": 5.0,
       "smpc_intersection_approach_decel": -3.0,
-      "yield_planner_ownership_stress_enabled": true,
+      "yield_planner_ownership_stress_enabled": false,
       "yield_steer_damping": 0.25,
       "yield_recovery_enabled": true,
       "yield_recovery_steps": 90,

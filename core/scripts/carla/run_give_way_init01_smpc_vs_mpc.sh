@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Init01-focused fixed-risk SMPC vs adaptive-risk SMPC comparison.
+# Init01-focused fixed-risk frontier vs adaptive-risk SMPC comparison.
 #
 # This is intentionally not a 5-init frontier and does not strengthen the
 # supervisor. The goal is to isolate whether phase-aware adaptive/variable-risk
-# SMPC handles the hard init01 interaction better than fixed-risk SMPC under
-# the current give-way setup.
+# SMPC handles the hard init01 interaction better than the fixed-risk SMPC
+# frontier under the current give-way setup.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CORE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REPO_DIR="$(cd "${CORE_DIR}/.." && pwd)"
-RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_init01_smpc_fixed_vs_adaptive}"
+RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_init01_smpc_fixed_frontier_vs_adaptive}"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 INIT_ID="${INIT_ID:-01}"
 ENABLE_CAMERA_VIZ="${ENABLE_CAMERA_VIZ:-0}"
@@ -164,7 +164,7 @@ TUNING_CONFIG="${RESULTS_DIR}/tuning_reduced_intervention_frozen.json"
 cp "${FROZEN_REDUCED_TUNING_CONFIG}" "${TUNING_CONFIG}"
 
 cat > "${RESULTS_DIR}/comparison_manifest.jsonl" <<EOF
-{"event":"batch_start","script":"$(basename "$0")","init_id":"${INIT_ID}","scenario_glob":"scenario_uk_give_way.json","arms":["smpc_fixed_medium","smpc_adaptive_floor_weak"],"supervisor_change":"none","comparison":"fixed-risk SMPC vs adaptive-risk SMPC"}
+{"event":"batch_start","script":"$(basename "$0")","init_id":"${INIT_ID}","scenario_glob":"scenario_uk_give_way.json","arms":["smpc_fixed_aggressive","smpc_fixed_medium","smpc_fixed_conservative","smpc_adaptive_floor_weak"],"supervisor_change":"planner_ownership_stress_if_enabled_in_tuning","comparison":"fixed-risk SMPC frontier vs adaptive-risk SMPC"}
 EOF
 
 postprocess_arm() {
@@ -225,8 +225,14 @@ run_arm() {
     "${name}" "${arm_dir}" >> "${RESULTS_DIR}/comparison_manifest.jsonl"
 }
 
+run_arm "smpc_fixed_aggressive" "smpc_fixed_risk" "fixed_frontier_aggressive"
+postprocess_arm "${RESULTS_DIR}/smpc_fixed_aggressive" "smpc_fixed_risk"
+
 run_arm "smpc_fixed_medium" "smpc_fixed_risk" "fixed_frontier_medium"
 postprocess_arm "${RESULTS_DIR}/smpc_fixed_medium" "smpc_fixed_risk"
+
+run_arm "smpc_fixed_conservative" "smpc_fixed_risk" "fixed_frontier_conservative"
+postprocess_arm "${RESULTS_DIR}/smpc_fixed_conservative" "smpc_fixed_risk"
 
 run_arm \
   "smpc_adaptive_floor_weak" \
@@ -236,14 +242,14 @@ run_arm \
 postprocess_arm "${RESULTS_DIR}/smpc_adaptive_floor_weak" "smpc_var_risk"
 
 cat > "${RESULTS_DIR}/README.md" <<EOF
-# Init01 Fixed-Risk SMPC vs Adaptive-Risk SMPC Focus Run
+# Init01 Fixed-Risk Frontier vs Adaptive-Risk SMPC Focus Run
 
 This run intentionally focuses on \`ego_init_01\` only.
 
 It does not strengthen supervisor logic and does not run deterministic MPC.
 The comparison target is whether phase-aware adaptive/variable-risk SMPC handles
-the hard give-way interaction better than fixed-risk SMPC under the same
-scenario and current frozen tuning.
+the hard give-way interaction better than the fixed-risk SMPC frontier under
+the same scenario and current frozen tuning.
 
 Primary evidence:
 
@@ -254,4 +260,4 @@ Primary evidence:
 - supervisor masking diagnostics
 EOF
 
-echo "Init01 fixed-risk vs adaptive-risk SMPC comparison complete: ${RESULTS_DIR}"
+echo "Init01 fixed-risk frontier vs adaptive-risk SMPC comparison complete: ${RESULTS_DIR}"

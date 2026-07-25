@@ -91,6 +91,7 @@ class SMPCAgent(object):
                  smpc_intersection_approach_distance=16.0,
                  smpc_intersection_approach_speed=5.0,
                  smpc_intersection_approach_decel=-3.0,
+                 yield_planner_ownership_stress_enabled=False,
                  yield_steer_damping=0.25,
                  yield_recovery_enabled=True,
                  yield_recovery_steps=180,
@@ -191,6 +192,9 @@ class SMPCAgent(object):
         self.smpc_intersection_approach_distance = float(smpc_intersection_approach_distance)
         self.smpc_intersection_approach_speed = float(smpc_intersection_approach_speed)
         self.smpc_intersection_approach_decel = float(smpc_intersection_approach_decel)
+        self.yield_planner_ownership_stress_enabled = bool(
+            yield_planner_ownership_stress_enabled
+        )
         self.yield_steer_damping = float(yield_steer_damping)
         self.yield_recovery_enabled = bool(yield_recovery_enabled)
         self.yield_recovery_steps = int(yield_recovery_steps)
@@ -930,6 +934,9 @@ class SMPCAgent(object):
                 ),
                 "smpc_intersection_approach_speed": self.smpc_intersection_approach_speed,
                 "smpc_intersection_approach_decel": self.smpc_intersection_approach_decel,
+                "planner_ownership_stress_enabled": (
+                    self.yield_planner_ownership_stress_enabled
+                ),
                 "steer_damping": self.yield_steer_damping,
                 "recovery_enabled": self.yield_recovery_enabled,
                 "recovery_steps": self.yield_recovery_steps,
@@ -2100,8 +2107,32 @@ class SMPCAgent(object):
             and not_far_past_conflict
         )
         if self.yield_supervisor_mode == "reduced_intervention":
+            planner_ownership_stress = bool(self.yield_planner_ownership_stress_enabled)
             reduced_overlap_guard = (
                 overlap_risk and ego_dist_to_conflict <= self.yield_activation_distance
+            )
+            if planner_ownership_stress:
+                reduced_overlap_guard = (
+                    overlap_risk
+                    and ego_dist_to_conflict <= max(
+                        ego_required_clearance + 0.75,
+                        self.yield_conflict_radius + 1.0,
+                    )
+                )
+            cautious_takeover_required = (
+                reduced_emergency_braking_distance_required
+                or (
+                    (not planner_ownership_stress)
+                    and ego_dist_to_conflict <= self.yield_activation_distance
+                )
+                or (
+                    planner_ownership_stress
+                    and (
+                        ego_inside_footprint_clearance
+                        or reduced_conflict_hold
+                        or reduced_low_speed_wait_hold
+                    )
+                )
             )
             active = (
                 allow_priority_yield
@@ -2118,10 +2149,7 @@ class SMPCAgent(object):
                 )
             ) or (
                 cautious_candidate
-                and (
-                    reduced_emergency_braking_distance_required
-                    or ego_dist_to_conflict <= self.yield_activation_distance
-                )
+                and cautious_takeover_required
             )
             hard_stop_required = (
                 active
@@ -2138,6 +2166,8 @@ class SMPCAgent(object):
             reduced_direct_takeover_margin = 0.0
             direct_takeover_required = bool(hard_stop_required)
         else:
+            planner_ownership_stress = False
+            cautious_takeover_required = False
             active = (
                 allow_priority_yield
                 and target_has_priority
@@ -2273,6 +2303,10 @@ class SMPCAgent(object):
             "reduced_clear_path_margin": float(reduced_clear_path_margin),
             "reduced_direct_takeover_required": bool(reduced_direct_takeover_required),
             "reduced_direct_takeover_margin": float(reduced_direct_takeover_margin),
+            "planner_ownership_stress_enabled": bool(planner_ownership_stress),
+            "planner_ownership_cautious_takeover_required": bool(
+                cautious_takeover_required
+            ),
             "ego_required_clearance": float(ego_required_clearance),
             "ego_inside_footprint_clearance": bool(ego_inside_footprint_clearance),
             "footprint_clearance_margin": float(self.yield_footprint_clearance_margin),
