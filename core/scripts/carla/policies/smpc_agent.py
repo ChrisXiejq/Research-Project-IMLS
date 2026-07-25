@@ -2981,6 +2981,7 @@ class SMPCAgent(object):
         if approach_speed_shaping_active:
             start_idx = int(max(0, min(t_ref_new, len(self.feas_ref_states_new) - 1)))
             speed_cap = float(self.smpc_intersection_approach_speed)
+            approach_decel = float(self.smpc_intersection_approach_decel)
             self.feas_ref_states_new[start_idx:, 3] = np.minimum(
                 self.feas_ref_states_new[start_idx:, 3],
                 speed_cap,
@@ -2990,20 +2991,31 @@ class SMPCAgent(object):
                     self.feas_ref_states_new[:start_idx, 3],
                     speed_cap,
                 )
+            self.feas_ref_inputs_new[start_idx:, 0] = np.minimum(
+                self.feas_ref_inputs_new[start_idx:, 0],
+                approach_decel,
+            )
+            if start_idx > 0:
+                self.feas_ref_inputs_new[:start_idx, 0] = np.minimum(
+                    self.feas_ref_inputs_new[:start_idx, 0],
+                    approach_decel,
+                )
             self.feas_ref_inputs_new[:, 0] = np.clip(
                 self.feas_ref_inputs_new[:, 0],
-                self.smpc_intersection_approach_decel,
+                approach_decel,
                 self.yield_recovery_accel,
             )
             ref_status.update({
                 "mode": "smpc_intersection_approach_reference",
                 "speed_cap": speed_cap,
                 "accel_upper_bound": float(self.yield_recovery_accel),
+                "force_reference_linearization": True,
                 "profile": {
                     "type": "pre_yield_smpc_speed_reference",
                     "ego_distance_to_conflict": float(ego_dist_to_conflict),
                     "speed_cap": speed_cap,
-                    "approach_decel": float(self.smpc_intersection_approach_decel),
+                    "approach_decel": approach_decel,
+                    "linearization": "shaped_reference",
                     "trigger": "target_approaching_conflict_and_cautious_candidate",
                 },
             })
@@ -3331,6 +3343,11 @@ class SMPCAgent(object):
                 heading_error=epsi,
                 completion_metrics=completion_metrics,
             )
+            if bool(reference_status["rule_aware_reference"].get("force_reference_linearization", False)):
+                reference_status["forced_reference_linearization"] = 1
+                reference_status["forced_reference_linearization_reason"] = (
+                    reference_status["rule_aware_reference"].get("mode")
+                )
             if (
                 self.prev_opt
                 and self.time%1==0

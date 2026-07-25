@@ -1,7 +1,7 @@
 {
   "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 9,
-  "description": "Init01 SMPC-layer candidate after v8 4.5m still failed footprint safety. Version 9 keeps the reduced supervisor unchanged and adds SMPC-only intersection-approach reference speed shaping so the optimizer slows before entering the give-way conflict area.",
+  "version": 10,
+  "description": "Init01 SMPC-layer candidate after v9 triggered approach speed shaping but did not produce effective low-level braking. Version 10 keeps the reduced supervisor unchanged and fixes the SMPC reference-to-actuation path by forcing shaped-reference linearization and executable approach deceleration before the give-way conflict area.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
