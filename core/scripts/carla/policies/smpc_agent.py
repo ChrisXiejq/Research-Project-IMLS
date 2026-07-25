@@ -57,6 +57,9 @@ class SMPCAgent(object):
                  yield_stop_line_creep_deadband=0.35,
                  yield_stop_line_creep_clearance_slack=0.75,
                  yield_stop_line_creep_accel=0.6,
+                 yield_dynamic_stop_clearance_enabled=False,
+                 yield_stop_clearance_slack=1.0,
+                 yield_stop_min_clearance_margin=0.5,
                  yield_caution_decel=-4.0,
                  yield_reference_min_speed=0.8,
                  yield_reference_decel=-3.75,
@@ -143,6 +146,9 @@ class SMPCAgent(object):
         self.yield_stop_line_creep_deadband = float(yield_stop_line_creep_deadband)
         self.yield_stop_line_creep_clearance_slack = float(yield_stop_line_creep_clearance_slack)
         self.yield_stop_line_creep_accel = float(yield_stop_line_creep_accel)
+        self.yield_dynamic_stop_clearance_enabled = bool(yield_dynamic_stop_clearance_enabled)
+        self.yield_stop_clearance_slack = float(yield_stop_clearance_slack)
+        self.yield_stop_min_clearance_margin = float(yield_stop_min_clearance_margin)
         self.yield_caution_decel = float(yield_caution_decel)
         self.yield_reference_min_speed = float(yield_reference_min_speed)
         self.yield_reference_decel = float(yield_reference_decel)
@@ -250,6 +256,16 @@ class SMPCAgent(object):
             raise ValueError(
                 "yield_stop_line_creep_accel must be non-negative, "
                 f"got {self.yield_stop_line_creep_accel}"
+            )
+        if self.yield_stop_clearance_slack < 0.0:
+            raise ValueError(
+                "yield_stop_clearance_slack must be non-negative, "
+                f"got {self.yield_stop_clearance_slack}"
+            )
+        if self.yield_stop_min_clearance_margin < 0.0:
+            raise ValueError(
+                "yield_stop_min_clearance_margin must be non-negative, "
+                f"got {self.yield_stop_min_clearance_margin}"
             )
         if self.yield_caution_decel >= 0.0:
             raise ValueError(f"yield_caution_decel must be negative, got {self.yield_caution_decel}")
@@ -833,6 +849,14 @@ class SMPCAgent(object):
                 ),
                 "conflict_radius": self.yield_conflict_radius,
                 "stop_buffer_distance": self.yield_stop_buffer_distance,
+                "dynamic_stop_clearance_enabled": self.yield_dynamic_stop_clearance_enabled,
+                "stop_clearance_slack": self.yield_stop_clearance_slack,
+                "stop_min_clearance_margin": self.yield_stop_min_clearance_margin,
+                "stop_line_creep_enabled": self.yield_stop_line_creep_enabled,
+                "stop_line_creep_speed": self.yield_stop_line_creep_speed,
+                "stop_line_creep_deadband": self.yield_stop_line_creep_deadband,
+                "stop_line_creep_clearance_slack": self.yield_stop_line_creep_clearance_slack,
+                "stop_line_creep_accel": self.yield_stop_line_creep_accel,
                 "footprint_clearance_margin": self.yield_footprint_clearance_margin,
                 "brake_distance_margin": self.yield_brake_distance_margin,
                 "wait_steer_lookahead_distance": self.yield_wait_steer_lookahead_distance,
@@ -1305,6 +1329,52 @@ class SMPCAgent(object):
         idx = int(np.searchsorted(cumulative_distance, float(target_distance), side="left"))
         return int(np.clip(idx, 0, len(cumulative_distance) - 1))
 
+    def _point_at_path_distance(self, xy_path, cumulative_distance, target_distance):
+        xy_path = np.asarray(xy_path, dtype=float)
+        cumulative_distance = np.asarray(cumulative_distance, dtype=float)
+        if len(xy_path) == 0:
+            return np.zeros(2, dtype=float)
+        if len(xy_path) == 1 or len(cumulative_distance) <= 1:
+            return xy_path[0].copy()
+        s = float(np.clip(target_distance, cumulative_distance[0], cumulative_distance[-1]))
+        hi = int(np.searchsorted(cumulative_distance, s, side="right"))
+        hi = int(np.clip(hi, 1, len(cumulative_distance) - 1))
+        lo = hi - 1
+        denom = max(float(cumulative_distance[hi] - cumulative_distance[lo]), 1e-9)
+        alpha = float(np.clip((s - cumulative_distance[lo]) / denom, 0.0, 1.0))
+        return (1.0 - alpha) * xy_path[lo] + alpha * xy_path[hi]
+
+    def _project_xy_to_path_distance(self, xy_path, cumulative_distance, point_xy):
+        xy_path = np.asarray(xy_path, dtype=float)
+        cumulative_distance = np.asarray(cumulative_distance, dtype=float)
+        point_xy = np.asarray(point_xy, dtype=float).reshape(2)
+        if len(xy_path) == 0:
+            return 0.0, 0, float("inf")
+        if len(xy_path) == 1 or len(cumulative_distance) <= 1:
+            dist = float(np.linalg.norm(point_xy - xy_path[0]))
+            return float(cumulative_distance[0] if len(cumulative_distance) else 0.0), 0, dist
+        best_s = float(cumulative_distance[0])
+        best_idx = 0
+        best_dist = float("inf")
+        for idx in range(len(xy_path) - 1):
+            p0 = xy_path[idx]
+            p1 = xy_path[idx + 1]
+            seg = p1 - p0
+            seg_len2 = float(np.dot(seg, seg))
+            if seg_len2 <= 1e-12:
+                alpha = 0.0
+                proj = p0
+            else:
+                alpha = float(np.clip(np.dot(point_xy - p0, seg) / seg_len2, 0.0, 1.0))
+                proj = p0 + alpha * seg
+            dist = float(np.linalg.norm(point_xy - proj))
+            if dist < best_dist:
+                best_dist = dist
+                seg_len = float(cumulative_distance[idx + 1] - cumulative_distance[idx])
+                best_s = float(cumulative_distance[idx] + alpha * seg_len)
+                best_idx = idx if alpha < 0.5 else idx + 1
+        return best_s, int(best_idx), best_dist
+
     def _as_xy_array(self, value):
         arr = np.asarray(value, dtype=float).reshape(-1)
         if arr.size < 2 or not np.all(np.isfinite(arr[:2])):
@@ -1359,11 +1429,21 @@ class SMPCAgent(object):
             min_dist = float(line_dist[ego_conflict_idx])
             cumulative = self._path_cumulative_distance(ego_global_path)
             conflict_s = float(cumulative[ego_conflict_idx])
-            stop_s = max(0.0, conflict_s - self.yield_stop_buffer_distance)
+            ego_required_clearance = self.yield_conflict_radius + self.yield_footprint_clearance_margin
+            dynamic_stop_clearance = max(
+                float(self.yield_conflict_radius) + float(self.yield_stop_min_clearance_margin),
+                ego_required_clearance - float(self.yield_stop_clearance_slack),
+            )
+            stop_clearance = (
+                min(float(self.yield_stop_buffer_distance), dynamic_stop_clearance)
+                if self.yield_dynamic_stop_clearance_enabled
+                else float(self.yield_stop_buffer_distance)
+            )
+            stop_s = max(0.0, conflict_s - stop_clearance)
             stop_idx = self._index_at_path_distance(cumulative, stop_s)
             steer_s = min(
                 conflict_s,
-                float(cumulative[stop_idx]) + self.yield_wait_steer_lookahead_distance,
+                float(stop_s) + self.yield_wait_steer_lookahead_distance,
             )
             steer_idx = self._index_at_path_distance(cumulative, steer_s)
             input_idx = int(min(steer_idx, len(self.feas_ref_inputs) - 1))
@@ -1372,12 +1452,17 @@ class SMPCAgent(object):
                 "conflict_point": ego_global_path[ego_conflict_idx].copy(),
                 "target_conflict_point": target_conflict_point.copy(),
                 "conflict_index": int(ego_conflict_idx),
-                "stop_point": ego_global_path[stop_idx].copy(),
+                "stop_point": self._point_at_path_distance(ego_global_path, cumulative, stop_s),
                 "stop_index": int(stop_idx),
                 "steer_index": int(steer_idx),
                 "conflict_s": conflict_s,
-                "stop_s": float(cumulative[stop_idx]),
+                "stop_s": float(stop_s),
                 "stop_buffer_distance": self.yield_stop_buffer_distance,
+                "stop_clearance": float(stop_clearance),
+                "dynamic_stop_clearance_enabled": bool(self.yield_dynamic_stop_clearance_enabled),
+                "dynamic_stop_clearance": float(dynamic_stop_clearance),
+                "stop_clearance_slack": float(self.yield_stop_clearance_slack),
+                "stop_min_clearance_margin": float(self.yield_stop_min_clearance_margin),
                 "wait_steer_ref": float(self.feas_ref_inputs[input_idx, 1]),
                 "init_min_path_distance": min_dist,
             }
@@ -1812,7 +1897,13 @@ class SMPCAgent(object):
         source,
         allow_priority_yield,
     ):
-        ego_route_s = float(ego_global_s[ego_global_idx])
+        ego_route_s, projected_ego_idx, ego_path_lateral_distance = self._project_xy_to_path_distance(
+            ego_global_path,
+            ego_global_s,
+            np.array([x, y], dtype=float),
+        )
+        ego_route_s = float(ego_route_s)
+        ego_global_idx = int(projected_ego_idx)
         conflict_point = np.asarray(geometry["conflict_point"], dtype=float)
         stop_point = np.asarray(geometry["stop_point"], dtype=float)
         target_conflict_point = np.asarray(geometry["target_conflict_point"], dtype=float)
@@ -2067,6 +2158,7 @@ class SMPCAgent(object):
             "stop_point": stop_point.tolist(),
             "yield_geometry_source": geometry["source"],
             "ego_global_index": int(ego_global_idx),
+            "ego_path_lateral_distance": float(ego_path_lateral_distance),
             "ego_route_s": ego_route_s,
             "ego_conflict_index": int(geometry["conflict_index"]),
             "ego_stop_index": int(geometry["stop_index"]),
@@ -2074,6 +2166,19 @@ class SMPCAgent(object):
             "wait_steer_index": int(geometry["steer_index"]),
             "wait_steer_ref": float(geometry["wait_steer_ref"]),
             "stop_s": stop_s,
+            "stop_clearance": float(geometry.get("stop_clearance", conflict_s - stop_s)),
+            "dynamic_stop_clearance_enabled": bool(
+                geometry.get("dynamic_stop_clearance_enabled", False)
+            ),
+            "dynamic_stop_clearance": float(
+                geometry.get("dynamic_stop_clearance", np.nan)
+            ),
+            "stop_clearance_slack": float(
+                geometry.get("stop_clearance_slack", np.nan)
+            ),
+            "stop_min_clearance_margin": float(
+                geometry.get("stop_min_clearance_margin", np.nan)
+            ),
             "conflict_s": conflict_s,
             "ego_distance_to_stop": ego_dist_to_stop,
             "ego_distance_to_conflict": ego_dist_to_conflict,
