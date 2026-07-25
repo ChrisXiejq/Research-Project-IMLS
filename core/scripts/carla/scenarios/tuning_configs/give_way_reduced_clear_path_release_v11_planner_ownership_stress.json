@@ -1,7 +1,7 @@
 {
-  "config_name": "give_way_reduced_clear_path_release_frozen",
-  "version": 12,
-  "description": "Init01 close-stop planner-ownership stress candidate. Version 12 keeps v11 shared planner-ownership stress and v10 executable SMPC approach braking, but relaxes the shared supervisor stop target from 4.5m to 4.0m. The purpose is to let ego stop closer after early SMPC approach deceleration, exposing fixed-risk versus adaptive-risk differences without giving adaptive an exclusive mechanism.",
+  "config_name": "give_way_reduced_clear_path_release_v11_planner_ownership_stress",
+  "version": 11,
+  "description": "Archived init01 planner-ownership stress candidate. Version 11 keeps v10 executable SMPC approach braking and reduces early deterministic supervisor takeover in reduced_intervention mode while keeping a 4.5m stop clearance. Server result 20260726_002752_init01_v11_planner_ownership_fixed_frontier_vs_adaptive passed all fixed-frontier and adaptive arms, but fixed and adaptive remained behaviourally close.",
   "vehicle_role_overrides": {
     "ego": {
       "nominal_speed": 6.0,
@@ -22,11 +22,11 @@
       "yield_stop_line_creep_clearance_slack": 1.0,
       "yield_stop_line_creep_accel": 0.6,
       "yield_stop_line_creep_safety_margin": 0.0,
-      "yield_stop_line_creep_min_clearance_override": 4.0,
+      "yield_stop_line_creep_min_clearance_override": 4.5,
       "yield_dynamic_stop_clearance_enabled": true,
       "yield_stop_clearance_slack": 1.0,
       "yield_stop_min_clearance_margin": 0.5,
-      "yield_stop_clearance_override": 4.0,
+      "yield_stop_clearance_override": 4.5,
       "yield_caution_decel": -4.0,
       "yield_reference_min_speed": 0.8,
       "yield_reference_decel": -3.75,
