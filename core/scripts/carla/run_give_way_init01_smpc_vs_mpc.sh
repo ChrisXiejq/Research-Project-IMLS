@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Init01-focused SMPC-vs-MPC comparison.
+# Init01-focused fixed-risk SMPC vs adaptive-risk SMPC comparison.
 #
 # This is intentionally not a 5-init frontier and does not strengthen the
-# supervisor. The goal is to isolate whether stochastic/multimodal SMPC handles
-# the hard init01 interaction better than deterministic MPC under the current
-# give-way setup.
+# supervisor. The goal is to isolate whether phase-aware adaptive/variable-risk
+# SMPC handles the hard init01 interaction better than fixed-risk SMPC under
+# the current give-way setup.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CORE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REPO_DIR="$(cd "${CORE_DIR}/.." && pwd)"
-RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_init01_smpc_vs_mpc}"
+RESULTS_DIR="${RESULTS_DIR:-${CORE_DIR}/results/$(date +%Y%m%d_%H%M%S)_init01_smpc_fixed_vs_adaptive}"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 INIT_ID="${INIT_ID:-01}"
 ENABLE_CAMERA_VIZ="${ENABLE_CAMERA_VIZ:-0}"
@@ -164,7 +164,7 @@ TUNING_CONFIG="${RESULTS_DIR}/tuning_reduced_intervention_frozen.json"
 cp "${FROZEN_REDUCED_TUNING_CONFIG}" "${TUNING_CONFIG}"
 
 cat > "${RESULTS_DIR}/comparison_manifest.jsonl" <<EOF
-{"event":"batch_start","script":"$(basename "$0")","init_id":"${INIT_ID}","scenario_glob":"scenario_uk_give_way.json","arms":["mpc_baseline","smpc_fixed_medium","smpc_adaptive_floor_weak"],"supervisor_change":"none"}
+{"event":"batch_start","script":"$(basename "$0")","init_id":"${INIT_ID}","scenario_glob":"scenario_uk_give_way.json","arms":["smpc_fixed_medium","smpc_adaptive_floor_weak"],"supervisor_change":"none","comparison":"fixed-risk SMPC vs adaptive-risk SMPC"}
 EOF
 
 postprocess_arm() {
@@ -225,9 +225,6 @@ run_arm() {
     "${name}" "${arm_dir}" >> "${RESULTS_DIR}/comparison_manifest.jsonl"
 }
 
-run_arm "mpc_baseline" "mpc" "fixed_frontier_medium"
-postprocess_arm "${RESULTS_DIR}/mpc_baseline" "mpc" --allow-missing-collision-envelope
-
 run_arm "smpc_fixed_medium" "smpc_fixed_risk" "fixed_frontier_medium"
 postprocess_arm "${RESULTS_DIR}/smpc_fixed_medium" "smpc_fixed_risk"
 
@@ -239,21 +236,22 @@ run_arm \
 postprocess_arm "${RESULTS_DIR}/smpc_adaptive_floor_weak" "smpc_var_risk"
 
 cat > "${RESULTS_DIR}/README.md" <<EOF
-# Init01 SMPC-vs-MPC Focus Run
+# Init01 Fixed-Risk SMPC vs Adaptive-Risk SMPC Focus Run
 
 This run intentionally focuses on \`ego_init_01\` only.
 
-It does not strengthen supervisor logic. The comparison target is whether
-multimodal/chance-constrained SMPC handles the hard give-way interaction better
-than deterministic MPC under the same scenario and current frozen tuning.
+It does not strengthen supervisor logic and does not run deterministic MPC.
+The comparison target is whether phase-aware adaptive/variable-risk SMPC handles
+the hard give-way interaction better than fixed-risk SMPC under the same
+scenario and current frozen tuning.
 
 Primary evidence:
 
 - post-CARLA footprint collision / min footprint separation
 - give-way order timing
 - completion validity
-- SMPC risk-vs-conflict-distance trace
-- supervisor masking diagnostics for SMPC arms
+- risk-vs-conflict-distance trace
+- supervisor masking diagnostics
 EOF
 
-echo "Init01 SMPC-vs-MPC comparison complete: ${RESULTS_DIR}"
+echo "Init01 fixed-risk vs adaptive-risk SMPC comparison complete: ${RESULTS_DIR}"
