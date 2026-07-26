@@ -172,7 +172,11 @@ def build_interaction_adapter_model(args, raw_output_dim: int) -> tf.keras.Model
     pooled = tf.keras.layers.Concatenate(name="interaction_head_input")([pooled, context_input])
     pooled = tf.keras.layers.Dense(args.ff_dim, activation="gelu", name="interaction_head_dense")(pooled)
     delta = tf.keras.layers.Dense(raw_output_dim, name="interaction_residual")(pooled)
-    delta = tf.keras.layers.Lambda(lambda z: z * float(args.delta_scale), name="scaled_interaction_residual")(delta)
+    delta = tf.keras.layers.Rescaling(
+        scale=float(args.delta_scale),
+        offset=0.0,
+        name="scaled_interaction_residual",
+    )(delta)
     output = tf.keras.layers.Add(name="interaction_adapted_multipath_output")([base_pred, delta])
     return tf.keras.Model([image_input, past_input, context_input], output, name="InteractionTransformerMultiPath")
 
