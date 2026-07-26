@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Deprecated filename kept for compatibility with older runbooks.
+#
+# Despite the historical "smpc_vs_mpc" name, this script no longer runs
+# deterministic MPC. The active dissertation comparison is fixed-risk SMPC
+# frontier vs adaptive-risk SMPC. Prefer the clearer wrapper:
+#
+#   run_give_way_init01_fixed_frontier_vs_adaptive.sh
+#
 # Init01-focused fixed-risk frontier vs adaptive-risk SMPC comparison.
 #
 # This is intentionally not a 5-init frontier and does not strengthen the
@@ -16,6 +24,7 @@ PYTHON_BIN="${PYTHON_BIN:-python}"
 INIT_ID="${INIT_ID:-01}"
 ENABLE_CAMERA_VIZ="${ENABLE_CAMERA_VIZ:-0}"
 SKIP_COMPLETED_SUBRUNS="${SKIP_COMPLETED_SUBRUNS:-0}"
+INCLUDE_ADAPTIVE_ABLATIONS="${INCLUDE_ADAPTIVE_ABLATIONS:-0}"
 PREDICTION_MODEL_WEIGHTS="${PREDICTION_MODEL_WEIGHTS:-l5kit_multipath_10_carla_finetuned_head_best}"
 PREDICTION_MODEL_ANCHORS="${PREDICTION_MODEL_ANCHORS:-l5kit_clusters_16.npy}"
 FROZEN_REDUCED_TUNING_CONFIG="${FROZEN_REDUCED_TUNING_CONFIG:-${SCRIPT_DIR}/scenarios/tuning_configs/give_way_reduced_clear_path_release_frozen.json}"
@@ -169,8 +178,13 @@ ln -sfn "${SCRIPT_DIR}/scenarios/inits/paper_intersection_50/ego_init_${INIT_ID}
 TUNING_CONFIG="${RESULTS_DIR}/tuning_reduced_intervention_frozen.json"
 cp "${FROZEN_REDUCED_TUNING_CONFIG}" "${TUNING_CONFIG}"
 
+arms_json='["smpc_fixed_aggressive","smpc_fixed_medium","smpc_fixed_conservative","smpc_adaptive_floor_weak"]'
+if [[ "${INCLUDE_ADAPTIVE_ABLATIONS}" == "1" ]]; then
+  arms_json='["smpc_fixed_aggressive","smpc_fixed_medium","smpc_fixed_conservative","smpc_adaptive_floor_weak","smpc_adaptive_phase_blind","smpc_adaptive_no_preclearance","smpc_adaptive_no_post_relax"]'
+fi
+
 cat > "${RESULTS_DIR}/comparison_manifest.jsonl" <<EOF
-{"event":"batch_start","script":"$(basename "$0")","init_id":"${INIT_ID}","scenario_glob":"scenario_uk_give_way.json","arms":["smpc_fixed_aggressive","smpc_fixed_medium","smpc_fixed_conservative","smpc_adaptive_floor_weak"],"supervisor_change":"planner_ownership_stress_if_enabled_in_tuning","comparison":"fixed-risk SMPC frontier vs adaptive-risk SMPC"}
+{"event":"batch_start","script":"$(basename "$0")","init_id":"${INIT_ID}","scenario_glob":"scenario_uk_give_way.json","arms":${arms_json},"include_adaptive_ablations":${INCLUDE_ADAPTIVE_ABLATIONS},"supervisor_change":"planner_ownership_stress_if_enabled_in_tuning","comparison":"fixed-risk SMPC frontier vs adaptive-risk SMPC"}
 EOF
 
 postprocess_arm() {
@@ -196,8 +210,13 @@ postprocess_arm() {
   if [[ "${required_policy}" == smpc_* ]]; then
     "${PYTHON_BIN}" "${CORE_DIR}/scripts/risk_by_conflict_distance.py" "${arm_dir}"
     if [[ -f "${REPO_DIR}/docs/paper/diagnose_supervisor_feedback_step1.py" ]]; then
+      set +e
       "${PYTHON_BIN}" "${REPO_DIR}/docs/paper/diagnose_supervisor_feedback_step1.py" \
         --results-dir "${arm_dir}"
+      local diag_exit=$?
+      set -e
+      printf '{"event":"optional_supervisor_diagnostics","arm_dir":"%s","exit_code":%s}\n' \
+        "${arm_dir}" "${diag_exit}" >> "${RESULTS_DIR}/comparison_manifest.jsonl"
     fi
   fi
 }
@@ -248,6 +267,29 @@ run_arm \
   --adaptive_risk_config_json '{"variant_name":"floor_weak","approach_preclearance_floor":1.66,"critical_preclearance_floor":1.72,"near_preclearance_floor":1.78}'
 postprocess_arm "${RESULTS_DIR}/smpc_adaptive_floor_weak" "smpc_var_risk"
 
+if [[ "${INCLUDE_ADAPTIVE_ABLATIONS}" == "1" ]]; then
+  run_arm \
+    "smpc_adaptive_phase_blind" \
+    "smpc_var_risk" \
+    "adaptive_interaction_severity_no_phase_awareness" \
+    --adaptive_risk_config_json '{"variant_name":"phase_blind","policy_map":"phase_blind_severity_only","phase_awareness_enabled":false,"preclearance_floor_enabled":false,"post_clearance_relaxation_enabled":false,"mild_tightening_scale":0.35}'
+  postprocess_arm "${RESULTS_DIR}/smpc_adaptive_phase_blind" "smpc_var_risk"
+
+  run_arm \
+    "smpc_adaptive_no_preclearance" \
+    "smpc_var_risk" \
+    "adaptive_interaction_severity_no_floor" \
+    --adaptive_risk_config_json '{"variant_name":"no_preclearance_floor","preclearance_floor_enabled":false,"post_clearance_relaxation_enabled":true,"approach_preclearance_floor":1.66,"critical_preclearance_floor":1.72,"near_preclearance_floor":1.78}'
+  postprocess_arm "${RESULTS_DIR}/smpc_adaptive_no_preclearance" "smpc_var_risk"
+
+  run_arm \
+    "smpc_adaptive_no_post_relax" \
+    "smpc_var_risk" \
+    "adaptive_interaction_severity_no_relax" \
+    --adaptive_risk_config_json '{"variant_name":"no_post_clearance_relaxation","preclearance_floor_enabled":true,"post_clearance_relaxation_enabled":false,"approach_preclearance_floor":1.66,"critical_preclearance_floor":1.72,"near_preclearance_floor":1.78}'
+  postprocess_arm "${RESULTS_DIR}/smpc_adaptive_no_post_relax" "smpc_var_risk"
+fi
+
 cat > "${RESULTS_DIR}/README.md" <<EOF
 # Init01 Fixed-Risk Frontier vs Adaptive-Risk SMPC Focus Run
 
@@ -257,6 +299,8 @@ It does not strengthen supervisor logic and does not run deterministic MPC.
 The comparison target is whether phase-aware adaptive/variable-risk SMPC handles
 the hard give-way interaction better than the fixed-risk SMPC frontier under
 the same scenario and current frozen tuning.
+
+Adaptive ablation arms enabled: \`${INCLUDE_ADAPTIVE_ABLATIONS}\`
 
 Primary evidence:
 

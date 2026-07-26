@@ -1691,6 +1691,7 @@ class SMPCAgent(object):
         )  # Phi^{-1}(0.90), used only after target clearance by default.
         high_tight = float(smpc.PAPER_INTERSECTION_TIGHTENING)
         nominal_to_high_span = high_tight - upstream_tight
+        phase_awareness_enabled = bool(cfg.get("phase_awareness_enabled", True))
         profile_default_preclearance_floor = profile in {
             "adaptive_interaction_severity",
             "adaptive_interaction_severity_no_relax",
@@ -1708,6 +1709,9 @@ class SMPCAgent(object):
                 profile_default_post_clearance_relaxation,
             )
         )
+        if not phase_awareness_enabled:
+            use_preclearance_floor = False
+            use_post_clearance_relaxation = False
         variant_name = str(cfg.get("variant_name", profile))
         policy_map = str(
             cfg.get(
@@ -1730,14 +1734,15 @@ class SMPCAgent(object):
             ego_distance_to_conflict = None
 
         phase_floor = 0.0
-        if yield_phase == "approach_yield_line":
-            phase_floor = float(cfg.get("approach_floor", 0.35))
-        elif yield_phase == "hold_yield_line":
-            phase_floor = float(cfg.get("hold_floor", 0.45))
-        elif yield_phase == "cautious_approach_observed_target":
-            phase_floor = float(cfg.get("cautious_floor", 0.25))
-        elif yield_phase == "observe_priority_target":
-            phase_floor = float(cfg.get("observe_floor", 0.20))
+        if phase_awareness_enabled:
+            if yield_phase == "approach_yield_line":
+                phase_floor = float(cfg.get("approach_floor", 0.35))
+            elif yield_phase == "hold_yield_line":
+                phase_floor = float(cfg.get("hold_floor", 0.45))
+            elif yield_phase == "cautious_approach_observed_target":
+                phase_floor = float(cfg.get("cautious_floor", 0.25))
+            elif yield_phase == "observe_priority_target":
+                phase_floor = float(cfg.get("observe_floor", 0.20))
 
         distance_bucket = "unknown"
         preclearance_tight_floor = None
@@ -1763,7 +1768,11 @@ class SMPCAgent(object):
                 preclearance_tight_floor = near_preclearance_floor
                 preclearance_floor_reason = "near_preclearance"
 
-        if target_cleared or yield_phase == "released_recovery":
+        phase_clearance_release = (
+            phase_awareness_enabled
+            and (target_cleared or yield_phase == "released_recovery")
+        )
+        if phase_clearance_release:
             effective_score = 0.0
             risk_scale = 0.0
             if use_post_clearance_relaxation:
@@ -1834,6 +1843,7 @@ class SMPCAgent(object):
                 "nominal_tight": upstream_tight,
                 "high_tight": high_tight,
                 "policy_map": policy_map,
+                "phase_awareness_enabled": phase_awareness_enabled,
                 "preclearance_floor_enabled": use_preclearance_floor,
                 "post_clearance_relaxation_enabled": use_post_clearance_relaxation,
                 "adaptive_risk_variant": variant_name,

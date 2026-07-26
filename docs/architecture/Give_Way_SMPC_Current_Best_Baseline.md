@@ -9,13 +9,16 @@ git tag.
 
 ```text
 branch: main
-base_commit: a357cdce642c1cb8d702eb6ccd59cf1d848d562d
-state: base commit plus current working-tree changes
+base_commit: a017793a7abe58609cd86ccc7d2e68cda3b44a41
+short_commit: a017793 feat: ablation
+state: frozen code/config lineage plus current documentation updates
 ```
 
-Reason: the current best state includes the v12 documentation updates, result
-interpretation, and the next difficulty-sweep entrypoint. A git tag on `HEAD`
-alone would not capture those changes.
+Reason: the current best code/config baseline is the v12 shared
+planner/supervisor lineage used for the close-stop validation and the
+target-speed sweep. Current paper-guidance edits may remain uncommitted, but
+future ablation code/config should be based on this frozen lineage unless a new
+baseline is explicitly re-frozen.
 
 ## Frozen Configuration
 
