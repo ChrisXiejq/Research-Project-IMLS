@@ -4,21 +4,25 @@ Freeze date: 2026-07-26
 
 ## Code State
 
-This baseline is frozen as the current best working-tree state, not as a clean
-git tag.
+This baseline is frozen as the current best shared runtime baseline, not as a
+clean git tag. Later ablation harness changes should be layered on top of this
+baseline without changing the shared supervisor / stop-target / approach-braking
+settings.
 
 ```text
 branch: main
-base_commit: a017793a7abe58609cd86ccc7d2e68cda3b44a41
-short_commit: a017793 feat: ablation
-state: frozen code/config lineage plus current documentation updates
+runtime_baseline_commit: a017793a7abe58609cd86ccc7d2e68cda3b44a41
+runtime_baseline_short_commit: a017793 feat: ablation
+current_ablation_harness_base: 79c27183a38856fca5e527e8d05daeb81915b15d plus current working-tree ablation updates
+state: frozen runtime baseline plus A1/A2 ablation harness updates
 ```
 
-Reason: the current best code/config baseline is the v12 shared
-planner/supervisor lineage used for the close-stop validation and the
-target-speed sweep. Current paper-guidance edits may remain uncommitted, but
-future ablation code/config should be based on this frozen lineage unless a new
-baseline is explicitly re-frozen.
+Reason: the current best runtime baseline is the v12 shared planner/supervisor
+lineage used for close-stop validation and the target-speed sweeps. It should be
+kept fixed for ablation. A1/A2 scripts may generate scenario difficulty and
+adaptive-risk ablation arms, but they must not retune supervisor strength, stop
+clearance, or SMPC approach braking unless a new baseline is explicitly
+re-frozen.
 
 ## Frozen Configuration
 
@@ -85,12 +89,24 @@ It is not strong adaptive-risk evidence by itself:
 
 ## Next Experiment
 
-Use the target-speed difficulty sweep to expose the fixed-risk frontier:
+Do not continue target-speed micro-sweeps as the immediate next step. The coarse
+target-speed sweep suggested a possible `9.0m/s` fixed-conservative failure, but
+the fine sweep did not reproduce it. Treat speed-only difficulty as insufficient
+main evidence.
+
+Use A1 to find a hard interaction subset:
 
 ```text
-core/scripts/carla/run_give_way_init01_v12_target_speed_sweep.sh
+core/scripts/carla/run_give_way_init01_v12_arrival_gap_sweep.sh
 ```
 
-The sweep must keep all v12 shared planner/supervisor settings fixed and vary
-only target speed. Adaptive-risk advantage should be claimed only if it shows a
-better safety-efficiency trade-off than the fixed-risk frontier.
+Then run A2 mechanism ablation on the selected hard offsets:
+
+```text
+core/scripts/carla/run_give_way_init01_v12_phase_ablation.sh
+```
+
+A1/A2 must keep all v12 shared planner/supervisor settings fixed. Adaptive-risk
+advantage should be claimed only if the full adaptive arm beats the fixed-risk
+frontier and phase-ablation controls on safety-efficiency-feasibility trade-off,
+without relying on stronger shared supervisor intervention.
