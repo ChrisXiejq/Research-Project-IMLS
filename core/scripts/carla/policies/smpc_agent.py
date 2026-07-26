@@ -92,6 +92,7 @@ class SMPCAgent(object):
                  smpc_intersection_approach_speed=5.0,
                  smpc_intersection_approach_decel=-3.0,
                  yield_planner_ownership_stress_enabled=False,
+                 yield_risk_owned_yield_enabled=False,
                  yield_steer_damping=0.25,
                  yield_recovery_enabled=True,
                  yield_recovery_steps=180,
@@ -195,6 +196,7 @@ class SMPCAgent(object):
         self.yield_planner_ownership_stress_enabled = bool(
             yield_planner_ownership_stress_enabled
         )
+        self.yield_risk_owned_yield_enabled = bool(yield_risk_owned_yield_enabled)
         self.yield_steer_damping = float(yield_steer_damping)
         self.yield_recovery_enabled = bool(yield_recovery_enabled)
         self.yield_recovery_steps = int(yield_recovery_steps)
@@ -937,6 +939,7 @@ class SMPCAgent(object):
                 "planner_ownership_stress_enabled": (
                     self.yield_planner_ownership_stress_enabled
                 ),
+                "risk_owned_yield_enabled": self.yield_risk_owned_yield_enabled,
                 "steer_damping": self.yield_steer_damping,
                 "recovery_enabled": self.yield_recovery_enabled,
                 "recovery_steps": self.yield_recovery_steps,
@@ -2118,10 +2121,13 @@ class SMPCAgent(object):
         )
         if self.yield_supervisor_mode == "reduced_intervention":
             planner_ownership_stress = bool(self.yield_planner_ownership_stress_enabled)
+            risk_owned_yield = bool(self.yield_risk_owned_yield_enabled)
             reduced_overlap_guard = (
                 overlap_risk and ego_dist_to_conflict <= self.yield_activation_distance
             )
-            if planner_ownership_stress:
+            if risk_owned_yield:
+                reduced_overlap_guard = False
+            elif planner_ownership_stress:
                 reduced_overlap_guard = (
                     overlap_risk
                     and ego_dist_to_conflict <= max(
@@ -2129,54 +2135,79 @@ class SMPCAgent(object):
                         self.yield_conflict_radius + 1.0,
                     )
                 )
-            cautious_takeover_required = (
+            emergency_takeover_required = bool(
                 reduced_emergency_braking_distance_required
-                or (
-                    (not planner_ownership_stress)
-                    and ego_dist_to_conflict <= self.yield_activation_distance
+                or ego_inside_footprint_clearance
+            )
+            if risk_owned_yield:
+                cautious_takeover_required = emergency_takeover_required
+                active = (
+                    allow_priority_yield
+                    and target_has_priority
+                    and not target_cleared_conflict
+                    and not reduced_clear_path_release
+                    and not_far_past_conflict
+                    and emergency_takeover_required
+                ) or (
+                    cautious_candidate
+                    and cautious_takeover_required
                 )
-                or (
-                    planner_ownership_stress
+                hard_stop_required = (
+                    active
+                    and not target_cleared_conflict
+                    and not reduced_clear_path_release
+                    and emergency_takeover_required
+                )
+            else:
+                cautious_takeover_required = (
+                    reduced_emergency_braking_distance_required
+                    or (
+                        (not planner_ownership_stress)
+                        and ego_dist_to_conflict <= self.yield_activation_distance
+                    )
+                    or (
+                        planner_ownership_stress
+                        and (
+                            ego_inside_footprint_clearance
+                            or reduced_conflict_hold
+                            or reduced_low_speed_wait_hold
+                        )
+                    )
+                )
+                active = (
+                    allow_priority_yield
+                    and target_has_priority
+                    and not target_cleared_conflict
+                    and not reduced_clear_path_release
+                    and not_far_past_conflict
                     and (
-                        ego_inside_footprint_clearance
+                        reduced_emergency_braking_distance_required
+                        or reduced_conflict_hold
+                        or reduced_low_speed_wait_hold
+                        or reduced_overlap_guard
+                        or ego_inside_footprint_clearance
+                    )
+                ) or (
+                    cautious_candidate
+                    and cautious_takeover_required
+                )
+                hard_stop_required = (
+                    active
+                    and not target_cleared_conflict
+                    and not reduced_clear_path_release
+                    and (
+                        reduced_emergency_braking_distance_required
+                        or ego_inside_footprint_clearance
                         or reduced_conflict_hold
                         or reduced_low_speed_wait_hold
                     )
                 )
-            )
-            active = (
-                allow_priority_yield
-                and target_has_priority
-                and not target_cleared_conflict
-                and not reduced_clear_path_release
-                and not_far_past_conflict
-                and (
-                    reduced_emergency_braking_distance_required
-                    or reduced_conflict_hold
-                    or reduced_low_speed_wait_hold
-                    or reduced_overlap_guard
-                    or ego_inside_footprint_clearance
-                )
-            ) or (
-                cautious_candidate
-                and cautious_takeover_required
-            )
-            hard_stop_required = (
-                active
-                and not target_cleared_conflict
-                and not reduced_clear_path_release
-                and (
-                    reduced_emergency_braking_distance_required
-                    or ego_inside_footprint_clearance
-                    or reduced_conflict_hold
-                    or reduced_low_speed_wait_hold
-                )
-            )
             reduced_direct_takeover_required = bool(hard_stop_required)
             reduced_direct_takeover_margin = 0.0
             direct_takeover_required = bool(hard_stop_required)
         else:
             planner_ownership_stress = False
+            risk_owned_yield = False
             cautious_takeover_required = False
             active = (
                 allow_priority_yield
@@ -2314,6 +2345,7 @@ class SMPCAgent(object):
             "reduced_direct_takeover_required": bool(reduced_direct_takeover_required),
             "reduced_direct_takeover_margin": float(reduced_direct_takeover_margin),
             "planner_ownership_stress_enabled": bool(planner_ownership_stress),
+            "risk_owned_yield_enabled": bool(risk_owned_yield),
             "planner_ownership_cautious_takeover_required": bool(
                 cautious_takeover_required
             ),
