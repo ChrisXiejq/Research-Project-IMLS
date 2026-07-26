@@ -13,7 +13,16 @@ from tensorflow.keras.applications.resnet import preprocess_input
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(SCRIPT_DIR)
-from prediction_dataset_utils import finite_or_none, has_full_horizon, mean, percentile, read_jsonl, resolve_raster_path, world_future_to_local
+from prediction_dataset_utils import (
+    finite_or_none,
+    has_full_horizon,
+    interaction_context_from_sample,
+    mean,
+    percentile,
+    read_jsonl,
+    resolve_raster_path,
+    world_future_to_local,
+)
 
 
 def parse_args():
@@ -49,6 +58,7 @@ def load_samples(jsonl_path, result_dir, horizon, max_samples=None, no_image=Fal
 def make_batch(batch, no_image=False):
     images = []
     past_states = []
+    interaction_contexts = []
     labels = []
     samples = []
     for sample, raster_path, past, future_local in batch:
@@ -61,9 +71,16 @@ def make_batch(batch, no_image=False):
             image = preprocess_input(tf.cast(image, tf.float32)).numpy()
         images.append(image)
         past_states.append(past)
+        interaction_contexts.append(interaction_context_from_sample(sample))
         labels.append(future_local)
         samples.append(sample)
-    return samples, np.asarray(images, dtype=np.float32), np.asarray(past_states, dtype=np.float32), np.asarray(labels, dtype=np.float32)
+    return (
+        samples,
+        np.asarray(images, dtype=np.float32),
+        np.asarray(past_states, dtype=np.float32),
+        np.asarray(interaction_contexts, dtype=np.float32),
+        np.asarray(labels, dtype=np.float32),
+    )
 
 
 def raw_to_modes(raw_pred, anchors, label_horizon):
@@ -89,6 +106,7 @@ def evaluate(args):
         print(f"Evaluating first {args.horizon} steps of {anchors.shape[1]}-step model output.")
 
     model = tf.keras.models.load_model(args.model, compile=False)
+    uses_interaction_context = len(getattr(model, "inputs", [])) >= 3
     top_ade = []
     min_ade = []
     top_fde = []
@@ -106,8 +124,9 @@ def evaluate(args):
         batch.append(item)
         if len(batch) < args.batch_size:
             continue
-        samples, images, past_states, labels = make_batch(batch, no_image=args.no_image)
-        pred = model.predict_on_batch([images, past_states])
+        samples, images, past_states, interaction_contexts, labels = make_batch(batch, no_image=args.no_image)
+        model_inputs = [images, past_states, interaction_contexts] if uses_interaction_context else [images, past_states]
+        pred = model.predict_on_batch(model_inputs)
         probs, mus = raw_to_modes(pred, anchors, args.horizon)
         for b in range(len(samples)):
             mode_ade = np.mean(np.linalg.norm(mus[b] - labels[b][None, :, :], axis=-1), axis=-1)
@@ -126,8 +145,9 @@ def evaluate(args):
             total += 1
         batch = []
     if batch:
-        samples, images, past_states, labels = make_batch(batch, no_image=args.no_image)
-        pred = model.predict_on_batch([images, past_states])
+        samples, images, past_states, interaction_contexts, labels = make_batch(batch, no_image=args.no_image)
+        model_inputs = [images, past_states, interaction_contexts] if uses_interaction_context else [images, past_states]
+        pred = model.predict_on_batch(model_inputs)
         probs, mus = raw_to_modes(pred, anchors, args.horizon)
         for b in range(len(samples)):
             mode_ade = np.mean(np.linalg.norm(mus[b] - labels[b][None, :, :], axis=-1), axis=-1)
@@ -148,6 +168,7 @@ def evaluate(args):
     return {
         "model": os.path.abspath(args.model),
         "split": args.split,
+        "uses_interaction_context": bool(uses_interaction_context),
         "samples": total,
         "top1_ADE_mean": finite_or_none(mean(top_ade)),
         "minADE_mean": finite_or_none(mean(min_ade)),

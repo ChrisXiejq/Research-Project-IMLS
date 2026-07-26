@@ -1,0 +1,10 @@
+evidence_item,split_or_scope,value,unit,source,paper_use,limitation
+validation top-mode ADE,validation,0.026689911261200905,m,core/scripts/models/l5kit_multipath_10_carla_finetuned_head_history.json,Shows the fine-tuned prediction head fits the held-out CARLA validation split.,"This is top-mode ADE from training history, not a full test-set predictor benchmark."
+best validation epoch,validation,9,epoch,core/scripts/models/l5kit_multipath_10_carla_finetuned_head_history.json,Documents the selected fine-tuned checkpoint.,Selection is based on validation top-mode ADE only.
+final training top-mode ADE,train,0.07164785265922546,m,core/scripts/models/l5kit_multipath_10_carla_finetuned_head_history.json,Sanity check that fine-tuning converged.,Training metric cannot be used as generalization evidence.
+final validation loss,validation,0.06837114691734314,loss,core/scripts/models/l5kit_multipath_10_carla_finetuned_head_history.json,Secondary convergence evidence.,Loss scale is model-specific.
+full-horizon train samples,train,2440,samples,core/scripts/models/l5kit_multipath_10_carla_finetuned_head_history.json,Documents dataset size used for fine-tuning sanity.,Does not replace a separate held-out test set report.
+full-horizon validation samples,val,305,samples,core/scripts/models/l5kit_multipath_10_carla_finetuned_head_history.json,Documents dataset size used for fine-tuning sanity.,Does not replace a separate held-out test set report.
+top1 FDE / minFDE,test,MISSING,m,not found locally,Required before final submission if predictor quality is challenged.,Do not claim final predictor benchmark until generated.
+minADE / mode ranking / calibration,test,MISSING,mixed,not found locally,Required to discuss multimodal ranking reliability.,Current dissertation can only use predictor as sanity support.
+train/val/test split integrity,dataset,MISSING_LOCAL_MANIFEST,check,prediction_dataset_merged/manifest.json not found locally,Required to rule out leakage.,Mention as pending if the manifest is not pulled/generated.

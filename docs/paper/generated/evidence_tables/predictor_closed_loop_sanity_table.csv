@@ -1,0 +1,3 @@
+policy,completion_time_s,solver_failure_frac,dmin_TV,completion_valid,note
+smpc_fixed_risk,10.016000149250031,0.006277554426200781,5.406995706616086,1.0,Closed-loop validation only; add ADE/FDE and mode-ranking metrics before final paper submission.
+smpc_var_risk,10.013000149205327,0.006252203651368781,5.40934207265012,1.0,Closed-loop validation only; add ADE/FDE and mode-ranking metrics before final paper submission.

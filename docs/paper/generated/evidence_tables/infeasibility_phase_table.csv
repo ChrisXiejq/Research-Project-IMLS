@@ -1,0 +1,5 @@
+supervisor_mode,policy,phase_bucket,yield_phase,infeasible_steps,affected_inits,mean_distance_to_conflict_m,min_distance_to_conflict_m,max_distance_to_conflict_m
+reduced,fixed-risk,critical/pre-clearance,cautious_approach_observed_target,6,01 03 04 05,9.510858162781908,8.401839489043642,10.646964392117564
+reduced,adaptive-risk,critical/pre-clearance,cautious_approach_observed_target,6,01 03 04 05,9.510860610112422,8.401839528761183,10.646970385510912
+reduced,fixed-risk,critical/pre-clearance,approach_yield_line,2,03,10.600866869373817,10.600866869373817,10.600866869373817
+reduced,adaptive-risk,critical/pre-clearance,approach_yield_line,2,03,10.600866853157394,10.600866853157394,10.600866853157394

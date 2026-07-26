@@ -30,6 +30,7 @@ from utils.vehicle_geometry_utils import vehicle_name_to_lf_lr, resolve_vehicle_
 scriptdir = os.path.abspath(__file__).split('scripts')[0] + 'scripts/'
 sys.path.append(scriptdir)
 from models.deploy_multipath_model import DeployMultiPath
+from models.prediction_dataset_utils import interaction_context_from_sample
 
 """
 Simulation parameter classes.
@@ -768,6 +769,7 @@ class RunIntersectionScenario:
             "model_weights": getattr(self, "_prediction_model_weights", None),
             "model_anchors": getattr(self, "_prediction_model_anchors", None),
         }
+        sample["interaction_context"] = interaction_context_from_sample(sample).tolist()
         self._prediction_samples.append(sample)
         self._append_prediction_jsonl("prediction_dataset_raw.jsonl", sample)
 
@@ -1148,7 +1150,17 @@ class RunIntersectionScenario:
                 tvs_valid_pred = [False]
             else:
                 img_tv = self.rasterizer.rasterize(self.agent_history, target_agent_id)
-                gmm_pred_tv = self.pred_model.predict_instance(img_tv, past_states_tv[:-1])
+                interaction_sample = {
+                    "ego_state": self._actor_state_for_prediction_log(self.vehicle_actors[self.ego_vehicle_idx]),
+                    "target_state": self._actor_state_for_prediction_log(target_actor),
+                    "target_to_world_R": np.asarray(R_target_to_world, dtype=float),
+                }
+                interaction_context = interaction_context_from_sample(interaction_sample)
+                gmm_pred_tv = self.pred_model.predict_instance(
+                    img_tv,
+                    past_states_tv[:-1],
+                    interaction_context=interaction_context,
+                )
                 gmm_pred_tv.transform(R_target_to_world, t_target_to_world)
                 gmm_pred_tv=gmm_pred_tv.get_top_k_GMM(self.ego_num_modes)
                 self._record_prediction_sample(
@@ -1358,7 +1370,8 @@ class RunIntersectionScenario:
                                         np.zeros((5,3))
                                       )).astype(np.float32)
         self.pred_model.predict_instance(image_raw   = blank_image,
-                                         past_states = zero_traj)
+                                         past_states = zero_traj,
+                                         interaction_context=np.zeros((8,), dtype=np.float32))
 
     def _viz_gmm(self, img, tvs_mode_dists, mdist_sq_thresh=5.991):
         mus    = tvs_mode_dists[0][0] # N_modes by N by 2

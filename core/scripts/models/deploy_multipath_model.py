@@ -18,6 +18,7 @@ class DeployMultiPath:
             self.model = tf.keras.models.load_model(saved_model_h5, compile=False)
         except Exception as e:
             print(f"Could not load the saved model!  Error: {e}")
+        self.uses_interaction_context = len(getattr(self.model, "inputs", [])) >= 3
 
         self.anchors = tf.constant(anchors, dtype=tf.float32)
 
@@ -25,7 +26,7 @@ class DeployMultiPath:
         assert (len(self.anchors.shape) == 3 and self.anchors.shape[-1] == 2)
         self.num_anchors, self.num_timesteps, _ = self.anchors.shape
 
-    def predict_instance(self, image_raw, past_states):
+    def predict_instance(self, image_raw, past_states, interaction_context=None):
         if len(image_raw.shape) == 3:
             image_raw = np.expand_dims(image_raw, 0)
         img = preprocess_input(tf.cast(image_raw, dtype=tf.float32))
@@ -34,7 +35,16 @@ class DeployMultiPath:
             past_states = np.expand_dims(past_states, 0)
         past_states = tf.cast(past_states, dtype=tf.float32)
 
-        pred = self.model.predict_on_batch([img, past_states])  # raw prediction tensor
+        if self.uses_interaction_context:
+            if interaction_context is None:
+                interaction_context = np.zeros((8,), dtype=np.float32)
+            interaction_context = np.asarray(interaction_context, dtype=np.float32)
+            if interaction_context.ndim == 1:
+                interaction_context = np.expand_dims(interaction_context, 0)
+            interaction_context = tf.cast(interaction_context, dtype=tf.float32)
+            pred = self.model.predict_on_batch([img, past_states, interaction_context])
+        else:
+            pred = self.model.predict_on_batch([img, past_states])  # raw prediction tensor
         gmm_pred = self._make_gmm(pred)                         # convert to GMM format
         return gmm_pred
 

@@ -110,6 +110,60 @@ def world_future_to_local(sample: Dict, horizon: int = 10) -> np.ndarray:
     return (future_world - translation) @ rotation
 
 
+def _state_value(state: Dict, key: str, default: float = 0.0) -> float:
+    try:
+        value = state.get(key, default)
+        return float(value) if value is not None else float(default)
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def interaction_context_from_sample(sample: Dict) -> np.ndarray:
+    """Return a compact ego-target interaction context in target-local axes.
+
+    The current deployed MultiPath model only receives a raster and target
+    history.  The interaction-aware adapter uses this low-dimensional side
+    channel to expose the ego vehicle state without changing the planner-facing
+    GMM output contract.
+    """
+
+    import numpy as np
+
+    ego = sample.get("ego_state") or {}
+    target = sample.get("target_state") or {}
+    rotation = np.asarray(sample.get("target_to_world_R", np.eye(2)), dtype=np.float32)
+
+    ego_xy = np.asarray([
+        _state_value(ego, "x"),
+        _state_value(ego, "y_rhs"),
+    ], dtype=np.float32)
+    target_xy = np.asarray([
+        _state_value(target, "x"),
+        _state_value(target, "y_rhs"),
+    ], dtype=np.float32)
+    rel_local = (ego_xy - target_xy).reshape(1, 2) @ rotation
+    rel_x = float(rel_local[0, 0])
+    rel_y = float(rel_local[0, 1])
+    ego_speed = _state_value(ego, "speed")
+    target_speed = _state_value(target, "speed")
+    yaw_delta = math.radians(_state_value(ego, "yaw_deg") - _state_value(target, "yaw_deg"))
+    distance = math.sqrt(rel_x * rel_x + rel_y * rel_y)
+
+    return np.asarray(
+        [
+            rel_x,
+            rel_y,
+            ego_speed,
+            target_speed,
+            ego_speed - target_speed,
+            math.sin(yaw_delta),
+            math.cos(yaw_delta),
+            distance,
+        ],
+        dtype=np.float32,
+    )
+
+
 def displacement_errors(pred: List, future_xy: List, mask: List, horizon: int = 10) -> Tuple[List[float], List[float]]:
     import numpy as np
 
