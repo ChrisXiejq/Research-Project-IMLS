@@ -46,7 +46,6 @@ def parse_args():
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--learning_rate", type=float, default=5.0e-5)
     parser.add_argument("--horizon", type=int, default=10)
-    parser.add_argument("--history_len", type=int, default=5)
     parser.add_argument("--context_dim", type=int, default=8)
     parser.add_argument("--d_model", type=int, default=64)
     parser.add_argument("--num_heads", type=int, default=4)
@@ -103,7 +102,6 @@ def make_dataset(
     jsonl_path: str,
     result_dir: str,
     horizon: int,
-    history_len: int,
     context_dim: int,
     batch_size: int,
     shuffle: bool,
@@ -112,7 +110,7 @@ def make_dataset(
 ) -> tf.data.Dataset:
     output_signature = (
         tf.TensorSpec(shape=(), dtype=tf.string),
-        tf.TensorSpec(shape=(history_len, 4), dtype=tf.float32),
+        tf.TensorSpec(shape=(None, 4), dtype=tf.float32),
         tf.TensorSpec(shape=(context_dim,), dtype=tf.float32),
         tf.TensorSpec(shape=(horizon, 2), dtype=tf.float32),
     )
@@ -158,11 +156,14 @@ def build_interaction_adapter_model(args, raw_output_dim: int) -> tf.keras.Model
         base_model.trainable = False
 
     image_input = tf.keras.Input(shape=(500, 500, 3), dtype=tf.float32, name="image")
-    past_input = tf.keras.Input(shape=(args.history_len, 4), dtype=tf.float32, name="past_states")
+    past_input = tf.keras.Input(shape=(None, 4), dtype=tf.float32, name="past_states")
     context_input = tf.keras.Input(shape=(args.context_dim,), dtype=tf.float32, name="interaction_context")
 
     base_pred = base_model([image_input, past_input])
-    context_tokens = tf.keras.layers.RepeatVector(args.history_len, name="repeat_interaction_context")(context_input)
+    context_tokens = tf.keras.layers.Lambda(
+        lambda z: tf.repeat(tf.expand_dims(z[1], axis=1), tf.shape(z[0])[1], axis=1),
+        name="repeat_interaction_context",
+    )([past_input, context_input])
     tokens = tf.keras.layers.Concatenate(axis=-1, name="history_context_tokens")([past_input, context_tokens])
     x = tf.keras.layers.Dense(args.d_model, activation="gelu", name="interaction_token_projection")(tokens)
     for idx in range(args.num_layers):
@@ -212,11 +213,11 @@ def main():
     model.summary()
 
     train_ds = make_dataset(
-        train_jsonl, result_dir, args.horizon, args.history_len, args.context_dim, args.batch_size,
+        train_jsonl, result_dir, args.horizon, args.context_dim, args.batch_size,
         shuffle=True, max_samples=args.max_train_samples, no_image=args.no_image,
     )
     val_ds = make_dataset(
-        val_jsonl, result_dir, args.horizon, args.history_len, args.context_dim, args.batch_size,
+        val_jsonl, result_dir, args.horizon, args.context_dim, args.batch_size,
         shuffle=False, max_samples=args.max_val_samples, no_image=args.no_image,
     )
 
@@ -247,7 +248,6 @@ def main():
         "batch_size": args.batch_size,
         "learning_rate": args.learning_rate,
         "horizon": args.horizon,
-        "history_len": args.history_len,
         "context_dim": args.context_dim,
         "d_model": args.d_model,
         "num_heads": args.num_heads,
