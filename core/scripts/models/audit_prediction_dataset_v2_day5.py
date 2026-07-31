@@ -108,6 +108,11 @@ def freeze_reactive_parameters(parameters):
     }
 
 
+def count_transitions(values):
+    values = np.asarray(values)
+    return int(np.sum(values[1:] != values[:-1])) if len(values) >= 2 else 0
+
+
 def load_full_rate_clearance(subrun_dir):
     pkl_path = subrun_dir / "scenario_result.pkl"
     with pkl_path.open("rb") as handle:
@@ -134,8 +139,18 @@ def step_metrics(step_csv):
     speed = np.asarray([as_float(row.get("target0_speed")) for row in rows], dtype=float)
     x = np.asarray([as_float(row.get("target0_x")) for row in rows], dtype=float)
     y = np.asarray([as_float(row.get("target0_y_rhs")) for row in rows], dtype=float)
+    throttle = np.asarray(
+        [as_float(row.get("target0_throttle"), 0.0) for row in rows], dtype=float
+    )
+    brake = np.asarray(
+        [as_float(row.get("target0_brake"), 0.0) for row in rows], dtype=float
+    )
     active = np.asarray(
         [as_bool(row.get("target0_reactive_active")) for row in rows], dtype=bool
+    )
+    desired_speed = np.asarray(
+        [as_float(row.get("target0_reactive_desired_speed_mps")) for row in rows],
+        dtype=float,
     )
     triggers = sum(as_bool(row.get("target0_reactive_triggered_this_step")) for row in rows)
     releases = sum(as_bool(row.get("target0_reactive_released_this_step")) for row in rows)
@@ -157,12 +172,38 @@ def step_metrics(step_csv):
             adt = np.diff(accel_time)
             good_jerk = adt > 1.0e-6
             jerk = np.diff(acceleration)[good_jerk] / adt[good_jerk]
+    control_mode = np.where(brake > 0.05, -1, np.where(throttle > 0.05, 1, 0))
+    compressed_control_mode = []
+    for value in control_mode:
+        value = int(value)
+        if not compressed_control_mode or value != compressed_control_mode[-1]:
+            compressed_control_mode.append(value)
+    direct_control_reversals = sum(
+        left * right == -1
+        for left, right in zip(
+            compressed_control_mode, compressed_control_mode[1:]
+        )
+    )
+    finite_desired_speed = desired_speed[np.isfinite(desired_speed)]
     return {
         "rows": len(rows),
         "trigger_count": int(triggers),
         "release_count": int(releases),
         "active_steps": int(np.sum(active)),
         "active_fraction": float(np.mean(active)) if len(active) else 0.0,
+        "active_state_transition_count": count_transitions(active),
+        "desired_speed_transition_count": (
+            count_transitions(np.round(finite_desired_speed, 6))
+            if len(finite_desired_speed)
+            else None
+        ),
+        "simultaneous_throttle_brake_steps": int(
+            np.sum((throttle > 0.05) & (brake > 0.05))
+        ),
+        "control_mode_transition_count": count_transitions(control_mode),
+        "direct_propulsion_braking_reversal_count": int(
+            direct_control_reversals
+        ),
         "trigger_onset_s": (
             float(time[trigger_indices[0]] - time[0]) if trigger_indices else None
         ),
@@ -372,6 +413,23 @@ def main():
         "trigger_release_events_paired": all(
             item["trigger_count"] == item["release_count"] for item in reactive
         ),
+        "reactive_command_has_single_down_up_cycle": all(
+            item["active_state_transition_count"]
+            == (2 if item["trigger_count"] else 0)
+            and item["desired_speed_transition_count"]
+            == (2 if item["trigger_count"] else 0)
+            for item in reactive
+        ),
+        "target_control_never_overlaps_throttle_and_brake": bool(rollouts)
+        and all(
+            item["simultaneous_throttle_brake_steps"] == 0
+            for item in rollouts.values()
+        ),
+        "target_control_has_no_direct_propulsion_braking_reversal": bool(rollouts)
+        and all(
+            item["direct_propulsion_braking_reversal_count"] == 0
+            for item in rollouts.values()
+        ),
         "reactive_trigger_not_immediate": bool(trigger_onsets)
         and min(trigger_onsets) >= 0.2,
         "reactive_trigger_timing_varies": len(trigger_onsets) >= 2
@@ -398,7 +456,7 @@ def main():
     status = "pass" if all(gates.values()) and not errors else "fail"
     frozen_parameters = parameter_sets[0] if len(unique_parameter_hashes) == 1 else None
     report = {
-        "audit_schema_version": "prediction_dataset_v2_day5_audit_v1",
+        "audit_schema_version": "prediction_dataset_v2_day5_audit_v2",
         "status": status,
         "results_dir": str(root),
         "rollout_count": len(rollouts),
@@ -415,6 +473,24 @@ def main():
                 max(trigger_onsets) - min(trigger_onsets)
                 if len(trigger_onsets) >= 2
                 else None
+            ),
+            "maximum_control_mode_transitions": max(
+                [item["control_mode_transition_count"] for item in reactive],
+                default=None,
+            ),
+            "simultaneous_throttle_brake_steps": sum(
+                item["simultaneous_throttle_brake_steps"]
+                for item in reactive
+            ),
+            "direct_propulsion_braking_reversals": sum(
+                item["direct_propulsion_braking_reversal_count"]
+                for item in reactive
+            ),
+            "kinematic_interpretation": (
+                "Finite-difference acceleration and jerk include 20 Hz CARLA "
+                "wheel-speed fluctuations shared by S0 and S1, so actuator "
+                "mutual exclusion and state/desired-speed transitions are the "
+                "primary anti-chattering evidence."
             ),
         },
         "safety_summary": {

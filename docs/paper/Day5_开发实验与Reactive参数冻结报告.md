@@ -7,7 +7,7 @@
 实验矩阵：5 inits × 2 target styles × 2 ego policies = 20 rollouts
 
 行为代码版本：`6b71ccc`
-云端有效结果：`/root/autodl-tmp/day5_final_6b71ccc`
+云端有效结果：`/root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc`
 
 ## 1. 结论
 
@@ -19,6 +19,7 @@ Day 5 已完成，defensive-reactive target 参数可以冻结并进入 Day 6 �
 status: pass
 rollouts: 20/20
 logged prediction samples: 1055
+audit gates: 19/19
 native CARLA collision events: 0
 reactive trigger rollout coverage: 80%
 mean reactive active fraction: 5.29%
@@ -29,7 +30,7 @@ minimum full-rate centroid clearance: 3.800 m
 median paired S1–S0 maximum target separation: 4.880 m
 ```
 
-全部冻结 gate 为 true，包括 raster/sequence 等价、单次 trigger、trigger/release 成对、非首步触发、trigger timing variation、速度恢复、原生零碰撞、S1–S0 separation 和参数一致性。
+全部 19 个冻结 gate 为 true，包括 raster/sequence 等价、单次 trigger、trigger/release 成对、非首步触发、trigger timing variation、速度恢复、控制命令无抖动、原生零碰撞、S1–S0 separation 和参数一致性。
 
 证据：
 
@@ -192,7 +193,38 @@ Day 5 不能单独支持：
 
 这些结论必须分别由 Day 6–10 的正式数据、模型训练、held-out evaluation 和闭环 sanity check 提供。
 
-## 10. 下一步
+## 10. 云端目录与完整性复核
+
+2026-07-31 将散落在 `/root/autodl-tmp/` 顶层的 Day 4/5 产物移入统一根目录：
+
+```text
+/root/autodl-tmp/results/give_way_transformer/
+├── day4/
+│   ├── final/
+│   └── artifacts/
+└── day5/
+    ├── final/
+    ├── development/
+    │   ├── candidates/
+    │   ├── pilots/
+    │   └── smoke/
+    ├── failed/
+    ├── artifacts/
+    └── logs/infrastructure/
+```
+
+整理只使用不覆盖移动，没有删除数据。移动后从新路径重跑完整审计，结果仍为 `status=pass`、20/20 rollouts、1,055 samples、19/19 gates 和 0 errors。`/root/autodl-tmp/` 顶层已无 Day4/Day5/audit/frozen 散落条目。
+
+额外防抖动复核显示：
+
+1. target throttle 与 brake 同时激活步数为 0；
+2. propulsion–braking 直接反转次数为 0；
+3. 触发轨迹的 active state 与 desired speed 都恰好发生一次下降和一次恢复；
+4. 未触发轨迹的上述转移次数为 0。
+
+20 Hz CARLA wheel-speed 有 S0/S1 共有的高频波动，因此原始速度差分的 acceleration/jerk 峰值不作为执行器物理界限证据。防抖动结论以互斥 actuator command、state transition 和 desired-speed transition 为主。因而 Day 5 对“正式数据采集前的 reactive 行为与配置冻结”已完全完成；它不支持人类舒适性或驾驶真实性 claim。
+
+## 11. 下一步
 
 进入 Day 6：
 

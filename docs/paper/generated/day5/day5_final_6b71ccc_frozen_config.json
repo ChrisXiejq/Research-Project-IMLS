@@ -1,7 +1,7 @@
 {
   "freeze_schema_version": "give_way_v2_day5_collection_freeze_v1",
-  "source_audit": "/root/autodl-tmp/day5_final_6b71ccc_audit.json",
-  "source_results_dir": "/root/autodl-tmp/day5_final_6b71ccc",
+  "source_audit": "/root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc_audit.json",
+  "source_results_dir": "/root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc",
   "development_init_ids": [
     1,
     2,

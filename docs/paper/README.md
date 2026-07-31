@@ -7,7 +7,7 @@
 3. `Day2_数据审计与V2协议冻结报告.md`：旧数据审计、V2 schema 与 200-rollout matrix；
 4. `Day3_GMM评估器与校准报告.md`：deployment-equivalent evaluator、输入契约和 calibration；
 5. `Day4_V2交互数据链路与ReactiveTarget报告.md`：V2 输入链、时序交互特征和 reactive target；
-6. `Day5_开发实验与Reactive参数冻结报告.md`：20-rollout 开发实验、行为 gate 与 frozen config；
+6. `Day5_开发实验与Reactive参数冻结报告.md`：20-rollout 开发实验、19-gate 行为审计、云端目录规范与 frozen config；
 7. `已完成实验与证据账本.md` 与 `generated/`：已完成证据。
 
 论文正文尚未进入最终写作阶段，因此不保留会迅速失效的 Results draft 或重复的 Markdown 表格。正式 Results/Discussion 将在模型与闭环实验冻结后从机器可读证据生成。

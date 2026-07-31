@@ -1,7 +1,7 @@
 {
   "audit_schema_version": "prediction_dataset_v2_smoke_audit_v1",
   "status": "pass",
-  "results_dir": "/root/autodl-tmp/day4_v2_smoke_1c55832",
+  "results_dir": "/root/autodl-tmp/results/give_way_transformer/day4/final/day4_v2_smoke_1c55832",
   "manifests": 4,
   "cell_rollouts": {
     "S0_ADAPTIVE": 1,

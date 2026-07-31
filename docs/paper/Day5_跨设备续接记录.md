@@ -1,6 +1,6 @@
 # Day 5 跨设备续接记录
 
-> 状态更新：本交接记录中的“停止点”已过时。Day 5 已于 2026-07-31 完成；最新结论以 `Day5_开发实验与Reactive参数冻结报告.md` 为准。
+> 状态更新：本交接记录中的“停止点”已过时。Day 5 已于 2026-07-31 完成；结果已统一移至 `/root/autodl-tmp/results/give_way_transformer/`，最新结论以 `Day5_开发实验与Reactive参数冻结报告.md` 为准。
 
 更新时间：2026-07-31  
 本地分支：`main`  
@@ -14,7 +14,7 @@
 
 ```text
 云端目录：
-/root/autodl-tmp/day5_candidate_clean_6b71ccc
+/root/autodl-tmp/results/give_way_transformer/day5/development/candidates/day5_candidate_clean_6b71ccc
 
 代码版本：
 6b71ccc
@@ -38,7 +38,7 @@ native CARLA collision_event_count: 0
 原计划的统一 20-rollout 最终 Day 5 目录：
 
 ```text
-/root/autodl-tmp/day5_final_6b71ccc
+/root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc
 ```
 
 在 SSH 连接被服务器重置后，启动命令没有得到执行确认。因此续接时必须先只读检查该目录和相关进程，不能假设它已启动，也不能直接重复启动。
@@ -135,9 +135,9 @@ init01 的真实 S1_FIXED 验证结果与预测一致，见第 1 节。
 ### 有效、可保留的证据
 
 ```text
-/root/autodl-tmp/day5_route_smoke_cdfe421
-/root/autodl-tmp/day5_collision_sensor_smoke_f818589
-/root/autodl-tmp/day5_candidate_clean_6b71ccc
+/root/autodl-tmp/results/give_way_transformer/day5/development/smoke/day5_route_smoke_cdfe421
+/root/autodl-tmp/results/give_way_transformer/day5/development/smoke/day5_collision_sensor_smoke_f818589
+/root/autodl-tmp/results/give_way_transformer/day5/development/candidates/day5_candidate_clean_6b71ccc
 ```
 
 用途：
@@ -203,10 +203,10 @@ docs/paper/Day4_V2交互数据链路与ReactiveTarget报告.md，
 
 ```bash
 pgrep -af 'CarlaUE4|run_all_scenarios.py|run_give_way_prediction_dataset_v2.sh'
-find /root/autodl-tmp/day5_final_6b71ccc \
+find /root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc \
   -name scenario_run_summary.json 2>/dev/null | wc -l
-test -f /root/autodl-tmp/day5_final_6b71ccc.log \
-  && tail -n 40 /root/autodl-tmp/day5_final_6b71ccc.log
+test -f /root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc.log \
+  && tail -n 40 /root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc.log
 ```
 
 解释：
@@ -237,14 +237,14 @@ export PYTHON_BIN=/root/miniconda3/envs/carla_modern/bin/python
 只在确认没有重复进程后执行：
 
 ```bash
-RESULTS_DIR=/root/autodl-tmp/day5_final_6b71ccc \
+RESULTS_DIR=/root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc \
 INIT_START=1 \
 INIT_END=5 \
 PREDICTION_GIT_COMMIT=6b71ccc \
 LOG_STRIDE=4 \
 SKIP_COMPLETED_SUBRUNS=1 \
 nohup bash core/scripts/carla/run_give_way_prediction_dataset_v2.sh \
-  > /root/autodl-tmp/day5_final_6b71ccc.log 2>&1 &
+  > /root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc.log 2>&1 &
 ```
 
 完成后运行：
@@ -252,9 +252,9 @@ nohup bash core/scripts/carla/run_give_way_prediction_dataset_v2.sh \
 ```bash
 PYTHONPATH=core/scripts/models \
 $PYTHON_BIN core/scripts/models/audit_prediction_dataset_v2_day5.py \
-  --results-dir /root/autodl-tmp/day5_final_6b71ccc \
-  --output-json /root/autodl-tmp/day5_final_6b71ccc_audit.json \
-  --frozen-config-json /root/autodl-tmp/day5_final_6b71ccc_frozen_config.json \
+  --results-dir /root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc \
+  --output-json /root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc_audit.json \
+  --frozen-config-json /root/autodl-tmp/results/give_way_transformer/day5/final/day5_final_6b71ccc_frozen_config.json \
   --expected-git-commit 6b71ccc
 ```
 

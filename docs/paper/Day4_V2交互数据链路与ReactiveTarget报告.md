@@ -4,7 +4,7 @@
 >
 > 实现 commit：`1c558326f066a906da4838add08266249dddf232`
 >
-> 云端 smoke：`/root/autodl-tmp/day4_v2_smoke_1c55832`
+> 云端 smoke：`/root/autodl-tmp/results/give_way_transformer/day4/final/day4_v2_smoke_1c55832`
 >
 > 范围：init 01，S0/S1 × fixed/adaptive 各 1 个 rollout
 
@@ -333,7 +333,7 @@ docs/paper/generated/day4/day4_v2_smoke_audit.json
 云端完整 raster、JSONL、scenario results 和 step logs 保留在：
 
 ```text
-/root/autodl-tmp/day4_v2_smoke_1c55832
+/root/autodl-tmp/results/give_way_transformer/day4/final/day4_v2_smoke_1c55832
 ```
 
 ## 9. 论文边界
