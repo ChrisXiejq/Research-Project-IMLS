@@ -677,14 +677,48 @@ def get_actor_position_rhs(actor):
     return np.array([location.x, -location.y])
 
 
-def get_route_conflict_point_rhs(start_a, goal_a, start_b, goal_b):
-    """Return the infinite-line intersection for two route centre lines."""
+def get_route_conflict_point_rhs(
+    start_a,
+    goal_a,
+    start_b=None,
+    goal_b=None,
+    *,
+    ego_route_points_rhs=None,
+):
+    """Return the target-line conflict point in the right-handed world frame.
+
+    A turning ego route must be represented by its generated reference path.
+    Intersecting the start-to-goal chord with the target line places the
+    conflict point outside the actual turn in the Town05 give-way scenario.
+    The route-aware branch deliberately mirrors SMPCAgent's
+    ``ego_route_target_motion_line`` geometry.
+
+    ``start_b``/``goal_b`` remain as a compatibility fallback for straight
+    routes only.
+    """
 
     p = np.asarray([start_a.location.x, -start_a.location.y], dtype=float)
     r = np.asarray(
         [goal_a.location.x - start_a.location.x, -(goal_a.location.y - start_a.location.y)],
         dtype=float,
     )
+    r_norm = float(np.linalg.norm(r))
+    if r_norm < 1.0e-8:
+        raise ValueError("Target route has zero length")
+    target_dir = r / r_norm
+
+    if ego_route_points_rhs is not None:
+        ego_route = np.asarray(ego_route_points_rhs, dtype=float)
+        if ego_route.ndim != 2 or ego_route.shape[0] < 2 or ego_route.shape[1] < 2:
+            raise ValueError("ego_route_points_rhs must have shape [N>=2, >=2]")
+        ego_xy = ego_route[:, :2]
+        progress = (ego_xy - p) @ target_dir
+        projected = p + progress[:, None] * target_dir[None, :]
+        distances = np.linalg.norm(ego_xy - projected, axis=1)
+        return projected[int(np.argmin(distances))]
+
+    if start_b is None or goal_b is None:
+        raise ValueError("A route-aware ego path or a straight route line is required")
     q = np.asarray([start_b.location.x, -start_b.location.y], dtype=float)
     s = np.asarray(
         [goal_b.location.x - start_b.location.x, -(goal_b.location.y - start_b.location.y)],
@@ -1426,7 +1460,7 @@ class RunIntersectionScenario:
         bp_library = self.world.get_blueprint_library()
 
         self.vehicle_actors   = []
-        self.vehicle_policies = []
+        self.vehicle_policies = [None] * len(vehicle_params_list)
         self.vehicle_params_list = list(vehicle_params_list)
         self.vehicle_colors   = []
         self.vehicle_init_speeds = []
@@ -1462,18 +1496,30 @@ class RunIntersectionScenario:
         if len(ego_vehicle_idxs) != 1:
             raise RuntimeError(f"Invalid number of ego vehicles spawned: {len(ego_vehicle_idxs)}")
         self.ego_vehicle_idx = ego_vehicle_idxs[0]
-        ego_start, ego_goal = route_transforms[self.ego_vehicle_idx]
-
-        for idx, (vp, veh_actor) in enumerate(zip(vehicle_params_list, self.vehicle_actors)):
+        # Construct the ego policy first so defensive targets use the exact
+        # generated ego reference route, not a geometrically invalid turn chord.
+        policy_creation_order = [self.ego_vehicle_idx] + [
+            idx for idx in range(len(vehicle_params_list))
+            if idx != self.ego_vehicle_idx
+        ]
+        for idx in policy_creation_order:
+            vp = vehicle_params_list[idx]
+            veh_actor = self.vehicle_actors[idx]
             _, goal_transform = route_transforms[idx]
             conflict_point = None
             if vp.policy_type == "defensive_reactive":
                 target_start, target_goal = route_transforms[idx]
+                ego_policy = self.vehicle_policies[self.ego_vehicle_idx]
+                ego_route = getattr(ego_policy, "feas_ref_states", None)
+                if ego_route is None:
+                    raise RuntimeError(
+                        "defensive_reactive target requires the ego policy's "
+                        "generated reference route"
+                    )
                 conflict_point = get_route_conflict_point_rhs(
                     target_start,
                     target_goal,
-                    ego_start,
-                    ego_goal,
+                    ego_route_points_rhs=ego_route,
                 )
             veh_policy = get_vehicle_policy(
                 vp,
@@ -1488,7 +1534,7 @@ class RunIntersectionScenario:
                         self.savedir,
                         label=getattr(vp, "smpc_config", vp.policy_type),
                     )
-            self.vehicle_policies.append(veh_policy)
+            self.vehicle_policies[idx] = veh_policy
 
         self.ego_N           = vehicle_params_list[self.ego_vehicle_idx].N
         self.ego_num_modes   = vehicle_params_list[self.ego_vehicle_idx].num_modes

@@ -56,6 +56,7 @@ class DefensiveReactiveAgent(StraightLineAgent):
         self.max_decel = -2.0
         self._active = False
         self._inactive_time = 0.0
+        self._released_latched = False
         self._diagnostics = self._empty_diagnostics()
 
     def _empty_diagnostics(self):
@@ -64,6 +65,8 @@ class DefensiveReactiveAgent(StraightLineAgent):
             "active": False,
             "triggered_this_step": False,
             "released_this_step": False,
+            "released_latched": False,
+            "transition_reason": "none",
             "target_conflict_distance_m": None,
             "ego_conflict_distance_m": None,
             "target_ttc_s": None,
@@ -93,7 +96,9 @@ class DefensiveReactiveAgent(StraightLineAgent):
             "release_hold_s": self.release_hold,
             "max_accel_mps2": self.max_accel,
             "max_decel_mps2": self.max_decel,
-            "parameter_status": "day4_provisional_day5_freeze_required",
+            "conflict_geometry": "ego_reference_route_target_motion_line",
+            "episode_semantics": "single_trigger_latched_release",
+            "parameter_status": "day5_development_candidate",
         }
 
     def diagnostics(self):
@@ -170,6 +175,7 @@ class DefensiveReactiveAgent(StraightLineAgent):
         ego_state = pred_dict.get("ego_actor_state")
         triggered = False
         released = False
+        transition_reason = "none"
         metrics = None
         if ego_state:
             metrics = self._interaction_metrics(
@@ -193,18 +199,23 @@ class DefensiveReactiveAgent(StraightLineAgent):
                 and metrics["closest_distance"] <= self.closest_approach_distance
             )
             hazard = before_conflict and within_zone and (ttc_conflict or closest_conflict)
-            if hazard:
+            if hazard and not self._released_latched:
                 self._inactive_time = 0.0
                 if not self._active:
                     self._active = True
                     triggered = True
+                    transition_reason = "hazard_trigger"
             elif self._active:
                 self._inactive_time += self.DT
                 cleared = metrics["target_conflict_signed"] < -self.release_clearance
                 if cleared or self._inactive_time >= self.release_hold:
                     self._active = False
                     self._inactive_time = 0.0
+                    self._released_latched = True
                     released = True
+                    transition_reason = (
+                        "target_cleared_conflict" if cleared else "hazard_absent_hold"
+                    )
 
         desired_speed = self.caution_speed if self._active else self.nominal_speed
         if metrics is not None and metrics["target_conflict_signed"] >= 0.0:
@@ -223,6 +234,8 @@ class DefensiveReactiveAgent(StraightLineAgent):
             "active": self._active,
             "triggered_this_step": triggered,
             "released_this_step": released,
+            "released_latched": self._released_latched,
+            "transition_reason": transition_reason,
             "target_conflict_distance_m": self._finite_or_none(
                 metrics["target_conflict_signed"] if metrics else float("nan")
             ),

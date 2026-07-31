@@ -23,6 +23,7 @@ DATASET_VERSION="give_way_interaction_prediction_v2.0"
 PROTOCOL_ID="town05_give_way_2x2_200_rollouts_v1"
 FEATURE_SCHEMA_ID="give_way_interaction_sequence_v2"
 ADAPTIVE_CONFIG='{"variant_name":"floor_weak","approach_preclearance_floor":1.66,"critical_preclearance_floor":1.72,"near_preclearance_floor":1.78}'
+REACTIVE_CONFIG_JSON="${REACTIVE_CONFIG_JSON:-}"
 
 if [[ -z "${CARLA_ROOT:-}" ]]; then
   echo "ERROR: CARLA_ROOT is not set." >&2
@@ -57,6 +58,10 @@ resume_args=()
 if [[ "${SKIP_COMPLETED_SUBRUNS}" == "1" ]]; then
   resume_args=(--skip_completed_subruns)
 fi
+reactive_args=()
+if [[ -n "${REACTIVE_CONFIG_JSON}" ]]; then
+  reactive_args=(--reactive_config_json "${REACTIVE_CONFIG_JSON}")
+fi
 
 run_cell() {
   local cell_id="$1"
@@ -87,6 +92,7 @@ run_cell() {
     --prediction_cell_id "${cell_id}" \
     --prediction_ego_policy_label "${ego_policy_label}" \
     --prediction_git_commit "${GIT_COMMIT}" \
+    "${reactive_args[@]}" \
     "${camera_args[@]}" \
     "${resume_args[@]}" \
     --skip_postprocess \

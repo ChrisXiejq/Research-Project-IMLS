@@ -116,6 +116,36 @@ def _prepare_prediction_params(scenario_dict, args=None, dataset_metadata=None):
     return pred_dict
 
 
+REACTIVE_CONFIG_FIELDS = {
+    "caution_speed_mps": "reactive_caution_speed",
+    "minimum_speed_mps": "reactive_minimum_speed",
+    "activation_distance_m": "reactive_activation_distance",
+    "release_clearance_m": "reactive_release_clearance",
+    "arrival_time_gap_s": "reactive_arrival_time_gap",
+    "closest_approach_time_s": "reactive_closest_approach_time",
+    "closest_approach_distance_m": "reactive_closest_approach_distance",
+    "release_hold_s": "reactive_release_hold",
+}
+
+
+def _load_reactive_config(args):
+    raw = getattr(args, "reactive_config_json", None)
+    path = getattr(args, "reactive_config_file", None)
+    if raw and path:
+        raise ValueError("Use only one of --reactive_config_json/--reactive_config_file")
+    if path:
+        with open(path, "r", encoding="utf-8") as handle:
+            config = json.load(handle)
+    elif raw:
+        config = json.loads(raw)
+    else:
+        return {}
+    unknown = sorted(set(config) - set(REACTIVE_CONFIG_FIELDS))
+    if unknown:
+        raise ValueError(f"Unknown reactive config fields: {unknown}")
+    return {key: float(value) for key, value in config.items()}
+
+
 def _infer_plot_init(init_glob):
     matches = glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/inits/", init_glob))
     if not matches:
@@ -270,6 +300,7 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
     else:
         raise ValueError(f"Invalid ego policy config: {ego_policy_config}")
 
+    reactive_config = _load_reactive_config(args)
     for vp_src in scenario_dict["vehicle_params"]:
         vp_dict = dict(vp_src)
         if vp_dict["role"] == "static":
@@ -284,6 +315,9 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
                 if target_style == "defensive_reactive"
                 else "straight"
             )
+            for public_name, dataclass_name in REACTIVE_CONFIG_FIELDS.items():
+                if public_name in reactive_config:
+                    vp_dict[dataclass_name] = reactive_config[public_name]
             vehicles_params_list.append( VehicleParams(**vp_dict) )
         elif vp_dict["role"] == "ego":
          
@@ -396,6 +430,16 @@ if __name__ == '__main__':
         choices=["assertive_constant_speed", "defensive_reactive"],
         default="assertive_constant_speed",
         help="V2 target behavior treatment.",
+    )
+    parser.add_argument(
+        "--reactive_config_json",
+        default=None,
+        help="JSON object overriding defensive-reactive parameters for Day 5 development.",
+    )
+    parser.add_argument(
+        "--reactive_config_file",
+        default=None,
+        help="JSON file overriding defensive-reactive parameters for Day 5 development.",
     )
     parser.add_argument(
         "--prediction_dataset_version",
