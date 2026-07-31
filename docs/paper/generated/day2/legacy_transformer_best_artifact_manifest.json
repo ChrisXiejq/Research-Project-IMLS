@@ -1,0 +1,151 @@
+{
+  "artifact_manifest_version": "tensorflow_saved_model_manifest_v1",
+  "artifact_role": "legacy_interaction_transformer_negative_control_pilot",
+  "associated_assets": {
+    "anchors": {
+      "bytes": 6528,
+      "path": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_clusters_16.npy",
+      "relative_path": "l5kit_clusters_16.npy",
+      "sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982"
+    },
+    "history_json": {
+      "bytes": 2412,
+      "path": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer_history.json",
+      "relative_path": "l5kit_multipath_10_carla_interaction_transformer_history.json",
+      "sha256": "34102a6713d629351c5ef71ddbab9fd69740561f3de59950db28f1df39fabb2f"
+    },
+    "training_log": {
+      "bytes": 1057,
+      "path": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer_training_log.csv",
+      "relative_path": "l5kit_multipath_10_carla_interaction_transformer_training_log.csv",
+      "sha256": "f019ec78bbae38c26a0b1efe7b3777806650e69e25d654ccef67a7fc7cb9c17c"
+    }
+  },
+  "history_parse_error": null,
+  "missing_required_assets": [],
+  "model": {
+    "directory": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer_best",
+    "files": [
+      {
+        "bytes": 57,
+        "path": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer_best/fingerprint.pb",
+        "relative_path": "fingerprint.pb",
+        "sha256": "ce3b616c8d2b8b18cfee98203552d10a4a6300ee325ff535a4169347b0240d12"
+      },
+      {
+        "bytes": 503964,
+        "path": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer_best/keras_metadata.pb",
+        "relative_path": "keras_metadata.pb",
+        "sha256": "69f9ef60a2a5ed8dc1ab6d328f090fad90a657eea47dadc980e82b7b55a824b0"
+      },
+      {
+        "bytes": 4307896,
+        "path": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer_best/saved_model.pb",
+        "relative_path": "saved_model.pb",
+        "sha256": "2616bf7df76b6183b3559acf556b6a53773c86f55e330d8a9b0027a72c49814d"
+      },
+      {
+        "bytes": 46550266,
+        "path": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer_best/variables/variables.data-00000-of-00001",
+        "relative_path": "variables/variables.data-00000-of-00001",
+        "sha256": "b6ceb5608354859b8c9805bdb253726ad09bd41264e64cec9c511d7f452d4766"
+      },
+      {
+        "bytes": 17708,
+        "path": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer_best/variables/variables.index",
+        "relative_path": "variables/variables.index",
+        "sha256": "3e63a83067732a2dac61710877e7a6b58a24a0193de076967142855b5c9bf93a"
+      }
+    ],
+    "total_bytes": 51379891
+  },
+  "normalization": {
+    "interaction_context_8d": "no explicit normalization in legacy pilot",
+    "past_states_local": "no explicit normalization in legacy pilot",
+    "raster": "tensorflow.keras.applications.resnet.preprocess_input",
+    "warning": "This legacy static-context pilot is not the formal V2 interaction-sequence model."
+  },
+  "seed": 11,
+  "seed_provenance": "run launcher did not override --seed; value is inherited from the frozen historical training script default",
+  "status": "pass",
+  "training_git_commit": "5d3ebc42f4882763561b70c652a465fc957c137f",
+  "training_metadata": {
+    "anchors": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_clusters_16.npy",
+    "base_model": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_finetuned_head_best",
+    "batch_size": 16,
+    "best_model": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer_best",
+    "context_dim": 8,
+    "d_model": 64,
+    "delta_scale": 0.15,
+    "epochs": 12,
+    "ff_dim": 128,
+    "freeze_base": "true",
+    "history": {
+      "loss": [
+        0.44145432114601135,
+        0.16874434053897858,
+        0.15462297201156616,
+        0.1466560661792755,
+        0.14116698503494263,
+        0.13863526284694672,
+        0.13490290939807892,
+        0.13255102932453156,
+        0.13126984238624573,
+        0.12861691415309906,
+        0.12834827601909637,
+        0.12703900039196014
+      ],
+      "top_mode_ADE": [
+        0.08622724562883377,
+        0.07065606862306595,
+        0.07057395577430725,
+        0.06985542923212051,
+        0.06861889362335205,
+        0.06932054460048676,
+        0.06858266890048981,
+        0.06847561150789261,
+        0.06931035965681076,
+        0.06876082718372345,
+        0.06949876993894577,
+        0.06978627294301987
+      ],
+      "val_loss": [
+        0.11938327550888062,
+        0.0827772319316864,
+        0.06980125606060028,
+        0.06480565667152405,
+        0.06103020906448364,
+        0.05957471951842308,
+        0.053746212273836136,
+        0.04964827746152878,
+        0.047242309898138046,
+        0.044636525213718414,
+        0.04526403546333313,
+        0.04398185387253761
+      ],
+      "val_top_mode_ADE": [
+        0.036183301359415054,
+        0.02855823002755642,
+        0.027233291417360306,
+        0.026806708425283432,
+        0.026165420189499855,
+        0.025802573189139366,
+        0.02571772038936615,
+        0.025443732738494873,
+        0.0259091816842556,
+        0.025105983018875122,
+        0.025419581681489944,
+        0.02546323463320732
+      ]
+    },
+    "horizon": 10,
+    "learning_rate": 5e-05,
+    "merged_dir": "/root/autodl-tmp/Research-Project-IMLS/core/results/20260726_212838_prediction_dataset_collection/prediction_dataset_merged",
+    "model_family": "interaction_transformer_multipath_residual_adapter",
+    "num_heads": 4,
+    "num_layers": 2,
+    "output_model": "/root/autodl-tmp/Research-Project-IMLS/core/scripts/models/l5kit_multipath_10_carla_interaction_transformer",
+    "train_count_full_horizon": 2441,
+    "val_count_full_horizon": 305
+  }
+}
