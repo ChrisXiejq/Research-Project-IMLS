@@ -80,7 +80,10 @@ def load_full_rate_clearance(subrun_dir):
     count = min(len(ego), len(target))
     if count == 0:
         return None
-    return float(np.min(np.linalg.norm(ego[:count, :2] - target[:count, :2], axis=1)))
+    # scenario_result state rows are [timestamp, x_rhs, y_rhs, yaw, speed].
+    return float(
+        np.min(np.linalg.norm(ego[:count, 1:3] - target[:count, 1:3], axis=1))
+    )
 
 
 def step_metrics(step_csv):
@@ -222,7 +225,10 @@ def main():
         step = step_metrics(subrun_dir / "scenario_steps.csv")
         summary_path = subrun_dir / "scenario_run_summary.json"
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
-        step["collision_event_count"] = int(summary.get("collision_event_count", -1))
+        summary_extra = summary.get("extra", {})
+        step["collision_event_count"] = int(
+            summary_extra.get("collision_event_count", -1)
+        )
         if step["collision_event_count"] < 0:
             errors.append(f"{summary_path}: native collision evidence missing")
         try:

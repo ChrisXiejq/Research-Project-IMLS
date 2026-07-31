@@ -218,9 +218,9 @@ class VehicleParams:
     target_style : str = "assertive_constant_speed"
     reactive_caution_speed : float = 4.5
     reactive_minimum_speed : float = 2.5
-    reactive_activation_distance : float = 30.0
+    reactive_activation_distance : float = 10.0
     reactive_release_clearance : float = 5.0
-    reactive_arrival_time_gap : float = 2.0
+    reactive_arrival_time_gap : float = 0.5
     reactive_closest_approach_time : float = 4.0
     reactive_closest_approach_distance : float = 6.0
     reactive_release_hold : float = 0.8

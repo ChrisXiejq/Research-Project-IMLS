@@ -31,9 +31,9 @@ class DefensiveReactiveAgent(StraightLineAgent):
         dt=0.2,
         caution_speed_mps=4.5,
         minimum_speed_mps=2.5,
-        activation_distance_m=30.0,
+        activation_distance_m=10.0,
         release_clearance_m=5.0,
-        arrival_time_gap_s=2.0,
+        arrival_time_gap_s=0.5,
         closest_approach_time_s=4.0,
         closest_approach_distance_m=6.0,
         release_hold_s=0.8,
@@ -98,6 +98,7 @@ class DefensiveReactiveAgent(StraightLineAgent):
             "max_decel_mps2": self.max_decel,
             "conflict_geometry": "ego_reference_route_target_motion_line",
             "episode_semantics": "single_trigger_latched_release",
+            "hazard_combination": "ttc_conflict_and_closest_approach",
             "parameter_status": "day5_development_candidate",
         }
 
@@ -198,7 +199,12 @@ class DefensiveReactiveAgent(StraightLineAgent):
                 metrics["closest_time"] <= self.closest_approach_time
                 and metrics["closest_distance"] <= self.closest_approach_distance
             )
-            hazard = before_conflict and within_zone and (ttc_conflict or closest_conflict)
+            hazard = (
+                before_conflict
+                and within_zone
+                and ttc_conflict
+                and closest_conflict
+            )
             if hazard and not self._released_latched:
                 self._inactive_time = 0.0
                 if not self._active:
