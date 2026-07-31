@@ -117,7 +117,7 @@ reactive_parameters_sha256:
 188ea5a1e3a34cde06eed16e779a252058476c5ab3d3dfda3a870000d92e77d5
 
 collection_config_sha256:
-80fe23a6ca65fb4c56e52bebbaa4d596c2f381604021689c7d0c8285f3cc32c8
+b047c70f238501f4c6de5b359dc18dc0db821da8d7bb8ab65501d8c2785e3b05
 
 formal_init_set_sha256:
 768228e53474e97eac574511a31265d193182dd3d96313b368c967c2f1b3dcc6
@@ -128,7 +128,7 @@ formal_init_set_sha256:
 - prediction model weights 与 anchors；
 - stride、horizon、raster logging 和 dt；
 - adaptive risk mapping；
-- collection runner、scenario、intersection geometry 和 tuning config 文件哈希；
+- collection/batch/scenario runner、reactive/straight-line target agent、raster/history、prediction deployment/input contract、GMM、scenario、intersection geometry 和 tuning config 等 13 个关键源文件哈希；
 - 正式 50 个 init 文件的组合哈希；
 - 四个 cells 和 200-rollout 设计。
 

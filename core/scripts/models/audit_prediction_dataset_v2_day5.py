@@ -542,11 +542,34 @@ def main():
             raise ValueError(f"Expected 50 formal init files, found {len(init_paths)}")
         source_artifacts = {
             "collection_runner": carla_dir / "run_give_way_prediction_dataset_v2.sh",
+            "batch_runner": carla_dir / "run_all_scenarios.py",
+            "scenario_runner": scenario_dir / "run_intersection_scenario.py",
             "scenario": scenario_dir / "scenario_uk_give_way.json",
             "intersection_geometry": scenario_dir / "intersection_01.csv",
             "tuning_config": scenario_dir
             / "tuning_configs"
             / "give_way_reduced_clear_path_release_v12_current_best.json",
+            "reactive_target_agent": carla_dir
+            / "policies"
+            / "defensive_reactive_agent.py",
+            "straight_line_target_agent": carla_dir
+            / "policies"
+            / "straight_line_agent.py",
+            "agent_history_rasterizer": carla_dir
+            / "rasterizer"
+            / "agent_history.py",
+            "prediction_deployment": scripts_dir
+            / "models"
+            / "deploy_multipath_model.py",
+            "interaction_sequence": scripts_dir
+            / "models"
+            / "interaction_sequence.py",
+            "prediction_input_contract": scripts_dir
+            / "models"
+            / "prediction_input_contract.py",
+            "gmm_prediction": scripts_dir
+            / "evaluation"
+            / "gmm_prediction.py",
         }
         source_artifact_sha256 = {
             name: file_sha256(path) for name, path in source_artifacts.items()

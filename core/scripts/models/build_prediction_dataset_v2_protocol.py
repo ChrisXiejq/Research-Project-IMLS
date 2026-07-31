@@ -319,7 +319,7 @@ def collection_manifest() -> Dict[str, Any]:
                 "parameter_status": "frozen after Day 5 init01-05 development audit",
                 "development_git_commit": "6b71ccc",
                 "reactive_parameters_sha256": "188ea5a1e3a34cde06eed16e779a252058476c5ab3d3dfda3a870000d92e77d5",
-                "collection_config_sha256": "80fe23a6ca65fb4c56e52bebbaa4d596c2f381604021689c7d0c8285f3cc32c8",
+                "collection_config_sha256": "b047c70f238501f4c6de5b359dc18dc0db821da8d7bb8ab65501d8c2785e3b05",
                 "freeze_evidence": "docs/paper/generated/day5/day5_final_6b71ccc_audit.json",
             },
         },
