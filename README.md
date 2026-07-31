@@ -14,8 +14,9 @@ interaction- and calibration-aware trajectory prediction
 2. `docs/paper/Day1_冻结协议与服务器资产审计报告.md`：本地/服务器资产、数据、checkpoint 和 Git 状态审计。
 3. `docs/paper/Day2_数据审计与V2协议冻结报告.md`：旧数据完整性、V2 interaction schema 和 200-rollout collection matrix。
 4. `docs/paper/Day3_GMM评估器与校准报告.md`：部署等价 GMM evaluator、raster channel 诊断与 calibration 结果。
-5. `docs/paper/已完成实验与证据账本.md`：已完成控制、预测和闭环实验的结果路径、可支持论点与限制。
-6. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、CasADi 和 Gurobi 启动检查。
+5. `docs/paper/Day4_V2交互数据链路与ReactiveTarget报告.md`：V2 共享输入、交互序列、reactive target 与四单元 smoke。
+6. `docs/paper/已完成实验与证据账本.md`：已完成控制、预测和闭环实验的结果路径、可支持论点与限制。
+7. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、CasADi 和 Gurobi 启动检查。
 
 完整索引见 `docs/README.md`。
 
@@ -29,6 +30,9 @@ interaction- and calibration-aware trajectory prediction
 - `core/scripts/models/build_prediction_dataset_v2_protocol.py`：生成冻结的 V2 feature schema 与 200-rollout manifest。
 - `core/scripts/models/multipath_gmm_utils.py`：evaluator/deployment 共用的唯一 MultiPath GMM 解码 contract。
 - `core/scripts/models/evaluate_multipath_model_on_dataset.py`：accuracy、NLL、2D coverage、covariance audit、rollout aggregation 和 calibration。
+- `core/scripts/models/prediction_input_contract.py`：V2 offline/online 共享 raster contract。
+- `core/scripts/models/interaction_sequence.py`：V2 共享 6×12 ego-target sequence builder。
+- `core/scripts/carla/run_give_way_prediction_dataset_v2.sh`：S0/S1 × fixed/adaptive V2 数据采集入口。
 - `core/scripts/models/`：MultiPath 训练、部署、dataset utilities 和 evaluator。
 - `core/scripts/postcarla_trajectory_gate.py`：正式闭环安全 gate。
 

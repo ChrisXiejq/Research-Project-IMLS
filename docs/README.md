@@ -6,6 +6,7 @@
 - `paper/Day1_冻结协议与服务器资产审计报告.md`：2026-07-31 的服务器数据、模型、结果、Git 和磁盘审计。
 - `paper/Day2_数据审计与V2协议冻结报告.md`：V1 完整性结论、V2 feature contract、200-rollout matrix 和模型资产哈希。
 - `paper/Day3_GMM评估器与校准报告.md`：共享 GMM 解码、真实 sample 等价、channel mismatch 与 B1/T0 calibration。
+- `paper/Day4_V2交互数据链路与ReactiveTarget报告.md`：V2 raster/interaction contract、reactive target 和四单元 CARLA smoke。
 - `paper/已完成实验与证据账本.md`：已完成实验的结果路径、结论强度和不可支持的论点。
 
 ## Evidence artifacts
@@ -14,6 +15,7 @@
 - `paper/generated/figures/`：历史控制实验的 SVG 图。
 - `paper/generated/day2/`：V1 dataset audit、50-rollout manifest consolidation 和 legacy Transformer artifact manifest。
 - `paper/generated/day3/`：GMM equivalence、B1/T0 validation calibration 和冻结 test reports。
+- `paper/generated/day4/`：V2 输入等价和四单元单-init smoke audit。
 - `paper/generated/README.md`：这些 artifacts 的范围和使用边界。
 
 ## Architecture and runtime

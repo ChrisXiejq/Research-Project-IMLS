@@ -1,0 +1,47 @@
+{
+  "input_contract_schema_version": "prediction_input_contract_v2",
+  "status": "pass",
+  "raster_contract_id": "semantic_raster_cv2_bytes_resnet_caffe_v2",
+  "feature_schema_id": "give_way_interaction_sequence_v2",
+  "synthetic": {
+    "raster_pixel_max_abs_difference": 0,
+    "raster_preprocessed_max_abs_difference": 0.0,
+    "raster_sha256_equal": true,
+    "interaction": {
+      "sequence_max_abs_difference": 0.0,
+      "mask_max_abs_difference": 0.0
+    },
+    "interaction_shape": [
+      6,
+      12
+    ],
+    "mask": [
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "real_sample": {
+    "sample_id": 0,
+    "source_subrun": "scenario_uk_give_way_ego_init_01_smpc_var_risk",
+    "missing_required_fields": [],
+    "raster_contract_id": "semantic_raster_cv2_bytes_resnet_caffe_v2",
+    "raster_sha256_equal": true,
+    "interaction": {
+      "sequence_max_abs_difference": 0.0,
+      "mask_max_abs_difference": 0.0
+    },
+    "interaction_shape": [
+      6,
+      12
+    ],
+    "mask_shape": [
+      6
+    ],
+    "valid_tokens": 6,
+    "masked_tokens_zero_filled": true
+  }
+}

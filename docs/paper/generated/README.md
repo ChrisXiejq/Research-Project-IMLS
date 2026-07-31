@@ -17,12 +17,15 @@
 
 `day3/` 保存 synthetic/real-sample evaluator-deployment equivalence、B1/T0 validation-only calibration 参数，以及修正 raster channel contract 后的一次性 test reports。
 
+`day4/` 保存 V2 raster/interaction online-offline equivalence，以及 S0/S1 × fixed/adaptive 单-init CARLA smoke audit。
+
 解释和论文 claim 以：
 
 ```text
 ../已完成实验与证据账本.md
 ../Day2_数据审计与V2协议冻结报告.md
 ../Day3_GMM评估器与校准报告.md
+../Day4_V2交互数据链路与ReactiveTarget报告.md
 ../两周_最终研究主线_数据扩展与实验执行方案.md
 ```
 
