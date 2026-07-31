@@ -1,0 +1,117 @@
+{
+  "freeze_schema_version": "give_way_v2_day5_collection_freeze_v1",
+  "source_audit": "/root/autodl-tmp/day5_final_6b71ccc_audit.json",
+  "source_results_dir": "/root/autodl-tmp/day5_final_6b71ccc",
+  "development_init_ids": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "reactive_parameters": {
+    "controller": "DefensiveReactiveAgent",
+    "nominal_speed_mps": 9.0,
+    "caution_speed_mps": 4.5,
+    "minimum_speed_mps": 2.5,
+    "activation_distance_m": 10.0,
+    "release_clearance_m": 5.0,
+    "arrival_time_gap_s": 0.5,
+    "closest_approach_time_s": 4.0,
+    "closest_approach_distance_m": 6.0,
+    "release_hold_s": 0.8,
+    "max_accel_mps2": 1.5,
+    "max_decel_mps2": -2.0,
+    "conflict_geometry": "ego_reference_route_target_motion_line",
+    "episode_semantics": "single_trigger_latched_release",
+    "hazard_combination": "ttc_conflict_and_closest_approach"
+  },
+  "reactive_parameters_sha256": "188ea5a1e3a34cde06eed16e779a252058476c5ab3d3dfda3a870000d92e77d5",
+  "collection_configuration": {
+    "dataset_version": "give_way_interaction_prediction_v2.0",
+    "protocol_id": "town05_give_way_2x2_200_rollouts_v1",
+    "development_git_commit": "6b71ccc",
+    "scenario": "scenario_uk_give_way.json",
+    "map": "Town05",
+    "formal_init_ids": [
+      1,
+      50
+    ],
+    "cells": {
+      "S0_FIXED": [
+        "assertive_constant_speed",
+        "fixed_medium"
+      ],
+      "S0_ADAPTIVE": [
+        "assertive_constant_speed",
+        "adaptive_floor_weak"
+      ],
+      "S1_FIXED": [
+        "defensive_reactive",
+        "fixed_medium"
+      ],
+      "S1_ADAPTIVE": [
+        "defensive_reactive",
+        "adaptive_floor_weak"
+      ]
+    },
+    "expected_rollouts": 200,
+    "prediction_contract": {
+      "dataset_version": "give_way_interaction_prediction_v2.0",
+      "protocol_id": "town05_give_way_2x2_200_rollouts_v1",
+      "git_commit": "6b71ccc",
+      "feature_schema_id": "give_way_interaction_sequence_v2",
+      "model_weights": "l5kit_multipath_10_carla_finetuned_head_best",
+      "model_anchors": "l5kit_clusters_16.npy",
+      "prediction_logging_stride": 4,
+      "prediction_logging_horizon": 10,
+      "prediction_logging_save_raster": 1,
+      "dt_s": 0.2
+    },
+    "adaptive_risk_config": {
+      "variant_name": "floor_weak",
+      "approach_preclearance_floor": 1.66,
+      "critical_preclearance_floor": 1.72,
+      "near_preclearance_floor": 1.78
+    },
+    "reactive_parameters": {
+      "controller": "DefensiveReactiveAgent",
+      "nominal_speed_mps": 9.0,
+      "caution_speed_mps": 4.5,
+      "minimum_speed_mps": 2.5,
+      "activation_distance_m": 10.0,
+      "release_clearance_m": 5.0,
+      "arrival_time_gap_s": 0.5,
+      "closest_approach_time_s": 4.0,
+      "closest_approach_distance_m": 6.0,
+      "release_hold_s": 0.8,
+      "max_accel_mps2": 1.5,
+      "max_decel_mps2": -2.0,
+      "conflict_geometry": "ego_reference_route_target_motion_line",
+      "episode_semantics": "single_trigger_latched_release",
+      "hazard_combination": "ttc_conflict_and_closest_approach"
+    },
+    "source_artifact_sha256": {
+      "collection_runner": "f7a9c4bbfa7885abae42d4a71d361b7085119be7f8b72defbba232f29e650528",
+      "scenario": "95b4c15074143cba15e3fcf958f3e334483127f823a811a28c932077a96b2df2",
+      "intersection_geometry": "5aa92e87bd98a72ef5fc94d925c601850bd2c4e1624db7187f418cb15da04071",
+      "tuning_config": "920a51ee6dadb7647b07b879e0438a075fa7a820a49fc093188c90c4f6dcbcb6"
+    },
+    "formal_init_set_sha256": "768228e53474e97eac574511a31265d193182dd3d96313b368c967c2f1b3dcc6"
+  },
+  "formal_collection_matrix": {
+    "init_ids": [
+      1,
+      50
+    ],
+    "cells": [
+      "S0_FIXED",
+      "S0_ADAPTIVE",
+      "S1_FIXED",
+      "S1_ADAPTIVE"
+    ],
+    "expected_rollouts": 200
+  },
+  "immutable_after_freeze": true,
+  "collection_config_sha256": "80fe23a6ca65fb4c56e52bebbaa4d596c2f381604021689c7d0c8285f3cc32c8"
+}

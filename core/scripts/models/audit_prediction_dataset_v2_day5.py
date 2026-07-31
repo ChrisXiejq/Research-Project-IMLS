@@ -31,6 +31,29 @@ EXPECTED_CELLS = {
     "S1_ADAPTIVE": ("defensive_reactive", "adaptive_floor_weak"),
 }
 EXPECTED_INITS = set(range(1, 6))
+ADAPTIVE_RISK_CONFIG = {
+    "variant_name": "floor_weak",
+    "approach_preclearance_floor": 1.66,
+    "critical_preclearance_floor": 1.72,
+    "near_preclearance_floor": 1.78,
+}
+FROZEN_REACTIVE_PARAMETER_KEYS = (
+    "controller",
+    "nominal_speed_mps",
+    "caution_speed_mps",
+    "minimum_speed_mps",
+    "activation_distance_m",
+    "release_clearance_m",
+    "arrival_time_gap_s",
+    "closest_approach_time_s",
+    "closest_approach_distance_m",
+    "release_hold_s",
+    "max_accel_mps2",
+    "max_decel_mps2",
+    "conflict_geometry",
+    "episode_semantics",
+    "hazard_combination",
+)
 
 
 def parse_args():
@@ -67,6 +90,24 @@ def canonical_hash(payload):
     return hashlib.sha256(encoded).hexdigest()
 
 
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def freeze_reactive_parameters(parameters):
+    """Keep behavior-defining values; exclude rollout-specific geometry values."""
+
+    return {
+        key: parameters[key]
+        for key in FROZEN_REACTIVE_PARAMETER_KEYS
+        if key in parameters
+    }
+
+
 def load_full_rate_clearance(subrun_dir):
     pkl_path = subrun_dir / "scenario_result.pkl"
     with pkl_path.open("rb") as handle:
@@ -98,6 +139,11 @@ def step_metrics(step_csv):
     )
     triggers = sum(as_bool(row.get("target0_reactive_triggered_this_step")) for row in rows)
     releases = sum(as_bool(row.get("target0_reactive_released_this_step")) for row in rows)
+    trigger_indices = [
+        idx
+        for idx, row in enumerate(rows)
+        if as_bool(row.get("target0_reactive_triggered_this_step"))
+    ]
     valid = np.isfinite(time) & np.isfinite(speed)
     acceleration = np.asarray([], dtype=float)
     jerk = np.asarray([], dtype=float)
@@ -117,7 +163,11 @@ def step_metrics(step_csv):
         "release_count": int(releases),
         "active_steps": int(np.sum(active)),
         "active_fraction": float(np.mean(active)) if len(active) else 0.0,
+        "trigger_onset_s": (
+            float(time[trigger_indices[0]] - time[0]) if trigger_indices else None
+        ),
         "minimum_speed_mps": float(np.nanmin(speed)) if len(speed) else None,
+        "final_speed_mps": float(speed[-1]) if len(speed) else None,
         "minimum_active_speed_mps": (
             float(np.nanmin(speed[active])) if np.any(active) else None
         ),
@@ -140,9 +190,16 @@ def paired_separation(s0, s1):
     t1, xy1 = s1["time"][valid1], s1["xy"][valid1]
     if len(t0) < 2 or len(t1) < 2:
         raise ValueError("insufficient paired target trajectory")
+    # CARLA elapsed_seconds is global to the server and therefore differs
+    # between sequential rollouts.  Pair trajectories by time since each
+    # rollout's first logged control step, not by absolute simulator uptime.
+    t0 = t0 - t0[0]
+    t1 = t1 - t1[0]
     lo, hi = max(t0[0], t1[0]), min(t0[-1], t1[-1])
     mask = (t0 >= lo) & (t0 <= hi)
     t = t0[mask]
+    if len(t) == 0:
+        raise ValueError("paired target trajectories have no relative-time overlap")
     interpolated = np.column_stack(
         [np.interp(t, t1, xy1[:, axis]) for axis in range(2)]
     )
@@ -177,6 +234,7 @@ def main():
     errors = []
     rollouts = {}
     parameter_sets = []
+    observed_collection_contracts = []
     contract_samples = 0
 
     for manifest_path in manifests:
@@ -192,6 +250,20 @@ def main():
             errors.append(f"duplicate rollout {key}")
             continue
         expected_target, expected_ego = EXPECTED_CELLS[cell]
+        observed_collection_contracts.append(
+            {
+                "dataset_version": metadata.get("dataset_version"),
+                "protocol_id": metadata.get("protocol_id"),
+                "git_commit": metadata.get("git_commit"),
+                "feature_schema_id": manifest.get("feature_schema_id"),
+                "model_weights": manifest.get("model_weights"),
+                "model_anchors": manifest.get("model_anchors"),
+                "prediction_logging_stride": manifest.get("stride"),
+                "prediction_logging_horizon": manifest.get("horizon"),
+                "prediction_logging_save_raster": manifest.get("save_raster"),
+                "dt_s": manifest.get("dt"),
+            }
+        )
         if metadata.get("target_style") != expected_target:
             errors.append(f"{manifest_path}: target style mismatch")
         if metadata.get("ego_policy") != expected_ego:
@@ -219,7 +291,11 @@ def main():
             except Exception as exc:
                 errors.append(f"{labeled_path}: {exc}")
         if cell.startswith("S1") and samples:
-            parameter_sets.append(samples[0].get("target_style_parameters", {}))
+            parameter_sets.append(
+                freeze_reactive_parameters(
+                    samples[0].get("target_style_parameters", {})
+                )
+            )
 
         subrun_dir = dataset_dir.parent
         step = step_metrics(subrun_dir / "scenario_steps.csv")
@@ -251,6 +327,12 @@ def main():
         else 0.0
     )
     active_fractions = [item["active_fraction"] for item in reactive]
+    triggered_reactive = [item for item in reactive if item["trigger_count"] > 0]
+    trigger_onsets = [
+        item["trigger_onset_s"]
+        for item in triggered_reactive
+        if item["trigger_onset_s"] is not None
+    ]
     min_speeds = [item["minimum_speed_mps"] for item in reactive if item["minimum_speed_mps"] is not None]
     clearances = [
         item["minimum_ego_target_centroid_clearance_m"]
@@ -269,6 +351,9 @@ def main():
     unique_parameter_hashes = {
         canonical_hash(value) for value in parameter_sets if value
     }
+    unique_collection_contracts = {
+        canonical_hash(value): value for value in observed_collection_contracts
+    }
     gates = {
         "complete_20_rollout_matrix": len(rollouts) == 20 and not missing,
         "all_logged_inputs_equivalent": not any(
@@ -284,8 +369,22 @@ def main():
             item["trigger_count"] <= 1 and item["release_count"] <= 1
             for item in reactive
         ),
+        "trigger_release_events_paired": all(
+            item["trigger_count"] == item["release_count"] for item in reactive
+        ),
+        "reactive_trigger_not_immediate": bool(trigger_onsets)
+        and min(trigger_onsets) >= 0.2,
+        "reactive_trigger_timing_varies": len(trigger_onsets) >= 2
+        and max(trigger_onsets) - min(trigger_onsets) >= 0.05,
+        "no_reactive_rollout_always_active": bool(reactive)
+        and max(active_fractions) <= 0.35,
         "target_never_stops_min_speed_gt_2_5_mps": bool(min_speeds)
         and min(min_speeds) > 2.5,
+        "target_recovers_final_speed_ge_8_0_mps": bool(reactive)
+        and all(
+            item["final_speed_mps"] is not None and item["final_speed_mps"] >= 8.0
+            for item in reactive
+        ),
         "full_rate_centroid_clearance_gt_3_0_m": bool(clearances)
         and min(clearances) > 3.0,
         "native_carla_collision_event_count_zero": bool(rollouts)
@@ -294,6 +393,7 @@ def main():
         and float(np.median([item["max_target_position_separation_m"] for item in paired]))
         > 0.5,
         "one_reactive_parameter_set": len(unique_parameter_hashes) == 1,
+        "one_observed_collection_contract": len(unique_collection_contracts) == 1,
     }
     status = "pass" if all(gates.values()) and not errors else "fail"
     frozen_parameters = parameter_sets[0] if len(unique_parameter_hashes) == 1 else None
@@ -309,6 +409,12 @@ def main():
             "minimum_target_speed_mps": min(min_speeds) if min_speeds else None,
             "maximum_trigger_count_per_rollout": max(
                 [item["trigger_count"] for item in reactive], default=None
+            ),
+            "trigger_onset_s": trigger_onsets,
+            "trigger_onset_range_s": (
+                max(trigger_onsets) - min(trigger_onsets)
+                if len(trigger_onsets) >= 2
+                else None
             ),
         },
         "safety_summary": {
@@ -329,6 +435,11 @@ def main():
         "frozen_reactive_parameters_sha256": (
             canonical_hash(frozen_parameters) if frozen_parameters else None
         ),
+        "observed_collection_contract": (
+            next(iter(unique_collection_contracts.values()))
+            if len(unique_collection_contracts) == 1
+            else None
+        ),
         "gates": gates,
         "rollouts": {
             f"{cell}_init_{init_id:02d}": json_safe(
@@ -343,6 +454,50 @@ def main():
     output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     if args.frozen_config_json and status == "pass":
+        scripts_dir = Path(__file__).resolve().parent.parent
+        carla_dir = scripts_dir / "carla"
+        scenario_dir = carla_dir / "scenarios"
+        init_paths = sorted(
+            (scenario_dir / "inits" / "paper_intersection_50").glob(
+                "ego_init_*.json"
+            )
+        )
+        if len(init_paths) != 50:
+            raise ValueError(f"Expected 50 formal init files, found {len(init_paths)}")
+        source_artifacts = {
+            "collection_runner": carla_dir / "run_give_way_prediction_dataset_v2.sh",
+            "scenario": scenario_dir / "scenario_uk_give_way.json",
+            "intersection_geometry": scenario_dir / "intersection_01.csv",
+            "tuning_config": scenario_dir
+            / "tuning_configs"
+            / "give_way_reduced_clear_path_release_v12_current_best.json",
+        }
+        source_artifact_sha256 = {
+            name: file_sha256(path) for name, path in source_artifacts.items()
+        }
+        formal_init_set = [
+            {"filename": path.name, "sha256": file_sha256(path)}
+            for path in init_paths
+        ]
+        collection_configuration = {
+            "dataset_version": observed_collection_contracts[0][
+                "dataset_version"
+            ],
+            "protocol_id": observed_collection_contracts[0]["protocol_id"],
+            "development_git_commit": observed_collection_contracts[0]["git_commit"],
+            "scenario": "scenario_uk_give_way.json",
+            "map": "Town05",
+            "formal_init_ids": [1, 50],
+            "cells": EXPECTED_CELLS,
+            "expected_rollouts": 200,
+            "prediction_contract": next(
+                iter(unique_collection_contracts.values())
+            ),
+            "adaptive_risk_config": ADAPTIVE_RISK_CONFIG,
+            "reactive_parameters": frozen_parameters,
+            "source_artifact_sha256": source_artifact_sha256,
+            "formal_init_set_sha256": canonical_hash(formal_init_set),
+        }
         frozen = {
             "freeze_schema_version": "give_way_v2_day5_collection_freeze_v1",
             "source_audit": str(output),
@@ -350,6 +505,7 @@ def main():
             "development_init_ids": sorted(EXPECTED_INITS),
             "reactive_parameters": frozen_parameters,
             "reactive_parameters_sha256": canonical_hash(frozen_parameters),
+            "collection_configuration": collection_configuration,
             "formal_collection_matrix": {
                 "init_ids": [1, 50],
                 "cells": list(EXPECTED_CELLS),
@@ -357,7 +513,9 @@ def main():
             },
             "immutable_after_freeze": True,
         }
-        frozen["collection_config_sha256"] = canonical_hash(frozen)
+        frozen["collection_config_sha256"] = canonical_hash(
+            collection_configuration
+        )
         frozen_path = Path(args.frozen_config_json).expanduser().resolve()
         frozen_path.parent.mkdir(parents=True, exist_ok=True)
         frozen_path.write_text(json.dumps(frozen, indent=2) + "\n", encoding="utf-8")

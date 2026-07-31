@@ -19,6 +19,8 @@
 
 `day4/` 保存 V2 raster/interaction online-offline equivalence，以及 S0/S1 × fixed/adaptive 单-init CARLA smoke audit。
 
+`day5/` 保存 init01–05 四单元 20-rollout 的完整冻结审计，以及覆盖模型、行为参数、runner/scenario/tuning/init 文件哈希的 frozen collection config。
+
 解释和论文 claim 以：
 
 ```text
@@ -26,6 +28,7 @@
 ../Day2_数据审计与V2协议冻结报告.md
 ../Day3_GMM评估器与校准报告.md
 ../Day4_V2交互数据链路与ReactiveTarget报告.md
+../Day5_开发实验与Reactive参数冻结报告.md
 ../两周_最终研究主线_数据扩展与实验执行方案.md
 ```
 
