@@ -752,6 +752,7 @@ class RunIntersectionScenario:
             self.priority_rule = carla_params.priority_rule
             self._setup_carla_world(carla_params)
             self._setup_vehicles(vehicle_params_list, carla_params)
+            self._setup_collision_sensors()
             self.use_camera = drone_viz_params.visualize_opencv or drone_viz_params.save_avi
             if self.use_camera:
                 self._setup_camera(drone_viz_params)
@@ -1269,7 +1270,11 @@ class RunIntersectionScenario:
             raise
         finally:
             exp_log.flush_step_csv(self.savedir, rows_buffer)
-            extra: Dict[str, Any] = {"policy_types": policy_types}
+            extra: Dict[str, Any] = {
+                "policy_types": policy_types,
+                "collision_event_count": len(getattr(self, "collision_events", [])),
+                "collision_events": list(getattr(self, "collision_events", [])),
+            }
             try:
                 extra["map"] = self.world.get_map().name
             except Exception:
@@ -1300,6 +1305,10 @@ class RunIntersectionScenario:
                 )
             if writer:
                 writer.release()
+            for sensor in getattr(self, "collision_sensors", []):
+                if sensor is not None and sensor.is_alive:
+                    sensor.stop()
+                    sensor.destroy()
             for actor in self.vehicle_actors:
                 actor.destroy()
             if self.use_camera:
@@ -1401,12 +1410,52 @@ class RunIntersectionScenario:
             self.world.wait_for_tick()
 
     def _destroy_created_actors(self):
+        for sensor in getattr(self, "collision_sensors", []):
+            if sensor is not None and sensor.is_alive:
+                sensor.stop()
+                sensor.destroy()
         for actor in getattr(self, "vehicle_actors", []):
             if actor is not None and actor.is_alive:
                 actor.destroy()
         drone = getattr(self, "drone", None)
         if drone is not None and drone.is_alive:
             drone.destroy()
+
+    def _setup_collision_sensors(self):
+        """Attach native CARLA collision sensors to all moving experiment actors."""
+
+        self.collision_sensors = []
+        self.collision_events = []
+        blueprint = self.world.get_blueprint_library().find("sensor.other.collision")
+
+        def record_event(monitored_role, event):
+            impulse = event.normal_impulse
+            self.collision_events.append(
+                {
+                    "frame": int(event.frame),
+                    "monitored_role": monitored_role,
+                    "other_actor_id": int(event.other_actor.id),
+                    "other_actor_type": str(event.other_actor.type_id),
+                    "normal_impulse_magnitude": float(
+                        np.linalg.norm([impulse.x, impulse.y, impulse.z])
+                    ),
+                }
+            )
+
+        for idx, (actor, params) in enumerate(
+            zip(self.vehicle_actors, self.vehicle_params_list)
+        ):
+            if params.role not in {"ego", "target"}:
+                continue
+            sensor = self.world.spawn_actor(
+                blueprint,
+                carla.Transform(),
+                attach_to=actor,
+                attachment_type=carla.AttachmentType.Rigid,
+            )
+            monitored_role = f"{params.role}_{idx}"
+            sensor.listen(lambda event, role=monitored_role: record_event(role, event))
+            self.collision_sensors.append(sensor)
 
     def _setup_camera(self, drone_viz_params):
         bp_library = self.world.get_blueprint_library()

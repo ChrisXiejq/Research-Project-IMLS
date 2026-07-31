@@ -220,6 +220,11 @@ def main():
 
         subrun_dir = dataset_dir.parent
         step = step_metrics(subrun_dir / "scenario_steps.csv")
+        summary_path = subrun_dir / "scenario_run_summary.json"
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        step["collision_event_count"] = int(summary.get("collision_event_count", -1))
+        if step["collision_event_count"] < 0:
+            errors.append(f"{summary_path}: native collision evidence missing")
         try:
             clearance = load_full_rate_clearance(subrun_dir)
         except Exception as exc:
@@ -277,6 +282,8 @@ def main():
         and min(min_speeds) > 2.5,
         "full_rate_centroid_clearance_gt_3_0_m": bool(clearances)
         and min(clearances) > 3.0,
+        "native_carla_collision_event_count_zero": bool(rollouts)
+        and all(item.get("collision_event_count") == 0 for item in rollouts.values()),
         "paired_s1_s0_separation_gt_0_5_m": bool(paired)
         and float(np.median([item["max_target_position_separation_m"] for item in paired]))
         > 0.5,
@@ -299,12 +306,16 @@ def main():
             ),
         },
         "safety_summary": {
+            "native_carla_collision_event_count": sum(
+                max(0, item.get("collision_event_count", 0))
+                for item in rollouts.values()
+            ),
             "minimum_full_rate_ego_target_centroid_clearance_m": (
                 min(clearances) if clearances else None
             ),
             "interpretation": (
-                "Centroid clearance is a conservative logged proxy; CARLA collision "
-                "sensor was not attached in this development runner."
+                "Native CARLA collision events are the primary gate; full-rate "
+                "centroid clearance is a secondary proximity diagnostic."
             ),
         },
         "paired_s1_s0_separation": paired,
