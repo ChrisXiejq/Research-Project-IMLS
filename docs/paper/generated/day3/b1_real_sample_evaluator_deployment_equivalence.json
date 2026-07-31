@@ -1,0 +1,20 @@
+{
+  "calibration": {
+    "covariance_scale": 0.07521206186172788,
+    "temperature": 1.7817974362806785
+  },
+  "channel_contract": "cv2.imread restores the byte order written by cv2.imwrite and matches the online in-memory semantic raster before ResNet preprocessing",
+  "differences": {
+    "covariance_max_abs": 0.0,
+    "mean_max_abs": 0.0,
+    "preprocessed_input_max_abs": 0.0,
+    "probability_max_abs": 0.0
+  },
+  "raster_path": "/root/autodl-tmp/Research-Project-IMLS/core/results/20260726_212838_prediction_dataset_collection/scenario_uk_give_way_ego_init_41_smpc_var_risk/prediction_dataset/rasters/sample_000000.png",
+  "sample_equivalence_schema_version": "multipath_real_sample_equivalence_v1",
+  "sample_id": 0,
+  "source_subrun": "scenario_uk_give_way_ego_init_41_smpc_var_risk",
+  "split": "val",
+  "status": "pass",
+  "uses_interaction_context": false
+}

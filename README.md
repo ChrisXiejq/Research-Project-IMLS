@@ -13,8 +13,9 @@ interaction- and calibration-aware trajectory prediction
 1. `docs/paper/两周_最终研究主线_数据扩展与实验执行方案.md`：当前唯一实验与论文 canonical 文档。
 2. `docs/paper/Day1_冻结协议与服务器资产审计报告.md`：本地/服务器资产、数据、checkpoint 和 Git 状态审计。
 3. `docs/paper/Day2_数据审计与V2协议冻结报告.md`：旧数据完整性、V2 interaction schema 和 200-rollout collection matrix。
-4. `docs/paper/已完成实验与证据账本.md`：已完成控制、预测和闭环实验的结果路径、可支持论点与限制。
-5. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、CasADi 和 Gurobi 启动检查。
+4. `docs/paper/Day3_GMM评估器与校准报告.md`：部署等价 GMM evaluator、raster channel 诊断与 calibration 结果。
+5. `docs/paper/已完成实验与证据账本.md`：已完成控制、预测和闭环实验的结果路径、可支持论点与限制。
+6. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、CasADi 和 Gurobi 启动检查。
 
 完整索引见 `docs/README.md`。
 
@@ -26,6 +27,8 @@ interaction- and calibration-aware trajectory prediction
 - `core/scripts/carla/run_give_way_init01_v13_risk_owned_yield.sh`：A3 risk-owned-yield development runner。
 - `core/scripts/models/audit_prediction_dataset.py`：V1/V2 grouped-split、horizon、raster 和计数审计。
 - `core/scripts/models/build_prediction_dataset_v2_protocol.py`：生成冻结的 V2 feature schema 与 200-rollout manifest。
+- `core/scripts/models/multipath_gmm_utils.py`：evaluator/deployment 共用的唯一 MultiPath GMM 解码 contract。
+- `core/scripts/models/evaluate_multipath_model_on_dataset.py`：accuracy、NLL、2D coverage、covariance audit、rollout aggregation 和 calibration。
 - `core/scripts/models/`：MultiPath 训练、部署、dataset utilities 和 evaluator。
 - `core/scripts/postcarla_trajectory_gate.py`：正式闭环安全 gate。
 

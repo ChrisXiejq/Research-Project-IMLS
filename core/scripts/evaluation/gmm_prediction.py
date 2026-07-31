@@ -1,5 +1,12 @@
 import numpy as np
-from scipy.special import logsumexp
+try:
+	from scipy.special import logsumexp
+except ImportError:
+	def logsumexp(values):
+		"""NumPy fallback used by lightweight deployment environments."""
+		values = np.asarray(values, dtype=np.float64)
+		maximum = np.max(values)
+		return maximum + np.log(np.sum(np.exp(values - maximum)))
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 import matplotlib.cm as cm
