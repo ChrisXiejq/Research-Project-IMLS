@@ -4,12 +4,14 @@
 
 - `paper/两周_最终研究主线_数据扩展与实验执行方案.md`：唯一有效的研究主线、数据扩展、模型设计、实验矩阵、结果解释和十四天计划。
 - `paper/Day1_冻结协议与服务器资产审计报告.md`：2026-07-31 的服务器数据、模型、结果、Git 和磁盘审计。
+- `paper/Day2_数据审计与V2协议冻结报告.md`：V1 完整性结论、V2 feature contract、200-rollout matrix 和模型资产哈希。
 - `paper/已完成实验与证据账本.md`：已完成实验的结果路径、结论强度和不可支持的论点。
 
 ## Evidence artifacts
 
 - `paper/generated/evidence_tables/`：历史控制实验的机器可读 CSV。
 - `paper/generated/figures/`：历史控制实验的 SVG 图。
+- `paper/generated/day2/`：V1 dataset audit、50-rollout manifest consolidation 和 legacy Transformer artifact manifest。
 - `paper/generated/README.md`：这些 artifacts 的范围和使用边界。
 
 ## Architecture and runtime
