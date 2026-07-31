@@ -65,55 +65,55 @@ Plugin 'gurobi' is not found
 - 车辆进入 fallback control，速度上不去
 - 即使没有 collision，post-CARLA gate 也会失败
 
-## 4. 长实验前先跑 1-init smoke test
+## 4. 长实验前先跑 development smoke
 
-正式跑 5-init、10-init 或 50-init 前，先跑：
+先在单独终端启动 CARLA：
+
+```bash
+cd "$CARLA_ROOT"
+./CarlaUE4.sh -RenderOffScreen -quality-level=Low
+```
+
+再在实验终端运行当前 A3 单点 development matrix：
 
 ```bash
 cd /root/autodl-tmp/Research-Project-IMLS/core/scripts/carla
 
-SUPERVISOR_MODES="full" \
-INIT_COUNT=1 \
+TARGET_START_OFFSETS="0.0" \
 ENABLE_CAMERA_VIZ=0 \
 PYTHON_BIN=python \
-RESULTS_DIR=/root/autodl-tmp/Research-Project-IMLS/core/results/$(date +%Y%m%d_%H%M%S)_1init_full_supervisor_smoke \
-./run_give_way_10init_supervisor_ablation.sh
+RESULTS_DIR=/root/autodl-tmp/Research-Project-IMLS/core/results/$(date +%Y%m%d_%H%M%S)_a3_development_smoke \
+./run_give_way_init01_v13_risk_owned_yield.sh
 ```
 
 通过标准：
 
 - `postcarla_trajectory_gate.md` 总体为 `PASS`
-- `solver_failure_frac = 0.000` 或明显低于 gate threshold
-- `completion=True`
+- `solver_failure_frac` 低于 gate threshold；
+- `completion_valid=True`；
 - 没有 `Plugin 'gurobi' is not found`
+- model/config/anchors 均来自预期路径；
+- step-level prediction/risk/solver/supervisor 日志存在。
 
-已确认的正常 smoke test：
+Smoke 只验证环境和执行链路，不计入正式结果，也不得用于调正式 test condition。
+
+## 5. 正式实验入口
+
+正式 dataset/model/closed-loop 命令按：
 
 ```text
-core/results/20260724_222517_1init_full_supervisor_smoke
+docs/paper/两周_最终研究主线_数据扩展与实验执行方案.md
 ```
 
-## 5. 正式 5-init supervisor ablation 模板
+逐日冻结后执行。本 runbook 不复制正式矩阵命令，避免两处配置漂移。
 
-```bash
-cd /root/autodl-tmp/Research-Project-IMLS
+每次正式 batch 前必须记录：
 
-conda activate carla_modern
+- `git status --short`；
+- Git commit；
+- dataset/model/config hashes；
+- `RESULTS_DIR`；
+- expected arms/conditions；
+- data disk 可用空间。
 
-export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
-export PYTHONPATH=$CARLA_ROOT/PythonAPI/carla:$CARLA_ROOT/PythonAPI/carla/agents:$PYTHONPATH
-
-export GUROBI_HOME=/root/autodl-tmp/Research-Project-IMLS/gurobi/gurobi1103/linux64
-export GUROBI_VERSION=110
-export GRB_LICENSE_FILE=/root/autodl-tmp/Research-Project-IMLS/gurobi/gurobi.lic
-export LD_LIBRARY_PATH=$GUROBI_HOME/lib:${LD_LIBRARY_PATH:-}
-
-cd core/scripts/carla
-
-SUPERVISOR_MODES="reduced_intervention full" \
-INIT_COUNT=5 \
-ENABLE_CAMERA_VIZ=0 \
-PYTHON_BIN=python \
-RESULTS_DIR=/root/autodl-tmp/Research-Project-IMLS/core/results/$(date +%Y%m%d_%H%M%S)_5init_supervisor_ablation \
-./run_give_way_10init_supervisor_ablation.sh
-```
+Gurobi 安装包和 license 只保存在服务器，不提交 Git。

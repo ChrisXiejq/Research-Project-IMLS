@@ -133,12 +133,6 @@ for offset in ${TARGET_START_OFFSETS}; do
     "${label}" "${offset}" "${difficulty_dir}" >> "${RESULTS_DIR}/ablation_manifest.jsonl"
 done
 
-if [[ -f "${REPO_DIR}/docs/paper/generate_v12_claim_sweep_report.py" ]]; then
-  "${PYTHON_BIN}" "${REPO_DIR}/docs/paper/generate_v12_claim_sweep_report.py" \
-    "${RESULTS_DIR}" \
-    --title "A3 v13 Risk-Owned-Yield Supervisor-Authority Experiment"
-fi
-
 cat > "${RESULTS_DIR}/README.md" <<EOF
 # A3 Init01 v13 Risk-Owned-Yield Supervisor-Authority Experiment
 

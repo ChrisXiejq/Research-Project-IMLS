@@ -38,6 +38,7 @@ htmlcov/
 # --- OS / editor ---
 .DS_Store
 Thumbs.db
+.tmp_pdf_review/
 *.swp
 *.swo
 *~

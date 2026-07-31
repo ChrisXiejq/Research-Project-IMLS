@@ -1,36 +1,45 @@
 # Research-Project-IMLS
 
-这个仓库已整合为你的毕业设计复现实验工作区，目标是复现论文：
-`Predictive Control for Autonomous Driving With Uncertain, Multimodal Predictions`
+这个仓库是毕业设计的唯一实验工作区。当前研究聚焦：
 
-## 目录说明
+```text
+interaction- and calibration-aware trajectory prediction
+× adaptive/fixed-risk SMPC
+× runtime safety authority
+```
 
-- `core/`：主实验代码（基于 `SMPC_MMPreds`，含 SMPC 三策略、CARLA give-way intersection 场景、预训练 MultiPath 资产）
-- `archive/extensions_confidence_reference/`：已归档的 `confidence_aware_predictions` 参考代码；当前主线实验不依赖
-- `docs/paper/Predictive_Control_for_Autonomous_Driving_With_Uncertain_Multimodal_Predictions.pdf`：原论文 PDF
-- `docs/architecture/`：流程图与代码架构映射
+## 当前文档
 
-## 当前实验入口
+1. `docs/paper/两周_最终研究主线_数据扩展与实验执行方案.md`：当前唯一实验与论文 canonical 文档。
+2. `docs/paper/Day1_冻结协议与服务器资产审计报告.md`：本地/服务器资产、数据、checkpoint 和 Git 状态审计。
+3. `docs/paper/已完成实验与证据账本.md`：已完成控制、预测和闭环实验的结果路径、可支持论点与限制。
+4. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、CasADi 和 Gurobi 启动检查。
 
-1. 先阅读 `docs/paper/论文实验与写作统一指导.md`。这是当前唯一 canonical 指导文档。
-2. 启动 CARLA 服务端（单独终端）：
-   - `cd $CARLA_ROOT && ./CarlaUE4.sh -RenderOffScreen -quality-level=Low`
-3. 当前 reduced early-stop 主基准和 ablation 只使用以下入口：
-   - `cd core/scripts/carla`
-   - `./run_give_way_10init_supervisor_ablation.sh`
-   - `./run_give_way_5init_fixed_risk_frontier.sh`
-   - `./run_give_way_video_gate_frontier.sh`
-4. 所有当前入口都应使用 `core/scripts/carla/scenarios/tuning_configs/give_way_reduced_clear_path_release_frozen.json`。不要恢复旧 final-dissertation batch 脚本。
+完整索引见 `docs/README.md`。
 
-## 与论文对齐建议
+## 代码入口
 
-- 本 dissertation 复现范围只保留 CARLA intersection give-way 场景，不复现 lane-change 或 hardware/VIL。
-- 当前主基准是 frozen `reduced_intervention` early-stop / clear-path-release tuning。
-- `full` supervisor 只作为 supervisor masking 的对比试验，不作为主系统。
-- 在完成 video gate 和 frozen reduced baseline 下的 frontier 证据前，不进入 50-init 全量实验。
-- 当前主线 adaptive arm 使用 `adaptive_interaction_severity` + `floor_weak`；fixed-risk baseline 应使用 fixed-risk frontier，而不是单一 fixed-risk baseline。
+- `core/scripts/carla/run_all_scenarios.py`：通用 CARLA batch runner。
+- `core/scripts/carla/run_give_way_prediction_dataset_collection.sh`：当前 V1 prediction dataset collector；V2 collector 将按 canonical 方案新增。
+- `core/scripts/carla/run_give_way_init01_fixed_frontier_vs_adaptive.sh`：单点 fixed frontier / adaptive development runner。
+- `core/scripts/carla/run_give_way_init01_v13_risk_owned_yield.sh`：A3 risk-owned-yield development runner。
+- `core/scripts/models/`：MultiPath 训练、部署、dataset utilities 和 evaluator。
+- `core/scripts/postcarla_trajectory_gate.py`：正式闭环安全 gate。
 
-## 重要说明
+当前保留的控制配置：
 
-- 当前 `core/` 已包含运行实验所需的 MultiPath 部署模型与 anchors。
-- 不再保留 `tools/assemble_from_sources.py`，避免误运行后覆盖当前已修正的 `core/` 和 `docs/`。
+```text
+give_way_reduced_clear_path_release_v12_current_best.json
+give_way_reduced_clear_path_release_v13_risk_owned_yield.json
+give_way_smpc_tuning.json
+```
+
+已完成的一次性 sweep/ablation runner 和旧模型 pilot runner 已删除；历史版本可从 Git 恢复，结果证据保留在账本和 `docs/paper/generated/`。
+
+## 运行边界
+
+- CARLA/Gurobi 正式实验在云服务器执行。
+- `core/results/`、训练日志、临时模型和视频不提交 Git。
+- Gurobi license 与安装包不得提交；服务器路径由环境变量配置。
+- 密码、token 和 license 内容不得写入脚本、文档或命令日志。
+- 正式实验必须记录 Git commit、dataset/model/config hash 和 result manifest。
