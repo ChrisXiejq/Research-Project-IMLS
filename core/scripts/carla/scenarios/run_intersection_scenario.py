@@ -20,6 +20,7 @@ from policies.static_agent import StaticAgent
 from policies.smpc_agent import SMPCAgent
 from policies.mpc_agent import MPCAgent
 from policies.straight_line_agent import StraightLineAgent
+from policies.defensive_reactive_agent import DefensiveReactiveAgent
 from policies.bl_smpc_agent import BLSMPCAgent
 
 from rasterizer.agent_history import AgentHistory
@@ -31,6 +32,19 @@ scriptdir = os.path.abspath(__file__).split('scripts')[0] + 'scripts/'
 sys.path.append(scriptdir)
 from models.deploy_multipath_model import DeployMultiPath
 from models.prediction_dataset_utils import interaction_context_from_sample
+from models.interaction_sequence import (
+    FEATURE_SCHEMA_ID,
+    HISTORY_TIMES_S,
+    aligned_history_from_agent_history,
+    assert_logged_feature_equivalence,
+    build_interaction_sequence,
+)
+from models.prediction_input_contract import (
+    RASTER_CONTRACT_ID,
+    raster_contract_metadata,
+    raster_array_sha256,
+    save_logged_raster,
+)
 
 """
 Simulation parameter classes.
@@ -199,6 +213,18 @@ class VehicleParams:
     obey_traffic_lights : bool = False
     stop_for_yellow : bool = True
 
+    # V2 target behavior. Values remain provisional until Day 5 development
+    # smoke on init 01-05 freezes the reactive rule.
+    target_style : str = "assertive_constant_speed"
+    reactive_caution_speed : float = 4.5
+    reactive_minimum_speed : float = 2.5
+    reactive_activation_distance : float = 30.0
+    reactive_release_clearance : float = 5.0
+    reactive_arrival_time_gap : float = 2.0
+    reactive_closest_approach_time : float = 4.0
+    reactive_closest_approach_distance : float = 6.0
+    reactive_release_hold : float = 0.8
+
 @dataclass(frozen=True)
 class PredictionParams:
     # Model parameter locations, given relative to <ROOTDIR>/scripts/models/
@@ -213,6 +239,7 @@ class PredictionParams:
     prediction_logging_stride : int = 1
     prediction_logging_horizon : int = 10
     prediction_logging_save_raster : bool = False
+    prediction_dataset_metadata : Optional[Dict[str, Any]] = None
 
     # TODO: future work includes things like how often to update preds (if not at the Carla fps).
 
@@ -240,13 +267,37 @@ def load_intersection(intersection_csv):
 
     return intersection
 
-def get_vehicle_policy(vehicle_params, vehicle_actor, goal_transform, n_tv_max=None):
+def get_vehicle_policy(
+    vehicle_params,
+    vehicle_actor,
+    goal_transform,
+    n_tv_max=None,
+    conflict_point_rhs=None,
+):
     if vehicle_params.policy_type == "static":
         return StaticAgent(vehicle_actor, goal_transform.location)
     elif vehicle_params.policy_type == "straight":
         return StraightLineAgent(vehicle_actor, goal_transform.location,
                                  nominal_speed_mps=vehicle_params.nominal_speed,
                                  dt=vehicle_params.dt)
+    elif vehicle_params.policy_type == "defensive_reactive":
+        if conflict_point_rhs is None:
+            raise ValueError("defensive_reactive target requires a route conflict point")
+        return DefensiveReactiveAgent(
+            vehicle_actor,
+            goal_transform.location,
+            conflict_point_rhs=conflict_point_rhs,
+            nominal_speed_mps=vehicle_params.nominal_speed,
+            dt=vehicle_params.dt,
+            caution_speed_mps=vehicle_params.reactive_caution_speed,
+            minimum_speed_mps=vehicle_params.reactive_minimum_speed,
+            activation_distance_m=vehicle_params.reactive_activation_distance,
+            release_clearance_m=vehicle_params.reactive_release_clearance,
+            arrival_time_gap_s=vehicle_params.reactive_arrival_time_gap,
+            closest_approach_time_s=vehicle_params.reactive_closest_approach_time,
+            closest_approach_distance_m=vehicle_params.reactive_closest_approach_distance,
+            release_hold_s=vehicle_params.reactive_release_hold,
+        )
     elif vehicle_params.policy_type == "mpc":
 
         return MPCAgent(vehicle_actor, goal_transform.location, \
@@ -625,6 +676,28 @@ def get_actor_position_rhs(actor):
     location = actor.get_location()
     return np.array([location.x, -location.y])
 
+
+def get_route_conflict_point_rhs(start_a, goal_a, start_b, goal_b):
+    """Return the infinite-line intersection for two route centre lines."""
+
+    p = np.asarray([start_a.location.x, -start_a.location.y], dtype=float)
+    r = np.asarray(
+        [goal_a.location.x - start_a.location.x, -(goal_a.location.y - start_a.location.y)],
+        dtype=float,
+    )
+    q = np.asarray([start_b.location.x, -start_b.location.y], dtype=float)
+    s = np.asarray(
+        [goal_b.location.x - start_b.location.x, -(goal_b.location.y - start_b.location.y)],
+        dtype=float,
+    )
+    cross = float(r[0] * s[1] - r[1] * s[0])
+    if abs(cross) < 1.0e-8:
+        raise ValueError("Target and ego route centre lines are parallel")
+    q_minus_p = q - p
+    t = float((q_minus_p[0] * s[1] - q_minus_p[1] * s[0]) / cross)
+    return p + t * r
+
+
 """
 Main class to simulate and run parametrized scenarios.
 """
@@ -715,6 +788,9 @@ class RunIntersectionScenario:
             "x": float(tf.location.x),
             "y_rhs": float(-tf.location.y),
             "yaw_deg": float(tf.rotation.yaw),
+            "yaw_rad_rhs": float(-np.radians(tf.rotation.yaw)),
+            "vx_rhs": float(vel.x),
+            "vy_rhs": float(-vel.y),
             "speed": float(np.linalg.norm([vel.x, vel.y])),
         }
 
@@ -741,22 +817,59 @@ class RunIntersectionScenario:
 
         sample_id = len(self._prediction_samples)
         raster_relpath = None
+        raster_uint8_sha256 = None
         if self._prediction_logging_save_raster:
             raster_relpath = f"rasters/sample_{sample_id:06d}.png"
             raster_path = os.path.join(self._prediction_log_dir, raster_relpath)
-            img_arr = np.asarray(img_tv)
-            if img_arr.dtype != np.uint8:
-                img_arr = np.clip(img_arr, 0, 255).astype(np.uint8)
-            cv2.imwrite(raster_path, img_arr)
+            canonical_raster = save_logged_raster(raster_path, img_tv)
+            raster_uint8_sha256 = raster_array_sha256(canonical_raster)
 
-        sample = {
+        aligned_history = aligned_history_from_agent_history(
+            self.agent_history,
+            self.vehicle_actors[self.ego_vehicle_idx].id,
+            target_agent_id,
+            history_times_s=HISTORY_TIMES_S,
+        )
+        interaction = build_interaction_sequence(
+            aligned_history,
+            history_times_s=HISTORY_TIMES_S,
+        )
+        target_params = self.vehicle_params_list[target_vehicle_idx]
+        target_policy = self.vehicle_policies[target_vehicle_idx]
+        if hasattr(target_policy, "parameters"):
+            target_style_parameters = target_policy.parameters()
+        else:
+            target_style_parameters = {
+                "controller": type(target_policy).__name__,
+                "nominal_speed_mps": float(target_params.nominal_speed),
+            }
+        target_diagnostics = (
+            target_policy.diagnostics()
+            if hasattr(target_policy, "diagnostics")
+            else {
+                "style": "assertive_constant_speed",
+                "active": False,
+                "triggered_this_step": False,
+                "released_this_step": False,
+            }
+        )
+
+        sample = dict(getattr(self, "_prediction_dataset_metadata", {}))
+        sample.update({
             "sample_id": sample_id,
             "step": loop_step,
             "sim_time_s": float(getattr(self, "_current_sim_time", np.nan)),
             "target_vehicle_idx": int(target_vehicle_idx),
             "target_actor_id": int(target_agent_id),
             "raster_relpath": raster_relpath,
+            "raster_contract_id": RASTER_CONTRACT_ID,
+            "raster_uint8_sha256": raster_uint8_sha256,
             "past_states_local": np.asarray(past_states_tv[:-1], dtype=float),
+            "history_times_s": list(HISTORY_TIMES_S),
+            "feature_schema_id": FEATURE_SCHEMA_ID,
+            "interaction_history_world": aligned_history,
+            "interaction_sequence": interaction.values,
+            "interaction_sequence_mask": interaction.mask,
             "target_to_world_R": np.asarray(R_target_to_world, dtype=float),
             "target_to_world_t": np.asarray(t_target_to_world, dtype=float),
             "mode_probabilities": np.asarray(gmm_pred_tv.mode_probabilities, dtype=float),
@@ -764,14 +877,40 @@ class RunIntersectionScenario:
             "pred_sigmas_world": np.asarray(gmm_pred_tv.sigmas[:, :self.ego_N, :, :], dtype=float),
             "ego_state": self._actor_state_for_prediction_log(self.vehicle_actors[self.ego_vehicle_idx]),
             "target_state": self._actor_state_for_prediction_log(target_actor),
+            "target_style": str(target_params.target_style),
+            "target_style_parameters": target_style_parameters,
+            "target_reactive_diagnostics": target_diagnostics,
+            "target_speed_mps": float(target_params.nominal_speed),
+            "target_start_offset_m": float(target_params.start_longitudinal_offset),
+            "prediction_horizon_steps": int(self._prediction_logging_horizon),
             "horizon_steps": int(self._prediction_logging_horizon),
+            "dt_s": float(self.vehicle_params_list[self.ego_vehicle_idx].dt),
             "dt": float(self.vehicle_params_list[self.ego_vehicle_idx].dt),
             "model_weights": getattr(self, "_prediction_model_weights", None),
             "model_anchors": getattr(self, "_prediction_model_anchors", None),
-        }
+        })
         sample["interaction_context"] = interaction_context_from_sample(sample).tolist()
+        assert_logged_feature_equivalence(sample)
         self._prediction_samples.append(sample)
+
+    def _flush_prediction_sample_after_controls(self, loop_step):
+        """Attach same-step target diagnostics, then persist the pending sample."""
+
+        if not self._prediction_samples:
+            return
+        sample = self._prediction_samples[-1]
+        sample_id = int(sample["sample_id"])
+        if int(sample["step"]) != int(loop_step) or sample_id in self._prediction_raw_written:
+            return
+        target_idx = int(sample["target_vehicle_idx"])
+        target_actor = self.vehicle_actors[target_idx]
+        target_policy = self.vehicle_policies[target_idx]
+        sample["target_state"] = self._actor_state_for_prediction_log(target_actor)
+        sample["target_actual_speed_mps"] = sample["target_state"]["speed"]
+        if hasattr(target_policy, "diagnostics"):
+            sample["target_reactive_diagnostics"] = target_policy.diagnostics()
         self._append_prediction_jsonl("prediction_dataset_raw.jsonl", sample)
+        self._prediction_raw_written.add(sample_id)
 
     def _interp_xy_at_times(self, trajectory, query_times):
         trajectory = np.asarray(trajectory)
@@ -817,6 +956,7 @@ class RunIntersectionScenario:
 
         manifest = {
             "enabled": True,
+            "dataset_metadata": getattr(self, "_prediction_dataset_metadata", {}),
             "sample_count": len(self._prediction_samples),
             "samples_with_any_future_label": valid_count,
             "raw_jsonl": "prediction_dataset_raw.jsonl",
@@ -829,6 +969,10 @@ class RunIntersectionScenario:
             "dt": float(self.vehicle_params_list[self.ego_vehicle_idx].dt),
             "model_weights": getattr(self, "_prediction_model_weights", None),
             "model_anchors": getattr(self, "_prediction_model_anchors", None),
+            "raster_contract": raster_contract_metadata(),
+            "feature_schema_id": FEATURE_SCHEMA_ID,
+            "history_times_s": list(HISTORY_TIMES_S),
+            "interaction_sequence_shape": [len(HISTORY_TIMES_S), 12],
         }
         with open(os.path.join(self._prediction_log_dir, "prediction_dataset_manifest.json"), "w", encoding="utf-8") as f:
             json.dump(self._json_safe(manifest), f, indent=2)
@@ -911,7 +1055,10 @@ class RunIntersectionScenario:
                     pred_dict={ "tvs_positions": tvs_positions,
                                 "tvs_mode_dists": tvs_mode_dists,
                                 "tvs_mode_probs": tvs_mode_probs,
-                                "tvs_valid_pred": tvs_valid_pred}
+                                "tvs_valid_pred": tvs_valid_pred,
+                                "ego_actor_state": self._actor_state_for_prediction_log(
+                                    self.vehicle_actors[self.ego_vehicle_idx]
+                                )}
 
                     # Run policies for each agent.
                     t_elapsed = snap.elapsed_seconds
@@ -968,6 +1115,7 @@ class RunIntersectionScenario:
                             ego_speed = np.linalg.norm([ego_vel.x, ego_vel.y])
                             ego_ctrl  = control
 
+                    self._flush_prediction_sample_after_controls(loop_step)
                     pred0 = bool(tvs_valid_pred[0]) if tvs_valid_pred else False
                     if ego_control is not None:
                         step_row = {
@@ -1000,6 +1148,13 @@ class RunIntersectionScenario:
                                     "target0_throttle": float(target0_control.throttle),
                                     "target0_brake": float(target0_control.brake),
                                     "target0_steer": float(target0_control.steer),
+                                })
+                            target0_policy = self.vehicle_policies[self.tv_vehicle_idxs[0]]
+                            if hasattr(target0_policy, "diagnostics"):
+                                diagnostics = target0_policy.diagnostics()
+                                step_row.update({
+                                    f"target0_reactive_{key}": value
+                                    for key, value in diagnostics.items()
                                 })
                         exp_log.append_step_row(self.savedir, rows_buffer, step_row, flush_every=25)
 
@@ -1280,6 +1435,7 @@ class RunIntersectionScenario:
         # Must match _make_predictions: one GMM stack per ``role == "target"`` vehicle.
         n_tv_max_mpc = max(1, sum(1 for vp in vehicle_params_list if vp.role == "target"))
 
+        route_transforms = []
         for idx, vp in enumerate(vehicle_params_list):
             veh_bp = resolve_vehicle_blueprint(vp.vehicle_type, bp_library)
             veh_bp.set_attribute("color", vp.vehicle_color)
@@ -1297,26 +1453,43 @@ class RunIntersectionScenario:
 
             start_transform = get_intersection_transform(intersection, vp, "start", side_of_road=carla_params.side_of_road)
             goal_transform  = get_intersection_transform(intersection, vp, "goal", side_of_road=carla_params.side_of_road)
-
             veh_actor  = self.world.spawn_actor(veh_bp, start_transform)
-            if vp.role == "ego":
-                veh_policy = get_vehicle_policy(
-                    vp, veh_actor, goal_transform, n_tv_max=n_tv_max_mpc)
-                if hasattr(veh_policy, "set_debug_context"):
-                    veh_policy.set_debug_context(
-                        self.savedir,
-                        label=getattr(vp, "smpc_config", vp.policy_type),
-                    )
-            else:
-                veh_policy = get_vehicle_policy(vp, veh_actor, goal_transform)
 
+            route_transforms.append((start_transform, goal_transform))
             self.vehicle_actors.append(veh_actor)
-            self.vehicle_policies.append(veh_policy)
             self.vehicle_init_speeds.append(vp.init_speed)
 
         if len(ego_vehicle_idxs) != 1:
             raise RuntimeError(f"Invalid number of ego vehicles spawned: {len(ego_vehicle_idxs)}")
         self.ego_vehicle_idx = ego_vehicle_idxs[0]
+        ego_start, ego_goal = route_transforms[self.ego_vehicle_idx]
+
+        for idx, (vp, veh_actor) in enumerate(zip(vehicle_params_list, self.vehicle_actors)):
+            _, goal_transform = route_transforms[idx]
+            conflict_point = None
+            if vp.policy_type == "defensive_reactive":
+                target_start, target_goal = route_transforms[idx]
+                conflict_point = get_route_conflict_point_rhs(
+                    target_start,
+                    target_goal,
+                    ego_start,
+                    ego_goal,
+                )
+            veh_policy = get_vehicle_policy(
+                vp,
+                veh_actor,
+                goal_transform,
+                n_tv_max=n_tv_max_mpc if vp.role == "ego" else None,
+                conflict_point_rhs=conflict_point,
+            )
+            if vp.role == "ego":
+                if hasattr(veh_policy, "set_debug_context"):
+                    veh_policy.set_debug_context(
+                        self.savedir,
+                        label=getattr(vp, "smpc_config", vp.policy_type),
+                    )
+            self.vehicle_policies.append(veh_policy)
+
         self.ego_N           = vehicle_params_list[self.ego_vehicle_idx].N
         self.ego_num_modes   = vehicle_params_list[self.ego_vehicle_idx].num_modes
 
@@ -1337,7 +1510,11 @@ class RunIntersectionScenario:
         self._prediction_logging_stride = max(1, int(prediction_params.prediction_logging_stride))
         self._prediction_logging_horizon = max(1, int(prediction_params.prediction_logging_horizon))
         self._prediction_logging_save_raster = bool(prediction_params.prediction_logging_save_raster)
+        self._prediction_dataset_metadata = dict(
+            prediction_params.prediction_dataset_metadata or {}
+        )
         self._prediction_samples = []
+        self._prediction_raw_written = set()
         self._prediction_log_dir = os.path.join(self.savedir, "prediction_dataset")
         if self._prediction_logging_enabled:
             os.makedirs(self._prediction_log_dir, exist_ok=True)
@@ -1355,6 +1532,10 @@ class RunIntersectionScenario:
                         "stride": self._prediction_logging_stride,
                         "horizon": self._prediction_logging_horizon,
                         "save_raster": self._prediction_logging_save_raster,
+                        "dataset_metadata": self._prediction_dataset_metadata,
+                        "raster_contract": raster_contract_metadata(),
+                        "feature_schema_id": FEATURE_SCHEMA_ID,
+                        "history_times_s": list(HISTORY_TIMES_S),
                     },
                     f,
                     indent=2,

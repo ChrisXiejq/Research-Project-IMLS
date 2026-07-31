@@ -3,12 +3,12 @@ import os
 import sys
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.applications.resnet import preprocess_input
 
 scriptdir = os.path.abspath(__file__).split('scripts')[0] + 'scripts/'
 sys.path.append(scriptdir)
 from evaluation.gmm_prediction import GMMPrediction
 from models.multipath_gmm_utils import decode_multipath_raw
+from models.prediction_input_contract import preprocess_resnet_raster
 
 class DeployMultiPath:
     """ Class to serve a pretrained MultiPath model for online trajectory prediction.
@@ -45,9 +45,7 @@ class DeployMultiPath:
         }
 
     def predict_instance(self, image_raw, past_states, interaction_context=None):
-        if len(image_raw.shape) == 3:
-            image_raw = np.expand_dims(image_raw, 0)
-        img = preprocess_input(tf.cast(image_raw, dtype=tf.float32))
+        img = preprocess_resnet_raster(image_raw)
 
         if len(past_states.shape) == 2:
             past_states = np.expand_dims(past_states, 0)

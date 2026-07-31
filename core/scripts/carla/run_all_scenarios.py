@@ -30,6 +30,17 @@ def _policy_output_name(policy_name):
     return policy_name
 
 
+def _current_git_commit():
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=os.path.dirname(os.path.abspath(__file__)),
+            text=True,
+        ).strip()
+    except Exception:
+        return "unknown"
+
+
 def _write_fine_tune_config_snapshot(savedir: str, scenario_dict: dict) -> None:
     os.makedirs(savedir, exist_ok=True)
     exp_log.write_json(
@@ -78,7 +89,7 @@ def _savedir_completed_successfully(savedir: str) -> bool:
     return bool(summary.get("ran_successfully", False))
 
 
-def _prepare_prediction_params(scenario_dict, args=None):
+def _prepare_prediction_params(scenario_dict, args=None, dataset_metadata=None):
     pred_dict = dict(scenario_dict.get("prediction_params", {}))
     traffic_control = (
         scenario_dict.get("carla_params", {}).get("traffic_control")
@@ -100,6 +111,8 @@ def _prepare_prediction_params(scenario_dict, args=None):
             pred_dict["prediction_logging_horizon"] = int(args.prediction_logging_horizon)
         if getattr(args, "prediction_logging_save_raster", False):
             pred_dict["prediction_logging_save_raster"] = True
+    if dataset_metadata is not None:
+        pred_dict["prediction_dataset_metadata"] = dict(dataset_metadata)
     return pred_dict
 
 
@@ -227,7 +240,7 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
 
 def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
                  enable_camera_viz=True, risk_profile="upstream_code",
-                 adaptive_risk_config=None, args=None):
+                 adaptive_risk_config=None, args=None, prediction_dataset_metadata=None):
     if scene != "intersection":
         raise ValueError(f"Unsupported scene type after cleanup: {scene}")
     from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
@@ -235,7 +248,13 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
     
     carla_params     = CarlaParams(**scenario_dict["carla_params"])
     drone_viz_params = DroneVizParams(**_prepare_drone_viz_params(scenario_dict, enable_camera_viz))
-    pred_params      = PredictionParams(**_prepare_prediction_params(scenario_dict, args))
+    pred_params      = PredictionParams(
+        **_prepare_prediction_params(
+            scenario_dict,
+            args,
+            dataset_metadata=prediction_dataset_metadata,
+        )
+    )
 
     vehicles_params_list = []
 
@@ -258,6 +277,13 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
             vehicles_params_list.append( VehicleParams(**vp_dict) )
             # continue
         elif "target" in vp_dict["role"]:
+            target_style = getattr(args, "target_style", "assertive_constant_speed")
+            vp_dict["target_style"] = target_style
+            vp_dict["policy_type"] = (
+                "defensive_reactive"
+                if target_style == "defensive_reactive"
+                else "straight"
+            )
             vehicles_params_list.append( VehicleParams(**vp_dict) )
         elif vp_dict["role"] == "ego":
          
@@ -365,9 +391,32 @@ if __name__ == '__main__':
                         help="Number of future target steps to label in prediction_dataset_labeled.jsonl.")
     parser.add_argument("--prediction_logging_save_raster", action="store_true",
                         help="Also save rasterized prediction input images as PNG files for future fine-tuning.")
+    parser.add_argument(
+        "--target_style",
+        choices=["assertive_constant_speed", "defensive_reactive"],
+        default="assertive_constant_speed",
+        help="V2 target behavior treatment.",
+    )
+    parser.add_argument(
+        "--prediction_dataset_version",
+        default="give_way_interaction_prediction_v2.0",
+    )
+    parser.add_argument(
+        "--prediction_protocol_id",
+        default="town05_give_way_2x2_200_rollouts_v1",
+    )
+    parser.add_argument(
+        "--prediction_feature_schema_id",
+        default="give_way_interaction_sequence_v2",
+    )
+    parser.add_argument("--prediction_cell_id", default=None)
+    parser.add_argument("--prediction_ego_policy_label", default=None)
+    parser.add_argument("--prediction_git_commit", default=None)
     parser.add_argument("--no_console_log", action="store_true",
                         help="Do not duplicate experiment logs to stdout (file + jsonl still written).")
     args = parser.parse_args()
+    if args.prediction_git_commit is None:
+        args.prediction_git_commit = _current_git_commit()
     adaptive_risk_config = _load_adaptive_risk_config(args)
 
     scenario_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scenarios/")
@@ -413,6 +462,13 @@ if __name__ == '__main__':
             "prediction_logging_stride": args.prediction_logging_stride,
             "prediction_logging_horizon": args.prediction_logging_horizon,
             "prediction_logging_save_raster": args.prediction_logging_save_raster,
+            "target_style": args.target_style,
+            "prediction_dataset_version": args.prediction_dataset_version,
+            "prediction_protocol_id": args.prediction_protocol_id,
+            "prediction_feature_schema_id": args.prediction_feature_schema_id,
+            "prediction_cell_id": args.prediction_cell_id,
+            "prediction_ego_policy_label": args.prediction_ego_policy_label,
+            "prediction_git_commit": args.prediction_git_commit,
             "results_folder": os.path.abspath(results_folder),
         },
     )
@@ -594,11 +650,31 @@ if __name__ == '__main__':
                             "solver_backend": "gurobi",
                         },
                     )
+                    try:
+                        ego_init_id = int(ego_init_name.rsplit("_", 1)[-1])
+                    except ValueError:
+                        ego_init_id = None
+                    prediction_dataset_metadata = {
+                        "dataset_version": args.prediction_dataset_version,
+                        "protocol_id": args.prediction_protocol_id,
+                        "git_commit": args.prediction_git_commit,
+                        "scenario": scenario_name,
+                        "map": scenario_dict.get("carla_params", {}).get("map_str"),
+                        "ego_init_id": ego_init_id,
+                        "ego_policy": (
+                            args.prediction_ego_policy_label or ego_policy_config
+                        ),
+                        "target_style": args.target_style,
+                        "cell_id": args.prediction_cell_id,
+                        "feature_schema_id": args.prediction_feature_schema_id,
+                        "source_subrun": label,
+                    }
                     scenario_ok = run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
                                                enable_camera_viz=args.enable_camera_viz,
                                                risk_profile=args.risk_profile,
                                                adaptive_risk_config=adaptive_risk_config,
-                                               args=args)
+                                               args=args,
+                                               prediction_dataset_metadata=prediction_dataset_metadata)
                     ok = bool(scenario_ok)
                 except Exception:
                     err = traceback.format_exc()

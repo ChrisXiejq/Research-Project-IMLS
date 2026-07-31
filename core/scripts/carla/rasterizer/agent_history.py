@@ -11,6 +11,7 @@ class ActorInfo:
 
 		self.time_history = deque(maxlen=history_max_length)
 		self.pose_history = deque(maxlen=history_max_length)
+		self.velocity_history = deque(maxlen=history_max_length)
 
 	def get_snapshot(self, index):
 		snapshot_dict = {}
@@ -18,10 +19,11 @@ class ActorInfo:
 		snapshot_dict['time']     = self.time_history[index]
 		snapshot_dict['centroid'] = self.pose_history[index][:2]
 		snapshot_dict['yaw']      = self.pose_history[index][2]
+		snapshot_dict['velocity'] = self.velocity_history[index]
 		snapshot_dict['extent']   = self.extent
 		return snapshot_dict
 
-	def update(self, time, transform):
+	def update(self, time, transform, velocity):
 		""" Add the current time and pose to the history.
 		    We save this in a RHS system vs. Carla's default LHS system.
 		"""
@@ -31,6 +33,16 @@ class ActorInfo:
 
 		self.time_history.append(time)
 		self.pose_history.append([x_rhs, y_rhs, yaw_rhs])
+		self.velocity_history.append([float(velocity.x), float(-velocity.y)])
+
+	def get_snapshot_at_time(self, query_time, closeness_eps):
+		if not self.time_history:
+			return None
+		times = np.asarray(self.time_history, dtype=float)
+		index = int(np.argmin(np.abs(times - query_time)))
+		if abs(float(times[index]) - float(query_time)) > closeness_eps:
+			return None
+		return self.get_snapshot(index)
 
 class AgentHistory:
 	""" Class to manage pose history for the vehicle/pedestrian agents.
@@ -84,12 +96,20 @@ class AgentHistory:
 		for veh_id in self.vehicles.keys():
 			actor_snapshot = world_snapshot.find(veh_id)
 			if actor_snapshot is not None:
-				self.vehicles[veh_id].update( time, actor_snapshot.get_transform() )
+				self.vehicles[veh_id].update(
+					time,
+					actor_snapshot.get_transform(),
+					actor_snapshot.get_velocity(),
+				)
 
 		for ped_id in self.pedestrians.keys():
 			actor_snapshot = world_snapshot.find(ped_id)
 			if actor_snapshot is not None:
-				self.pedestrians[ped_id].update( time, actor_snapshot.get_transform() )
+				self.pedestrians[ped_id].update(
+					time,
+					actor_snapshot.get_transform(),
+					actor_snapshot.get_velocity(),
+				)
 
 		for tl_id in self.traffic_lights.keys():
 			tl_actor = world.get_actor(tl_id)
@@ -123,12 +143,23 @@ class AgentHistory:
 
 		for hsec in history_secs:
 			tm_query = current_tm - hsec
-			ind_closest = np.argmin( np.abs( tms - tm_query ) )
 			scene_dict = {}
 
-			if np.abs(tms[ind_closest] - tm_query) <= closeness_eps:
-				scene_dict['vehicles'] = [veh.get_snapshot(ind_closest) for veh in self.vehicles.values()]
-				scene_dict['pedestrians']  = [ped.get_snapshot(ind_closest) for ped in self.pedestrians.values()]
+			vehicles = [
+				snapshot for snapshot in (
+					veh.get_snapshot_at_time(tm_query, closeness_eps)
+					for veh in self.vehicles.values()
+				) if snapshot is not None
+			]
+			pedestrians = [
+				snapshot for snapshot in (
+					ped.get_snapshot_at_time(tm_query, closeness_eps)
+					for ped in self.pedestrians.values()
+				) if snapshot is not None
+			]
+			if vehicles or pedestrians:
+				scene_dict['vehicles'] = vehicles
+				scene_dict['pedestrians'] = pedestrians
 
 			snapshots[np.round(hsec, 2)] = scene_dict
 

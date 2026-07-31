@@ -109,6 +109,23 @@ def feature_schema() -> Dict[str, Any]:
         "history_times_s": HISTORY_TIMES_S,
         "sequence_shape": [len(HISTORY_TIMES_S), len(TOKEN_FEATURES)],
         "mask_shape": [len(HISTORY_TIMES_S)],
+        "raster_contract": {
+            "raster_contract_id": "semantic_raster_cv2_bytes_resnet_caffe_v2",
+            "online_source": "SemBoxRasterizer in-memory uint8 array",
+            "storage_round_trip": "cv2.imwrite PNG then cv2.imread(IMREAD_COLOR)",
+            "channel_rule": "preserve rasterizer byte order; never decode the logged PNG with an RGB-assuming decoder",
+            "preprocessing": "shared prediction_input_contract.preprocess_resnet_raster",
+            "required_equivalence": [
+                "pixel max absolute difference = 0",
+                "preprocessed tensor max absolute difference = 0",
+            ],
+        },
+        "state_sampling": {
+            "source": "CARLA ActorSnapshot pose and velocity histories",
+            "velocity_axes": "CARLA velocity converted to RHS as [vx, -vy]",
+            "alignment_tolerance_s": 0.1,
+            "invalid_rule": "if either ego or target state is unavailable, mask=0 and all 12 values are zero",
+        },
         "mask_semantics": {
             "1": "ego and target states are both available and time-aligned within 0.1 s",
             "0": "missing token; feature values are zero-filled and must be ignored by masked layers",
@@ -124,6 +141,7 @@ def feature_schema() -> Dict[str, Any]:
         "forbidden_predictor_inputs": [
             "target_style",
             "ego_policy",
+            "cell_id",
             "split",
             "ego_init_id",
         ],
@@ -146,8 +164,12 @@ def feature_schema() -> Dict[str, Any]:
             "source_subrun",
             "sample_id",
             "raster_relpath",
+            "raster_contract_id",
+            "raster_uint8_sha256",
+            "cell_id",
         ],
         "required_training_fields": [
+            "interaction_history_world",
             "interaction_sequence",
             "interaction_sequence_mask",
             "past_states_local",
@@ -272,7 +294,7 @@ def collection_manifest() -> Dict[str, Any]:
                 "nominal_speed_mps": 9.0,
             },
             "defensive_reactive": {
-                "controller": "to_be_implemented_and_frozen_on_day_5",
+                "controller": "DefensiveReactiveAgent implemented on Day 4; parameter freeze follows Day 5 smoke",
                 "nominal_speed_mps": 9.0,
                 "required_properties": [
                     "ego-state-dependent trigger",

@@ -21,11 +21,11 @@ from typing import Dict, Iterator, Tuple
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.applications.resnet import preprocess_input
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(SCRIPT_DIR)
 from prediction_dataset_utils import has_full_horizon, read_jsonl, resolve_raster_path, world_future_to_local
+from prediction_input_contract import load_logged_raster, preprocess_resnet_raster
 
 
 def parse_args():
@@ -105,11 +105,26 @@ def make_dataset(jsonl_path: str, result_dir: str, horizon: int, batch_size: int
         if no_image:
             image = tf.zeros((500, 500, 3), dtype=tf.float32)
         else:
-            raw = tf.io.read_file(raster_path)
-            image = tf.image.decode_png(raw, channels=3)
-            image = tf.image.resize(image, (500, 500), method="bilinear")
-            image = tf.cast(image, tf.float32)
-            image = preprocess_input(image)
+            def load_shared(path_value):
+                path_bytes = path_value.item() if hasattr(path_value, "item") else path_value
+                path = (
+                    path_bytes.decode("utf-8")
+                    if isinstance(path_bytes, bytes)
+                    else str(path_bytes)
+                )
+                raster = load_logged_raster(path)
+                if tuple(raster.shape[:2]) != (500, 500):
+                    import cv2
+
+                    raster = cv2.resize(
+                        raster,
+                        (500, 500),
+                        interpolation=cv2.INTER_LINEAR,
+                    )
+                return preprocess_resnet_raster(raster)[0].astype(np.float32)
+
+            image = tf.numpy_function(load_shared, [raster_path], tf.float32)
+            image.set_shape((500, 500, 3))
         return (image, past_states), future_local
 
     dataset = dataset.map(load_inputs, num_parallel_calls=tf.data.AUTOTUNE)

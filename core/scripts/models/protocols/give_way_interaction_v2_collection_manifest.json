@@ -159,7 +159,7 @@
       "nominal_speed_mps": 9.0
     },
     "defensive_reactive": {
-      "controller": "to_be_implemented_and_frozen_on_day_5",
+      "controller": "DefensiveReactiveAgent implemented on Day 4; parameter freeze follows Day 5 smoke",
       "nominal_speed_mps": 9.0,
       "required_properties": [
         "ego-state-dependent trigger",

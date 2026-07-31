@@ -19,10 +19,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
-import cv2
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.applications.resnet import preprocess_input
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(SCRIPT_DIR)
@@ -43,6 +41,7 @@ from prediction_dataset_utils import (
     resolve_raster_path,
     world_future_to_local,
 )
+from prediction_input_contract import load_logged_raster, preprocess_resnet_raster
 
 
 CHI2_THRESHOLDS_2D = {
@@ -167,16 +166,12 @@ def make_batch(batch, no_image: bool = False):
         if no_image:
             image = np.zeros((500, 500, 3), dtype=np.float32)
         else:
-            # The online raster array is written directly with cv2.imwrite.
-            # cv2.imread restores those exact channel bytes; tf.decode_png
-            # interprets the file as RGB and silently reverses the online
-            # channel contract.
-            image = cv2.imread(raster_path, cv2.IMREAD_COLOR)
-            if image is None:
-                raise ValueError(f"Unable to decode raster: {raster_path}")
+            image = load_logged_raster(raster_path)
             if tuple(image.shape[:2]) != (500, 500):
+                import cv2
+
                 image = cv2.resize(image, (500, 500), interpolation=cv2.INTER_LINEAR)
-            image = preprocess_input(tf.cast(image, tf.float32)).numpy()
+            image = preprocess_resnet_raster(image)[0]
         images.append(image)
         past_states.append(past)
         interaction_contexts.append(interaction_context_from_sample(sample))

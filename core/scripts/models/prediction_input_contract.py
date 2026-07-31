@@ -9,6 +9,7 @@ preprocessing function below.
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -51,15 +52,26 @@ def load_logged_raster(path: str) -> np.ndarray:
     return canonical_raster_array(array)
 
 
+def raster_array_sha256(image: Any) -> str:
+    array = canonical_raster_array(image)
+    return hashlib.sha256(array.tobytes(order="C")).hexdigest()
+
+
 def preprocess_resnet_raster(image: Any) -> np.ndarray:
     """Apply the one frozen ResNet preprocessing path used by all V2 models."""
 
     import tensorflow as tf
     from tensorflow.keras.applications.resnet import preprocess_input
 
-    array = canonical_raster_array(image)
-    if array.ndim == 3:
-        array = array[None, ...]
+    raw = np.asarray(image)
+    if raw.ndim == 3:
+        array = canonical_raster_array(raw)[None, ...]
+    elif raw.ndim == 4:
+        array = np.stack([canonical_raster_array(item) for item in raw], axis=0)
+    else:
+        raise ValueError(
+            f"Expected raster shape [height, width, 3] or [batch, height, width, 3], got {raw.shape}"
+        )
     return np.asarray(preprocess_input(tf.cast(array, tf.float32)))
 
 

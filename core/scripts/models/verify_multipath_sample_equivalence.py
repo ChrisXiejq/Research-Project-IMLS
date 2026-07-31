@@ -8,10 +8,7 @@ import json
 import os
 from pathlib import Path
 
-import cv2
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras.applications.resnet import preprocess_input
 
 from deploy_multipath_model import DeployMultiPath
 from evaluate_multipath_model_on_dataset import (
@@ -20,6 +17,7 @@ from evaluate_multipath_model_on_dataset import (
     make_batch,
 )
 from prediction_dataset_utils import interaction_context_from_sample
+from prediction_input_contract import load_logged_raster, preprocess_resnet_raster
 
 
 def parse_args() -> argparse.Namespace:
@@ -50,12 +48,8 @@ def main() -> int:
     sample, raster_path, past, _ = item
     samples, evaluator_images, past_batch, context_batch, _ = make_batch([item])
 
-    raw_image = cv2.imread(raster_path, cv2.IMREAD_COLOR)
-    if raw_image is None:
-        raise ValueError(f"Unable to decode raster: {raster_path}")
-    deployment_preprocessed = preprocess_input(
-        tf.cast(raw_image[None, ...], tf.float32)
-    ).numpy()
+    raw_image = load_logged_raster(raster_path)
+    deployment_preprocessed = preprocess_resnet_raster(raw_image)
     input_difference = float(
         np.max(np.abs(evaluator_images - deployment_preprocessed))
     )
