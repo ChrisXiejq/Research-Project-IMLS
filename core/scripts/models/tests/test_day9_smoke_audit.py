@@ -24,6 +24,15 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
 
 
 class Day9AuditTest(unittest.TestCase):
+    def test_legacy_boolean_solver_failure_is_recognized(self) -> None:
+        from core.scripts.models.audit_day9_smoke import solver_failed
+
+        self.assertTrue(solver_failed({"optimal": False}))
+        self.assertTrue(solver_failed({"optimal": 0}))
+        self.assertTrue(solver_failed({"exception": "fixture"}))
+        self.assertFalse(solver_failed({"optimal": True}))
+        self.assertFalse(solver_failed({"optimal": 1}))
+
     def test_eight_arm_prediction_control_chain(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -41,7 +50,13 @@ class Day9AuditTest(unittest.TestCase):
                         arms.append(arm)
                         arm_dir = root / arm_id
                         scenario = arm_dir / "scenario_fixture"
-                        write_json(arm_dir / "postcarla_trajectory_gate.json", {"overall_status": "PASS"})
+                        write_json(
+                            arm_dir / "postcarla_trajectory_gate.json",
+                            {
+                                "overall_status": "PASS",
+                                "evaluations": [{"solver_failure_frac": 0.0}],
+                            },
+                        )
                         write_json(scenario / "scenario_run_summary.json", {"ran_successfully": True})
                         calibration = (
                             {

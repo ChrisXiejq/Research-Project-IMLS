@@ -11,6 +11,7 @@
 7. `Day6_正式200Rollout采集运行指南.md`：断点续跑、配置漂移保护、服务器命令和完成标志；
 8. `Day7完成与Day8训练执行指南.md`、`Day8最终Test结果与结论.md`：模型训练和最终 offline 证据；
 9. `Day9部署与CARLA_Smoke执行指南.md`：冻结模型的在线部署与 smoke；
-10. `已完成实验与证据账本.md` 与 `generated/`：已完成证据。
+10. `Day10正式闭环矩阵执行指南.md`：B1/B0 × fixed frontier/adaptive × held-out target-style 正式矩阵；
+11. `已完成实验与证据账本.md` 与 `generated/`：已完成证据。
 
 论文正文尚未进入最终写作阶段，因此不保留会迅速失效的 Results draft 或重复的 Markdown 表格。正式 Results/Discussion 将在模型与闭环实验冻结后从机器可读证据生成。

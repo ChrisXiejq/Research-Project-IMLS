@@ -43,6 +43,12 @@ def warmup_passed(value: object) -> bool:
     return value is True or (type(value) is int and value == 1)
 
 
+def solver_failed(solver: dict) -> bool:
+    """Recognize canonical False and the legacy integer emitted for bool False."""
+    optimal = solver.get("optimal")
+    return "exception" in solver or optimal is False or (type(optimal) is int and optimal == 0)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-dir", required=True)
@@ -112,7 +118,7 @@ def main() -> None:
         supervisor_rows = 0
         for row in debug_rows:
             solver = row.get("solver") or {}
-            if "exception" in solver or solver.get("optimal") is False:
+            if solver_failed(solver):
                 solver_failures += 1
             valid_flags = row.get("prediction_valid") or []
             if not any(bool(item) for item in valid_flags):
@@ -138,6 +144,25 @@ def main() -> None:
             arm_failures.append("risk_mode_chain")
         if supervisor_rows != len(valid_debug):
             arm_failures.append("supervisor_chain")
+        gate_evaluations = gate.get("evaluations") or []
+        gate_solver_failure_frac = (
+            gate_evaluations[0].get("solver_failure_frac")
+            if len(gate_evaluations) == 1
+            else None
+        )
+        debug_solver_failure_frac = (
+            solver_failures / len(debug_rows) if debug_rows else None
+        )
+        if (
+            gate_solver_failure_frac is None
+            or debug_solver_failure_frac is None
+            or not math.isclose(
+                float(gate_solver_failure_frac),
+                float(debug_solver_failure_frac),
+                abs_tol=1e-12,
+            )
+        ):
+            arm_failures.append("solver_failure_accounting")
 
         invalid_covariances = 0
         invalid_probabilities = 0
@@ -181,6 +206,8 @@ def main() -> None:
             "prediction_samples": len(prediction_rows),
             "reactive_active_samples": active_samples,
             "solver_failure_steps": solver_failures,
+            "solver_failure_fraction": debug_solver_failure_frac,
+            "postcarla_solver_failure_fraction": gate_solver_failure_frac,
             "invalid_probabilities": invalid_probabilities,
             "invalid_covariances": invalid_covariances,
             "deployment_warmup_serialized_value": deployment.get("warmup_passed"),

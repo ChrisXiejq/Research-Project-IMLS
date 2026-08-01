@@ -12,6 +12,7 @@
 - `paper/Day7完成与Day8训练执行指南.md`：Day 8 三 seed 训练与 validation 协议。
 - `paper/Day8最终Test结果与结论.md`：五模型最终 test、matched controls 和假设判定。
 - `paper/Day9部署与CARLA_Smoke执行指南.md`：冻结 B1/B0 在线部署、校准和机制链路 smoke。
+- `paper/Day10正式闭环矩阵执行指南.md`：80-rollout held-out predictor × risk × target-style 正式闭环矩阵。
 - `paper/已完成实验与证据账本.md`：已完成实验的结果路径、结论强度和不可支持的论点。
 
 ## Evidence artifacts

@@ -24,7 +24,7 @@ authority: A3 risk-owned-yield
 
 共 2 × 2 × 2 = 8 个 rollouts。B0 只用于判断 Day 10 的 fine-tuning bridge 是否可执行；正式模型仍是 B1。
 
-最终观测为 1,761 个 prediction samples、1,737 个 debug steps，其中 1,593 个包含有效 prediction。四个 reactive arms 各有 17 个 response-active samples，共 68 个；所有 arms 均为 0 solver failure、0 invalid probability、0 invalid covariance，8/8 post-CARLA gate 为 PASS。该结果放行 Day 10，但作为 development smoke 不用于估计 B1 相对 B0、adaptive 相对 fixed 的正式效果量。
+最终观测为 1,761 个 prediction samples、1,737 个 debug steps，其中 1,593 个包含有效 prediction。四个 reactive arms 各有 17 个 response-active samples，共 68 个；所有 arms 均为 0 invalid probability、0 invalid covariance，8/8 post-CARLA gate 为 PASS。每个 arm 有 1–2 个 `INF_OR_UNBD` fallback steps，solver failure fraction 为 0.47%–0.98%，均低于冻结的 5% 门限，且 final safety/completion 均通过。该结果放行 Day 10，但作为 development smoke 不用于估计 B1 相对 B0、adaptive 相对 fixed 的正式效果量。
 
 ## 2. 本次修复的部署缺口
 
@@ -60,6 +60,30 @@ Runner 会依次检查：
 12. 输出 `DAY9_COMPLETE.json` 和 compact snapshot。
 
 任一检查失败时不会生成 Day 9 pass 标志。
+
+## 3.1 最终结果与放行解释
+
+| Arm | Completion (s) | Min footprint separation (m) | Solver failure fraction | Reactive-active samples |
+| --- | ---: | ---: | ---: | ---: |
+| B1 fixed-medium assertive | 10.25 | 1.335 | 0.97% | 0 |
+| B1 fixed-medium reactive | 11.75 | 1.173 | 0.85% | 17 |
+| B1 adaptive assertive | 10.35 | 1.292 | 0.96% | 0 |
+| B1 adaptive reactive | 11.30 | 1.162 | 0.88% | 17 |
+| B0 fixed-medium assertive | 10.15 | 1.330 | 0.98% | 0 |
+| B0 fixed-medium reactive | 11.25 | 1.205 | 0.88% | 17 |
+| B0 adaptive assertive | 10.55 | 1.662 | 0.47% | 0 |
+| B0 adaptive reactive | 10.85 | 1.148 | 0.92% | 17 |
+
+解释边界：
+
+1. 所有 rollout 均 completion valid、无 footprint collision、target 在 ego 进入冲突区前完成 clearance；
+2. reactive treatment 在四个相关 arms 都实际触发，不是空处理组；
+3. B1/B0 与 adaptive/fixed 的单-init结果均为 mixed trade-off，不支持任何一方“普遍更好”；
+4. reactive 相对 assertive 稳定改变 completion 与 separation，说明 target-style 是有效 moderator；
+5. 该 smoke 只有一个 train init，不能用于显著性检验或论文正式效果量；它只放行 held-out paired matrix；
+6. 原 audit 曾因 legacy integer `0` 漏报 solver failure steps。修复后逐场景计数与 post-CARLA fraction 完全一致，并继续由 5% gate 判断，而不是将 fallback 隐藏为零失败。
+
+变量控制检查通过：8 arms 的 anchors 与 normalization 完全相同；B1 四组共享同一个 model/calibration hash，B0 四组共享同一个 pretrained model 和 identity calibration；init、target offset、nominal speed、A3 authority 与冻结 tuning 相同；仅 predictor、risk policy 与 target style 按 factorial contract 改变。
 
 ## 4. 服务器执行
 
