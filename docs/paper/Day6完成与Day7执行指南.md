@@ -2,6 +2,10 @@
 
 状态：Day 6 正式采集已完成并通过最终审计；Day 7 本地实现和合成数据测试已完成，等待服务器执行真实数据 gate。
 
+首次真实 model gate 已完成数据 merge，但发现 TensorFlow 2.13 无法可靠恢复嵌套在自定义复合层中的
+`MultiHeadAttention` 权重。修复后 MHA/LayerNorm/FFN 已展开为标准 Keras Functional graph；
+服务器针对 T1 的 23 组权重复测全部完全一致，重复推理和保存/加载最大绝对差均为 0。
+
 ## 1. Day 6 最终事实
 
 正式目录：

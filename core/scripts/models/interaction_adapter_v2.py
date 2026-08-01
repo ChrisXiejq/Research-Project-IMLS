@@ -69,6 +69,7 @@ class AddLearnedPosition(tf.keras.layers.Layer):
             initializer="glorot_uniform",
             trainable=True,
         )
+        super().build(input_shape)
 
     def call(self, inputs):
         return inputs + self.embedding[None, :, :]
@@ -82,53 +83,19 @@ class AddLearnedPosition(tf.keras.layers.Layer):
 
 
 @tf.keras.utils.register_keras_serializable(package="imls")
-class MaskedTransformerBlock(tf.keras.layers.Layer):
-    def __init__(self, width: int, heads: int, ff_dim: int, dropout: float, **kwargs):
-        super().__init__(**kwargs)
-        self.width = int(width)
-        self.heads = int(heads)
-        self.ff_dim = int(ff_dim)
-        self.dropout_rate = float(dropout)
-        self.attention = tf.keras.layers.MultiHeadAttention(
-            num_heads=self.heads,
-            key_dim=self.width // self.heads,
-            dropout=self.dropout_rate,
-        )
-        self.dropout1 = tf.keras.layers.Dropout(self.dropout_rate)
-        self.norm1 = tf.keras.layers.LayerNormalization(epsilon=1.0e-6)
-        self.ffn = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(self.ff_dim, activation="gelu"),
-                tf.keras.layers.Dropout(self.dropout_rate),
-                tf.keras.layers.Dense(self.width),
-            ]
-        )
-        self.dropout2 = tf.keras.layers.Dropout(self.dropout_rate)
-        self.norm2 = tf.keras.layers.LayerNormalization(epsilon=1.0e-6)
+class PairwiseAttentionMask(tf.keras.layers.Layer):
+    """Expand a [batch, time] token mask to [batch, query, key]."""
 
-    def call(self, inputs, training=None):
-        sequence, mask = inputs
+    def call(self, mask):
         valid = tf.cast(mask > 0.0, tf.bool)
-        attention_mask = tf.logical_and(valid[:, :, None], valid[:, None, :])
-        attended = self.attention(
-            sequence,
-            sequence,
-            attention_mask=attention_mask,
-            training=training,
-        )
-        x = self.norm1(sequence + self.dropout1(attended, training=training))
-        fed = self.ffn(x, training=training)
-        x = self.norm2(x + self.dropout2(fed, training=training))
-        return x * tf.cast(mask[..., None], x.dtype)
+        return tf.logical_and(valid[:, :, None], valid[:, None, :])
 
-    def get_config(self):
-        return {
-            **super().get_config(),
-            "width": self.width,
-            "heads": self.heads,
-            "ff_dim": self.ff_dim,
-            "dropout": self.dropout_rate,
-        }
+
+@tf.keras.utils.register_keras_serializable(package="imls")
+class ApplyTokenMask(tf.keras.layers.Layer):
+    def call(self, inputs):
+        sequence, mask = inputs
+        return sequence * tf.cast(mask[..., None], sequence.dtype)
 
 
 @tf.keras.utils.register_keras_serializable(package="imls")
@@ -261,15 +228,42 @@ def build_interaction_adapter(
     else:
         x = tf.keras.layers.Dense(transformer_width, name="token_projection")(normalized)
         x = AddLearnedPosition(6, transformer_width, name="position_embedding")(x)
-        x = x * mask[..., None]
+        x = ApplyTokenMask(name="position_token_mask")([x, mask])
+        attention_mask = PairwiseAttentionMask(name="pairwise_attention_mask")(mask)
         for index in range(transformer_layers):
-            x = MaskedTransformerBlock(
-                transformer_width,
-                transformer_heads,
+            prefix = f"transformer_block_{index + 1}"
+            attended = tf.keras.layers.MultiHeadAttention(
+                num_heads=transformer_heads,
+                key_dim=transformer_width // transformer_heads,
+                dropout=dropout,
+                name=f"{prefix}_self_attention",
+            )(x, x, attention_mask=attention_mask)
+            attended = tf.keras.layers.Dropout(
+                dropout, name=f"{prefix}_attention_dropout"
+            )(attended)
+            x = tf.keras.layers.Add(name=f"{prefix}_attention_add")([x, attended])
+            x = tf.keras.layers.LayerNormalization(
+                epsilon=1.0e-6, name=f"{prefix}_attention_norm"
+            )(x)
+            fed = tf.keras.layers.Dense(
                 transformer_ff_dim,
-                dropout,
-                name=f"transformer_block_{index + 1}",
-            )([x, mask])
+                activation="gelu",
+                name=f"{prefix}_ff_expand",
+            )(x)
+            fed = tf.keras.layers.Dropout(
+                dropout, name=f"{prefix}_ff_dropout"
+            )(fed)
+            fed = tf.keras.layers.Dense(
+                transformer_width, name=f"{prefix}_ff_contract"
+            )(fed)
+            fed = tf.keras.layers.Dropout(
+                dropout, name=f"{prefix}_residual_dropout"
+            )(fed)
+            x = tf.keras.layers.Add(name=f"{prefix}_output_add")([x, fed])
+            x = tf.keras.layers.LayerNormalization(
+                epsilon=1.0e-6, name=f"{prefix}_output_norm"
+            )(x)
+            x = ApplyTokenMask(name=f"{prefix}_token_mask")([x, mask])
         context = MaskedMeanPooling(name="masked_temporal_pool")([x, mask])
 
     zero = tf.keras.initializers.Zeros()
