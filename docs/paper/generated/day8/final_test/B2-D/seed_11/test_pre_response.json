@@ -1,0 +1,765 @@
+{
+  "anchors": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_clusters_16.npy",
+  "anchors_artifact": {
+    "bytes": 6528,
+    "path": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_clusters_16.npy",
+    "sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982"
+  },
+  "best_mode_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    60,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "calibrated": {
+    "accuracy": {
+      "best_mode_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        60,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "mean_mode_entropy": 0.19585639238357544,
+      "minADE": {
+        "count": 60,
+        "max": 0.21269477919666602,
+        "mean": 0.08121971040964127,
+        "p50": 0.06069253757596016,
+        "p90": 0.13812262713909154
+      },
+      "minFDE": {
+        "count": 60,
+        "max": 0.2667589947745484,
+        "mean": 0.09221943467855453,
+        "p50": 0.06869746372103691,
+        "p90": 0.21015642732381826
+      },
+      "top1_ADE": {
+        "count": 60,
+        "max": 0.21269477919666602,
+        "mean": 0.08121971040964127,
+        "p50": 0.06069253757596016,
+        "p90": 0.13812262713909154
+      },
+      "top1_FDE": {
+        "count": 60,
+        "max": 0.2667589947745484,
+        "mean": 0.09221943467855453,
+        "p50": 0.06869746372103691,
+        "p90": 0.21015642732381826
+      },
+      "top_prob_mode_is_best_fraction": 1.0
+    },
+    "best_mode_counts": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      60,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "calibration_parameters": {
+      "covariance_scale": 0.012861081668351452,
+      "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+      "temperature": 0.7071067811865475
+    },
+    "historical_std_parameterization": {
+      "formula": "axis_std = exp(abs(raw_std_parameter))",
+      "name": "exp_abs_raw",
+      "posthoc_scaled_axis_standard_deviation": {
+        "count": 19200,
+        "max": 0.16732271015644073,
+        "mean": 0.11499588191509247,
+        "p50": 0.11429043859243393,
+        "p90": 0.11705785244703293
+      },
+      "raw_parameter_absolute": {
+        "count": 19200,
+        "max": 0.3889438211917877,
+        "mean": 0.01355880219489336,
+        "p50": 0.007762349909171462,
+        "p90": 0.0316876620054245
+      },
+      "theoretical_uncalibrated_minimum_std": 1.0,
+      "uncalibrated_axis_standard_deviation": {
+        "count": 19200,
+        "max": 1.4754215478897095,
+        "mean": 1.0140130519866943,
+        "p50": 1.0077925324440002,
+        "p90": 1.0321950912475586
+      }
+    },
+    "init_group_aggregation": {
+      "design_role": "paired clustering unit shared by all available 2x2 cells",
+      "group_key": "ego_init_id",
+      "independent_init_groups": 2,
+      "macro_mean": {
+        "pointwise_mixture_NLL_mean": -2.0628762245178223,
+        "top1_ADE_mean": 0.08121972531080246,
+        "top1_FDE_mean": 0.09221942722797394,
+        "top1_FDE_p90": 0.22339841723442078,
+        "trajectory_mixture_NLL_per_step_mean": -2.117197036743164
+      },
+      "per_init_group": {
+        "ego_init_47": {
+          "pointwise_mixture_NLL_mean": -2.067711114883423,
+          "samples": 30,
+          "top1_ADE_mean": 0.08254988491535187,
+          "top1_FDE_mean": 0.09003014117479324,
+          "top1_FDE_p90": 0.20465485304594042,
+          "trajectory_mixture_NLL_per_step_mean": -2.1231529712677
+        },
+        "ego_init_50": {
+          "pointwise_mixture_NLL_mean": -2.0580413341522217,
+          "samples": 30,
+          "top1_ADE_mean": 0.07988956570625305,
+          "top1_FDE_mean": 0.09440871328115463,
+          "top1_FDE_p90": 0.2421419829130173,
+          "trajectory_mixture_NLL_per_step_mean": -2.111241340637207
+        }
+      }
+    },
+    "mean_mode_entropy": 0.19585639238357544,
+    "mean_probability_assigned_to_best_mode": 0.9445562362670898,
+    "mean_top_mode_probability": 0.9445562362670898,
+    "minADE_mean": 0.08121971040964127,
+    "minADE_p50": 0.06069253757596016,
+    "minADE_p90": 0.13812262713909154,
+    "minFDE_mean": 0.09221943467855453,
+    "minFDE_p50": 0.06869746372103691,
+    "minFDE_p90": 0.21015642732381826,
+    "pointwise_mixture_NLL_mean": -2.062875986099243,
+    "probabilistic": {
+      "covariance_audit": {
+        "invalid_matrices": 0,
+        "invalid_rate": 0.0,
+        "maximum_symmetry_error": 0.0,
+        "minimum_determinant": 0.00016540738579351455,
+        "minimum_eigenvalue": 0.012861079536378384,
+        "non_positive_definite_matrices": 0,
+        "nonfinite_matrices": 0,
+        "nonsymmetric_matrices": 0,
+        "total_matrices": 9600
+      },
+      "coverage_mean_absolute_error": 0.09183333069086075,
+      "pointwise_mixture_NLL": {
+        "count": 60,
+        "max": -0.4399969319768758,
+        "mean": -2.062875986099243,
+        "p50": -2.3178060054779053,
+        "p90": -1.2571176171302796
+      },
+      "top_mode_2d_covariance_coverage": {
+        "1sigma": {
+          "absolute_error": 0.22730000000000006,
+          "empirical_coverage": 0.91,
+          "mahalanobis_sq": 2.3,
+          "nominal_coverage": 0.6827,
+          "per_horizon_empirical": [
+            1.0,
+            0.8666666666666667,
+            0.9333333333333333,
+            0.9333333333333333,
+            0.95,
+            1.0,
+            0.9,
+            0.8666666666666667,
+            0.7833333333333333,
+            0.8666666666666667
+          ],
+          "signed_error": 0.22730000000000006
+        },
+        "2sigma": {
+          "absolute_error": 0.045499999999999985,
+          "empirical_coverage": 1.0,
+          "mahalanobis_sq": 6.18,
+          "nominal_coverage": 0.9545,
+          "per_horizon_empirical": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "signed_error": 0.045499999999999985
+        },
+        "3sigma": {
+          "absolute_error": 0.0027000000000000357,
+          "empirical_coverage": 1.0,
+          "mahalanobis_sq": 11.83,
+          "nominal_coverage": 0.9973,
+          "per_horizon_empirical": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "signed_error": 0.0027000000000000357
+        }
+      },
+      "top_mode_2sigma_tail_rate": 0.0,
+      "top_mode_covariance_determinant": {
+        "count": 600,
+        "max": 0.0001654074626635742,
+        "mean": 0.000165407414897345,
+        "p50": 0.000165407414897345,
+        "p90": 0.000165407414897345
+      },
+      "top_mode_log_covariance_determinant": {
+        "count": 600,
+        "max": -8.707098657507538,
+        "mean": -8.707098960876465,
+        "p50": -8.707098960876465,
+        "p90": -8.707098960876465
+      },
+      "trajectory_mixture_NLL_per_step": {
+        "count": 60,
+        "max": -0.6402180876566186,
+        "mean": -2.117197275161743,
+        "p50": -2.337383985519409,
+        "p90": -1.6642891764640801
+      }
+    },
+    "rollout_aggregation": {
+      "group_key": "cell_id::source_subrun",
+      "independent_rollouts": 4,
+      "macro_mean": {
+        "pointwise_mixture_NLL_mean": -2.062875986099243,
+        "top1_ADE_mean": 0.08121971786022186,
+        "top1_FDE_mean": 0.09221942722797394,
+        "top1_FDE_p90": 0.1927257627248764,
+        "trajectory_mixture_NLL_per_step_mean": -2.117197275161743
+      },
+      "per_rollout": {
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_47_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": -2.0658411979675293,
+          "samples": 15,
+          "top1_ADE_mean": 0.08273288607597351,
+          "top1_FDE_mean": 0.09016214311122894,
+          "top1_FDE_p90": 0.18200454413890838,
+          "trajectory_mixture_NLL_per_step_mean": -2.121607780456543
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_50_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": -2.0603227615356445,
+          "samples": 15,
+          "top1_ADE_mean": 0.07975076884031296,
+          "top1_FDE_mean": 0.09419583529233932,
+          "top1_FDE_p90": 0.19992461800575254,
+          "trajectory_mixture_NLL_per_step_mean": -2.113532066345215
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_47_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": -2.0695807933807373,
+          "samples": 15,
+          "top1_ADE_mean": 0.08236686140298843,
+          "top1_FDE_mean": 0.08989812433719635,
+          "top1_FDE_p90": 0.1798293590545654,
+          "trajectory_mixture_NLL_per_step_mean": -2.1246981620788574
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_50_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": -2.0557596683502197,
+          "samples": 15,
+          "top1_ADE_mean": 0.08002834767103195,
+          "top1_FDE_mean": 0.09462158381938934,
+          "top1_FDE_p90": 0.20914453268051142,
+          "trajectory_mixture_NLL_per_step_mean": -2.1089508533477783
+        }
+      }
+    },
+    "samples": 60,
+    "top1_ADE_mean": 0.08121971040964127,
+    "top1_FDE_mean": 0.09221943467855453,
+    "top_prob_mode_is_best_frac": 1.0,
+    "trajectory_mixture_NLL_per_step_mean": -2.117197275161743
+  },
+  "calibration": {
+    "anchors_artifact": {
+      "bytes": 6528,
+      "path": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_clusters_16.npy",
+      "sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982"
+    },
+    "calibration_schema_version": "multipath_posthoc_calibration_v2",
+    "fit_criterion": "macro mean over validation rollouts of trajectory mixture NLL per valid step",
+    "fit_split": "val",
+    "horizon": 10,
+    "model_artifact": {
+      "bytes": 39682225,
+      "files": 5,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-D/seed_11/best_model",
+      "sha256_tree": "667d3f535def0cc4afddd76d4b376d4def396ef3aa5c038714c665787927ac0b"
+    },
+    "parameters": {
+      "covariance_scale": 0.012861081668351452,
+      "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+      "temperature": 0.7071067811865475
+    },
+    "samples": 326,
+    "search": {
+      "best_validation_NLL_per_step": -1.478132528643507,
+      "covariance_scale_candidates": 50,
+      "covariance_scale_range": [
+        0.0001,
+        4.0
+      ],
+      "identity_validation_NLL_per_step": 1.8727439439705003,
+      "independent_validation_init_groups": 5,
+      "independent_validation_rollouts": 20,
+      "joint_candidates": 1250,
+      "temperature_candidates": 25,
+      "temperature_range": [
+        0.25,
+        4.0
+      ],
+      "top_candidates": [
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 4.700123042920454,
+          "temperature": 0.7071067811865475,
+          "validation_trajectory_mixture_NLL_per_step": -1.478132528643507
+        },
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 4.815647573013779,
+          "temperature": 0.6299605249474365,
+          "validation_trajectory_mixture_NLL_per_step": -1.4780564374220064
+        },
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 4.58459851282713,
+          "temperature": 0.7937005259840997,
+          "validation_trajectory_mixture_NLL_per_step": -1.4776025553978962
+        },
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 4.9311721031071025,
+          "temperature": 0.5612310241546865,
+          "validation_trajectory_mixture_NLL_per_step": -1.4774546742313348
+        },
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 5.046696633200427,
+          "temperature": 0.5,
+          "validation_trajectory_mixture_NLL_per_step": -1.4763849233857123
+        },
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 4.469073982733806,
+          "temperature": 0.8908987181403392,
+          "validation_trajectory_mixture_NLL_per_step": -1.4763589073607306
+        },
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 5.162221163293752,
+          "temperature": 0.44544935907016964,
+          "validation_trajectory_mixture_NLL_per_step": -1.474886210604739
+        },
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 4.353549452640482,
+          "temperature": 1.0,
+          "validation_trajectory_mixture_NLL_per_step": -1.4742645116805406
+        },
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 5.277745693387075,
+          "temperature": 0.3968502629920498,
+          "validation_trajectory_mixture_NLL_per_step": -1.4729808733702163
+        },
+        {
+          "covariance_scale": 0.012861081668351452,
+          "distance_from_identity": 4.469073982733805,
+          "temperature": 1.1224620483093728,
+          "validation_trajectory_mixture_NLL_per_step": -1.4711567029317938
+        }
+      ],
+      "validation_init_group_key": "ego_init_id",
+      "validation_rollout_group_key": "cell_id::source_subrun"
+    },
+    "std_parameterization": "exp_abs_raw",
+    "validation_jsonl": {
+      "bytes": 5808967,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/val.jsonl",
+      "sha256": "5ad6210b44b83f5c2ea3a8e64eaae32413bc73bdd337189999d2778b20c993ed"
+    }
+  },
+  "calibration_fit_uses_test": false,
+  "evaluation_schema_version": "multipath_accuracy_calibration_v2",
+  "failing_gates": [],
+  "horizon": 10,
+  "independent_init_groups": 2,
+  "independent_rollouts": 4,
+  "jsonl": {
+    "bytes": 5673913,
+    "path": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/test.jsonl",
+    "sha256": "29291fe2a172047267c3a0c4c3d5693519f550881010a965fb60166a5013d770"
+  },
+  "latency": {
+    "batch_size": 16,
+    "mean_prediction_ms_per_sample": 52.88602182020744,
+    "prediction_calls": 4,
+    "total_prediction_seconds": 3.173161309212446
+  },
+  "mean_mode_entropy": 0.4278479814529419,
+  "mean_probability_assigned_to_best_mode": 0.8865293264389038,
+  "mean_top_mode_probability": 0.8865293264389038,
+  "merged_dir": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1",
+  "minADE_mean": 0.08121971040964127,
+  "minADE_p50": 0.06069253757596016,
+  "minADE_p90": 0.13812262713909154,
+  "minFDE_mean": 0.09221943467855453,
+  "minFDE_p50": 0.06869746372103691,
+  "minFDE_p90": 0.21015642732381826,
+  "model": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-D/seed_11/best_model",
+  "model_artifact": {
+    "bytes": 39682225,
+    "files": 5,
+    "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-D/seed_11/best_model",
+    "sha256_tree": "667d3f535def0cc4afddd76d4b376d4def396ef3aa5c038714c665787927ac0b"
+  },
+  "model_input_count": 4,
+  "samples": 60,
+  "split": "test",
+  "status": "pass",
+  "subset": "pre_response",
+  "top1_ADE_mean": 0.08121971040964127,
+  "top1_FDE_mean": 0.09221943467855453,
+  "top_prob_mode_is_best_frac": 1.0,
+  "uncalibrated": {
+    "accuracy": {
+      "best_mode_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        60,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "mean_mode_entropy": 0.4278479814529419,
+      "minADE": {
+        "count": 60,
+        "max": 0.21269477919666602,
+        "mean": 0.08121971040964127,
+        "p50": 0.06069253757596016,
+        "p90": 0.13812262713909154
+      },
+      "minFDE": {
+        "count": 60,
+        "max": 0.2667589947745484,
+        "mean": 0.09221943467855453,
+        "p50": 0.06869746372103691,
+        "p90": 0.21015642732381826
+      },
+      "top1_ADE": {
+        "count": 60,
+        "max": 0.21269477919666602,
+        "mean": 0.08121971040964127,
+        "p50": 0.06069253757596016,
+        "p90": 0.13812262713909154
+      },
+      "top1_FDE": {
+        "count": 60,
+        "max": 0.2667589947745484,
+        "mean": 0.09221943467855453,
+        "p50": 0.06869746372103691,
+        "p90": 0.21015642732381826
+      },
+      "top_prob_mode_is_best_fraction": 1.0
+    },
+    "best_mode_counts": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      60,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "calibration_parameters": {
+      "covariance_scale": 1.0,
+      "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+      "temperature": 1.0
+    },
+    "historical_std_parameterization": {
+      "formula": "axis_std = exp(abs(raw_std_parameter))",
+      "name": "exp_abs_raw",
+      "posthoc_scaled_axis_standard_deviation": {
+        "count": 19200,
+        "max": 1.4754215478897095,
+        "mean": 1.0140130519866943,
+        "p50": 1.0077925324440002,
+        "p90": 1.0321950912475586
+      },
+      "raw_parameter_absolute": {
+        "count": 19200,
+        "max": 0.3889438211917877,
+        "mean": 0.01355880219489336,
+        "p50": 0.007762349909171462,
+        "p90": 0.0316876620054245
+      },
+      "theoretical_uncalibrated_minimum_std": 1.0,
+      "uncalibrated_axis_standard_deviation": {
+        "count": 19200,
+        "max": 1.4754215478897095,
+        "mean": 1.0140130519866943,
+        "p50": 1.0077925324440002,
+        "p90": 1.0321950912475586
+      }
+    },
+    "init_group_aggregation": {
+      "design_role": "paired clustering unit shared by all available 2x2 cells",
+      "group_key": "ego_init_id",
+      "independent_init_groups": 2,
+      "macro_mean": {
+        "pointwise_mixture_NLL_mean": 1.9199728965759277,
+        "top1_ADE_mean": 0.08121972531080246,
+        "top1_FDE_mean": 0.09221942722797394,
+        "top1_FDE_p90": 0.22339841723442078,
+        "trajectory_mixture_NLL_per_step_mean": 1.855515956878662
+      },
+      "per_init_group": {
+        "ego_init_47": {
+          "pointwise_mixture_NLL_mean": 1.9209463596343994,
+          "samples": 30,
+          "top1_ADE_mean": 0.08254988491535187,
+          "top1_FDE_mean": 0.09003014117479324,
+          "top1_FDE_p90": 0.20465485304594042,
+          "trajectory_mixture_NLL_per_step_mean": 1.8555272817611694
+        },
+        "ego_init_50": {
+          "pointwise_mixture_NLL_mean": 1.9189993143081665,
+          "samples": 30,
+          "top1_ADE_mean": 0.07988956570625305,
+          "top1_FDE_mean": 0.09440871328115463,
+          "top1_FDE_p90": 0.2421419829130173,
+          "trajectory_mixture_NLL_per_step_mean": 1.8555045127868652
+        }
+      }
+    },
+    "mean_mode_entropy": 0.4278479814529419,
+    "mean_probability_assigned_to_best_mode": 0.8865293264389038,
+    "mean_top_mode_probability": 0.8865293264389038,
+    "minADE_mean": 0.08121971040964127,
+    "minADE_p50": 0.06069253757596016,
+    "minADE_p90": 0.13812262713909154,
+    "minFDE_mean": 0.09221943467855453,
+    "minFDE_p50": 0.06869746372103691,
+    "minFDE_p90": 0.21015642732381826,
+    "pointwise_mixture_NLL_mean": 1.9199727773666382,
+    "probabilistic": {
+      "covariance_audit": {
+        "invalid_matrices": 0,
+        "invalid_rate": 0.0,
+        "maximum_symmetry_error": 0.0,
+        "minimum_determinant": 0.9999998807907104,
+        "minimum_eigenvalue": 0.9999998807907104,
+        "non_positive_definite_matrices": 0,
+        "nonfinite_matrices": 0,
+        "nonsymmetric_matrices": 0,
+        "total_matrices": 9600
+      },
+      "coverage_mean_absolute_error": 0.12183333188295364,
+      "pointwise_mixture_NLL": {
+        "count": 60,
+        "max": 2.392845055434951,
+        "mean": 1.9199727773666382,
+        "p50": 1.8653833866119385,
+        "p90": 2.1754996538162232
+      },
+      "top_mode_2d_covariance_coverage": {
+        "1sigma": {
+          "absolute_error": 0.3173,
+          "empirical_coverage": 1.0,
+          "mahalanobis_sq": 2.3,
+          "nominal_coverage": 0.6827,
+          "per_horizon_empirical": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "signed_error": 0.3173
+        },
+        "2sigma": {
+          "absolute_error": 0.045499999999999985,
+          "empirical_coverage": 1.0,
+          "mahalanobis_sq": 6.18,
+          "nominal_coverage": 0.9545,
+          "per_horizon_empirical": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "signed_error": 0.045499999999999985
+        },
+        "3sigma": {
+          "absolute_error": 0.0027000000000000357,
+          "empirical_coverage": 1.0,
+          "mahalanobis_sq": 11.83,
+          "nominal_coverage": 0.9973,
+          "per_horizon_empirical": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "signed_error": 0.0027000000000000357
+        }
+      },
+      "top_mode_2sigma_tail_rate": 0.0,
+      "top_mode_covariance_determinant": {
+        "count": 600,
+        "max": 1.0000002384185933,
+        "mean": 1.0,
+        "p50": 1.0,
+        "p90": 1.0
+      },
+      "top_mode_log_covariance_determinant": {
+        "count": 600,
+        "max": 2.3841856489070892e-07,
+        "mean": -2.0066897477022394e-08,
+        "p50": 0.0,
+        "p90": 0.0
+      },
+      "trajectory_mixture_NLL_per_step": {
+        "count": 60,
+        "max": 1.9204637571315781,
+        "mean": 1.855515956878662,
+        "p50": 1.8483701348304749,
+        "p90": 1.8977031707763672
+      }
+    },
+    "rollout_aggregation": {
+      "group_key": "cell_id::source_subrun",
+      "independent_rollouts": 4,
+      "macro_mean": {
+        "pointwise_mixture_NLL_mean": 1.9199727773666382,
+        "top1_ADE_mean": 0.08121971786022186,
+        "top1_FDE_mean": 0.09221942722797394,
+        "top1_FDE_p90": 0.1927257627248764,
+        "trajectory_mixture_NLL_per_step_mean": 1.855515956878662
+      },
+      "per_rollout": {
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_47_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.9213411808013916,
+          "samples": 15,
+          "top1_ADE_mean": 0.08273288607597351,
+          "top1_FDE_mean": 0.09016214311122894,
+          "top1_FDE_p90": 0.18200454413890838,
+          "trajectory_mixture_NLL_per_step_mean": 1.8555891513824463
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_50_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.9189660549163818,
+          "samples": 15,
+          "top1_ADE_mean": 0.07975076884031296,
+          "top1_FDE_mean": 0.09419583529233932,
+          "top1_FDE_p90": 0.19992461800575254,
+          "trajectory_mixture_NLL_per_step_mean": 1.8554779291152954
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_47_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.9205513000488281,
+          "samples": 15,
+          "top1_ADE_mean": 0.08236686140298843,
+          "top1_FDE_mean": 0.08989812433719635,
+          "top1_FDE_p90": 0.1798293590545654,
+          "trajectory_mixture_NLL_per_step_mean": 1.8554654121398926
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_50_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.9190324544906616,
+          "samples": 15,
+          "top1_ADE_mean": 0.08002834767103195,
+          "top1_FDE_mean": 0.09462158381938934,
+          "top1_FDE_p90": 0.20914453268051142,
+          "trajectory_mixture_NLL_per_step_mean": 1.8555313348770142
+        }
+      }
+    },
+    "samples": 60,
+    "top1_ADE_mean": 0.08121971040964127,
+    "top1_FDE_mean": 0.09221943467855453,
+    "top_prob_mode_is_best_frac": 1.0,
+    "trajectory_mixture_NLL_per_step_mean": 1.855515956878662
+  },
+  "uses_interaction_context": true
+}

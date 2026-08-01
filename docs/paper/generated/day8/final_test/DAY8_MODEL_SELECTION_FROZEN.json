@@ -1,0 +1,152 @@
+{
+  "closed_loop_selected_seed": 37,
+  "closed_loop_selected_variant": "B1",
+  "closed_loop_selection_locked_before_test": true,
+  "representatives_for_single_test_pass": {
+    "B1": {
+      "calibration": {
+        "bytes": 4129,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B1/seed_37/calibration.json",
+        "sha256": "fcfb203384f900ea43d53651934979c660d85be5827944e34a63d2338b2da301"
+      },
+      "calibration_parameters": {
+        "covariance_scale": 0.008270371084000278,
+        "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+        "temperature": 1.259921049894873
+      },
+      "model": {
+        "bytes": 45157094,
+        "files": 5,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B1/seed_37/best_model",
+        "sha256_tree": "860e2c4513273982e26cb7ea36177029c1620a3761e631eee64818fb85ec2231"
+      },
+      "seed": 37,
+      "selection_rule": "seed closest to the architecture median primary score; lower seed breaks exact ties",
+      "training_completion": {
+        "bytes": 1276,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B1/seed_37/TRAINING_COMPLETE.json",
+        "sha256": "bf16b455a4e589b8ae25ea5f6abded086d2bb6eeae4be39dd4381f615c89b2ee"
+      },
+      "validation_rank": 1
+    },
+    "B2-D": {
+      "calibration": {
+        "bytes": 4116,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-D/seed_11/calibration.json",
+        "sha256": "d7a2ebea97828c38fd6f26b13391050bd9afb490a9620b627cacf97d0a167530"
+      },
+      "calibration_parameters": {
+        "covariance_scale": 0.012861081668351452,
+        "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+        "temperature": 0.7071067811865475
+      },
+      "model": {
+        "bytes": 39682225,
+        "files": 5,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-D/seed_11/best_model",
+        "sha256_tree": "667d3f535def0cc4afddd76d4b376d4def396ef3aa5c038714c665787927ac0b"
+      },
+      "seed": 11,
+      "selection_rule": "seed closest to the architecture median primary score; lower seed breaks exact ties",
+      "training_completion": {
+        "bytes": 1285,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-D/seed_11/TRAINING_COMPLETE.json",
+        "sha256": "49195936f573fdbe6fae0b94b69c3c16c935a73fbd4c16c07dfb42c128aca1d6"
+      },
+      "validation_rank": 2
+    },
+    "B2-M": {
+      "calibration": {
+        "bytes": 4135,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-M/seed_37/calibration.json",
+        "sha256": "aa8cd2c647e39c2b6d8352561e165638661c3d55907d6334956d8edb7152fbc9"
+      },
+      "calibration_parameters": {
+        "covariance_scale": 0.012861081668351452,
+        "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+        "temperature": 1.4142135623730947
+      },
+      "model": {
+        "bytes": 38436781,
+        "files": 5,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-M/seed_37/best_model",
+        "sha256_tree": "374a8ad4cc1b33a84babc57ddfb5baf3edcc6db414b3e30d4a80a0642320a828"
+      },
+      "seed": 37,
+      "selection_rule": "seed closest to the architecture median primary score; lower seed breaks exact ties",
+      "training_completion": {
+        "bytes": 1282,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-M/seed_37/TRAINING_COMPLETE.json",
+        "sha256": "cfbca5ab5001dfec970d0c17ffda260df0a78e13320663fca41db49d8ad745e8"
+      },
+      "validation_rank": 5
+    },
+    "T1": {
+      "calibration": {
+        "bytes": 4145,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T1/seed_23/calibration.json",
+        "sha256": "949c79387044bf3c552bee1e0fbb9f31339297f56455d30b571b674fb7641278"
+      },
+      "calibration_parameters": {
+        "covariance_scale": 0.012861081668351452,
+        "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+        "temperature": 1.4142135623730947
+      },
+      "model": {
+        "bytes": 38924841,
+        "files": 5,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T1/seed_23/best_model",
+        "sha256_tree": "897b8f14fa1dae771800008f44458f24d7698dc31684f8dabaaed57266949a44"
+      },
+      "seed": 23,
+      "selection_rule": "seed closest to the architecture median primary score; lower seed breaks exact ties",
+      "training_completion": {
+        "bytes": 1273,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T1/seed_23/TRAINING_COMPLETE.json",
+        "sha256": "416c6df4713b339ee61164fc82851c1ebad87ee3e797edfa47940349fcf8f52a"
+      },
+      "validation_rank": 4
+    },
+    "T2": {
+      "calibration": {
+        "bytes": 4113,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T2/seed_23/calibration.json",
+        "sha256": "dc808a6614afa6bf453b6da7fd78d230985809904bd5395852b3b291620f4b27"
+      },
+      "calibration_parameters": {
+        "covariance_scale": 0.016038130606994976,
+        "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+        "temperature": 0.7071067811865475
+      },
+      "model": {
+        "bytes": 39936544,
+        "files": 5,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T2/seed_23/best_model",
+        "sha256_tree": "a37a153891c93f2404154574ca26c1919656ae2d22dbcd4e21dcb0355d0081e9"
+      },
+      "seed": 23,
+      "selection_rule": "seed closest to the architecture median primary score; lower seed breaks exact ties",
+      "training_completion": {
+        "bytes": 1275,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T2/seed_23/TRAINING_COMPLETE.json",
+        "sha256": "5d9d04abd2074c1fc2a7461ab25097ff78d581810b8a21289139a36c7df87e26"
+      },
+      "validation_rank": 3
+    }
+  },
+  "schema_version": "day8_model_selection_freeze_v1",
+  "selection_basis": "validation_only",
+  "status": "pass",
+  "test_accessed_at_freeze": false,
+  "test_policy": "evaluate all five frozen representatives once; test cannot change selection or training",
+  "validation_completion": {
+    "bytes": 378,
+    "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/DAY8_VALIDATION_COMPLETE.json",
+    "sha256": "252fd93aa29cc60bcf5b04353560c06f44b3c799ed5222ae6d0ec97a5ef28c6a"
+  },
+  "validation_summary": {
+    "bytes": 78993,
+    "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/day8_validation_summary.json",
+    "sha256": "fffc0552f1dccd75a0bf8e6e6595e4e4b4f6959fc4892331769b7bd9b64645d6"
+  }
+}

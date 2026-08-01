@@ -1,0 +1,8 @@
+{
+  "archive": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/final_test_v1/day8_frozen_test_snapshot.tar.gz",
+  "archive_sha256": "0186bc9d4a27aaeca0d7a20ae2ea1fbaf101de5cbaa04877d8527e2a5d36d2d9",
+  "contains_all_five_frozen_representatives": true,
+  "excludes_model_weights": true,
+  "files": 28,
+  "status": "pass"
+}

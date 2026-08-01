@@ -2,6 +2,8 @@
 
 更新日期：2026-08-01
 
+完成状态（2026-08-02）：一次性 test 已完成，`DAY8_COMPLETE.json` 为 `pass`，闭环模型保持 B1 / seed 37。最终结果见 `Day8最终Test结果与结论.md`。
+
 ## 1. 当前结论
 
 Day 8 的 5 个模型、3 个随机种子，共 15/15 个正式训练与 validation 评价均已通过。验证证据已拉取到：
@@ -38,7 +40,7 @@ Matched controls 的中位数差值为：
 | T1 − B2-M | -0.0167 | -0.0977 | -0.0734 | T1 小幅优于 matched MLP |
 | T2 − B2-D | +0.0052 | +0.0227 | +0.0274 | T2 小幅劣于 matched MLP |
 
-`pre_response` 在正式数据中为零样本，已按预注册规则标为 `not_applicable`，没有重定义 subset 或用其他样本替代。该结果本身说明 reactive target 在可用预测窗口中已经进入响应阶段，应在论文限制中报告。
+`pre_response` 在 validation split 中为零样本，已按预注册规则标为 `not_applicable`，没有重定义 subset 或用其他样本替代；test split 中则有 60 个 pre-response samples，来自 4 个 rollouts、2 个 init groups。由于不同 split 的状态覆盖不均衡，subset 结果必须同时报告样本数和独立 init 数量。
 
 ## 3. 冻结和 test 协议
 
