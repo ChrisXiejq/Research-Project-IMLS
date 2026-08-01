@@ -1,4 +1,5 @@
 import json
+import hashlib
 import os
 import sys
 import numpy as np
@@ -18,10 +19,11 @@ class DeployMultiPath:
     """
 
     def __init__(self, saved_model_h5, anchors, calibration=None):
+        self.model_path = os.path.abspath(os.fspath(saved_model_h5))
         try:
             self.model = tf.keras.models.load_model(saved_model_h5, compile=False)
         except Exception as e:
-            print(f"Could not load the saved model!  Error: {e}")
+            raise RuntimeError(f"Could not load the saved model {self.model_path}: {e}") from e
         self.model_input_count = len(getattr(self.model, "inputs", []))
         self.uses_interaction_context = self.model_input_count >= 3
 
@@ -30,21 +32,98 @@ class DeployMultiPath:
         # Check shape: should be N_A x N_T x 2.
         assert (len(self.anchors.shape) == 3 and self.anchors.shape[-1] == 2)
         self.num_anchors, self.num_timesteps, _ = self.anchors.shape
-        self.calibration = self._load_calibration(calibration)
+        self.model_artifact = self._artifact_hash(self.model_path)
+        self.calibration_source = (
+            os.path.abspath(os.fspath(calibration))
+            if isinstance(calibration, (str, os.PathLike))
+            else None
+        )
+        self.calibration_artifact = (
+            self._artifact_hash(self.calibration_source) if self.calibration_source else None
+        )
+        self.calibration, self.calibration_metadata = self._load_calibration(calibration)
+        expected_model = self.calibration_metadata.get("model_artifact") or {}
+        expected_tree = expected_model.get("sha256_tree")
+        if expected_tree and expected_tree != self.model_artifact.get("sha256_tree"):
+            raise ValueError(
+                "Calibration/model artifact mismatch: "
+                f"calibration expects {expected_tree}, loaded {self.model_artifact.get('sha256_tree')}"
+            )
+
+    @staticmethod
+    def _sha256_file(path):
+        digest = hashlib.sha256()
+        with open(path, "rb") as handle:
+            for block in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(block)
+        return digest.hexdigest()
+
+    @classmethod
+    def _artifact_hash(cls, path):
+        path = os.path.abspath(os.fspath(path))
+        if os.path.isfile(path):
+            return {
+                "path": path,
+                "bytes": os.path.getsize(path),
+                "sha256": cls._sha256_file(path),
+            }
+        files = []
+        for root, _, names in os.walk(path):
+            for name in names:
+                files.append(os.path.join(root, name))
+        files.sort()
+        digest = hashlib.sha256()
+        total_bytes = 0
+        for item in files:
+            relative = os.path.relpath(item, path)
+            digest.update(relative.encode("utf-8"))
+            digest.update(b"\0")
+            digest.update(cls._sha256_file(item).encode("ascii"))
+            total_bytes += os.path.getsize(item)
+        return {
+            "path": path,
+            "files": len(files),
+            "bytes": total_bytes,
+            "sha256_tree": digest.hexdigest(),
+        }
 
     @staticmethod
     def _load_calibration(calibration):
         if calibration is None:
-            return {"temperature": 1.0, "covariance_scale": 1.0}
+            return (
+                {"temperature": 1.0, "covariance_scale": 1.0},
+                {"source": "identity_no_calibration_artifact", "fit_split": None},
+            )
         if isinstance(calibration, (str, os.PathLike)):
             with open(calibration, "r", encoding="utf-8") as handle:
                 calibration = json.load(handle)
         if not isinstance(calibration, dict):
             raise TypeError("calibration must be None, a dict, or a JSON path")
+        if calibration.get("fit_split") != "val":
+            raise ValueError(
+                "Deployment calibration must be frozen on validation; "
+                f"got fit_split={calibration.get('fit_split')!r}"
+            )
         parameters = calibration.get("parameters", calibration)
-        return {
+        parsed = {
             "temperature": float(parameters.get("temperature", 1.0)),
             "covariance_scale": float(parameters.get("covariance_scale", 1.0)),
+        }
+        if not all(np.isfinite(value) and value > 0.0 for value in parsed.values()):
+            raise ValueError(f"Invalid deployment calibration parameters: {parsed}")
+        return parsed, dict(calibration)
+
+    def deployment_metadata(self):
+        return {
+            "schema_version": "multipath_online_deployment_v1",
+            "model_artifact": self.model_artifact,
+            "model_input_count": self.model_input_count,
+            "uses_interaction_context": self.uses_interaction_context,
+            "calibration_source": self.calibration_source,
+            "calibration_artifact": self.calibration_artifact,
+            "calibration_fit_split": self.calibration_metadata.get("fit_split"),
+            "calibration_parameters": dict(self.calibration),
+            "calibration_model_artifact": self.calibration_metadata.get("model_artifact"),
         }
 
     def predict_instance(

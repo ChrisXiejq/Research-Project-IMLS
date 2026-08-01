@@ -230,6 +230,7 @@ class PredictionParams:
     # Model parameter locations, given relative to <ROOTDIR>/scripts/models/
     model_weights         : str = "l5kit_multipath_10/"
     model_anchors         : str = "l5kit_clusters_16.npy"
+    model_calibration     : Optional[str] = None
 
     # Flag to render traffic lights on rasterized image for prediction.
     render_traffic_lights : bool = False
@@ -923,6 +924,7 @@ class RunIntersectionScenario:
             "dt": float(self.vehicle_params_list[self.ego_vehicle_idx].dt),
             "model_weights": getattr(self, "_prediction_model_weights", None),
             "model_anchors": getattr(self, "_prediction_model_anchors", None),
+            "model_calibration": getattr(self, "_prediction_model_calibration", None),
         })
         sample["interaction_context"] = interaction_context_from_sample(sample).tolist()
         assert_logged_feature_equivalence(sample)
@@ -1004,6 +1006,7 @@ class RunIntersectionScenario:
             "dt": float(self.vehicle_params_list[self.ego_vehicle_idx].dt),
             "model_weights": getattr(self, "_prediction_model_weights", None),
             "model_anchors": getattr(self, "_prediction_model_anchors", None),
+            "model_calibration": getattr(self, "_prediction_model_calibration", None),
             "raster_contract": raster_contract_metadata(),
             "feature_schema_id": FEATURE_SCHEMA_ID,
             "history_times_s": list(HISTORY_TIMES_S),
@@ -1599,8 +1602,14 @@ class RunIntersectionScenario:
         prefix             = os.path.abspath(__file__).split('carla')[0] + 'models/'
         self._prediction_model_weights = prediction_params.model_weights
         self._prediction_model_anchors = prediction_params.model_anchors
+        self._prediction_model_calibration = prediction_params.model_calibration
         self._prediction_model_weights_resolved = resolve_model_asset_path(prefix, prediction_params.model_weights)
         self._prediction_model_anchors_resolved = resolve_model_asset_path(prefix, prediction_params.model_anchors)
+        self._prediction_model_calibration_resolved = (
+            resolve_model_asset_path(prefix, prediction_params.model_calibration)
+            if prediction_params.model_calibration
+            else None
+        )
         self._prediction_logging_enabled = bool(prediction_params.prediction_logging_enabled)
         self._prediction_logging_stride = max(1, int(prediction_params.prediction_logging_stride))
         self._prediction_logging_horizon = max(1, int(prediction_params.prediction_logging_horizon))
@@ -1621,8 +1630,10 @@ class RunIntersectionScenario:
                     {
                         "model_weights": prediction_params.model_weights,
                         "model_anchors": prediction_params.model_anchors,
+                        "model_calibration": prediction_params.model_calibration,
                         "model_weights_resolved": self._prediction_model_weights_resolved,
                         "model_anchors_resolved": self._prediction_model_anchors_resolved,
+                        "model_calibration_resolved": self._prediction_model_calibration_resolved,
                         "render_traffic_lights": bool(prediction_params.render_traffic_lights),
                         "stride": self._prediction_logging_stride,
                         "horizon": self._prediction_logging_horizon,
@@ -1635,8 +1646,11 @@ class RunIntersectionScenario:
                     f,
                     indent=2,
                 )
-        self.pred_model    = DeployMultiPath(self._prediction_model_weights_resolved, \
-                                             np.load(self._prediction_model_anchors_resolved))
+        self.pred_model = DeployMultiPath(
+            self._prediction_model_weights_resolved,
+            np.load(self._prediction_model_anchors_resolved),
+            calibration=self._prediction_model_calibration_resolved,
+        )
 
         # Try to do a sample prediction, initialize and check GPU model is working fine.
         blank_image = np.zeros((self.rasterizer.sem_rast.raster_height,
@@ -1646,8 +1660,31 @@ class RunIntersectionScenario:
                                         np.zeros((5,3))
                                       )).astype(np.float32)
         self.pred_model.predict_instance(image_raw   = blank_image,
-                                         past_states = zero_traj,
-                                         interaction_context=np.zeros((8,), dtype=np.float32))
+                                         past_states = zero_traj)
+        deployment_manifest = self.pred_model.deployment_metadata()
+        deployment_manifest.update({
+            "status": "pass",
+            "anchors_artifact": DeployMultiPath._artifact_hash(
+                self._prediction_model_anchors_resolved
+            ),
+            "warmup_passed": True,
+            "normalization": {
+                "raster": "tensorflow.keras.applications.resnet.preprocess_input",
+                "past_states_local": "no explicit normalization",
+                "interaction": (
+                    "not_applicable_for_two_input_B1"
+                    if self.pred_model.model_input_count == 2
+                    else "embedded_in_frozen_model_graph"
+                ),
+            },
+        })
+        with open(
+            os.path.join(self.savedir, "prediction_deployment_manifest.json"),
+            "w",
+            encoding="utf-8",
+        ) as handle:
+            json.dump(self._json_safe(deployment_manifest), handle, indent=2, sort_keys=True)
+            handle.write("\n")
 
     def _viz_gmm(self, img, tvs_mode_dists, mdist_sq_thresh=5.991):
         mus    = tvs_mode_dists[0][0] # N_modes by N by 2

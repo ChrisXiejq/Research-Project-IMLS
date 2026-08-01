@@ -103,6 +103,8 @@ def _prepare_prediction_params(scenario_dict, args=None, dataset_metadata=None):
             pred_dict["model_weights"] = args.prediction_model_weights
         if getattr(args, "prediction_model_anchors", None):
             pred_dict["model_anchors"] = args.prediction_model_anchors
+        if getattr(args, "prediction_model_calibration", None):
+            pred_dict["model_calibration"] = args.prediction_model_calibration
         if getattr(args, "enable_prediction_logging", False):
             pred_dict["prediction_logging_enabled"] = True
         if getattr(args, "prediction_logging_stride", None) is not None:
@@ -417,6 +419,8 @@ if __name__ == '__main__':
                         help="Override PredictionParams.model_weights, relative to core/scripts/models unless absolute.")
     parser.add_argument("--prediction_model_anchors", default=None,
                         help="Override PredictionParams.model_anchors, relative to core/scripts/models unless absolute.")
+    parser.add_argument("--prediction_model_calibration", default=None,
+                        help="Validation-fitted calibration JSON; relative to core/scripts/models unless absolute.")
     parser.add_argument("--enable_prediction_logging", action="store_true",
                         help="Write per-rollout prediction dataset JSONL files for model calibration/fine-tuning.")
     parser.add_argument("--prediction_logging_stride", type=int, default=None,
