@@ -768,6 +768,9 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
 
     model = tf.keras.models.load_model(args.model, compile=False)
     input_count = len(getattr(model, "inputs", []))
+    preloaded_calibration = (
+        load_calibration(args.calibration_json) if args.calibration_json else None
+    )
     iterator = load_samples(
         jsonl_path,
         result_dir,
@@ -790,8 +793,9 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         return {
             "evaluation_schema_version": "multipath_accuracy_calibration_v2",
             "status": "not_applicable",
-            "reason": "no_full_horizon_samples_in_requested_validation_subset",
+            "reason": "no_full_horizon_samples_in_requested_subset",
             "model": os.path.abspath(args.model),
+            "model_artifact": artifact_hash(Path(args.model).resolve()),
             "merged_dir": merged_dir,
             "split": args.split,
             "subset": args.subset,
@@ -801,6 +805,7 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
             "samples": 0,
             "independent_rollouts": 0,
             "independent_init_groups": 0,
+            "calibration": preloaded_calibration,
         }
     uncalibrated_decoded = decode_raw_predictions(raw_predictions, anchors)
     uncalibrated_metrics = evaluate_decoded(
@@ -812,7 +817,7 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         covariance_scale=1.0,
     )
 
-    calibration = None
+    calibration = preloaded_calibration
     if args.fit_calibration:
         calibration = fit_validation_calibration(
             raw_predictions, anchors, labels, samples, args.horizon, args
@@ -835,9 +840,6 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
             json.dumps(calibration, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
-    elif args.calibration_json:
-        calibration = load_calibration(args.calibration_json)
-
     calibrated_metrics = None
     if calibration is not None:
         parameters = calibration["parameters"]
