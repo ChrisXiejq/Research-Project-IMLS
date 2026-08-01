@@ -2,6 +2,8 @@
 
 更新日期：2026-08-02
 
+首次运行修复记录：原 preflight 使用全黑 raster 和全零轨迹，并错误地要求该训练分布外输入的 covariance 正定；B1 在这种输入上因极大方差的 float32 旋转消减而失败。服务器复核证明 Day7 train 真实输入上 B1 与 B0 均为 0 invalid covariance。修复后 warm-up 使用 Day7 train split 的冻结真实 raster/past-state，并记录输入哈希；每个 CARLA step 的真实 covariance gate 保持不变，没有降低正式数值标准。
+
 ## 1. Day 9 的目标
 
 Day 9 只验证部署和机制链路，不产生正式论文 outcome，也不允许调模型、calibration、risk policy 或 supervisor。完成后才决定 Day 10 正式矩阵能否启动。
@@ -83,6 +85,7 @@ cd /root/autodl-tmp/Research-Project-IMLS-day8
 
 export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
 export PYTHON_BIN=/root/miniconda3/envs/carla_modern/bin/python
+export DAY7_RESULTS=/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1
 export DAY8_RESULTS=/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1
 export DAY9_RESULTS=/root/autodl-tmp/results/give_way_transformer/day9/day9_smoke_v1
 
@@ -96,6 +99,7 @@ mkdir -p "$(dirname "$DAY9_RESULTS")"
 nohup env \
   CARLA_ROOT="$CARLA_ROOT" \
   PYTHON_BIN="$PYTHON_BIN" \
+  DAY7_RESULTS="$DAY7_RESULTS" \
   DAY8_RESULTS="$DAY8_RESULTS" \
   DAY9_RESULTS="$DAY9_RESULTS" \
   GUROBI_HOME="$GUROBI_HOME" \

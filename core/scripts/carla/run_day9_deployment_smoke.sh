@@ -9,6 +9,7 @@ CORE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REPO_DIR="$(cd "${CORE_DIR}/.." && pwd)"
 MODELS_DIR="${CORE_DIR}/scripts/models"
 PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/envs/carla_modern/bin/python}"
+DAY7_RESULTS="${DAY7_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1}"
 DAY8_RESULTS="${DAY8_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1}"
 DAY9_RESULTS="${DAY9_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day9/day9_smoke_v1}"
 B1_MODEL="${B1_MODEL:-${DAY8_RESULTS}/runs/B1/seed_37/best_model}"
@@ -20,6 +21,8 @@ FROZEN_COLLECTION="${FROZEN_COLLECTION:-${REPO_DIR}/docs/paper/generated/day5/da
 
 : "${CARLA_ROOT:?Set CARLA_ROOT to the CARLA 0.9.14 directory}"
 for required in \
+  "${DAY7_RESULTS}/DAY7_COMPLETE.json" \
+  "${DAY7_RESULTS}/train.jsonl" \
   "${DAY8_RESULTS}/DAY8_COMPLETE.json" \
   "${DAY8_RESULTS}/final_test_v1/DAY8_MODEL_SELECTION_FROZEN.json" \
   "${B1_MODEL}/saved_model.pb" \
@@ -83,6 +86,7 @@ fi
 
 PREFLIGHT="${DAY9_RESULTS}/day9_deployment_preflight.json"
 "${PYTHON_BIN}" "${MODELS_DIR}/verify_day9_deployment.py" \
+  --day7-results "${DAY7_RESULTS}" \
   --day8-results "${DAY8_RESULTS}" \
   --model "${B1_MODEL}" \
   --calibration "${B1_CALIBRATION}" \

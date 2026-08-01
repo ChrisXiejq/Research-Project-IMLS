@@ -12,6 +12,8 @@ from pathlib import Path
 import numpy as np
 
 from deploy_multipath_model import DeployMultiPath
+from prediction_dataset_utils import read_jsonl, resolve_raster_path
+from prediction_input_contract import load_logged_raster
 
 
 def sha256(path: Path) -> str:
@@ -24,9 +26,7 @@ def atomic_json(path: Path, payload: dict) -> None:
     os.replace(temporary, path)
 
 
-def smoke(model: DeployMultiPath) -> dict:
-    image = np.zeros((500, 500, 3), dtype=np.uint8)
-    past = np.column_stack((np.arange(-1.0, 0.0, 0.2), np.zeros((5, 3)))).astype(np.float32)
+def smoke(model: DeployMultiPath, image: np.ndarray, past: np.ndarray) -> dict:
     prediction = model.predict_instance(image, past)
     probabilities = np.asarray(prediction.mode_probabilities, dtype=float)
     means = np.asarray(prediction.mus, dtype=float)
@@ -54,8 +54,34 @@ def smoke(model: DeployMultiPath) -> dict:
     }
 
 
+def load_frozen_train_input(day7_results: Path) -> tuple[np.ndarray, np.ndarray, dict]:
+    jsonl_path = day7_results / "train.jsonl"
+    result_dir = str(day7_results.parent)
+    for sample in read_jsonl(str(jsonl_path)):
+        raster_path = resolve_raster_path(sample, result_dir=result_dir)
+        if raster_path and Path(raster_path).is_file():
+            image = load_logged_raster(raster_path)
+            past = np.asarray(sample["past_states_local"], dtype=np.float32)
+            if tuple(image.shape[:2]) == (500, 500) and past.shape == (5, 4):
+                return image, past, {
+                    "split": "train",
+                    "jsonl": str(jsonl_path),
+                    "jsonl_sha256": sha256(jsonl_path),
+                    "raster": str(Path(raster_path).resolve()),
+                    "raster_sha256": sha256(Path(raster_path)),
+                    "cell_id": sample.get("cell_id"),
+                    "ego_init_id": sample.get("ego_init_id"),
+                    "source_subrun": sample.get("source_subrun"),
+                    "sample_id": sample.get("sample_id"),
+                    "image_shape": list(image.shape),
+                    "past_states_shape": list(past.shape),
+                }
+    raise ValueError(f"No deployment-compatible frozen train sample in {jsonl_path}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--day7-results", required=True)
     parser.add_argument("--day8-results", required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--calibration", required=True)
@@ -64,6 +90,7 @@ def main() -> None:
     parser.add_argument("--output-json", required=True)
     args = parser.parse_args()
 
+    day7 = Path(args.day7_results).resolve()
     day8 = Path(args.day8_results).resolve()
     model_path = Path(args.model).resolve()
     calibration_path = Path(args.calibration).resolve()
@@ -98,16 +125,17 @@ def main() -> None:
     expected_anchors = calibration.get("anchors_artifact") or {}
     if expected_anchors.get("sha256") and expected_anchors["sha256"] != sha256(anchors_path):
         raise ValueError("Anchor hash differs from the validation calibration artifact")
-    b1_smoke = smoke(deployed)
+    image, past, warmup_input = load_frozen_train_input(day7)
+    b1_smoke = smoke(deployed, image, past)
     if b1_smoke["status"] != "pass":
-        raise ValueError("B1 numerical deployment smoke failed")
+        raise ValueError(f"B1 numerical deployment smoke failed: {b1_smoke}")
 
     baseline = None
     if args.baseline_model:
         baseline_model = DeployMultiPath(Path(args.baseline_model).resolve(), anchors)
-        baseline_smoke = smoke(baseline_model)
+        baseline_smoke = smoke(baseline_model, image, past)
         if baseline_smoke["status"] != "pass":
-            raise ValueError("B0 numerical deployment smoke failed")
+            raise ValueError(f"B0 numerical deployment smoke failed: {baseline_smoke}")
         baseline = {
             "deployment": baseline_model.deployment_metadata(),
             "numerical_smoke": baseline_smoke,
@@ -125,6 +153,7 @@ def main() -> None:
             "raster": "shared ResNet preprocess_input contract",
             "past_states": "no explicit normalization",
         },
+        "warmup_input": warmup_input,
         "b1": {"deployment": metadata, "numerical_smoke": b1_smoke},
         "b0": baseline,
         "anchors": DeployMultiPath._artifact_hash(anchors_path),
