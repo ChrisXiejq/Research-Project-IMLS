@@ -8,6 +8,8 @@
 
 中期 8-run 审计进一步发现 V1 evaluator 的 `source_subrun` 键会把 S0/S1 同名 rollout 合并。V2 evaluator 改用 `cell_id::source_subrun` 识别 20 个真实 validation rollouts，并单独用 `ego_init_id` 报告 5 个 paired clustering units。旧的逐样本指标仍有效，但所有 calibration 和 rollout-macro 指标会自动按 V2 重算；已有模型无需重训。详细中期结果见 `docs/paper/Day8中期模型性能审计_8runs.md`。
 
+首次 V2 续跑在 B2-D seed 37 检测到 `git_head` 漂移：旧 checkpoint 来自 `d1655f7`，V2 evaluator 修复后 worktree 为 `761a21a`，但 trainer 与 interaction adapter 在两提交间逐字节一致。resume gate 已改为严格比较全部训练语义字段，并只对这一个已审计的 legacy trainer hash 允许 `git_head` 单字段迁移；迁移证据写入 `RESUME_PROVENANCE.json`。epochs、seed、variant、数据哈希、learning rate、batch size 或 adapter 代码有任何变化仍会拒绝续跑。
+
 ## 1. Day 7 结论
 
 Day 7 两个完成门均为 `pass`。真实数据事实为：

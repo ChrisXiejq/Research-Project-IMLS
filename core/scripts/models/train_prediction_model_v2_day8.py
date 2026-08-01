@@ -37,6 +37,12 @@ from prediction_input_contract import load_logged_raster, preprocess_resnet_rast
 
 
 ALL_VARIANTS = ("B1", *VARIANTS)
+REPO_ROOT = Path(__file__).resolve().parents[3]
+TRAINER_RELPATH = "core/scripts/models/train_prediction_model_v2_day8.py"
+ADAPTER_RELPATH = "core/scripts/models/interaction_adapter_v2.py"
+LEGACY_RESUME_TRAINER_SHA256 = (
+    "946fc09e3c7e4839fd20998c8182180ee23b30e63549e8932b8b35de99018d2f"
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -194,6 +200,65 @@ def git_head() -> str | None:
         return None
 
 
+def git_blob_sha256(revision: str, relative_path: str) -> str:
+    try:
+        content = subprocess.check_output(
+            ["git", "show", f"{revision}:{relative_path}"],
+            cwd=REPO_ROOT,
+            stderr=subprocess.DEVNULL,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise ValueError(
+            f"Cannot audit resume source {revision}:{relative_path}"
+        ) from error
+    return hashlib.sha256(content).hexdigest()
+
+
+def audit_compatible_git_only_resume(
+    existing: Dict, requested: Dict, output: Path
+) -> None:
+    existing_semantics = {
+        key: value for key, value in existing.items() if key != "git_head"
+    }
+    requested_semantics = {
+        key: value for key, value in requested.items() if key != "git_head"
+    }
+    if existing_semantics != requested_semantics:
+        changed = sorted(
+            key
+            for key in set(existing_semantics) | set(requested_semantics)
+            if existing_semantics.get(key) != requested_semantics.get(key)
+        )
+        raise ValueError(f"Resume semantic config drift detected: {changed}")
+    previous_head = existing.get("git_head")
+    requested_head = requested.get("git_head")
+    if not previous_head or not requested_head:
+        raise ValueError("Cannot audit resume across missing Git provenance")
+    previous_trainer_sha = git_blob_sha256(previous_head, TRAINER_RELPATH)
+    previous_adapter_sha = git_blob_sha256(previous_head, ADAPTER_RELPATH)
+    current_adapter_sha = sha256_file(REPO_ROOT / ADAPTER_RELPATH)
+    if previous_trainer_sha != LEGACY_RESUME_TRAINER_SHA256:
+        raise ValueError(
+            "Resume rejected: previous trainer is not the audited legacy implementation"
+        )
+    if previous_adapter_sha != current_adapter_sha:
+        raise ValueError("Resume rejected: interaction adapter implementation changed")
+    atomic_json(
+        output / "RESUME_PROVENANCE.json",
+        {
+            "status": "pass",
+            "reason": "git_head_only_change_with_identical_training_semantics",
+            "allowed_changed_config_fields": ["git_head"],
+            "previous_git_head": previous_head,
+            "resume_git_head": requested_head,
+            "previous_trainer_sha256": previous_trainer_sha,
+            "audited_legacy_trainer_sha256": LEGACY_RESUME_TRAINER_SHA256,
+            "previous_interaction_adapter_sha256": previous_adapter_sha,
+            "resume_interaction_adapter_sha256": current_adapter_sha,
+        },
+    )
+
+
 def read_history(path: Path) -> Dict[str, list]:
     if not path.exists():
         return {}
@@ -266,8 +331,10 @@ def main() -> None:
         "git_head": git_head(),
     }
     config_path = output / "run_config.json"
-    if config_path.exists() and json.loads(config_path.read_text()) != config:
-        raise ValueError(f"Resume config drift detected in {config_path}")
+    if config_path.exists():
+        existing_config = json.loads(config_path.read_text())
+        if existing_config != config:
+            audit_compatible_git_only_resume(existing_config, config, output)
     atomic_json(config_path, config)
 
     train_jsonl, val_jsonl = merged / "train.jsonl", merged / "val.jsonl"

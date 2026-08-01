@@ -23,6 +23,7 @@ RUN_FILES = {
     "validation_pre_response.json",
     "validation_response_active.json",
 }
+OPTIONAL_RUN_FILES = {"RESUME_PROVENANCE.json"}
 VARIANTS = ("B1", "B2-M", "B2-D", "T1", "T2")
 SEEDS = (11, 23, 37)
 
@@ -48,6 +49,11 @@ def main() -> None:
         for variant in VARIANTS
         for seed in SEEDS
         for filename in sorted(RUN_FILES)
+    )
+    files.extend(
+        path
+        for path in sorted((root / "runs").glob("*/seed_*/*"))
+        if path.name in OPTIONAL_RUN_FILES and path.is_file()
     )
     missing = [str(path) for path in files if not path.is_file()]
     if missing:

@@ -103,3 +103,5 @@ B1 三 seed 的最佳 epoch 都在 epoch 20，validation loss 仍缓慢下降。
 - 为减少硬件路径混杂，建议恢复 GPU 后再续跑剩余训练。
 
 runner 已增加强制 GPU gate：每个正式训练和每次 validation evaluator 启动前都要求 TensorFlow 能看到至少一个 GPU。GPU 再次掉线时脚本会停止并保留 epoch backup，而不会静默切换到 CPU。
+
+恢复 GPU 后，V2 evaluator 已成功为现有 8 个模型重算 all validation，并正确报告 all `independent_rollouts=20`。随后 B2-D seed 37 的 resume gate 因 worktree Git HEAD 更新而停止；检查证明 `train_prediction_model_v2_day8.py` 与 `interaction_adapter_v2.py` 在旧 checkpoint 提交中分别具有冻结哈希，训练语义没有改变。修复后的单次 provenance migration 会保留旧/新 HEAD 和代码哈希，不会把真实超参数漂移当成兼容变化。
