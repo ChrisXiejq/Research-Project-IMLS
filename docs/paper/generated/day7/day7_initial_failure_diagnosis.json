@@ -1,0 +1,40 @@
+{
+  "status": "fixed_and_targeted_retest_passed",
+  "failed_commit": "15cd74b",
+  "failure_stage": "T1 synthetic SavedModel save/load equivalence gate",
+  "data_gate": {
+    "status": "pass",
+    "rollout_count": 200,
+    "usable_sample_count": 5037,
+    "full_horizon_sample_count": 3237,
+    "split_audit_sha256": "78713b96ff3415bab5f960889c9878ed49b53f8f08446ef60fea6e74d8c555bf",
+    "normalization_sha256": "2dd054698e0ba0ca204ecc480078603fe8b958cfd3feca201f9c7ed9ffe28b9b",
+    "manifest_sha256": "52a1ed4c817ab5dbb160515fb581ff3a859866230267c21cd79b92bee2a3233d"
+  },
+  "original_error": {
+    "type": "AssertionError",
+    "message": "T1 save/load difference 0.12775421142578125"
+  },
+  "root_cause": {
+    "summary": "TensorFlow 2.13 did not restore MultiHeadAttention weights nested inside a custom composite Layer.",
+    "evidence": {
+      "repeat_inference_max_abs_difference": 0.0,
+      "model_weight_count_before": 23,
+      "model_weight_count_after": 23,
+      "non_attention_weight_max_abs_difference": 0.0,
+      "attention_weight_max_abs_difference_observed": 0.27059710025787354
+    }
+  },
+  "fix": {
+    "commit": "78c8f4f",
+    "change": "Expand MultiHeadAttention, LayerNormalization and FFN into standard Keras Functional graph layers; retain only weightless serializable mask helpers."
+  },
+  "targeted_server_retest": {
+    "repeat_inference_max_abs_difference": 0.0,
+    "save_load_max_abs_difference": 0.0,
+    "weight_groups_checked": 23,
+    "maximum_weight_abs_difference": 0.0,
+    "status": "pass"
+  },
+  "resume_scope": "Reuse the completed Day 7 merge/split/normalization output and rerun only the model implementation gate through the existing resumable wrapper."
+}
