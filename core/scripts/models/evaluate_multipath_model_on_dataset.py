@@ -53,6 +53,10 @@ CHI2_THRESHOLDS_2D = {
 }
 
 
+class NoUsableSubsetSamples(ValueError):
+    """Raised when a requested evaluation subset has no full-horizon samples."""
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--merged_dir", required=True)
@@ -268,7 +272,9 @@ def run_model(
     if batch:
         consume(batch)
     if not raw_outputs:
-        raise ValueError("No full-horizon samples with usable model inputs")
+        raise NoUsableSubsetSamples(
+            "No full-horizon samples with usable model inputs"
+        )
 
     raw_array = np.concatenate(raw_outputs, axis=0)
     label_array = np.concatenate(labels, axis=0)
@@ -735,13 +741,31 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         no_image=args.no_image,
         subset=args.subset,
     )
-    samples, raw_predictions, labels, latency = run_model(
-        model,
-        input_count,
-        iterator,
-        args.batch_size,
-        args.no_image,
-    )
+    try:
+        samples, raw_predictions, labels, latency = run_model(
+            model,
+            input_count,
+            iterator,
+            args.batch_size,
+            args.no_image,
+        )
+    except NoUsableSubsetSamples:
+        if args.subset == "all":
+            raise
+        return {
+            "evaluation_schema_version": "multipath_accuracy_calibration_v1",
+            "status": "not_applicable",
+            "reason": "no_full_horizon_samples_in_requested_validation_subset",
+            "model": os.path.abspath(args.model),
+            "merged_dir": merged_dir,
+            "split": args.split,
+            "subset": args.subset,
+            "calibration_fit_uses_test": False,
+            "model_input_count": input_count,
+            "uses_interaction_context": bool(input_count >= 3),
+            "samples": 0,
+            "independent_rollouts": 0,
+        }
     uncalibrated_decoded = decode_raw_predictions(raw_predictions, anchors)
     uncalibrated_metrics = evaluate_decoded(
         uncalibrated_decoded,
@@ -861,6 +885,21 @@ def main() -> None:
     with open(output_json, "w", encoding="utf-8") as handle:
         json.dump(metrics, handle, indent=2, sort_keys=True)
         handle.write("\n")
+    if metrics["status"] == "not_applicable":
+        print(
+            json.dumps(
+                {
+                    "status": metrics["status"],
+                    "split": metrics["split"],
+                    "subset": metrics["subset"],
+                    "samples": 0,
+                    "reason": metrics["reason"],
+                    "output_json": str(Path(output_json).expanduser().resolve()),
+                },
+                indent=2,
+            )
+        )
+        return
     print(
         json.dumps(
             {

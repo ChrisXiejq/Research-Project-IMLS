@@ -1,6 +1,10 @@
 # Day 7 完成审计与 Day 8 Validation-only 训练执行指南
 
-状态：Day 7 已完成并通过；Day 8 第一阶段脚本已实现，等待同步到服务器运行。
+状态：Day 7 已完成并通过；Day 8 第一阶段正在服务器执行，支持从已完成的 variant/seed 和 validation 子集断点续跑。
+
+2026-08-01 首次正式运行发现 validation 的 `pre_response` 定义没有任何 full-horizon 样本。实测覆盖为：assertive full 150、reactive full 176，其中 response-active 24、released 152；pre-response 为 0。B1 seed 11 的训练及 all/assertive/reactive 评价均已通过，失败只发生在空子集评价。
+
+修复后的规则是：all/assertive/reactive 为必需子集；pre-response/response-active 为可选诊断子集。可选子集为空时写入带原因和零样本数的 `status=not_applicable` 证据，不重新定义该子集、不伪造指标，也不把它用于模型排序。该事实作为数据时序覆盖限制写入最终汇总。
 
 ## 1. Day 7 结论
 
@@ -37,6 +41,8 @@ B1 / B2-M / B2-D / T1 / T2
 7. 输出 all、assertive、reactive、pre-response、response-active 五组 validation 指标；
 8. 生成三 seed 架构汇总和代表 seed；
 9. 不读取 test 指标。
+
+其中可选诊断子集若在固定 validation 中没有 full-horizon 样本，会输出 `not_applicable`；这不会中止其余正式矩阵。
 
 正式矩阵前会自动运行一个 `T2, seed=11, 32 train/16 val` 的单 epoch preflight，并用 8 个 validation 样本验证 SavedModel 恢复、四输入 evaluator 和 calibration 路径。preflight 通过后才进入 15 个正式运行；preflight 数据不进入正式汇总。
 

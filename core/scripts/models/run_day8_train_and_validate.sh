@@ -76,7 +76,7 @@ try:
     payload = json.load(open(sys.argv[1]))
 except Exception:
     raise SystemExit(1)
-raise SystemExit(0 if payload.get("status") == "pass" else 1)
+raise SystemExit(0 if payload.get("status") in ("pass", "not_applicable") else 1)
 PY
 }
 

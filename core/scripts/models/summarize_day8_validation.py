@@ -15,6 +15,7 @@ from statistics import median
 VARIANTS = ("B1", "B2-M", "B2-D", "T1", "T2")
 SEEDS = (11, 23, 37)
 SUBSETS = ("all", "assertive", "reactive", "pre_response", "response_active")
+REQUIRED_SUBSETS = ("all", "assertive", "reactive")
 
 
 def parse_args() -> argparse.Namespace:
@@ -50,6 +51,7 @@ def metrics_for(payload: dict) -> dict:
     uncalibrated_macro = uncalibrated["rollout_aggregation"]["macro_mean"]
     calibrated_macro = calibrated["rollout_aggregation"]["macro_mean"]
     return {
+        "status": "pass",
         "samples": int(payload["samples"]),
         "independent_rollouts": int(payload["independent_rollouts"]),
         "top1_ADE_mean": finite(uncalibrated["top1_ADE_mean"], "top1_ADE_mean"),
@@ -96,11 +98,30 @@ def main() -> None:
             for subset in SUBSETS:
                 evaluation_path = run_dir / f"validation_{subset}.json"
                 evaluation = json.loads(evaluation_path.read_text())
-                if evaluation.get("status") != "pass" or evaluation.get("split") != "val":
+                status = evaluation.get("status")
+                if evaluation.get("split") != "val":
                     raise ValueError(f"Invalid validation artifact: {evaluation_path}")
                 if evaluation.get("subset") != subset:
                     raise ValueError(f"Subset mismatch: {evaluation_path}")
-                subsets[subset] = metrics_for(evaluation)
+                if status == "not_applicable":
+                    if subset in REQUIRED_SUBSETS:
+                        raise ValueError(
+                            f"Required validation subset is empty: {evaluation_path}"
+                        )
+                    if int(evaluation.get("samples", -1)) != 0:
+                        raise ValueError(
+                            f"not_applicable subset must have zero samples: {evaluation_path}"
+                        )
+                    subsets[subset] = {
+                        "status": "not_applicable",
+                        "samples": 0,
+                        "independent_rollouts": 0,
+                        "reason": evaluation.get("reason"),
+                    }
+                elif status == "pass":
+                    subsets[subset] = metrics_for(evaluation)
+                else:
+                    raise ValueError(f"Invalid validation artifact: {evaluation_path}")
             runs.append(
                 {
                     "variant": variant,
@@ -126,6 +147,16 @@ def main() -> None:
                 }
             )
 
+    subset_availability = {
+        subset: {
+            "pass_runs": sum(run["subsets"][subset]["status"] == "pass" for run in runs),
+            "not_applicable_runs": sum(
+                run["subsets"][subset]["status"] == "not_applicable" for run in runs
+            ),
+        }
+        for subset in SUBSETS
+    }
+    pre_response_available = subset_availability["pre_response"]["pass_runs"] == len(runs)
     variants = []
     for variant in VARIANTS:
         group = [run for run in runs if run["variant"] == variant]
@@ -134,9 +165,11 @@ def main() -> None:
             for run in group
         ]
         reactive_ade = [run["subsets"]["reactive"]["top1_ADE_mean"] for run in group]
-        pre_response_ade = [
-            run["subsets"]["pre_response"]["top1_ADE_mean"] for run in group
-        ]
+        pre_response_ade = (
+            [run["subsets"]["pre_response"]["top1_ADE_mean"] for run in group]
+            if pre_response_available
+            else []
+        )
         target = median(primary)
         representative = min(
             group,
@@ -156,7 +189,9 @@ def main() -> None:
                 "seeds": [run["seed"] for run in group],
                 "median_validation_rollout_macro_NLL": median(primary),
                 "median_reactive_top1_ADE": median(reactive_ade),
-                "median_pre_response_top1_ADE": median(pre_response_ade),
+                "median_pre_response_top1_ADE": (
+                    median(pre_response_ade) if pre_response_ade else None
+                ),
                 "median_latency_ms_per_sample": median(
                     run["subsets"]["all"]["mean_prediction_ms_per_sample"] for run in group
                 ),
@@ -168,21 +203,27 @@ def main() -> None:
         key=lambda item: (
             item["median_validation_rollout_macro_NLL"],
             item["median_reactive_top1_ADE"],
-            item["median_pre_response_top1_ADE"],
+            (
+                item["median_pre_response_top1_ADE"]
+                if item["median_pre_response_top1_ADE"] is not None
+                else float("inf")
+            ),
         )
     )
     payload = {
-        "schema_version": "day8_validation_summary_v1",
+        "schema_version": "day8_validation_summary_v2",
         "status": "pass",
         "selection_scope": "validation_only_test_untouched",
         "expected_runs": 15,
         "observed_runs": len(runs),
         "primary_ranking_metric": "median across seeds of validation rollout-macro uncalibrated trajectory mixture NLL per step",
         "calibration_role": "fitted on validation for deployment, reported for every run, but not used to rank architectures",
-        "secondary_ranking_metrics": [
-            "median reactive top1 ADE",
-            "median pre-response top1 ADE",
-        ],
+        "secondary_ranking_metrics": ["median reactive top1 ADE"]
+        + (["median pre-response top1 ADE"] if pre_response_available else []),
+        "subset_availability": subset_availability,
+        "empty_optional_subset_policy": (
+            "record not_applicable with zero samples; do not redefine the subset or use it for ranking"
+        ),
         "provisional_selected_variant": variants[0]["variant"],
         "provisional_representative_seed": variants[0]["representative_seed"],
         "test_accessed": False,
