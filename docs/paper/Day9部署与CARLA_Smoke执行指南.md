@@ -4,6 +4,8 @@
 
 首次运行修复记录：原 preflight 使用全黑 raster 和全零轨迹，并错误地要求该训练分布外输入的 covariance 正定；B1 在这种输入上因极大方差的 float32 旋转消减而失败。服务器复核证明 Day7 train 真实输入上 B1 与 B0 均为 0 invalid covariance。修复后 warm-up 使用 Day7 train split 的冻结真实 raster/past-state，并记录输入哈希；每个 CARLA step 的真实 covariance gate 保持不变，没有降低正式数值标准。
 
+最终审计修复记录：8/8 rollout 完成后，部署 manifest 中的 `warmup_passed=True` 因 Python `bool` 是 `int` 子类而被旧 serializer 写成整数 `1`，旧 audit 的 `is True` 判断因此误报 8 个 `deployment_warmup`。修复后 serializer 优先处理 bool；audit 只兼容 canonical `true` 和历史 exact integer `1`，不会接受字符串或其他 truthy 值。已有 rollout 不重跑，使用独立 finalizer 重算 audit，并记录原 contract commit、finalizer commit 和所有输入哈希。
+
 ## 1. Day 9 的目标
 
 Day 9 只验证部署和机制链路，不产生正式论文 outcome，也不允许调模型、calibration、risk policy 或 supervisor。完成后才决定 Day 10 正式矩阵能否启动。
@@ -134,6 +136,17 @@ find "$DAY9_RESULTS" -name scenario_run_summary.json -type f | wc -l
 若脚本提示已有 invalid output，不要删除文件，先把日志发给我诊断。
 
 ## 6. 完成检查与回传
+
+如果 8 个 rollout 已经全部完成、仅最终 audit 因历史 `warmup_passed=1` 失败，不要重新运行主 runner。同步包含修复的提交后执行：
+
+```bash
+cd /root/autodl-tmp/Research-Project-IMLS-day8
+export PYTHON_BIN=/root/miniconda3/envs/carla_modern/bin/python
+export DAY9_RESULTS=/root/autodl-tmp/results/give_way_transformer/day9/day9_smoke_v1
+bash core/scripts/carla/finalize_day9_deployment_smoke.sh
+```
+
+该命令不会启动 CARLA rollout，只会重算 audit、生成 provenance、完成标记和 compact snapshot。
 
 ```bash
 cat "$DAY9_RESULTS/DAY9_COMPLETE.json"

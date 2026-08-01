@@ -805,10 +805,10 @@ class RunIntersectionScenario:
         if isinstance(value, (np.floating, float)):
             value = float(value)
             return value if np.isfinite(value) else None
-        if isinstance(value, (np.integer, int)):
-            return int(value)
         if isinstance(value, (np.bool_, bool)):
             return bool(value)
+        if isinstance(value, (np.integer, int)):
+            return int(value)
         if isinstance(value, list):
             return [self._json_safe(v) for v in value]
         if isinstance(value, tuple):

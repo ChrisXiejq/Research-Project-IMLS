@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -67,7 +68,9 @@ class Day9AuditTest(unittest.TestCase):
                             scenario / "prediction_deployment_manifest.json",
                             {
                                 "status": "pass",
-                                "warmup_passed": True,
+                                # Existing Day 9 CARLA artifacts contain legacy integer 1
+                                # because bool was checked after int during JSON conversion.
+                                "warmup_passed": 1,
                                 "model_artifact": {
                                     "sha256_tree": "b1hash" if predictor == "B1" else "b0hash"
                                 },
@@ -147,6 +150,32 @@ class Day9AuditTest(unittest.TestCase):
             self.assertEqual(audit["status"], "pass")
             self.assertEqual(audit["observed_arms"], 8)
             self.assertTrue(all(item["status"] == "pass" for item in audit["evaluations"]))
+
+            write_json(root / "day9_deployment_preflight.json", {"status": "pass"})
+            environment = os.environ.copy()
+            environment.update({"DAY9_RESULTS": str(root), "PYTHON_BIN": sys.executable})
+            subprocess.run(
+                [
+                    "bash",
+                    str(
+                        SCRIPT_DIR.parent
+                        / "carla"
+                        / "finalize_day9_deployment_smoke.sh"
+                    ),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+                env=environment,
+            )
+            complete = json.loads((root / "DAY9_COMPLETE.json").read_text())
+            provenance = json.loads(
+                (root / "day9_finalization_provenance.json").read_text()
+            )
+            self.assertEqual(complete["status"], "pass")
+            self.assertEqual(complete["observed_arms"], 8)
+            self.assertTrue(provenance["raw_rollouts_reused"])
+            self.assertTrue((root / "day9_smoke_snapshot.tar.gz").is_file())
 
 
 if __name__ == "__main__":

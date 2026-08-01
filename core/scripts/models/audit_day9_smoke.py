@@ -38,6 +38,11 @@ def atomic_json(path: Path, payload: dict) -> None:
     os.replace(temporary, path)
 
 
+def warmup_passed(value: object) -> bool:
+    """Accept canonical JSON true and the legacy integer emitted for bool True."""
+    return value is True or (type(value) is int and value == 1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-dir", required=True)
@@ -74,7 +79,9 @@ def main() -> None:
             arm_failures.append("postcarla_gate")
         if scenario_summary.get("ran_successfully") is not True:
             arm_failures.append("scenario_run")
-        if deployment.get("status") != "pass" or deployment.get("warmup_passed") is not True:
+        if deployment.get("status") != "pass" or not warmup_passed(
+            deployment.get("warmup_passed")
+        ):
             arm_failures.append("deployment_warmup")
         actual_model_hash = (deployment.get("model_artifact") or {}).get("sha256_tree")
         if actual_model_hash != expected_predictor["model_sha256_tree"]:
@@ -176,6 +183,7 @@ def main() -> None:
             "solver_failure_steps": solver_failures,
             "invalid_probabilities": invalid_probabilities,
             "invalid_covariances": invalid_covariances,
+            "deployment_warmup_serialized_value": deployment.get("warmup_passed"),
             "artifacts": {
                 "scenario_summary_sha256": sha256(scenario_summaries[0]),
                 "deployment_manifest_sha256": sha256(deployment_path),
