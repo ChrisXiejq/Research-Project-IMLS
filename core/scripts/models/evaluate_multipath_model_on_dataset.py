@@ -24,6 +24,8 @@ import tensorflow as tf
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(SCRIPT_DIR)
+# Import registers the V2 custom Keras layers before SavedModel restoration.
+import interaction_adapter_v2  # noqa: F401,E402
 from multipath_gmm_utils import (
     COVARIANCE_SCALE_SEMANTICS,
     STD_PARAMETERIZATION,
@@ -71,6 +73,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--covariance-scale-min", type=float, default=1.0e-4)
     parser.add_argument("--covariance-scale-max", type=float, default=4.0)
     parser.add_argument("--covariance-scale-count", type=int, default=49)
+    parser.add_argument(
+        "--subset",
+        default="all",
+        choices=["all", "assertive", "reactive", "pre_response", "response_active"],
+        help="Optional V2 behavioural subset; split selection remains unchanged.",
+    )
     return parser.parse_args()
 
 
@@ -140,9 +148,24 @@ def load_samples(
     horizon: int,
     max_samples: Optional[int] = None,
     no_image: bool = False,
+    subset: str = "all",
 ):
     count = 0
     for sample in read_jsonl(jsonl_path):
+        target_style = sample.get("target_style")
+        diagnostics = sample.get("target_reactive_diagnostics") or {}
+        include = {
+            "all": True,
+            "assertive": target_style == "assertive_constant_speed",
+            "reactive": target_style == "defensive_reactive",
+            "pre_response": target_style == "defensive_reactive"
+            and not bool(diagnostics.get("active"))
+            and not bool(diagnostics.get("released_latched")),
+            "response_active": target_style == "defensive_reactive"
+            and bool(diagnostics.get("active")),
+        }[subset]
+        if not include:
+            continue
         if not has_full_horizon(sample, horizon=horizon):
             continue
         raster_path = resolve_raster_path(sample, result_dir=result_dir)
@@ -160,6 +183,8 @@ def make_batch(batch, no_image: bool = False):
     images = []
     past_states = []
     interaction_contexts = []
+    interaction_sequences = []
+    interaction_masks = []
     labels = []
     samples = []
     for sample, raster_path, past, future_local in batch:
@@ -175,6 +200,8 @@ def make_batch(batch, no_image: bool = False):
         images.append(image)
         past_states.append(past)
         interaction_contexts.append(interaction_context_from_sample(sample))
+        interaction_sequences.append(sample.get("interaction_sequence"))
+        interaction_masks.append(sample.get("interaction_sequence_mask"))
         labels.append(future_local)
         samples.append(sample)
     return (
@@ -182,13 +209,15 @@ def make_batch(batch, no_image: bool = False):
         np.asarray(images, dtype=np.float32),
         np.asarray(past_states, dtype=np.float32),
         np.asarray(interaction_contexts, dtype=np.float32),
+        np.asarray(interaction_sequences, dtype=np.float32),
+        np.asarray(interaction_masks, dtype=np.float32),
         np.asarray(labels, dtype=np.float32),
     )
 
 
 def run_model(
     model: tf.keras.Model,
-    uses_interaction_context: bool,
+    input_count: int,
     iterator: Iterable,
     batch_size: int,
     no_image: bool,
@@ -202,13 +231,27 @@ def run_model(
 
     def consume(items) -> None:
         nonlocal prediction_seconds, prediction_calls
-        samples, images, past_states, contexts, batch_labels = make_batch(
-            items, no_image=no_image
-        )
-        model_inputs = [images, past_states, contexts] if uses_interaction_context else [
+        (
+            samples,
             images,
             past_states,
-        ]
+            contexts,
+            sequences,
+            sequence_masks,
+            batch_labels,
+        ) = make_batch(items, no_image=no_image)
+        if input_count == 2:
+            model_inputs = [images, past_states]
+        elif input_count == 3:
+            model_inputs = [images, past_states, contexts]
+        elif input_count == 4:
+            if sequences.shape[1:] != (6, 12) or sequence_masks.shape[1:] != (6,):
+                raise ValueError(
+                    "V2 model requires interaction_sequence [N,6,12] and mask [N,6]"
+                )
+            model_inputs = [images, past_states, sequences, sequence_masks]
+        else:
+            raise ValueError(f"Unsupported model input count: {input_count}")
         started = time.perf_counter()
         predictions = np.asarray(model.predict_on_batch(model_inputs))
         prediction_seconds += time.perf_counter() - started
@@ -683,17 +726,18 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         )
 
     model = tf.keras.models.load_model(args.model, compile=False)
-    uses_interaction_context = len(getattr(model, "inputs", [])) >= 3
+    input_count = len(getattr(model, "inputs", []))
     iterator = load_samples(
         jsonl_path,
         result_dir,
         args.horizon,
         max_samples=args.max_samples,
         no_image=args.no_image,
+        subset=args.subset,
     )
     samples, raw_predictions, labels, latency = run_model(
         model,
-        uses_interaction_context,
+        input_count,
         iterator,
         args.batch_size,
         args.no_image,
@@ -771,8 +815,10 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         "merged_dir": merged_dir,
         "jsonl": artifact_hash(Path(jsonl_path).resolve()),
         "split": args.split,
+        "subset": args.subset,
         "calibration_fit_uses_test": False,
-        "uses_interaction_context": bool(uses_interaction_context),
+        "model_input_count": input_count,
+        "uses_interaction_context": bool(input_count >= 3),
         "samples": len(samples),
         "independent_rollouts": len(
             {str(sample.get("source_subrun", "<missing>")) for sample in samples}

@@ -1,10 +1,31 @@
 # Day 6 完成审计与 Day 7 执行指南
 
-状态：Day 6 正式采集已完成并通过最终审计；Day 7 本地实现和合成数据测试已完成，等待服务器执行真实数据 gate。
+状态：Day 6 正式采集与 Day 7 真实数据/model gate 均已完成并通过。Day 7 的紧凑证据已拉取到 `docs/paper/generated/day7/`。
 
 首次真实 model gate 已完成数据 merge，但发现 TensorFlow 2.13 无法可靠恢复嵌套在自定义复合层中的
 `MultiHeadAttention` 权重。修复后 MHA/LayerNorm/FFN 已展开为标准 Keras Functional graph；
 服务器针对 T1 的 23 组权重复测全部完全一致，重复推理和保存/加载最大绝对差均为 0。
+
+最终真实 gate 结果：
+
+- 200 个 rollout 按 init 分组为 160/20/20；
+- 5,037 个至少含一个有效 future label 的样本，其中 full horizon 3,237、partial horizon 1,800；
+- train/val/test 可用样本分别为 4,036/506/495；
+- B1、B2-M、B2-D、T1、T2 全部通过前向、反向、保存/加载和数值检查；
+- B2-M/T1 trainable 参数为 77,600/86,688，相差 10.48%；
+- B2-D/T2 trainable 参数为 176,096/165,728，相差 5.89%；
+- 四个 adapter 的零初始化输出与 frozen base 最大绝对差均为 0；
+- 五个模型的保存/加载最大绝对差均为 0；
+- 四个 adapter 的 smoke covariance audit 均为 0 个 invalid matrix。
+
+证据哈希：
+
+```text
+manifest.json                         52a1ed4c817ab5dbb160515fb581ff3a859866230267c21cd79b92bee2a3233d
+day7_split_audit.json                 78713b96ff3415bab5f960889c9878ed49b53f8f08446ef60fea6e74d8c555bf
+interaction_normalization_train.json  2dd054698e0ba0ca204ecc480078603fe8b958cfd3feca201f9c7ed9ffe28b9b
+day7_model_smoke.json                 26086f6e85497cd1190e8383c3d167681905ee1ccecbfed421cabcfeb5cea188
+```
 
 ## 1. Day 6 最终事实
 
@@ -157,3 +178,5 @@ day7_model_smoke.json
 8. 模型保存/加载输出等价；
 9. covariance audit 通过；
 10. MLP/Transformer 参数匹配在 20% 内。
+
+以上十项在正式服务器产物中全部通过。这里的 synthetic overfit 只证明实现可训练，不能作为 Transformer 优于 MLP 或 B1 的性能证据；模型优劣必须由 Day 8 的独立 validation 与一次性 test 评价决定。

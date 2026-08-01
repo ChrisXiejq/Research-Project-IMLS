@@ -1,0 +1,12 @@
+{
+  "model_smoke_report": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/day7_model_smoke.json",
+  "model_smoke_report_sha256": "26086f6e85497cd1190e8383c3d167681905ee1ccecbfed421cabcfeb5cea188",
+  "status": "pass",
+  "variants": [
+    "B1",
+    "B2-M",
+    "B2-D",
+    "T1",
+    "T2"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "audit": "day7_split_audit.json",
+  "day": 7,
+  "day6_results": "/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200",
+  "files": {
+    "all": {
+      "bytes": 57798196,
+      "path": "all.jsonl",
+      "sha256": "c311632fa60947392a17973f05e55143265809f621a1d968e496b8be537a7954"
+    },
+    "test": {
+      "bytes": 5673913,
+      "path": "test.jsonl",
+      "sha256": "29291fe2a172047267c3a0c4c3d5693519f550881010a965fb60166a5013d770"
+    },
+    "train": {
+      "bytes": 46315316,
+      "path": "train.jsonl",
+      "sha256": "b09e02e735b022ad42df274559e91e6cf4a42e46f55e23e4a2caf68e2073d55b"
+    },
+    "val": {
+      "bytes": 5808967,
+      "path": "val.jsonl",
+      "sha256": "5ad6210b44b83f5c2ea3a8e64eaae32413bc73bdd337189999d2778b20c993ed"
+    }
+  },
+  "merged_dir": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1",
+  "normalization": "interaction_normalization_train.json",
+  "status": "pass",
+  "training_filter": "at least one valid future step; masked loss required"
+}

@@ -1,0 +1,117 @@
+{
+  "parameter_matching": {
+    "B2-D_vs_T2": {
+      "control_trainable": 176096,
+      "relative_difference": 0.05887697619480284,
+      "transformer_trainable": 165728,
+      "within_20_percent": true
+    },
+    "B2-M_vs_T1": {
+      "control_trainable": 77600,
+      "relative_difference": 0.10483573274270949,
+      "transformer_trainable": 86688,
+      "within_20_percent": true
+    }
+  },
+  "real_sample": {
+    "raster_path": "/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200/S0_FIXED/scenario_uk_give_way_ego_init_01_smpc_fixed_risk/prediction_dataset/rasters/sample_000000.png",
+    "source_subrun": "scenario_uk_give_way_ego_init_01_smpc_fixed_risk",
+    "valid_future_steps": 10
+  },
+  "seed": 11,
+  "status": "pass",
+  "variants": {
+    "B1": {
+      "real_sample_masked_loss": 2.709738254547119,
+      "save_load_max_abs_difference": 0.0,
+      "synthetic_final_loss": 2.9655892848968506,
+      "synthetic_initial_loss": 3.0225887298583984,
+      "total_parameters": 429408,
+      "trainable_parameters": 429408
+    },
+    "B2-D": {
+      "covariance_audit": {
+        "invalid_matrices": 0,
+        "invalid_rate": 0.0,
+        "maximum_symmetry_error": 0.0,
+        "minimum_determinant": 0.9999998807907104,
+        "minimum_eigenvalue": 0.9999999403953552,
+        "non_positive_definite_matrices": 0,
+        "nonfinite_matrices": 0,
+        "nonsymmetric_matrices": 0,
+        "total_matrices": 400
+      },
+      "real_sample_masked_loss": 2.709738254547119,
+      "save_load_max_abs_difference": 0.0,
+      "synthetic_final_loss": 0.2578382194042206,
+      "synthetic_initial_loss": 3.0225887298583984,
+      "synthetic_min_train_loss": 0.25057679414749146,
+      "total_parameters": 8698568,
+      "trainable_parameters": 176096,
+      "zero_init_base_max_abs_difference": 0.0
+    },
+    "B2-M": {
+      "covariance_audit": {
+        "invalid_matrices": 0,
+        "invalid_rate": 0.0,
+        "maximum_symmetry_error": 0.0,
+        "minimum_determinant": 1.0,
+        "minimum_eigenvalue": 1.0,
+        "non_positive_definite_matrices": 0,
+        "nonfinite_matrices": 0,
+        "nonsymmetric_matrices": 0,
+        "total_matrices": 400
+      },
+      "real_sample_masked_loss": 2.709738254547119,
+      "save_load_max_abs_difference": 0.0,
+      "synthetic_final_loss": 2.7860870361328125,
+      "synthetic_initial_loss": 3.0225887298583984,
+      "synthetic_min_train_loss": 2.7915565967559814,
+      "total_parameters": 8600072,
+      "trainable_parameters": 77600,
+      "zero_init_base_max_abs_difference": 0.0
+    },
+    "T1": {
+      "covariance_audit": {
+        "invalid_matrices": 0,
+        "invalid_rate": 0.0,
+        "maximum_symmetry_error": 0.0,
+        "minimum_determinant": 1.0,
+        "minimum_eigenvalue": 1.0,
+        "non_positive_definite_matrices": 0,
+        "nonfinite_matrices": 0,
+        "nonsymmetric_matrices": 0,
+        "total_matrices": 400
+      },
+      "real_sample_masked_loss": 2.709738254547119,
+      "save_load_max_abs_difference": 0.0,
+      "synthetic_final_loss": 2.773408889770508,
+      "synthetic_initial_loss": 3.0225887298583984,
+      "synthetic_min_train_loss": 2.775538444519043,
+      "total_parameters": 8609160,
+      "trainable_parameters": 86688,
+      "zero_init_base_max_abs_difference": 0.0
+    },
+    "T2": {
+      "covariance_audit": {
+        "invalid_matrices": 0,
+        "invalid_rate": 0.0,
+        "maximum_symmetry_error": 0.0,
+        "minimum_determinant": 1.0,
+        "minimum_eigenvalue": 1.0,
+        "non_positive_definite_matrices": 0,
+        "nonfinite_matrices": 0,
+        "nonsymmetric_matrices": 0,
+        "total_matrices": 400
+      },
+      "real_sample_masked_loss": 2.709738254547119,
+      "save_load_max_abs_difference": 0.0,
+      "synthetic_final_loss": 0.440631628036499,
+      "synthetic_initial_loss": 3.0225887298583984,
+      "synthetic_min_train_loss": 0.5137962102890015,
+      "total_parameters": 8688200,
+      "trainable_parameters": 165728,
+      "zero_init_base_max_abs_difference": 0.0
+    }
+  }
+}
