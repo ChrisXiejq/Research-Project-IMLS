@@ -1,0 +1,11 @@
+{
+  "deployment_preflight_sha256": "2e0eb393c4e0a3bbe1fedba5ada85efbb96c66b7047a72bd8563690c4f6745cd",
+  "finalization_provenance_sha256": "ad965909b781246e618fd07185600bce2b6c49127ed5dfbfa8bf556eb8b90f33",
+  "observed_arms": 8,
+  "schema_version": "day9_complete_v1",
+  "selected_seed": 37,
+  "selected_variant": "B1",
+  "smoke_audit_sha256": "fdcc985a3b633fc4376e2ff6635652b51e7f080b7b08c9e4292c42535e0de004",
+  "smoke_only_not_formal_evidence": true,
+  "status": "pass"
+}

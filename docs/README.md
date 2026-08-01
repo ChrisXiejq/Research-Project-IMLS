@@ -25,6 +25,7 @@
 - `paper/generated/day6/`：正式 200-rollout 数据审计与完成证据。
 - `paper/generated/day7/`：V2 merge/split 和模型实现证据。
 - `paper/generated/day8/`：15-run validation 与一次性冻结 test 证据。
+- `paper/generated/day9/`：8-arm 冻结模型 CARLA deployment smoke、最终审计与 compact snapshot。
 - `paper/generated/README.md`：这些 artifacts 的范围和使用边界。
 
 ## Architecture and runtime

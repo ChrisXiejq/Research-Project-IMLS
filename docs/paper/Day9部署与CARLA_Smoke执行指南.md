@@ -2,6 +2,8 @@
 
 更新日期：2026-08-02
 
+完成状态：Day 9 已完成。服务器与本地证据均验证 `DAY9_COMPLETE.json.status=pass`，8/8 smoke arms 通过，compact snapshot SHA256 为 `2298ff3e29c9740b5c3e320a2949085e078d69b2e1e65de9bfc60670f9b9e12c`。
+
 首次运行修复记录：原 preflight 使用全黑 raster 和全零轨迹，并错误地要求该训练分布外输入的 covariance 正定；B1 在这种输入上因极大方差的 float32 旋转消减而失败。服务器复核证明 Day7 train 真实输入上 B1 与 B0 均为 0 invalid covariance。修复后 warm-up 使用 Day7 train split 的冻结真实 raster/past-state，并记录输入哈希；每个 CARLA step 的真实 covariance gate 保持不变，没有降低正式数值标准。
 
 最终审计修复记录：8/8 rollout 完成后，部署 manifest 中的 `warmup_passed=True` 因 Python `bool` 是 `int` 子类而被旧 serializer 写成整数 `1`，旧 audit 的 `is True` 判断因此误报 8 个 `deployment_warmup`。修复后 serializer 优先处理 bool；audit 只兼容 canonical `true` 和历史 exact integer `1`，不会接受字符串或其他 truthy 值。已有 rollout 不重跑，使用独立 finalizer 重算 audit，并记录原 contract commit、finalizer commit 和所有输入哈希。
@@ -21,6 +23,8 @@ authority: A3 risk-owned-yield
 ```
 
 共 2 × 2 × 2 = 8 个 rollouts。B0 只用于判断 Day 10 的 fine-tuning bridge 是否可执行；正式模型仍是 B1。
+
+最终观测为 1,761 个 prediction samples、1,737 个 debug steps，其中 1,593 个包含有效 prediction。四个 reactive arms 各有 17 个 response-active samples，共 68 个；所有 arms 均为 0 solver failure、0 invalid probability、0 invalid covariance，8/8 post-CARLA gate 为 PASS。该结果放行 Day 10，但作为 development smoke 不用于估计 B1 相对 B0、adaptive 相对 fixed 的正式效果量。
 
 ## 2. 本次修复的部署缺口
 

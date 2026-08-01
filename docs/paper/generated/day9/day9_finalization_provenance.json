@@ -1,0 +1,13 @@
+{
+  "audit_script_sha256": "7df989d8547b4de6d9510f7145876b29389da2ead2290fa586892346edd4a7f0",
+  "audit_sha256": "fdcc985a3b633fc4376e2ff6635652b51e7f080b7b08c9e4292c42535e0de004",
+  "compatibility_reason": "Legacy Day 9 manifests serialized boolean warmup_passed=True as integer 1; the corrected audit accepts only canonical true or exact integer 1.",
+  "contract_sha256": "db3b464e840d11f06148ad3e78dad6bc0a70202f0c2d762afb5d263dd8a4f070",
+  "finalization_only": true,
+  "finalizer_git_commit": "9f2b8eaece024071c31487e03ed284e8bb751b21",
+  "original_contract_git_commit": "974abcf872d6b4874a0c075489d36b1c05f85554",
+  "preflight_sha256": "2e0eb393c4e0a3bbe1fedba5ada85efbb96c66b7047a72bd8563690c4f6745cd",
+  "raw_rollouts_reused": true,
+  "schema_version": "day9_finalization_provenance_v1",
+  "status": "pass"
+}
