@@ -1,0 +1,3165 @@
+{
+  "schema_version": "day6_analysis_manifest_v1",
+  "generated_at_utc": "2026-07-31T23:05:31.460921+00:00",
+  "results_dir": "/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200",
+  "file_count": 631,
+  "total_bytes": 17975846,
+  "files": [
+    {
+      "relative_path": "S0_ADAPTIVE/applied_tuning_configs.json",
+      "size_bytes": 3554,
+      "sha256": "abb8e1073767739e0234de0c63dbe69357158b83361ba8fd5f286973192a6fa8"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/batch_events.jsonl",
+      "size_bytes": 175974,
+      "sha256": "5b8ba1bdb8fe0839b28d1c53aeeaf6aff60077f62b56a31e1f9dd6887958088e"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/batch_subruns.json",
+      "size_bytes": 93487,
+      "sha256": "5a93ad1273f1fe2cee01b4ca263c31795680cd046b1d029e3d9e6d777ef8e1e9"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/batch_summary.txt",
+      "size_bytes": 4197,
+      "sha256": "e6309113d9c72cd7c888c99e0000e2f015d16f352195dbb5dd789dfff92de933"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/environment.json",
+      "size_bytes": 513,
+      "sha256": "bb4867b27eff290595df656a3c97e64cf70df774ac3805d9ecb83695e88b7473"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_01_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1508,
+      "sha256": "e1fd3259dbd43bcec9f6264976ea415c9d15eaf7a8ccc14726646e538ab8805c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_01_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "86e08fe29e0192c650a250e8a92c42212b209589d7a14d7a7e4d64735312595c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_01_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 56923,
+      "sha256": "7c2ee328e65fb891fc8adc5ac7f220a60b200f22c2def12dc831385e39ab4a01"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_02_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1508,
+      "sha256": "61e8b5dc3ee91104a0e3f07fd8ffed8bbea7581fff8e7ca79f8410e7e7c0797c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_02_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1375,
+      "sha256": "6fef02f29e659ac9103a60c11bfa263be38e5a6d3c749661e31260d372d7c327"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_02_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 53366,
+      "sha256": "5570e7ee521aa1545aa99770b67be2d5857df744c4783522267bdf49c8d71117"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_03_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1508,
+      "sha256": "f987b8b2322bb2b41c5759a18a7118b8a00fde761da89a34e2379a8ae44aa11d"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_03_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1375,
+      "sha256": "9d96c02f40c7fb8b538fe79d55beb6fa4ae6984b85f3b532be40ffedab791eaa"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_03_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 57558,
+      "sha256": "0f7e146da9d4bb4c4e3cfe41318235cf7c190f38debf48aaed97e5da5a6eb443"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_04_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1508,
+      "sha256": "705dd6150bfc7b391ab1bf0bcfa3858a1e5db0185c8a821460711bbf67969fa9"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_04_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1375,
+      "sha256": "da5a67f03f0d0478008e243ec92d42ba96645586b63b565d78cc4d2106c708ae"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_04_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 57759,
+      "sha256": "3a290abbd27562fde5d503e38f318739e1621fc0aa4e910ab69c34805c2f874c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_05_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1508,
+      "sha256": "d3c5a7baa1f9a9785ccf3c6e7eff2a3dcd9cb9da7c4f1eff1b6694d0235b9174"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_05_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "c58cd5890489b79dfd96dbf13801c1dea8aaeff433ae3d68a492d5f47091f261"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_05_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 60952,
+      "sha256": "162a3cd46db780f3674ea494c0ad4236058b1baa90d3408fbeff0399f047986c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_06_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1508,
+      "sha256": "1cc4038defd51f497f06a0da4cf3b12b80d1165a6374720d9a0a4b8de6d53b77"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_06_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "8e0cc4aa0896d631d3dfffcf4df254aedcf5efdb9e0438067ba28a297bf9bbdc"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_06_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 55792,
+      "sha256": "d7a21d074c514131107c495079c99496216d3beaf6e5bb0ce9606b465b4a8582"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_07_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1508,
+      "sha256": "4b8a708397332c5b39b5e102bd7edf07ecc1b9dcc3887becaa27a1b620079a5c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_07_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1401,
+      "sha256": "8411b7d8fedb6d02dbe016a820337a648648eb6ceaabaa8d60f6d8db47f55216"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_07_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 69890,
+      "sha256": "41e8fccce01443ad827c91755796dd7192af5527c460823da40e11f3205587ea"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_08_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1508,
+      "sha256": "f6d8c8ee8232e668735b16aee62302c17206d3d03529baba5f20d7de32c8a301"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_08_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "46c2cc6b0072f6d15feaeedcda276835cb621215deacd154b7b21433327c3b6f"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_08_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 55012,
+      "sha256": "90da27fda37b86f7523781a4af13091bf744b6af07af6345fdf78d1c220e391b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_09_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1508,
+      "sha256": "dadb6ef5d761c27fa8e24f8744782fa5cbf92753c2435e959229ec204c9d2dd6"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_09_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "516befbe173bb6ede0327ed59eca68d1fa8aa65adf4b54862bf3f583c21aa3ba"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_09_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 54506,
+      "sha256": "c895c86a46cbfa639e1b102893208257df51ab7e62f9d9a44a48be27903b4fc6"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_10_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "b095935d02e0e91a61f855a42a347b7335a36ca8f75c2763d1b45cd77b542fb9"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_10_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "de8b8abfa0992b424421f8bad3bd5df061b71df98282eb9a4010adc9a258c453"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_10_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 79699,
+      "sha256": "7fff5c49bfef55883a19a4cd0760532475479a6a5ad9f16f58d24f3930e26388"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_11_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "b8530bbcbd5dba815dfa78212576ecfe78c5d3ccc639ebf83d88443aa4ee0d74"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_11_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "908237f4e305825ec1a29e22d8181bda1203c93c67bab88964266e70f1809b2a"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_11_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 55930,
+      "sha256": "6b574a7f098fd2e4bf2f091718b89c36c67a40d49f6b1a2dbf1e378e359629b4"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_12_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "2a5fced079d73f006df46f329292699b24116f9cb67ca1ca93df12b3fae2d54d"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_12_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "3eed90f60cce2d9692a34f8b8b9e0dfe850d9bed3536714b5177a49699fed17b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_12_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 53450,
+      "sha256": "ff210d3aa2879b3b6af17d75ca0336bd046c7e506ef1c6983bd4900ea5ef605d"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_13_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "0953b8525db05f5e07d81ec87c52a8c0ba75042b63f22b327a488c04af29181f"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_13_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "f24d223d34b437daa96c04edca48803169ccb0ab51700738cd95ad9ba96d62de"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_13_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 62516,
+      "sha256": "42c18bd4820e775a7752acc8a05681c850ac801ec801f898f330ad71ea56f093"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_14_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "f964805b642a8c08773555a73b3c28f1a7efe6a078c25692d77c746b5268da3f"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_14_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "b4955b62a5bc4fe487b507572bb7cb013522d0a3bbf3189ea0fdcac18819470c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_14_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 53416,
+      "sha256": "9f2408b996e947c13671ed7f51310dfa3a3dc487672e60914ffe2d869c32e779"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_15_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "2976de2736a0fabf86756e90e8f0b50278d7b674d4fc4f40b7a9c88f04f16b33"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_15_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "91c2f90dd6ddc0158cbaa096fdc0f98d274ea6a5b4629d7f2c7b23ae50454a86"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_15_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 77928,
+      "sha256": "8a53feabd60cacaa03817c471b30e6ecffaa8ac06d9d49180974ecd681b498d2"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_16_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "764f71ede770c04895073c7c4fe9abf5370038b89742ae5ad3d5ded033a348f4"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_16_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "76af5f76db34c87114255ab327fa0d5b636f95a90a0971d0e05f4ef806c6af90"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_16_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 56425,
+      "sha256": "e1322bf390a07693499b5e747f8a1165ddaf336f0aef32ce4754e82ca8b9bf9c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_17_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "0e82e55641d07fbfd895d4868f6d4020aa56a6b52515c0f4374a414c330c0779"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_17_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "dd6137bc74e0060f16475d01641bd1bc19d76a0d1da33c2016014aad8eff1303"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_17_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 70742,
+      "sha256": "237857a7a50bb87e207c19625bf9c448f0311d9a91d6112e5aaa6e72ecd42dc7"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_18_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "703ab94ac21a4d24913bb8c1e9fd63ba350b10807ed4d2e542ef6732c953ba2b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_18_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1408,
+      "sha256": "79c7872378de054d2dc06692dc747a750d48bc5fc972d9680bc7f21f34e3ba78"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_18_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 68286,
+      "sha256": "2b8bb29704bf53b4a4401568f6ac96f0296a52519e513406a03c351e17135a94"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_19_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "2ce9846e329b115475087cf9b73e62dd8d5ec8b22ecafbeb4314a42f8ab181af"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_19_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "5fa50d61d82b9ed1d29cbc6992658051152e3daa4c5c59ceb9e3b8d939aec650"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_19_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 64778,
+      "sha256": "20e94da963ff93c56996b86f424714de90b52b24af970c678297321688962c74"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_20_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "298ad80f2a466ef46b8b9423f23875f1eae97879bace899c0d41c9bcc4cd6017"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_20_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "3a9ce45f90a77101e22ccb340e0e5b11bcd523ffba01d21251bf560f0fbc96e9"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_20_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 56710,
+      "sha256": "d9e479cc1fceb8e8335c319ad7a078d925a2c6e27a9c16d7246fb18572885f19"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_21_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "063e1371657b5ee2bd96fa34cea419c561a04a7ece39904ffc214d3c7ef91f7e"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_21_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "ba9a207f24525fbbaacff37d1e38e57483bc1a646512d982323bb90aaed57e58"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_21_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 55452,
+      "sha256": "453dfd850e936baa2b4d1f9a34f7ca395843cac0bf0840e6444eccf4e06c8dd1"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_22_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "4ed319c34281b62e68f01e6615b1c6ace1b5fe645d545cf930f1284522466f87"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_22_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1395,
+      "sha256": "14ee1611989923989de65ebb05c1546e4e867976b72ea86021c596ea5a33013a"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_22_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 56203,
+      "sha256": "586c760c97c262edb8a0e016affc48a6d29cf1e31ffdb263e599fc7ec41d8324"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_23_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "faa7979456c97593fdd0777f8f6efdc726f1646a836e7360715efd5a147b541c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_23_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "7ebff3ead467d2df1500413f285ebeac30b0c974136d24b93879621ff520b34f"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_23_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 62953,
+      "sha256": "65331ae7dd734c95b63fc445d7520bfc20078537e66e9f82703bcaa21f6ffadb"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_24_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "e734850e92e8acc4da88ce2c6775b2ccb3b450e1e9d3c1366b225491886c8851"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_24_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "14582061180fa51dd57e576855359e9905a0047a598257e098ff9be75a48e703"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_24_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 63954,
+      "sha256": "4eaa6418827b2b957cbe1a5b21687fbb64389f40fc01e14a2e62775e4064ce6b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_25_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "4b3c607e8fc50ad0cbb77bc38da9d32bce2c5aaefb34136a6b7481af5fb6d0fe"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_25_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1375,
+      "sha256": "f47fb1761ebc484b7a230340ad8e195bda029a59ecec1a1d47f851d07a40816f"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_25_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 55231,
+      "sha256": "63f48dce6621490ebb534f38337988f81c628b7b6049eb36c683f093b77fd9ea"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_26_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "dbe26b13675b705528acc339b83ffe520cc76469aaed8ea8cc2f2d8bae5de0f3"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_26_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "86a10497683b64dc728e0f5cc84e24af1388367e81d2b07c3dbbd396ba1e54e7"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_26_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 55158,
+      "sha256": "a343a5e9bd2fe83732a8f4437803d2f0450d17cb9a0d2b78294e14a5511f5164"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_27_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "1d9fc56c5d8ed93994c5f5f865a3e2f8124962eee25755a51852338d78046e21"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_27_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "22dfabc1f0da7faa25a7fc91f67c9ad6f081207a9d1bd30186b085ac809762e3"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_27_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 57272,
+      "sha256": "14ddc4ee7e3ea031a2cc22e91d711e64613bf833899d53540944ba60f1f9d2c8"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_28_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "f76eef10d88e840238183ac97bdac804d0194e8ce1edd85272d8c2f2afb9406d"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_28_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "08a4d3e64413fac2f1c0154da7dbb0dd481c56d23e7f8f3a8ed66dfcfaf91ad0"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_28_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 61524,
+      "sha256": "5bc516c3d009d0d971c3b255baf4447a725e4509deedfc2d74ff614e237e071a"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_29_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "fcacb8b71b8e1081357fe1d29a3ab2f3672b5398eae5cfd6be2c38feb0eaee4c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_29_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1387,
+      "sha256": "dd3a04194670030bd028d3ac1d8033ade4f2b278bfe2693e7f36103934047a9d"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_29_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 70531,
+      "sha256": "246cbd558de84f1063b6c84752f226e018b6faf0407046285b1d3514594a6882"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_30_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "1e9dbc449d1bc61df989e1c2026b39ed88620736b422c13263e7644e8108f797"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_30_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "8249bc42bb7a3e6b2ad736130100775e90b8d9d9d9a93eb584dd29c7d12bf2da"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_30_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 54106,
+      "sha256": "ac7f9c0965690a34b7c9325abc96b48a97510a19897d9752673c3d3ccf3e742b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_31_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "a0983ff82ca182880dd6b9deed6fd3e81b92683d89281a675027ebf593f4cecf"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_31_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "159b655cb7688f73135e0647f1db4fdffa1538ebae61677f6aa2a905fb1ccfae"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_31_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 74862,
+      "sha256": "19f117db56d76d100bbca6ccf46587bec0ed9cca6ebe093461cffcd21fea18ef"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_32_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "38ef0af35deb69299790857cf9630d833181a9e53b661c0a3fd6b08b65ee624f"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_32_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "9602699c74ca2634560c3939f6c9b66bc3e4b796538461185fd3fb4af82de3ba"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_32_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 60720,
+      "sha256": "168b535d061c9ea685abb9f14d3ada5fd9f67ac31008cefe83d51066e577472b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_33_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "e330ec3aba0e1094df2be09f32114d6262bbbb2d5c390bba5517191c10f0fd8b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_33_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1375,
+      "sha256": "7d7a16203a3e757ab313a44480a79db68a83598eeaaa9a0169fb4e7f1ef71427"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_33_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 54120,
+      "sha256": "820d0a346a127c71d5cd5f8b6ad8a747ace74a023adde98f980825062369918b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_34_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "eae4eb4ba4a87c00e15244fd2f53ac9e89511515ff953bf5d9a35c4b53f0462b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_34_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "6edcba39dd056c57fd269b2a9d0d7338d8ebbad9d188663994a336ecc342e654"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_34_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 54493,
+      "sha256": "3176559fe42260f35913e303ec45eccc310e04f8e74cc6eb3bdec90f12e298ad"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_35_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "fbe8e2b7ff8f055b7e27cf2280807414316c7b626ec90e03c27ad14f0bd72cfd"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_35_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "fee07807b0a7ee663a1e7591a3649ae26a2eaaea7c8ff968de7501c236ccb9ce"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_35_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 74772,
+      "sha256": "7c75e127957cff0030f73282d547605a44be17aa7a04740086b90f82a68bc3be"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_36_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "63753d9a44e1e622eab1f70d36a3652fc115329d64d4a739c108526deb78f6a9"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_36_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "9a52dec6bbb0ee6bb7ae9ece1b0bc2a776dacc4a717de4bf287379ac721b6dad"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_36_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 59697,
+      "sha256": "d68da57971f6eb8eeb47ef4c9c086e628a8c1bbc23aff3eab31cd5f5536cf899"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_37_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "5a69e485787afb400cf049641d88418adce5d7e92771924b1e6fb650887df926"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_37_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "449fa89e36bf8238c4780c5f5adc4593dbbbea734fb4ee56df762a4004f35c84"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_37_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 67233,
+      "sha256": "369dc3f779c1fa765bc77ad6cf3e6dc5e50fb66436953ca2a0c1b3cbd354e90e"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_38_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "0db1ac9665237f0287f43a9c267731e55cca43fbac44a5e702e1d7bf8d6412f8"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_38_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1392,
+      "sha256": "f09a7de6c19024eafa2dd66ce717e3745ec2b11cf6632d472530ee583105fcd2"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_38_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 68853,
+      "sha256": "f146b8fe84c84a2140d2c146d089494de066121c0eb415ca47ee8a6c7ac83c98"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_39_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "b90735e0a016f0a10abcd1a27787da30fb6899e9588682fae1349ee6eb02919f"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_39_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "3fe7bab7c1e587ad7ea4d3c034bcc8f22e95ff256073aa926fccb21de7b66556"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_39_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 54036,
+      "sha256": "50b8b5a919909379816b2d7953d1a3f1cec6ef1526fa676439b8666bbc18505b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_40_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "817fd430e166a1600b6e631222b372fde0449590d2ea09c1380031d5cf825188"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_40_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "d1137aaf964a4721a6aad8e8462a5da2603f28d6d70ef8165cca9dfb3e7e1d42"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_40_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 62629,
+      "sha256": "da7d81e96fde9d7908e508e2afe78ef6215f4677f845254c3c09e753eb590806"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_41_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "439d47ccf5d1376b7fec5f3c607273d8d3914c70702c6c0e6ce7ebaf90307775"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_41_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "6a393c84982326b880507bace80a2b51cfbd671107923d88b8dc815646d4e6f4"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_41_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 55144,
+      "sha256": "a3a05785270e109b908a1a19d2cb1740a5f2badf73b5a649d429ea64f113da18"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_42_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "e40a309fbc67b74448528fd016ab75039c09ac3f6600a743d3fca4c62525c135"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_42_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "d30f76b5592970dc0956c8a87c08f6cc051cdc046fc749d287ad363d83c5d2a6"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_42_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 57559,
+      "sha256": "da162954db61cf36f96cd670f211819e87247608370fa34f17ad563827986e4e"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_43_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "8c9d65d4c78108d623f1c4edf6467b9e530889c980e9a9687477aaacb3a0c586"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_43_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1408,
+      "sha256": "d8020e9f52a4dee58892bf11ae7ec814d50ed56cb4d17019854c7e2a6e15a8e1"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_43_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 56654,
+      "sha256": "86568745f363f72334043c158aa83aafe9ba0ee47539bb94fba09f16b1cb60a1"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_44_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "3273e01d97f0b4d379f774e0c220aece76e0a092c5a48452d0870e5cd94c9144"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_44_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "0163dfc1b90e7c4257a29c374a8017d30bbeb1740491d1cb130d11b247398117"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_44_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 61213,
+      "sha256": "630f6e5e92b42599e95673c5502dfbfb882789e55ed6924c1aa9cc06b8ff17e3"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_45_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "804b261bbcfa001c9fe711e290742689148ec89e283dcaca66a032bca1cd187a"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_45_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1375,
+      "sha256": "be9fe80d2116d800118cb416de4bdd4aa30e4b0d3b3aa51aec0c2727ac8b3f0d"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_45_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 54488,
+      "sha256": "ee1b4253fd9091db4c6ae50232627140724cf4dd75fec14995961d1eca907db9"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_46_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "f672e4f23390978279b3cb594f7d1c1e9b40eaaf2ad4daab54bd22e2bf2ab1c5"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_46_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "ac28fe1e984eeaece2b08605e3657c3b83be20289d034b863a60d213f82c849c"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_46_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 55319,
+      "sha256": "b0b85c20aaa63fa537dde3fea9d13d7c5ac04c8b73babce1d10c3b4f5a34b3ef"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_47_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "a265857fb3c9088d2551a99e6484b5b4ff4acd9a7907100223418a0171b9a593"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_47_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1375,
+      "sha256": "8435a5b58837e9c31caf9f39fc5d0606393757626bdb3dcb46f193bda058a7e8"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_47_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 54907,
+      "sha256": "76856bf6df8bc134a12e57f135bdb487d33cc700074e390b315f1b1a22332bfc"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_48_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "fb55fa6982a004d615fc7a358d4e02864b885ffb6816225c7952899b8e0b1b78"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_48_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "74ec373cc9b0711b4ce4202603de3904fdbac6fd60e4c977dfff5bdedcddc456"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_48_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 58662,
+      "sha256": "6f7f6a734be4d3b8bba6bfa86e5ed67d1d55ad34373282c41de5c736e4567190"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_49_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "f48b12ba1aefb4b323921e9dc91fc36798009aa8aedd27035f46a8366ddac2c5"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_49_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "f64c3b22d4db52c3002aad7b49ea6bde12d39d3e889e7b46a2640c0ae5891837"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_49_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 58216,
+      "sha256": "5d18ea83b9f4a5729a0b260f42ccc9566414ac825371e378392b185b8ec47ee2"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_50_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1509,
+      "sha256": "93452a6cfdaf950804435a8134abff7bc9a6ce0505848251f18b040738a2e671"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_50_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1408,
+      "sha256": "d27c4bdca1cc46ff54b579549b0e453288ab6953b7c67fe64590551c5a370a6b"
+    },
+    {
+      "relative_path": "S0_ADAPTIVE/scenario_uk_give_way_ego_init_50_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 60001,
+      "sha256": "db7c45d1d814a13f0cd6d72cb6b22775f846836f7363422fc2095f9d7327f059"
+    },
+    {
+      "relative_path": "S0_FIXED/applied_tuning_configs.json",
+      "size_bytes": 3554,
+      "sha256": "abb8e1073767739e0234de0c63dbe69357158b83361ba8fd5f286973192a6fa8"
+    },
+    {
+      "relative_path": "S0_FIXED/batch_events.jsonl",
+      "size_bytes": 176260,
+      "sha256": "f872c1df668c177a9ca1500c7b48a6bd07e515288d48eea41f8951a8ac03ee43"
+    },
+    {
+      "relative_path": "S0_FIXED/batch_subruns.json",
+      "size_bytes": 93663,
+      "sha256": "00b218a500a5e82fd3daf308603da45178143ddc5369a15fd9778e439377e3be"
+    },
+    {
+      "relative_path": "S0_FIXED/batch_summary.txt",
+      "size_bytes": 4297,
+      "sha256": "8ef09beaf92846590e8b312a69e8ded6e571655efed61911befe831ca713e684"
+    },
+    {
+      "relative_path": "S0_FIXED/environment.json",
+      "size_bytes": 513,
+      "sha256": "090a64d651a2ceaefd414b2366be54685cb27c02e04191b24892d7f8949166e0"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_01_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1500,
+      "sha256": "8ed0d04db09239f81cc139dcd7354ed057e66c961afdd587377c04ecd04b6c32"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_01_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "93a64e247a36b706d6466c4641f4e1c21e7afb55a92b26b84f4d8244e0830d5a"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_01_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 58145,
+      "sha256": "489367672d10f5c5963473daa136661ccf840fdb6c5cb891c6f34b82fedb1be1"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_02_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1500,
+      "sha256": "28da4d1487c43104e2f3ddd161bb3e2df30dfd25a59137238c70d59d5cdc93e5"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_02_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1373,
+      "sha256": "7913943e473907387958ec9a29c8ea1efc812c6b6fcf0dd364b85c51fb7b7e85"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_02_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 52990,
+      "sha256": "a5d19d27fe7bf07a31ad6d39f0de8238b83992b69928b7a87c241484b15a8003"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_03_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1500,
+      "sha256": "3d7e45d995bc1056f60712809a63ab2c6194eff03a204b68e3a117702c746ce8"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_03_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1374,
+      "sha256": "870f43ffff1a497a589edc65a051b4f3bc1752e2ca47e624fc5de77e4a6eadda"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_03_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 55106,
+      "sha256": "26c7ed2d0e46c33544169833c3eff82d716f6e83de2b634d70e22cd3080651e6"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_04_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1500,
+      "sha256": "b42b2edbae8d89de10d5bf542cc8cc650fde5a0f35088dad2ebc70634f378429"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_04_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1375,
+      "sha256": "570613a8c1934f4c5a958b3a077c6a6c41c889a29828b46063b4f4bf3ee8e0af"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_04_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 67849,
+      "sha256": "a8fe18492fe8bcd143b0598d45f85fa54e27fe1ed08c543778d1c50ec8b41339"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_05_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1500,
+      "sha256": "b2f774b68bac90e659e647070679fa0b48a9c6910f00f6d46c69a767ee67f2c7"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_05_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "45ea430067399bb47f7372015af41db4ba5528f93b24db73e5a8c723fb8bc930"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_05_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 60476,
+      "sha256": "92ac2c42cece627532db1ff820468754bf7871d20c5d14d7ac19cda7e3cb1f8e"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_06_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1500,
+      "sha256": "6d844f8bebd4ea0dad79b7b25b808124916cb0ebb681ac45ee9ef74ab8b5bed3"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_06_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "8f774661272cba6ab0b89c13025674921e8ce9ede80549d70435dab8f4155628"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_06_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 57095,
+      "sha256": "99fc45aed790f8aa24dd4565360f5564ec4b5e1ee69f77e5d6aadf36ece9f9e6"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_07_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1500,
+      "sha256": "add1e9c5ca5cd2718658c6dd0a8d2590fb10cd2e0de535225d00998bcca5933e"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_07_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "8e77e0a563a88a607d9acd0fb91d5aa9c9b2fb13494ed52f95ff36565e28c732"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_07_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 77120,
+      "sha256": "5009227d903e371fd8e675cfdc7c0bb11522a7fe01bb0412ee72aa41f8db8660"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_08_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1500,
+      "sha256": "b7ae050efacc9488b8dfa86a4f84e70a467ce52a5b088c356108bef60f6d2d02"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_08_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "ef3a8083472ff662000330ceaae7f50976c3a6b16531fd2c28864403035c15fe"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_08_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 56519,
+      "sha256": "24fee81ae3fcc5bab133eed779a6bec28016953c5662cf2211cfea3a627f77f3"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_09_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1500,
+      "sha256": "919e81d909d765857ba3057f7884813bfb6d1509ae86bddcb2bbc9801f3ff0fa"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_09_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "796734037cedfd259159dc4de7cbea5d6885cade911a14bb557073d812af1869"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_09_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 77164,
+      "sha256": "e6c8e9797da020b146c5177f762f4825fdff426079ad7b947770cce19f2b243b"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_10_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "a701f27ac23fa747a091f6d888dd0a2f14fe3705f1a5d9cde07cf8a4da0bbcd7"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_10_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1402,
+      "sha256": "cf966f11497fc5985f345f648daec06488b6392e5f863c6c3930507ee91cef67"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_10_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 67108,
+      "sha256": "e759e1dcaa09526121d41695f6646da9611775f4469858f35ce68738ed6d7d4b"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_11_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "5cd6e15a49bc5b0a60de857b16d1c8208b77feb31d567697dc296a21f36cfaeb"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_11_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1404,
+      "sha256": "a65d7b17c19ea0440a4e3de8afb9ed6f27f804549f62fa4a7b0f4aa6f49d8d2a"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_11_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 56408,
+      "sha256": "6bbf8c3915b36dff4353561020ce921163a4a4801ae66ac8d9027536fa4d6a89"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_12_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "45ff9f8b9ec9c9071c5b16fca40cbcdff86ad198316663277c9f45cf88ecf006"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_12_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "db6c9af3719908abe8aa2322aa69fd16fc74b4d905a6ec09a3eb82eb01d8bafd"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_12_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 56730,
+      "sha256": "505ca9162e43364cfc332ebb04789fa963bdaabe22fa87eabfb0366cea2e68e0"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_13_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "5fca422fb45694f2639589a4d2446be27e46d996aad534aff5669b7022b29f5b"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_13_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "3b8a99cf7e04b169fa0e563d638e5f192a040d5815a8a0d66672851fd0a4559f"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_13_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 63475,
+      "sha256": "01a9d872efb8b052908b64e4f5044d56bed6360d97f14d8650eba3f21bcb8b9e"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_14_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "3d31c4d708d6a0bd60aef416101a1f74c24862871f8ca8f53f6a245a8b8201df"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_14_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "aae20a9f7219297fdb5ed0bccfcd48ca8f0daadf3e7540ae9a6d02185cebc5bb"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_14_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 53871,
+      "sha256": "1e27f230f44035a7be070a2acbbdb2fe30846622f7c566b2cd82650ded68ad95"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_15_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "440bd361b9cc557b66aad6e20bd27d5f393bfb2f4ef4b919a0b7893e5ec8fa92"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_15_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "bca86553b236b67fb4c94f768363282097b067bf270700161655ec72e0a94bc4"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_15_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 64757,
+      "sha256": "eb911e7c28b29756613366f6a143011ce140d5943e8dfd8d0ddeb550340564cb"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_16_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "762fa3f0cf924341c2f3472fd1671dd6623d9009bb66fbdd22b8be40bdaf5f28"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_16_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "ea99c5f8123f6b42f2ea7536ba0cbafaabf67ce791a24592147bf5bb5f566042"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_16_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 57107,
+      "sha256": "a356ea396080de242692f4d7d088527aa85c6e3329a5844654bd00d07f3884d4"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_17_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "cadd84c26a282c25e6de96c8c2cb364e35aa5507fdd0d17b7acb716594a0a774"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_17_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1404,
+      "sha256": "a2b1beaa2b46243cd3983876d1d161c5f6d357d9fe81ac9b5160498d473110ed"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_17_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 63982,
+      "sha256": "751b4a3bfe656f076a43293e4fe4bf56a4837715b2b334b373f7b6db2c946db3"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_18_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "6c921228ffa5d578501673e91fb59ad190583c9144281c6ac518f4f71367c48a"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_18_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "94c68903d88691348035a00a24a19fec245646a3750cb0938c6a4270b928c075"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_18_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 61252,
+      "sha256": "da75a750984e9e1223ff7c91639136c6fd1308f50d8c9b1df36af557a679bfd3"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_19_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "bef91a3bf55eaa4ae7b8b5cb86e96f487fed7d8c7653bdb4aa88ad1372960383"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_19_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "038803315b6708eef7ea000ee1f4b660ea45e929417e62f82f01e8b2fa55ad23"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_19_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 58750,
+      "sha256": "09097ebc6c3e999dfc652df176aa0780c8e7bb5875a517ada3e4428f2e57f381"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_20_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "627ebb32df4389c8c7ca9694fb136bbb3606d87b93ea28f79d65b66a47a4fea8"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_20_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1404,
+      "sha256": "46f82f4daf89670178e5d8cd9f278707b6f44b67b755271f8032023cf5d325ee"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_20_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 68083,
+      "sha256": "6d078142a5da3ef727eaf1e027e0efacc931c65f4f4b57432fca3bc5bd6201aa"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_21_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "1562db3f31a3d3b60c8d4eae7b116620ea2ba8a0994b346c7215347195a65b96"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_21_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "0448ea78b56db9efdfa95a26c2ba0176503dd352982cb6a66e9645b3d8a2c7dd"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_21_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 56500,
+      "sha256": "0ce6b0b04118f5e9a14b191351a5f35dc7a53cf2adbff3c1f1cac268016a5cc3"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_22_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "ce932a461546a62beea17984da72cf776589c4dfcef8c23f7eb75146b3ff71a3"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_22_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "e34fcdcb0fab40024b4c61ee4b92071662d089993e07152af4c7751df71605e4"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_22_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 52946,
+      "sha256": "6bd9a13f30219d1449aeaf8df7b537dbb0cfca548fb033b93c44f080c4abba6e"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_23_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "764595abf6e697433115c9a9fa6e3188131f467d78e8d499fd75e9c924d52da0"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_23_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "6f8135462ffbed77565fce7409a542cb7f2be2119c200820c6daf07f4b779d0b"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_23_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 58069,
+      "sha256": "cfaf9ccd0dffb29f3b2d6c2fd2101541afe9e3238cf1a3b33cb65601008d9e10"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_24_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "9a0c11e5fc6b6172ea7b6c566ac8c69cb958f022a5733e4c83232f32952f74ea"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_24_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "812e89a8d129c9ab9a473d19333ceb772cd8a5005f33e66fe89028e16e51fab9"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_24_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 66527,
+      "sha256": "01749028f8397b4ad7c2ae3ffd5c9c047a64e5b409ecd3b2f180fb34c783ad34"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_25_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "f9683cac16433983473733cd22a3b1a111d849b27c5d5d9d7e2c4acf2cb60689"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_25_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1373,
+      "sha256": "b0d1e99a6cb17b4019f091c3a7b6d85ca0b2f99312452468fb0e3409525d1ad5"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_25_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 55803,
+      "sha256": "a47bdb031487660b2648c62ec6cdc66c6d271cea38c26bd5690a344d6c323425"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_26_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "d89777db739315fc6f0a68c2e9c48882a053d0c0ffe809f17ea96a93b9ef111b"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_26_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "ca1065d81cad517673bb808cc3c6dabdcc8493ace5c5b9c93c4e74661e9a1fc8"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_26_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 54707,
+      "sha256": "ac6621ee6cc4e5b7b9a47ea9304e35674551c1fc9c8a97f1507f1dae80ebac3a"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_27_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "0fc6e3b9f555ad4b2d7680d7205a9fe0260264f4cd921cb35d9f95f60f900a89"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_27_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "a56b0960677fb89d5d0f3876f2d57c68e89b5d742dc6ae50c16c34337c9bde6f"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_27_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 55372,
+      "sha256": "7bdac5a8d4eacaac5afde8ee4b85106876216272aeab0f07b3e1307e71331626"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_28_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "4c90eb5643269f4bc8c8e7247e7968ec96218b53876bc2b70185b0ac02665d61"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_28_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "3c7882e8faebb443f7fdb6ccc350f7cfdd41e7525e841b44fe799ceb9b865544"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_28_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 54329,
+      "sha256": "a61eb0c91f6ec06a189732ca912596bbb884f67c943f49ececa89d8a90ff3d6e"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_29_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "5420b5ec100971bbd3d83fbc5cae8dda426efbe825a4a90b6d2963bfb08c8141"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_29_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "004e6b77df5fc2e7bdfa6758e532b939243657b05cdf4dfa4a2375603c35875c"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_29_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 63601,
+      "sha256": "e400071b8f984491240c756e540267b8a2f61e6d134bac922632e2ba1077338c"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_30_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "f55abe9177ee1f81e3b6cde9a46febeb63dea50480b852b619956ecb144da7cd"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_30_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "62c472d4a0554288f34d514fbb85c0be32de898457e7aed585a01118f9681a1c"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_30_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 56989,
+      "sha256": "68e6ec5663873c138604437370b9b65d1e035150353eefb5357abfc8c18d3b57"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_31_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "0e4d1112ec34b99c50c098e24b00fcc43a3c7b04b931b7e86f8d02330e1385fc"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_31_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "789f9e1dad94e4cf6927e5adbb87b3050eb841038aab433d289799ff197adc12"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_31_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 67225,
+      "sha256": "7a05f8a470358143af2a03ee94307f4b355e8a52bc5d405082f7be9d57b3ea9a"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_32_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "f2d8d5a40c0887557a5f30ab7504baf031a0f44ad30ef79d4395d0afcd978997"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_32_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "68e7af66f8b524791d6fefa0a21b636bb592526d95619c62cb110d0a774b309a"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_32_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 60522,
+      "sha256": "95be7d5b097a9781f3291a44fed4f6efdcdc4e09a128b17121fbc700c4b37a12"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_33_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "4c49b4258053d8db1f292cef45dc2cffbf7f0aa918435bcee4597da70b9f03fd"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_33_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1374,
+      "sha256": "14561218ae5453776f34f8e6322fafda98418ae29a54e160c533ec22badd11d0"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_33_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 60164,
+      "sha256": "068d020ec5a80e4d41d10e4dd8671f6ae4e0d91a3ae627d306c2e198892e97c9"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_34_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "2cf515a571adb9c5aadc2c8c635a94ea51153924c247dc2f48abd07dc45701de"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_34_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "c0063cacf623efd1372739412e56c7319f9c0191e0ba058ada81cbd4bec31d24"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_34_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 54290,
+      "sha256": "664e1550582bf98713eb4c155bc8b5f3945235e64d7c31ac399c89626b67181a"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_35_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "ede53428198ae0b796c97edf262cb8af586ed320018036b6203595efa774eaaa"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_35_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "85cd51e67adac30282d17f18a6047b4f95022e6639897d07950cd5788a1ec07f"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_35_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 66936,
+      "sha256": "eb48d0b9452be38f556a3137a242f6ce1cf2df2700d8f215a94927cbb4ee9b66"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_36_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "522f22b992927809739b68d98ba8d9f70ce39cb90393fccb93976fd924dd69ee"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_36_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "1b84be13ab83199856805d230c5e57002844ae21f75b28a866ddf49252cac282"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_36_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 60075,
+      "sha256": "74fe2df8c345450fe224d58b33f4c171694ee4c12f7d8b1801dfacd8fd5b234c"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_37_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "bed6bdb2d4c23c41bd5bc5e33ae438a48c009ff41ef856cbba9790683a8ad4eb"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_37_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "ab961871f76bbd1fdb99cefdc3a59d6cbc9dcd1c825740e6356fdd6d87b838d9"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_37_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 62800,
+      "sha256": "a4babe4dc3ac8b0f14d6e1071533e2e58c4abfc0256f5828cfb5ce79b57ece47"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_38_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "ad037d8a562630a72472bdca4760ebf13f13e6a7f460b88ce770af96bee7f0c1"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_38_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "2defe4623b54d43528cc5f1849c22f107a9885f87ae7421784851cd86f378ac8"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_38_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 65318,
+      "sha256": "a9cf04c35b352a3b6fdec76fcdd4a10868d28f2f054ebebf327879a941949e08"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_39_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "3b7fa1f478799f38734f56b3ffcaea4bde9efc5965fa41cfde79dcb437ce77d3"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_39_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "8a3690315887f5c910be2eb2fd567401ebd5bc0c0c6f9b83eedea8bbd063a53b"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_39_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 53634,
+      "sha256": "67856170681d52b466359bc20b69170eb3eea3bed90d52bd4de060ccc12c2fd1"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_40_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "18fce4b1f92b715caf6a4393f08b825b927f1669257742f03280987bcedad0cf"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_40_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "ba10b2d5301c26f27e65f619be5fa809a4d9b380d2788e056691308ed1c7fcf3"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_40_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 61943,
+      "sha256": "97313a3da4ddc4af37a850c4d5a9b6f91ebbd27eb39cf3bd2cf9e962571e45c2"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_41_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "f959ec92b9f09c2b88d7c3332148fe017725f5edc10372cea3142d08f3765c3c"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_41_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "cc49f9e2c828a17d743be3df6c22103a3e6c8e70c509e2544dfcdb1100f32065"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_41_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 57391,
+      "sha256": "28d625089df23a09c214d28496a4d6718afa9b1a7497fe19fb8ea4ae2a076412"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_42_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "815963b826e94194f72e70bb51b55305c91c3fe69224ccad9de598401da1b912"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_42_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1405,
+      "sha256": "7cb30cf67b91bbd381bd494fc72220cbeaf539c3f4d08bb5f5b8ddc4ee1da34c"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_42_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 57890,
+      "sha256": "8488255885e1beaaec02f2772f3f8499e23b7ab42d0b5d6c177360c688be554b"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_43_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "22a2e9594ba25bf9d3477648e80b01ef6af1b7fa588deb20d76ffa96c64bc409"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_43_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1407,
+      "sha256": "4797aa0851d4073872c3704fdea989b98e84ebc766826671e96c5ab848d22b01"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_43_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 55140,
+      "sha256": "f4d999a15d96400ab87c48c5c3158067152882fc7720e00f8310d4280361de90"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_44_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "f47b6a38dffa8f743cfec05703c087d40a14b50e86cf99ae483dc7b3deabf2d6"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_44_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "a34409f7ca2a3eae86b447d49a10c5fdc7bcb51f7c6ed8e30c7c0d2e13a754b5"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_44_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 57688,
+      "sha256": "ef4455a538bd942f459026ad4040d4e9bc4107652859ca553cce1f4038704f4d"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_45_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "0a3bc899f830b95eccc36850bc91e74267205fd0dd300293df6a96f8a5aa46f2"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_45_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1374,
+      "sha256": "7c4d57718fbbb45f15252d114eaa0363c90f87bbc133098eb8b7f2945ca45e76"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_45_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 56519,
+      "sha256": "39b4ee351575aa57d5dfb9a5447260b4fdcb9492940e179b1e24e52413340797"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_46_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "92be400178310e435e537ef7c2dc5a1574dd5d7a4465c5bdcd89cdba86ccc1fc"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_46_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "23182f3cab335c36c8b9bb6d4d80935d6e4cd1050c4e0c500b5bb9f1e5ac618e"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_46_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 55702,
+      "sha256": "227dedadfc3bc93c7116dfe7a8ccde4ce2f4089377f4c629611be1e526b702cd"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_47_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "47bcdca8d099b213803d066fe2725e9590f2202bad9f671fbc2e0265b3433356"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_47_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1374,
+      "sha256": "90ffd65964e446e20de297c088cd2444c9a1350f4edd89179f7a8f27a60b7bf5"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_47_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 54181,
+      "sha256": "89e4d4b3b2bef2bea2db1cd6bc4a7fefe14cea1b8a09cd27470a87f74ca3227f"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_48_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "7b69fe53e05543269516d1526fab4be592780fd8a13c02e837e0a61d6eb9ee53"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_48_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "2f5015d14d45619781b7da27f11a2edaf320ab31ec991942c318a517a6b0d806"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_48_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 58514,
+      "sha256": "7ea06bdcd0b9daae44aaee6e1200363f4834c38cbcce02c974ffd3bcfcc526e2"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_49_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "f4b828b2780ec300dff30602539360323e5c10ddbba3b2a9b2f097c3fc6fdc47"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_49_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "74c66ce89e7e2d8f3602a0ca4e9374a59bac6d2fff68c841d86655a7b3f60fd2"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_49_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 57489,
+      "sha256": "11620fd4c0f6f2d5eeab43adb023f5bfd8587f24188d55de78b66510ac93791d"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_50_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1501,
+      "sha256": "20bedc40d6014f82db92ecdb08ad67f3e69530612dfd449e450dff9fba2b3943"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_50_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1400,
+      "sha256": "a7b6f48666052acc1132ae61659eed963a4d9b542bde3a82385f6e386dd3523b"
+    },
+    {
+      "relative_path": "S0_FIXED/scenario_uk_give_way_ego_init_50_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 56457,
+      "sha256": "01431d3e219cd737b554da1150378050ed1899914f85159d10b3cabcc1ae2dda"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/applied_tuning_configs.json",
+      "size_bytes": 3554,
+      "sha256": "abb8e1073767739e0234de0c63dbe69357158b83361ba8fd5f286973192a6fa8"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/batch_events.jsonl",
+      "size_bytes": 162684,
+      "sha256": "bdfd140038f0a5f7985b42b7ed4d467fb67a369b8a2c8243383ca70bc0a70cb9"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/batch_subruns.json",
+      "size_bytes": 93274,
+      "sha256": "10f05aed20f39b5a68ff2634e73bac04ea78c72dab5d6bc6af2f3c781567d115"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/batch_summary.txt",
+      "size_bytes": 4218,
+      "sha256": "bc8ae37c90bc1754528ecc92584913e85b298180370b432261e8a89199f09464"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/environment.json",
+      "size_bytes": 513,
+      "sha256": "0aea349f979d986f8ab8f25394a798ea4abae9ceba5fe0b5388a58cc3b4755de"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_01_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1502,
+      "sha256": "21d0ec30efd5bd44ca63f8f22c8f88334ca901a3ad165a5e4167a0ec3e04b218"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_01_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "fee37ca3036baea6efddd04810b37ffe319b84f89df28b33779e8390c16ddb5b"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_01_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 102095,
+      "sha256": "62f942893fb7f0a131941614a91069dcc1aaa1a556dc148616df66206b71aa13"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_02_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1502,
+      "sha256": "7c2fe81ba1438a5fe79467cc4d8825c00202a7dc57a0854d34c21a5aac53ffb1"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_02_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1380,
+      "sha256": "cf72112bfe3877888f36157f0c0a0537f028449a92850506503a403971316671"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_02_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 91978,
+      "sha256": "beef1c1dd9b8bdb4a679043eded316389b4ff340b9c3460c772aabf7b022fcea"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_03_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1502,
+      "sha256": "01da5ed844bbda799619d482b191645a506f693ddd3efa4e4327b57f5dac52b3"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_03_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1380,
+      "sha256": "40c4c2d9cf76e892f01fe63e36dd9a58bc6c6d6e2df525b1cb1c16f6b8ff0268"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_03_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 97711,
+      "sha256": "533d88c48d34fb5337b770b842429e390da6f95e324a817dc7063191b884e850"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_04_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1502,
+      "sha256": "2cd23fbbaaa69a7bdb8e5de21f705a1f835c2fb330da5fc5e13d083f223251f4"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_04_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1380,
+      "sha256": "773ced3dbedfa98664c966b13c31f12b02516cfe9cdd0fce087703e19f383dbc"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_04_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 95093,
+      "sha256": "eefa73a03c858afb15e4f02a58c641754df89e3eaa4dbb792c8ea61a36fa878a"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_05_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1502,
+      "sha256": "95b9e481d222cd41805565ede8825b991ab05fb986711968aeabc69f2a5864ca"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_05_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "6b5c97697c28ea4f18d17ae7aaecd5e7672a323dbed4f2d4c15093d4de214f65"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_05_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 98999,
+      "sha256": "bd523e6eba7b8f9b262b7bf52307e7495fab8c2a3792b7e7b701113fb2a59192"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_06_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1502,
+      "sha256": "90e0e2f72865dbf5c9860242e971f0a61210fb40e6b9acb47951a00b874c8f59"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_06_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "b9a453cfd53f202c21871f1e24214cc9a291da0f370e447a577ef31528a157c3"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_06_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 127083,
+      "sha256": "dee260475bc0403a60fd361a5bb21b674d7b0983759f9d1d27d243b7bbe9a542"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_07_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1502,
+      "sha256": "70d4da2a99514659592c7eb16afb6ed9cf2e61fcc0daf7c1d8cf0959c062653b"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_07_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1634,
+      "sha256": "b13c0095c6d1c49fcff67a4790273b7a4b9325ac49aa2aad1bc6deedea775c89"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_07_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 121459,
+      "sha256": "d0258bb926044d492a0b49ad16891c0ae9adec1bfe50742875cacf943a234803"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_08_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1502,
+      "sha256": "214f2ecccc386d75f1ca90c28f38ae7c37098c59090c2b6f7af70601f5f6dc31"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_08_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "5c904d7e3f485648445329858f7106165850d91dcee3cfb26c3993de19d7b420"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_08_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 113853,
+      "sha256": "acd3156f6a4c05bd433985329f21f6d37b6bc9c6b2244316d6191d19cb1d9ec8"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_09_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1502,
+      "sha256": "38db39835a3c2645e10b727c49afd9f23240b646c49b109eb0add8bc0fb9c8d9"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_09_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "dd97c75e7cc71654a3d61252d38fecfb53428b16c698453400d00d7685fe34c0"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_09_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 108333,
+      "sha256": "0873327896c6df289cf72f6c32903d2c1222b93f9f3173b712bb7f9423c7f118"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_10_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "e63b39ce11766537350dd0ca8b4916bb6743ac625dd7bebd637ac22b6f00ba94"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_10_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 2945,
+      "sha256": "c272065a1822480fc1748ce58682228f1ebf98530b3032261f284ecb2ed7d372"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_10_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 118482,
+      "sha256": "cfeaa0df54bfb432e3f14434e53dcd0df7f4d748452e42dfd9ac32d350cef22f"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_11_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "eb0f7210cb1acf009e7265244ac7a696d9fa4f1372a33b5281887a921adf5d96"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_11_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "21a72648d05564c3ccd098341f3dbe549ac84a54440648c85e5c3d571247cb40"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_11_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 90701,
+      "sha256": "613e3c5d4e98ad41ad1d55da998c19fd31ac49efb4d3d62293073182c98c5323"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_12_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "671962916ee066b14a5563f51f37a56b6c781ec09fafe8c66b0718c53b55bd92"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_12_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "446b5dd693de961467bc8d051d11330b7e00a011ed3c7f9a80fea4ce79567b11"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_12_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 88694,
+      "sha256": "fe4a357a0cf6d50d8cd7a2148fae8abf82fe85489407f7a8eb78ce076caa3454"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_13_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "931dfa3fe64060a9b9e14cbc400b4b1e599ab1c6502641428709c5a5c7184b74"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_13_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "e73d73c593beae2af5a7da0cdd5e3358ef8947d78f4d57a21f1a42d28b149ae6"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_13_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 106570,
+      "sha256": "40aa6182bc352502971925457b483694e0f351c053a90a42b2f124136e966954"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_14_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "4d558a93191fbf94b0d2402fcb5038b97d259ac5e5e04e2191a45f588bb84ce7"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_14_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "0681433a997ca269f83a5778af234e9666069e8a8c429dc87d7aea440b4a1587"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_14_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 100044,
+      "sha256": "9ffed0cd1373565a9119aa8a960ccefee892def1f49689a7c6a3e392fd6c6e0f"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_15_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "7a6d32c068d085382dbce89189ee74bc6e732e96b41bbc15a3db8143e60ef5aa"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_15_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "2f1ddfc74e565428fbd5a1890951407cf33008a095de3a6abb5522a5ad011692"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_15_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 94328,
+      "sha256": "b607dc54047fb8c9271b0fb86ba935778b71c9264fbba5c1ef72b5f200c1c0a4"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_16_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "dd723e3f49538fc80e21b907a2f10ee024648082e382f66474fc44320fa971dc"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_16_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "e45c8658605f4418fead2b6ecec2a31bb6a7c32dc5be6a91b8bccafc0c8c3833"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_16_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 86180,
+      "sha256": "95f02fdc29abe74815a05915db65c555171af601c7ddbf52f28dc60471a40c49"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_17_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "305c1b1a7ab5197a11971aadfb9ae053654b61a1612ea118c06173a7b3547b53"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_17_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "83b8e86a99ab8ef3ec12d7f233a110d4f9f2135737cddff6de44a6a66088df7f"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_17_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 97933,
+      "sha256": "c39293ad698e1274780205b19a505da8490f9d4a8f7157f4075aae4f5516a08a"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_18_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "dabca29918fc1db4cef012caee90d20ef217bfd5a37bf9764c73ba9ecbf08c20"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_18_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "8ef5014967057eeb3b2da9e5cfd1feb07837f6067f4ba1c421b45319a38cf292"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_18_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 116669,
+      "sha256": "2ef4824473293ff1d72cf8b228a9f4c4c5318d3d7b9dee959b4c4170cbf2b20c"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_19_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "3d8c8b18e499caec840d6fd0eb718e4203cb1bb05d48da46bee07d6c8669707d"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_19_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 3603,
+      "sha256": "394552674b76a02f3eaef2d23015c4920ce7f83f83faefa062f0e1c6cbc282b7"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_19_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 102669,
+      "sha256": "fb60c3f6ef45c5e22f73031f17a759cb3cb81272201df4dac7b9a45d9c25c134"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_20_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "81f10e13840c48ab7443610a0859acf2b6368a27f0df23a5b8402f899682cb14"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_20_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1404,
+      "sha256": "8e7cac48f55b0ee04d079fcf0ec9b9df448e0fc26c0a64cb9f94a3c63d36db3b"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_20_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 103310,
+      "sha256": "01d47a5bde8326b01b97b9491788ef0ec0203a963a602ccf4bf4a6fd1efaf565"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_21_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "1cebe4aa1ea0b490b59355e8066e3907c3529ed246f77d96681e79657c1a1622"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_21_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "5a58fd14418a311c2b5c082ef329ff4c7f180779f2797fc2d46eed02d604e14d"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_21_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 94185,
+      "sha256": "68815fae706a00f02ded88fca556d749b2c92ae99c7f94fcabba0bf12c01f180"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_22_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "beb516711a056b79d1669f5826b078e75e406a8fd3bd823a744ad8df5b5d5f38"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_22_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1413,
+      "sha256": "be637846ea37fc2e10c90f92274eeaabe59d0a4f90f283f03a6cebdc7fd39c58"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_22_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 101996,
+      "sha256": "9b85a2636ed3a1cfedbab27ee1c72cbca52f6d61f25e04dbf2086b2c80444bbc"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_23_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "2213b7a63432fcd122484a0ef3fa3cdad8c19f031d35e55a116963e68adafca9"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_23_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "33bcea6a277bb822a6e7512e7d618ef0fec31f471f28360de72aedd01bde42e7"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_23_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 98535,
+      "sha256": "8de78271622f3d7f65820aa74062d2d30adbbf3d99ec569e02eb01c874d11dd5"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_24_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "59c38fd9822192dc5d3d43eff7f8757ff833a6292307c3c5877f7060ecf75a62"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_24_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "78335b80572e9d0cbda6b4ca1f3a644a819e6c05f376a2abc2d36ac7985b4664"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_24_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 109445,
+      "sha256": "b5a8b4f420787e9dd47c55f68460800c9c3cd76eac3d5c030054b0484b4f44be"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_25_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "b203408f6d88661679220c5c7ebddbf6d0b36be3af975afa14b1e5fe2b1cd0e1"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_25_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1380,
+      "sha256": "1636c210fcb160ee10317eabfb8c607b1b1f1122a2095ccb03aa5e63a428aa0a"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_25_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 88753,
+      "sha256": "b2a559b6182a4ef4b5f38f3b623f135b1cbe8440cd7f862247d788f87191d672"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_26_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "992cb590c7b7dd79b152ee85f9edcb2775eb2f53e223ca20a39dfa0906f8637e"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_26_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1380,
+      "sha256": "7aaf97a6ca086d79424b682fd3ed1c2316e213bd97c0739659336ed7ae9a8aca"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_26_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 95961,
+      "sha256": "0a46959fbde2d53fc4403cbed185c10bf95ae03215fa6030d3de05a1b8c05134"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_27_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "fa3ad1966fb428878f8de084e72cfa8aa7afcdecb14969b5f17dbc8cc6039617"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_27_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 4039,
+      "sha256": "5d5e065b69e6a8850dabcfe39f51b992c99d011de06721926bd3848188a10ab8"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_27_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 101302,
+      "sha256": "7a58e79a92ced61a77171265d62f51b6afcd8b84a353e03d45b30eff0a5984df"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_28_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "aebc1f376e025e58cf06c27281ef1cc97b677a3f57652866bc24d461b015b610"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_28_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "5796f3fdfabe637eeadb64c19ad8ed773a0d669fd95401c9c795e428f966b07d"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_28_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 115813,
+      "sha256": "74351c658653af85df68d53ed9cc35ba24e683dfd43db14244382159bb15e2e2"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_29_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "15bfe97eba122333c65138ba3abaad6e8a24cf9acdf1c859fac790b799453d69"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_29_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "532da416f3982af6e2341f2c7be94b4551725959eea6ecac9cfc62c5bb805c04"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_29_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 115505,
+      "sha256": "2ee2413b8b4a3d049b397f622bd8da8f671b0d3e78801d3ca456022b702f8f27"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_30_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "b631ca525c2533da70be187675fa40f0353f989d2c892885a4d78560e0c743e6"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_30_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "9563415fa9b1698aa9877a50088c789283444ce9554dadcdabf87ace88b03535"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_30_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 94129,
+      "sha256": "acb8f277b1acbbedeccca4de1301ad960fe03306cd4b7707862a1e303ee885f0"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_31_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "0d3426e4ac9e6d9a022ddab61fd5f220a1c2f742becbf1505d86554e0ef41093"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_31_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "364175645257ead2e1f75c95e8aceb134fbff218d0b3779c235aa37457e8eb9f"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_31_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 98593,
+      "sha256": "03d3c69d4f2716c378a7a23e2120e83e151229e2c8efaa6895ecca31e87c8f27"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_32_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "a62e017128385230832d774e750c71b15af1db098d1c2193f3e7e7018399415d"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_32_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "a168ec3540b1f7b900f655cb5ee827e06f28345458f8b3afad798c0c12882848"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_32_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 114947,
+      "sha256": "b429b90b590af123128efc114d4429c24baa83f797489114c8e37b62a0a6ba89"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_33_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "afbea00854bdad437e44f66381efd81fd2fbad0fd7d324228820501f7e47b3d0"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_33_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1374,
+      "sha256": "f8229150ead8487478af958a63c1b3ab8d436dc5277c67191ef32312e8d93c17"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_33_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 89841,
+      "sha256": "3148d9da1cc70dcbe427bb121262f7f4f7f3e6aeeaf2c5f6db2c18e1dd44abe7"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_34_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "e652469f7c50e9ef49b97fdd5aff26ca579b8dc632921887cd14ea98781e063d"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_34_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "1bc495af8ea934a0cd734490c0fc031acc5f25b5ac657855c3a7bcd89decb7ab"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_34_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 90790,
+      "sha256": "4647990a898dd3a1082592e093659da3b03ed532bcb82f556421dc9e254539b7"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_35_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "b58e1634f073877fc32a56e50b32b3782bb4536b289ff52e784efb82b6323696"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_35_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "fe82b0cea3409650eb11e726e1de4e7508b4c5f8e54787e5af01ad8c3fc9e7cf"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_35_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 111696,
+      "sha256": "2cbf7bd20b0cd1efb90bae07c06b0761ef2f8ce682634c4c4cfb572c05671940"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_36_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "464376d0feefaaaec1a4bf3117c5ab6e4ea4a3e7ec8eec603c8b93c7057f5629"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_36_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "32996258ee8af71f5f40d6998bed5dcf30f0a1ca0fe31d167cb5d6cfbc79422e"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_36_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 90479,
+      "sha256": "01d7f495f9f28fd99d6fd48345c0e8d70674c5a0acfc78bfb100b12fda052a14"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_37_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "29abea63d4354bcc494fe4bb0c4e54d82494b8a7b281df1eca86ace0b5429026"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_37_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "db008e1009a3694b7dca69d476f61f30359c5c685e0134113b90cba0ac9cfe72"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_37_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 122296,
+      "sha256": "ee6cc9d024c695a578d286c39f7a66a7698a9d7242c984b56f8198ce17fa544a"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_38_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "98ee640ad2f12b9dd2b54922b1749bdc7de7bec8aa4655c2bd763f40f4cdab9b"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_38_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "3f0bba20eb3c8c9195f000a8e7e6ef4af6e59613c7bf6b11e31f0b6c64c7b12b"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_38_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 98093,
+      "sha256": "c3e610e8260cc3b37b87270a1949f01ed12f5b472c65adc69688e8025b482ee6"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_39_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "01ef6c1d018a5390a1b6085649c779daecb1079846968b5e4e31a1ee4761f73f"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_39_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "a1a7d3d3bd64ae311476178e256a74c9e27f0a77d26f2db56e56402b8770f8d0"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_39_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 96432,
+      "sha256": "7976beb578e5cf7b2d7d807065a9fe4ab6aa0acf33b7db5641472d7371a4d4f0"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_40_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "e4a9d365d30fd1eb5f4b4eb017bdf93c744d54f67f078a07cb59aa92e7ed7568"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_40_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "d716c15c8065275add3bd98803df24a53b62fb52c56dcacf233e60e17e7613c3"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_40_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 109883,
+      "sha256": "ecce3368322471fa5d89ad91ca7285d9f5e045757be008ce302d313fb10558da"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_41_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "d6dc2e3a596062fe1786bd89d0bf56cee0fa82ce89b41727384f75fb0a4a9f47"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_41_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "58178f230f496828e25a109832b151a8fcbfe7920aab233b881447609f65c96b"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_41_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 90407,
+      "sha256": "47d48e47908f6851f95504edd27d65bd41b8688f94e887e69c07f63ca50b3e50"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_42_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "da9279e61d8c6118e3505b002066a22ae41a5f4fcdc3215f20d97d80b3e491eb"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_42_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1409,
+      "sha256": "dc84dfd1b20ceadc3a894e8e1089512f99ef1018c7fae2a6934ad9561d7dbf7c"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_42_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 97993,
+      "sha256": "3dc92ad0c625c38df3c4d063764731e0233cb49fe64df373da5cd8859fe42d80"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_43_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "7a4f7f08ef83d3de88e57e1445ace2426555f4f3adf89e64842ab42879b46353"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_43_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "54a1acae7619aa12bc536ef24a9920244445c00f36dbe556bb5aa30433082df0"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_43_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 91751,
+      "sha256": "9726a2da246d41af155de9a3dc9598cdacd19f0a72ffc3c4a4ff7779330ff497"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_44_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "871ac280469767a233d74c411e3d2aa736b90cd3769e373bc99a3b00ba5de01e"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_44_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "97d6df61275d9e5d364e560d3d5a655fdfb6a6d2f1155659179f9179014c635f"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_44_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 90738,
+      "sha256": "85a9be9d3de6a848cc3edbe0040e16ecaf9455d600207cea5849442c97dd1261"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_45_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "0262ebcf2ddd18ef592ea7dd8efc433fc5c05f2c3e252c4b017465f8af25ce92"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_45_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1379,
+      "sha256": "3c47f8617477913f9d1ee39418712150f32cb90d082c883fece3083ec171d985"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_45_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 87018,
+      "sha256": "3faf5ff40930ed4a1aa44a51f16d567cb1e6313c416b4667451afebdb636b29c"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_46_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "68dc30df64766c93af44a3173977b76c7352fb14a9161b2cd35eaff081500ea6"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_46_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "032cba4dbe60b7f19289016824ee78043bfa897656ed6307d6132e50f50fc84d"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_46_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 105403,
+      "sha256": "3e22db9360cfebeee502a07c4ba7712f2f38dd10550d9e8c056d112f5c0263e3"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_47_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "17d66a6a604d1f45703f559ecc5fdbfe88821c743112ff0cd8a55c546a5dd084"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_47_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1380,
+      "sha256": "647bccb9e7d510981b51bdd9bdfb8059f5d428d08c1fd2557d59251782bdf5a1"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_47_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 84653,
+      "sha256": "9751012531b70e9d3e830145175964ba9ee5d7d5d595b3b54c1dcbc06bc42338"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_48_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "58fe2e53fdc1bdfcd667837dc1d556a73791a7abf67fc4df7868147776081b4f"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_48_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "f7418259732bcb7df20aba16a7043a83dd003b0b5f81766f5ab1df89a2221315"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_48_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 90684,
+      "sha256": "9494620cf43bc48496e350df8e7609ef35f340be8c693de30ab88934d0d85437"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_49_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "2fb64f3c70b203a7c31ade5130debc34252c9f82805c7e347487bf44030615ae"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_49_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "24df9867508d43d4994dae1c8fe955eeb106388d624a7b09dec9dad144a4135a"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_49_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 91235,
+      "sha256": "15a6a1e41a935edbce1dd609f267a4b2d2034e4293e6c75d6e009c10d95c4203"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_50_smpc_var_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1503,
+      "sha256": "2243c5816a8e6a2382fc0294eb4342b640f0d13a1719a44a0ffca09fa564c56e"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_50_smpc_var_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "9dab86bd65e9ced5e0bca381b371687980dc2b71e7e754fdc40ac30e37e2aced"
+    },
+    {
+      "relative_path": "S1_ADAPTIVE/scenario_uk_give_way_ego_init_50_smpc_var_risk/scenario_steps.csv",
+      "size_bytes": 98302,
+      "sha256": "89ad7fe6d3d04eae5d968df19298df9e5e6cd31122f34ae81f14c6ef2fb23b94"
+    },
+    {
+      "relative_path": "S1_FIXED/applied_tuning_configs.json",
+      "size_bytes": 3554,
+      "sha256": "abb8e1073767739e0234de0c63dbe69357158b83361ba8fd5f286973192a6fa8"
+    },
+    {
+      "relative_path": "S1_FIXED/batch_events.jsonl",
+      "size_bytes": 176483,
+      "sha256": "66980aea3dab8ac598bb041c71d2456753c97384a10619a69926435515087157"
+    },
+    {
+      "relative_path": "S1_FIXED/batch_subruns.json",
+      "size_bytes": 93650,
+      "sha256": "1f0f9b3d7c312999f58fdecf95931ba8e22d232a6a733ca23ad86ca5a8232a4c"
+    },
+    {
+      "relative_path": "S1_FIXED/batch_summary.txt",
+      "size_bytes": 4297,
+      "sha256": "4e28cffb0994ed6adc9a864d35db5bbc427d42b4884126e98fe5ed465830bfdf"
+    },
+    {
+      "relative_path": "S1_FIXED/environment.json",
+      "size_bytes": 513,
+      "sha256": "9d5367e869cae21914e974d19464610d51a9ae66ffa0ad8fd6d93e9dc7b8604d"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_01_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1494,
+      "sha256": "1e962005688eada0c9c8410275ddae95eae24733b315c4041e85ecdcb25566cb"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_01_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "7d664e7c8cd39717accf54e594c06c699b16168f74fdd2941eae250b99da41f4"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_01_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 99903,
+      "sha256": "87037cf560d29083fb073b6c0281cf9b7023bd43fc19582c67b518168e2f1048"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_02_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1494,
+      "sha256": "73e3c5c25a54fe7e5b012d87ba57e327a17ef5a6a7fafeb703deafc952954203"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_02_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1379,
+      "sha256": "f2fe3e6c08abae5ce2f73fc4674a835d4f9ba81478cf69179be58a9eb285c479"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_02_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 87337,
+      "sha256": "ffd430e30ee5c5bc0bd8c798df2d6c35f5070a0ef2b61b097daa471d7a347968"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_03_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1494,
+      "sha256": "331a558aee29397b457d0f96c9c145f80d0fed5c7aa536672c402b0c79ac7415"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_03_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1379,
+      "sha256": "e8e3935e6469cbdabddd80aa906f057bc08ddc2e271d65cd01654a16ccd4e24a"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_03_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 85722,
+      "sha256": "c4e035bfe1d78c75413fc6affd662efc98588ad2aa5fea82f6fecb57a742447f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_04_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1494,
+      "sha256": "24b9aba532ff8b47f463e69ca30ba0b4e4a63b2ae534d850377bbcfb2ea7de2e"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_04_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1379,
+      "sha256": "77bddf9b4778f6ad92858ac79e940067e22863dd1e96555a2fe17e4441ac462d"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_04_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 91854,
+      "sha256": "61e8d13fb9cdd0998969a7ce5dbcf60ab7713cc93f5cbbc3d53615fe128c23e3"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_05_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1494,
+      "sha256": "63c82169644dac900a5d7986cfe19b17eb0f8c34a75d85bbf22f2d978e96da09"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_05_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "a10f8e9414e84156aacc6e07a57cff47e3efb3ed0aaadf494de6afb15c200fc3"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_05_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 99426,
+      "sha256": "f56385f873ee68c77f8d6ea5cb0bbdfca0998fba8e34cb489c4512aa728259ee"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_06_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1494,
+      "sha256": "48e57c5a39214c1c4e4ea5929307580eee5480f8bf7b76765fa0a571ec9e19c5"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_06_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "91e474a7c6663598e539d6e10f680f22345c8238c706d71e304a79f35668bbd8"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_06_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 100779,
+      "sha256": "4a3bc84fc3c4012e8c41f0e26aa19846fc047f4612ddb538b724eecae301e2d2"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_07_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1494,
+      "sha256": "f9e73d5723b5564bf0258630a0e81874e6999a9466cc25cde77767268dff83e0"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_07_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "8705d700180b5dc24ae73088c2c3753e2a5b7b3b08f99ab1be2f2c636fc9b866"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_07_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 120963,
+      "sha256": "5c7f5978702dd2591cc0a0ad37537902825cae913ab81b8e918e848f00bd9e05"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_08_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1494,
+      "sha256": "0f018fae76442ba4d13939526c440d84435e3372e3f8eea50eddc392458e563b"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_08_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 4259,
+      "sha256": "03b7f603736446b3dc7944761294f987922ad1c52481ab1f70a444c9db4525c3"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_08_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 113345,
+      "sha256": "07c620dc0862b92aab29f02d0c9e27ed39c973605a40fc97a6e82fce5df54b2f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_09_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1494,
+      "sha256": "bff15b5ceb7f6858df78f13e4a8a502e5b42743847d1bf2cad8caf8cc83c9fa1"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_09_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1413,
+      "sha256": "ab49a4fbb304648a4ea9a3ba17fbf84f8ff65272d517ff52ec2031d9895cc69c"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_09_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 115804,
+      "sha256": "2259e7b1c8f0d3c3fe0ac92b4b984498969373a5ab2b38717c255cc9ff9fcc81"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_10_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "7ecf4a599a9854a2a2dcf1d3ca935311840bd5d245b805f30f3b985bd8f5ae31"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_10_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 45127,
+      "sha256": "c07e2032e2f7c41bf32c188635a2bb90d14e1e00c3aa9d404bb59687315d125f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_10_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 122443,
+      "sha256": "4c2449e26739911fdedc42e7d4b153864f52ec185ba930a083c22423c9101d29"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_11_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "7205665bc35c8f23a959b70de8b8f2fae927eb6cd8e59d85e80cf24306ff3425"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_11_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "cbae6d4d717184cdea0cf08c81c4debcbf983ec841892b4167aaef2b7aab1721"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_11_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 90632,
+      "sha256": "19af0a949683240b097572f5cf50ccba6f1ba58f5ea3add5afe138b92eab8747"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_12_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "00e3174cb8db62d25a1842e8ef14923de40601ec1695138a7005087dd58e77fe"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_12_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "b1ac22177f6145bdaf64247cedffc75d41f1c2f4682c208e243f44226190cb59"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_12_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 94074,
+      "sha256": "a54d4199abfea6693d07c6d85d2a0abec5718ef85a05dc5cb986f1c14cb62a87"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_13_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "7b0ee7598a38e9705b9fdd75230855c4323aaeb958053f89fd3df58354f99b6b"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_13_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "29f566d1d36182c8ade56558995fea7f3626405a1a2e7dd0866e62d6cc26594b"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_13_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 113705,
+      "sha256": "8484e87f93bf28119ce8136390086193b781e91ae54490bca5c3d0fb90807164"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_14_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "11cd0fcbb532f94a31e5d1b1d0b72d52c564c8972008b4f14305f2a08d9262de"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_14_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "99f88fd2bcf59aa4ed09b6bab8c1681fd3381b1a9268c65535f1081808f4c47b"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_14_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 93581,
+      "sha256": "a11e28e06e2d6e5ac2676f36a9e53d1ccc6fadc23e7455a42311c78dce62bd84"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_15_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "f16cce709b23e8d5d1699f21098fa03993fea10d084e1e473ce199e655830e36"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_15_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "bca14665e3262478ad03a718aacd99b3552860e6c521df51fe689d287b216a69"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_15_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 95108,
+      "sha256": "2362289cef444e46e939fc61f94bb50d4e896937155f0961685cadfdcad6bef3"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_16_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "5cb971fcf2417115f861084e8788aafc939922be9a52ab49d128098ce03dcdc0"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_16_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "e0f520313f2fc5f2246fbca68203979e1b98f2799a5b6a2f3f34119972810d9d"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_16_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 85349,
+      "sha256": "ce4478c1bdf440c4106b1186448d4fa7c2d2e6f8c82465d6f7525a7038b5259c"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_17_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "3849b8c775804905af3b6e4227c892b514ea93f0339bfecd96cfa1d42b1f884f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_17_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "27642a0d765dd6f17f4b2a31070b29f262431a4e9efea73787eb5d54072d4c9e"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_17_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 109057,
+      "sha256": "95baaa1e2d7ee132ffaa3bc5c52272e9e1b2e85bc97b939a16ce0cc9ca846a27"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_18_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "74e17d642b92214ba3bb1786a9afc7e84a8b4aa577fec3772775a85cc60a83d1"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_18_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "4a0546b59154088ed40e6e5d891a2bab3f1fcc5d5d7e0528f538b41eb3496525"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_18_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 98212,
+      "sha256": "327d0035a1b1fbfa92fdc6530cb3385b61497f4638f709fef0ef1ba27a9372e8"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_19_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "1fd499326a2684a653cff2824fa4ba803aee77e70dbaec4796de890820c511cb"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_19_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "c86c69fdc39d467f8bdc87390a48528d34c789b7509a28fb1fb61dcd964fed3d"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_19_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 124083,
+      "sha256": "96b19814a5b3f04d58e7292a769c8133d497b1780bb1f82ba29e04bd14d87310"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_20_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "0c2fb94b2ba0266c5782a82d963dbd4c932034a963b22bf2026b0c124b66e7d8"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_20_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "0e52cc9b58f0167c71f107ee1318eaec53264cbc0de2e74a0052ae972b7247b5"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_20_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 107089,
+      "sha256": "6e41e97aaacd5d742dc87139cd86d42939490fcef9a2b51b9b1f53126d79087c"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_21_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "1e4b2293f002b1f2b4bdd7166c8302d57039dc17626c7182bf319768df0dbe63"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_21_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "0d5fae1d2c9df861ab15baed64a9ed7a73870a99ddab5eab74cdbd58bddf3855"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_21_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 94363,
+      "sha256": "885d6aba04908525a8dc7582e281b655abbfa93bbc5049010b65acb324d4a904"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_22_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "27b06494371b33ba44a49b8ebe0f66a8d0941eeecc2b76293e23f4c849a590e9"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_22_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "bc0eac4db927cd5105344029090e0e6d053416c98ee922ab06c263fbb22812fd"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_22_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 113619,
+      "sha256": "4d8d4d8dd9cfc28f474e5e360e63d0c4f1f02f10106197f216cbe6693bf8db0a"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_23_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "8f4f346be3afd4e28468a42d6fa9b0c6bf089ebdd501dfa85d12cf8e508b6008"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_23_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "03283cbc74df0a3d61409838addfd627f90b46ac6b298c42146c8164db469168"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_23_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 108279,
+      "sha256": "a35170ae854c8e3827a76816507b190c06c94ec7cace0d1a5adb88a902176b27"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_24_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "6eb1f120b039877d5664ef4a52a83c033efdfbdeffa97132db66c718d502bdfe"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_24_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "ab950b0c94b782c1321aea213afbd262ed31a440cda89addc02b7fdccc9ec765"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_24_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 104753,
+      "sha256": "4116eebaae574d321e24fdd10b80a9b673466c9a4d87b86383b189ec98ba5722"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_25_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "c3627dd1a4ad66113ddac426bdefcc1c61536297f07cc86c12cf6f67060b06c7"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_25_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1380,
+      "sha256": "edd0dde7d2a841b7ebb72a5be6f8d2c81ef63054e6cf746012d2e73c0d4743cd"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_25_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 87548,
+      "sha256": "59ceea4b08a8f7d338a2ec0bae0bfe095a38f4baca6bcba5a4ddb6bc84f33ff2"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_26_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "252a2b311af9e92e9a15cc620a9d2221f9e177af78a1a3668c80fb9389f5348d"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_26_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1379,
+      "sha256": "8b450ddcbc1eacb021aab92ec71ebe94264d0a05f318202eff22fcde37bd794f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_26_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 93544,
+      "sha256": "ef9e3f8a0128403b521791fa3c3af05c42cb1f83d8796d4c80d9461edf9e3fc5"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_27_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "480a1ac4d00f887ceaa6ce86354131ea381afa74d2daf8b959492dfa28490dc3"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_27_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "20c872137566d3372069016bd50c17a2a33d9e7715ab841afc613ec2e2ec58cc"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_27_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 106453,
+      "sha256": "d26ebf12c9bab8b287c2ed029ea856b7d9c211890b54470dee4cd8f34f448b4e"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_28_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "b7e646e4af9e4c8ac4d9ef11c6f12ecb14bf33a6b6c527eb40b3a141d9aa015c"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_28_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "0ae537dd4e12f08571f698869ccc97ce1e1f456a294d185b0f70ab14ad7e66f2"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_28_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 111453,
+      "sha256": "fc6a5ab4926ecb1451c79fdff42928afa17f85500eb10ec4a6736124bd2e689f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_29_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "416e2d096d359144b60b9ac0f9a92c85d2c8f936ac15c637ae34053549cb6ffd"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_29_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "797f4508a310d024da68af06f215a23d13eeb0aa58c501d8022c171fee6fff6b"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_29_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 90589,
+      "sha256": "f72203690927c84fdb1d0725b6a443a0d0d0ec0b4f5288f165fb0171b42ef8ae"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_30_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "530457baeb36a407e656b8653c98367a39d28663a44052ff374866c0e5b5d82a"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_30_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "1eec623428810b72d5742cd86067e400853d5d25f455ee4f65c17afd92b4e4c8"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_30_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 96982,
+      "sha256": "ab3380921815c79ed9c88dadcb1c12c5bc2e7b03837de5c8f3187825338b1c18"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_31_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "0d94c05010f4a94c6f47fdf7d89b87472dfb4362ee67d4d299e7d96222f93ca5"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_31_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "1880cf8b97b5bcb713c96f3fd2b35027631dcd1343eaa473d98168fe4ce3bf3f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_31_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 93781,
+      "sha256": "9fcbba4d82a7cf92dc8ca365ab7bd4a60bb4e8ad8dc58e082f7325ac69cc1685"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_32_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "e065d2d3aee235b56259ca56db8708d4ad7ce1fd7a6156b16bbbb685f45eeb68"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_32_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "ea7499144c9cfae299fb5cb8a19bd882c625eff3f3e9855088fcba1ae80c2574"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_32_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 110013,
+      "sha256": "3c009f1eb73be61dc4eb9e220496669830f5421a70ff19137638d417b01a63ba"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_33_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "3bdcaa95daf305829c8404eb9e822aa4148d2e51c5e5c2a53e25f2703eae693a"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_33_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1379,
+      "sha256": "80aa130d0fa3b885105680c1eba8d8929efaa2e34021b7beb3f01c75ed6b8e3c"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_33_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 87003,
+      "sha256": "916ae1f1ef8bb76628d215c3cb4339aadda5018538a8b907292a9483df4486a7"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_34_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "c71a3839d658cc552087b3852e6100974df25231373a9f0b97d95ed8486decc6"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_34_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "e042213b0ce64ef7fc31cb52507637a2c45f34249ea99f6ccfaea9b3eef82ba6"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_34_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 94161,
+      "sha256": "9a7d001ae33220094c73b5480827290876d3004ba9ef4e5a598dcf47eda75bcd"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_35_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "22dccb1711c434aa46b2c12af9b55267f486d2b2bf3344a904786517b071b40e"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_35_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "8065aa02ddbc36c4ea869edc3ca20ab30f85fe6cab9660376ac05eb6f8206f7d"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_35_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 97021,
+      "sha256": "10425c29641eaf71f8319213fea22dc448f861c60fee8a06f5af2e706af89771"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_36_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "3bca214fbf820c5e836a123b68a54260e794238fc98763a0ec904d7526d5e4e7"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_36_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "cc09d86ba814a38d6544be21c10d1927c5b7a481d08392ede2657374bfc823ca"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_36_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 90953,
+      "sha256": "b7c17dbd7b099f6261a1f1a4d59c501f00bf83c97fb3bb6aeb4f8d75bf5d59d5"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_37_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "f70140647145ead5b7c0ad2c7ceea44f40a98349f8bb5689c9b4b23a53f61687"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_37_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "5ac6f1c0ed193f41e492d2577d36d1469c94f2a384180bb98fbef4b22ca7cede"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_37_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 122446,
+      "sha256": "e8e9b08142973bd7e0e28c84510af0d8a7acc9754f9d89bd074f2d9c1e560fd8"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_38_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "645cd66e7fae982917687fb80b1b0ebcdbd0480d1beb68b937f7007f0a12f08f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_38_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "2c23d2b04206b7ef7661ef614a64fa4133a428086179346ad9e41ccbd227aad6"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_38_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 101704,
+      "sha256": "191de7e35a2a1f11338061727d448e95d3f3e8ff1cad4cb4b7e1152b55525c21"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_39_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "62a8613563298c5a738f05f331a4c1ab8a416c7aa5454b4e9f79313cd85b1dbf"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_39_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "e7c33772a21fb2dff260b5de88737fe84e964605aa528b36f67b052fc17bfc7e"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_39_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 95159,
+      "sha256": "06378e51955612f609137ef07f41b5783b6b7d33a5b44d5d5cee08363fc67bff"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_40_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "e9c6da2950b4b407ca1001b7987e1c1acd75cf387dbdd66a0b25a27b633bc8a6"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_40_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1406,
+      "sha256": "92e7838a7f702d375c76b5c14acba601ff3054419e0af89347b83fec63b02521"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_40_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 109952,
+      "sha256": "cc575436c68e131d9822c95235e82ca8f229999bd420503084dbbb8950ca09ca"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_41_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "a1a36a9658cfd3bfd0f116f5886593bb4fa600aa62662e67aaf5ec625a548ab1"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_41_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1412,
+      "sha256": "b4b34cb6fff6ee7b2ce62808edec077b7bb970b587d0d9385f25ec9da4e8cf24"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_41_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 88104,
+      "sha256": "6e8faf60378c69c68148932da968512e88d49a07614b933471d1868baaceee34"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_42_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "58e3169947593a3bbe3815631fbde7b22505d7efc1c31105e7ea824392f5a086"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_42_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "515a094be48792e4fc0f2e201c092749a93478b2dc1bbf96010d21db1bace498"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_42_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 94783,
+      "sha256": "2dba5a72dc6cc51503ccb27ee6a1a510da498d16c5ad3b7e01234d83669e1ffb"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_43_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "5c1b51211794dc687409b4a1686c48564c71e33967388c1261477d9cd9ccafbb"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_43_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "76d87f96bcdbd5de4e50366c94234154314f5259080fbe1f17181ba69ca64e21"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_43_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 91609,
+      "sha256": "9ec9bb984db3c09d9cfc99d9087ddd02780166f7da4a452eb5a20fb4889a776f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_44_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "f66757f690821f3271e3b8e577095a5f5f87602b72a29da939579a71bfde28ed"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_44_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "3fe758b41803b90edf3c4050317bf34d5412147b752e5cf4421cf978c2a76d84"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_44_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 89917,
+      "sha256": "68dd61a128a8a288f833117ddcc02315f1b21af3d26658e268b4280562f14d7e"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_45_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "bbcc47d2fb33e631951f610ede87653bdfc833b05db057f43af773cc3bceea6a"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_45_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1378,
+      "sha256": "5f0972f722c36659bf170ffc77a6a480f2156eb6a0eeef35eeff5d503a22a54d"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_45_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 86991,
+      "sha256": "4002d8c22a54d75faaca92f50f050dbb049a658f579482be713b9bd94ed844c7"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_46_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "e4fc42c92ae4698173b93f02c85492ffc082d5915a5a4e295025bf62ad7725c2"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_46_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "c2ba229c8f45315883ad7fbeefec677c4e2afcc8752060be2e1dc6f1c93b1b59"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_46_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 115139,
+      "sha256": "c31605e0ad9ad27098ab0e1d7510e128216dcbc6caebae5a5b2725f6f80df769"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_47_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "811b7a5dc081a65d98ba7a53df0ffa7760eff1533d108bb9cb472b4af577f037"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_47_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1379,
+      "sha256": "401db145756f2ca1a80e167e7eca2848ac1e70f2bac3f8c7a0994fe4b65bdfe4"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_47_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 84573,
+      "sha256": "b4d033782aae94450bb822cfd6d72f9a48ded91b093e7b8256a27d2726e75183"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_48_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "0a16521ab28a6cf2c64c9955d2d515b2fd86cb1df232f4649c40e8cb3133d884"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_48_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "f3e7aad67e5fd41f958aac1dba4007d805aa41638c8033259a43d3f7c545b2e6"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_48_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 106052,
+      "sha256": "2a0aa31946d311b8e4afbb54c85bcd3fe2964ff8cb9ceb09b3ea9efeade63c64"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_49_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "aa30452aaf72f6f7b665dfcef81aad786319ba615ba5f6e7af6d579e73a09ce0"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_49_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1411,
+      "sha256": "da0ba3dfb5a460a4beda9aaa172448e452d3b39396583074026a71c733b1853f"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_49_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 108723,
+      "sha256": "d03110a3abb41ea59b1806949367166cc0cc71b56f0e2048d387269d40803cfa"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_50_smpc_fixed_risk/prediction_dataset/prediction_dataset_manifest.json",
+      "size_bytes": 1495,
+      "sha256": "5fc4b27b02786252a289c1a2abf9d6a21f387d95aaf74859bae514515e383311"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_50_smpc_fixed_risk/scenario_run_summary.json",
+      "size_bytes": 1410,
+      "sha256": "9ee8b04475ce2fbd81cfd76af759adc767405291c2de4ce51a610ad57ba27f08"
+    },
+    {
+      "relative_path": "S1_FIXED/scenario_uk_give_way_ego_init_50_smpc_fixed_risk/scenario_steps.csv",
+      "size_bytes": 96465,
+      "sha256": "cda88288a885d0f873e019025fcb17658d3f5381a7b21b5096f1a3192d769a2e"
+    },
+    {
+      "relative_path": "day6_attempts.jsonl",
+      "size_bytes": 778,
+      "sha256": "41797a00c0f5c99e93e828cedc7a5926d0adda26d464f1f1aafa6da00c5acf97"
+    },
+    {
+      "relative_path": "day6_collection_audit.json",
+      "size_bytes": 39207,
+      "sha256": "5a1c111319819c7a8f87ae0ce24a9c0eadd6556881aa96afcae4f26c47910dd2"
+    },
+    {
+      "relative_path": "day6_launcher.pid",
+      "size_bytes": 7,
+      "sha256": "aa17b49f178eb5583bf3655f8cafb1224f3487859fa578e1a9174dd5ceebeea2"
+    },
+    {
+      "relative_path": "day6_preflight_latest.json",
+      "size_bytes": 13298,
+      "sha256": "41768890753b1cc1a447203e3436642fc4cf4fb9eb0a2aaa575b3916d1eb085d"
+    },
+    {
+      "relative_path": "day6_progress.json",
+      "size_bytes": 3630,
+      "sha256": "f9d3e51084f2278743169ce69f2a5e1ccfe6b7daaeb91a71417ae82f3c540039"
+    },
+    {
+      "relative_path": "day6_run_contract.json",
+      "size_bytes": 13298,
+      "sha256": "33bc13d94066530d5a0090be678747434fb185aae024b6194b7abe50cc76c3b1"
+    },
+    {
+      "relative_path": "prediction_dataset_manifests.txt",
+      "size_bytes": 37500,
+      "sha256": "082f798d40908dac8d04e08c92690549330e98963434f08f611d0e9bdb71383d"
+    },
+    {
+      "relative_path": "protocol_snapshot/day5_final_6b71ccc_frozen_config.json",
+      "size_bytes": 4865,
+      "sha256": "39f4cfffa1817ad1ca133de692d2b377e485bfdadc47a26ce3409a2f22570104"
+    },
+    {
+      "relative_path": "protocol_snapshot/give_way_interaction_sequence_v2.schema.json",
+      "size_bytes": 5137,
+      "sha256": "a2fa83955673b9719efe0a39fac35acb05985b348cd2f1e668827b26135f7076"
+    },
+    {
+      "relative_path": "protocol_snapshot/give_way_interaction_v2_collection_manifest.json",
+      "size_bytes": 61754,
+      "sha256": "8e6272d5e68dc7f7ad3bbd748b1055751879b8f2bafc33b42b2701ade0c9229a"
+    },
+    {
+      "relative_path": "protocol_snapshot/run_day6_formal_prediction_dataset_v2.sh",
+      "size_bytes": 7470,
+      "sha256": "76b651578fff67d1683e6e4aafb4657f949c3c795e42896ec56f46c827d92220"
+    }
+  ],
+  "note": "This compact manifest covers audit/control metadata, every rollout summary and step CSV, and every prediction manifest. Raw rasters, pickles and labeled JSONL remain under their rollout directories."
+}

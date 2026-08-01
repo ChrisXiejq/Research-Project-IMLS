@@ -1,0 +1,16 @@
+{
+  "utc_iso": "2026-07-31T22:43:04.473616+00:00",
+  "platform": "Linux-5.15.0-160-generic-x86_64-with-glibc2.17",
+  "python": "3.8.20",
+  "executable": "/root/miniconda3/envs/carla_modern/bin/python",
+  "env": {
+    "CARLA_ROOT": "/root/autodl-tmp/carla_0.9.14",
+    "GUROBI_HOME": "/root/autodl-tmp/Research-Project-IMLS/gurobi/gurobi1103/linux64",
+    "GUROBI_VERSION": "110",
+    "GRB_LICENSE_FILE": "gurobi.lic"
+  },
+  "tensorflow": "2.13.1",
+  "casadi": "3.7.2",
+  "carla": "?",
+  "gurobipy": "(11, 0, 3)"
+}

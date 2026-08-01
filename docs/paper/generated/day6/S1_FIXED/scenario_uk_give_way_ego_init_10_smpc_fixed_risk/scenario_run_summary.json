@@ -1,0 +1,1525 @@
+{
+  "scenario_kind": "intersection",
+  "savedir": "/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200/S1_FIXED/scenario_uk_give_way_ego_init_10_smpc_fixed_risk",
+  "ran_successfully": true,
+  "max_iters": 600,
+  "carla_fps": 20,
+  "utc_iso": "2026-07-31T18:54:32.420444+00:00",
+  "stats": {
+    "static_0": {
+      "n_steps": 309,
+      "feasible_frac": 1.0,
+      "solve_time_mean": null,
+      "solve_time_max": null,
+      "solve_time_nan_frac": 1.0,
+      "state_rows": 309
+    },
+    "static_1": {
+      "n_steps": 309,
+      "feasible_frac": 1.0,
+      "solve_time_mean": null,
+      "solve_time_max": null,
+      "solve_time_nan_frac": 1.0,
+      "state_rows": 309
+    },
+    "target_2": {
+      "n_steps": 129,
+      "feasible_frac": 1.0,
+      "solve_time_mean": null,
+      "solve_time_max": null,
+      "solve_time_nan_frac": 1.0,
+      "state_rows": 129
+    },
+    "ego_3": {
+      "n_steps": 288,
+      "feasible_frac": 0.9895833333333334,
+      "solve_time_mean": 0.057519649845614036,
+      "solve_time_max": 0.136958632,
+      "solve_time_nan_frac": 0.01041666666666663,
+      "state_rows": 288
+    }
+  },
+  "extra": {
+    "policy_types": [
+      "StaticAgent",
+      "StaticAgent",
+      "DefensiveReactiveAgent",
+      "SMPCAgent"
+    ],
+    "collision_event_count": 210,
+    "collision_events": [
+      {
+        "frame": 269965,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 15130.476883150548
+      },
+      {
+        "frame": 269971,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 213.4039065571701
+      },
+      {
+        "frame": 269971,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 473.4255297148539
+      },
+      {
+        "frame": 269971,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 270.44140728922736
+      },
+      {
+        "frame": 269971,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 197.51500381301108
+      },
+      {
+        "frame": 269971,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 193.6685384063719
+      },
+      {
+        "frame": 269972,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 182.59656786709422
+      },
+      {
+        "frame": 269972,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 179.31186171036575
+      },
+      {
+        "frame": 269972,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 184.62632638680992
+      },
+      {
+        "frame": 269972,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 172.9372813068129
+      },
+      {
+        "frame": 269972,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 178.32772249642687
+      },
+      {
+        "frame": 269973,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 164.43607576568235
+      },
+      {
+        "frame": 269973,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 169.89893802815035
+      },
+      {
+        "frame": 269973,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 155.3498861798994
+      },
+      {
+        "frame": 269973,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 160.8351339711686
+      },
+      {
+        "frame": 269973,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 145.49587451807795
+      },
+      {
+        "frame": 269974,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 150.9981212724332
+      },
+      {
+        "frame": 269974,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 144.362193265138
+      },
+      {
+        "frame": 269974,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 84.17981581104794
+      },
+      {
+        "frame": 269974,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 162.75433819702016
+      },
+      {
+        "frame": 269974,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 121.32039720971456
+      },
+      {
+        "frame": 269978,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 1.5621343697765688
+      },
+      {
+        "frame": 269979,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 59.62000948398606
+      },
+      {
+        "frame": 269979,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 28.051361514314273
+      },
+      {
+        "frame": 269979,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 33.3381594657479
+      },
+      {
+        "frame": 269979,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 26.279301127914017
+      },
+      {
+        "frame": 269979,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 29.124630811338587
+      },
+      {
+        "frame": 269980,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 189.21308230236315
+      },
+      {
+        "frame": 269980,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 155.4530050936519
+      },
+      {
+        "frame": 269980,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 303.7355568436675
+      },
+      {
+        "frame": 270002,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 2907.953216894069
+      },
+      {
+        "frame": 270003,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 190.9610393805372
+      },
+      {
+        "frame": 270003,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 216.95071663866213
+      },
+      {
+        "frame": 270003,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 242.0810308815897
+      },
+      {
+        "frame": 270004,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 115.38290111398646
+      },
+      {
+        "frame": 270004,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 230.80318640355225
+      },
+      {
+        "frame": 270004,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 115.04820593027519
+      },
+      {
+        "frame": 270004,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 223.52233591230595
+      },
+      {
+        "frame": 270004,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 110.65043832193746
+      },
+      {
+        "frame": 270005,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 216.20939606542277
+      },
+      {
+        "frame": 270005,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 108.83809163476796
+      },
+      {
+        "frame": 270005,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 203.7955609315333
+      },
+      {
+        "frame": 270005,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 107.79475269911954
+      },
+      {
+        "frame": 270005,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 189.65462266046
+      },
+      {
+        "frame": 270006,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 107.35444340447953
+      },
+      {
+        "frame": 270006,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 174.06493314253288
+      },
+      {
+        "frame": 270006,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 106.04369317174778
+      },
+      {
+        "frame": 270006,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 156.20591735232054
+      },
+      {
+        "frame": 270006,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 102.17172254945824
+      },
+      {
+        "frame": 270007,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 143.69480706746398
+      },
+      {
+        "frame": 270007,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 97.26730017887952
+      },
+      {
+        "frame": 270007,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 138.80016561810785
+      },
+      {
+        "frame": 270007,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 93.89581211511431
+      },
+      {
+        "frame": 270007,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 133.3743179212919
+      },
+      {
+        "frame": 270008,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 90.30836558687133
+      },
+      {
+        "frame": 270008,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 128.70648397636958
+      },
+      {
+        "frame": 270008,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 86.3509301613934
+      },
+      {
+        "frame": 270008,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 123.63033853956496
+      },
+      {
+        "frame": 270008,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 82.93986827725502
+      },
+      {
+        "frame": 270009,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 118.85154988741412
+      },
+      {
+        "frame": 270009,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 79.02936906584634
+      },
+      {
+        "frame": 270009,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 114.39865969346532
+      },
+      {
+        "frame": 270009,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 75.65395184875773
+      },
+      {
+        "frame": 270009,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 109.64658928269607
+      },
+      {
+        "frame": 270010,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 72.09559631281874
+      },
+      {
+        "frame": 270010,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 105.47697958709163
+      },
+      {
+        "frame": 270010,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 68.68890608849131
+      },
+      {
+        "frame": 270010,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 101.12887189681923
+      },
+      {
+        "frame": 270010,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 5.850036973057163
+      },
+      {
+        "frame": 270010,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 91.00117828478609
+      },
+      {
+        "frame": 270011,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 145.82526257154737
+      },
+      {
+        "frame": 270011,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 5.8635162572000805
+      },
+      {
+        "frame": 270011,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 63.676004758533836
+      },
+      {
+        "frame": 270011,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 5.854699981390422
+      },
+      {
+        "frame": 270011,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 84.11127471750649
+      },
+      {
+        "frame": 270011,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 5.8453052999102795
+      },
+      {
+        "frame": 270011,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 57.626238058801626
+      },
+      {
+        "frame": 270011,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 129.72302837640592
+      },
+      {
+        "frame": 270012,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 94.39436442936831
+      },
+      {
+        "frame": 270012,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 87.8730993513121
+      },
+      {
+        "frame": 270012,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 51.905089706954996
+      },
+      {
+        "frame": 270012,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 82.19766269099941
+      },
+      {
+        "frame": 270012,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 49.08628090312879
+      },
+      {
+        "frame": 270013,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 81.22739074509535
+      },
+      {
+        "frame": 270013,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 48.10572449422066
+      },
+      {
+        "frame": 270013,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 76.4816680147647
+      },
+      {
+        "frame": 270013,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 46.047019904508275
+      },
+      {
+        "frame": 270013,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 73.85241605500488
+      },
+      {
+        "frame": 270014,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 43.471460013229084
+      },
+      {
+        "frame": 270014,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 70.98890264357787
+      },
+      {
+        "frame": 270014,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.33488952626646
+      },
+      {
+        "frame": 270014,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 68.30004199721479
+      },
+      {
+        "frame": 270014,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 38.908061433324875
+      },
+      {
+        "frame": 270015,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 66.06426992992377
+      },
+      {
+        "frame": 270015,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 36.413938009480944
+      },
+      {
+        "frame": 270015,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 64.07859036811661
+      },
+      {
+        "frame": 270015,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 33.784819564583366
+      },
+      {
+        "frame": 270015,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 62.58098792210655
+      },
+      {
+        "frame": 270016,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 42.15716972797984
+      },
+      {
+        "frame": 270016,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 87.8678350490783
+      },
+      {
+        "frame": 270016,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.63309317698581
+      },
+      {
+        "frame": 270016,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 86.78019968004865
+      },
+      {
+        "frame": 270016,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 34.258797505522146
+      },
+      {
+        "frame": 270017,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 86.25339561010846
+      },
+      {
+        "frame": 270017,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 29.22290300019102
+      },
+      {
+        "frame": 270017,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 85.48821782925481
+      },
+      {
+        "frame": 270017,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 24.58178729679428
+      },
+      {
+        "frame": 270017,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 84.35725496366184
+      },
+      {
+        "frame": 270018,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 21.101888938361096
+      },
+      {
+        "frame": 270018,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 81.77406183407368
+      },
+      {
+        "frame": 270018,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 19.247519386107665
+      },
+      {
+        "frame": 270018,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 77.37646970249901
+      },
+      {
+        "frame": 270018,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 18.97154024635056
+      },
+      {
+        "frame": 270019,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 70.585527388623
+      },
+      {
+        "frame": 270019,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 20.459869128003287
+      },
+      {
+        "frame": 270019,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 61.391083944406674
+      },
+      {
+        "frame": 270019,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 22.3555005104181
+      },
+      {
+        "frame": 270019,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 52.715933402656205
+      },
+      {
+        "frame": 270020,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 22.106987295606416
+      },
+      {
+        "frame": 270020,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 55.79915132538566
+      },
+      {
+        "frame": 270020,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 39.72085063204789
+      },
+      {
+        "frame": 270020,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 65.82807823427419
+      },
+      {
+        "frame": 270020,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 28.005226013272058
+      },
+      {
+        "frame": 270021,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 54.35678972085062
+      },
+      {
+        "frame": 270021,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 24.194058082268484
+      },
+      {
+        "frame": 270021,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 51.20089772365979
+      },
+      {
+        "frame": 270021,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 21.670258108033053
+      },
+      {
+        "frame": 270021,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 50.508023990327715
+      },
+      {
+        "frame": 270022,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 20.451352783896038
+      },
+      {
+        "frame": 270022,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 49.47958150423404
+      },
+      {
+        "frame": 270022,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 19.206532215190492
+      },
+      {
+        "frame": 270022,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 48.17902036673878
+      },
+      {
+        "frame": 270022,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 18.420701584753314
+      },
+      {
+        "frame": 270022,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 0.36147165915107565
+      },
+      {
+        "frame": 270023,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 47.739031507916245
+      },
+      {
+        "frame": 270023,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 18.488492828112815
+      },
+      {
+        "frame": 270023,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 1.152666310826207
+      },
+      {
+        "frame": 270023,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 52.82302380694931
+      },
+      {
+        "frame": 270023,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 24.77255721912156
+      },
+      {
+        "frame": 270023,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 49.34867203948301
+      },
+      {
+        "frame": 270024,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 21.277695653651108
+      },
+      {
+        "frame": 270024,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 47.885680473563674
+      },
+      {
+        "frame": 270024,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 18.137810187214864
+      },
+      {
+        "frame": 270024,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 48.213360402340015
+      },
+      {
+        "frame": 270024,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 19.76799866385992
+      },
+      {
+        "frame": 270025,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 46.93650006923306
+      },
+      {
+        "frame": 270025,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 18.320365127674183
+      },
+      {
+        "frame": 270025,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 46.030120731258855
+      },
+      {
+        "frame": 270025,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 17.65948538218053
+      },
+      {
+        "frame": 270025,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 45.31976798845972
+      },
+      {
+        "frame": 270026,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 16.924470527612648
+      },
+      {
+        "frame": 270026,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 44.63591604852227
+      },
+      {
+        "frame": 270026,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 16.28666597378838
+      },
+      {
+        "frame": 270026,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 44.06641772412369
+      },
+      {
+        "frame": 270026,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 15.703690272639664
+      },
+      {
+        "frame": 270027,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 43.493703597748954
+      },
+      {
+        "frame": 270027,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 15.14428376832752
+      },
+      {
+        "frame": 270027,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 42.90657367542231
+      },
+      {
+        "frame": 270027,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 14.636203257597439
+      },
+      {
+        "frame": 270027,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 43.52572810326519
+      },
+      {
+        "frame": 270028,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 12.417686085466219
+      },
+      {
+        "frame": 270028,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 24.86657460610882
+      },
+      {
+        "frame": 270028,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 43.54429049091646
+      },
+      {
+        "frame": 270028,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 27.821395051710905
+      },
+      {
+        "frame": 270028,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 44.04119103502248
+      },
+      {
+        "frame": 270028,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 31.853520626857843
+      },
+      {
+        "frame": 270029,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.986251565856925
+      },
+      {
+        "frame": 270029,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 19.731383152671444
+      },
+      {
+        "frame": 270029,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.31621651201386
+      },
+      {
+        "frame": 270029,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 27.461476993540018
+      },
+      {
+        "frame": 270029,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.66712422096172
+      },
+      {
+        "frame": 270030,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 22.839860189521282
+      },
+      {
+        "frame": 270030,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.629152579717044
+      },
+      {
+        "frame": 270030,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 26.037048349234027
+      },
+      {
+        "frame": 270030,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.73783371884365
+      },
+      {
+        "frame": 270030,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 24.557199571924947
+      },
+      {
+        "frame": 270031,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.74967458426928
+      },
+      {
+        "frame": 270031,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 25.83454628078221
+      },
+      {
+        "frame": 270031,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.88702709728816
+      },
+      {
+        "frame": 270031,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 25.35694817835101
+      },
+      {
+        "frame": 270031,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.870734463179474
+      },
+      {
+        "frame": 270032,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 26.083944508723267
+      },
+      {
+        "frame": 270032,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 41.89715134238349
+      },
+      {
+        "frame": 270032,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 26.583540146746
+      },
+      {
+        "frame": 270032,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 42.54047196946599
+      },
+      {
+        "frame": 270032,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 27.52966878167136
+      },
+      {
+        "frame": 270033,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 38.825125784120374
+      },
+      {
+        "frame": 270033,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 31.872000998172247
+      },
+      {
+        "frame": 270033,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 37.22801658083932
+      },
+      {
+        "frame": 270033,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 32.25735173991607
+      },
+      {
+        "frame": 270033,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 36.43519358364586
+      },
+      {
+        "frame": 270034,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 32.88866365423704
+      },
+      {
+        "frame": 270034,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 3.036620502800284
+      },
+      {
+        "frame": 270034,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 32.76131713028499
+      },
+      {
+        "frame": 270034,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 30.89417020084836
+      },
+      {
+        "frame": 270034,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 2.1999273662755674
+      },
+      {
+        "frame": 270034,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 32.43297725631608
+      },
+      {
+        "frame": 270034,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 3.1187972627795904
+      },
+      {
+        "frame": 270034,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 31.817277050053356
+      },
+      {
+        "frame": 270034,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 2.3575293231853482
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 32.959216748954674
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 3.050026592157843
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 30.49577695948679
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 2.428679181872931
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 18.304717179872892
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 17.48233207362341
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 21.62323415570566
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 7.1438889861998955
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 12.952659360701126
+      },
+      {
+        "frame": 270035,
+        "monitored_role": "target_2",
+        "other_actor_id": 0,
+        "other_actor_type": "static.wall",
+        "normal_impulse_magnitude": 21.423238352884255
+      }
+    ],
+    "map": "Carla/Maps/Town05",
+    "completion_tail_iters": 20
+  }
+}

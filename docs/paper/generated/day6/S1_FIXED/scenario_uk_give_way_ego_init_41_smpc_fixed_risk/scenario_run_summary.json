@@ -1,0 +1,54 @@
+{
+  "scenario_kind": "intersection",
+  "savedir": "/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200/S1_FIXED/scenario_uk_give_way_ego_init_41_smpc_fixed_risk",
+  "ran_successfully": true,
+  "max_iters": 600,
+  "carla_fps": 20,
+  "utc_iso": "2026-07-31T19:55:28.971408+00:00",
+  "stats": {
+    "static_0": {
+      "n_steps": 219,
+      "feasible_frac": 1.0,
+      "solve_time_mean": null,
+      "solve_time_max": null,
+      "solve_time_nan_frac": 1.0,
+      "state_rows": 219
+    },
+    "static_1": {
+      "n_steps": 219,
+      "feasible_frac": 1.0,
+      "solve_time_mean": null,
+      "solve_time_max": null,
+      "solve_time_nan_frac": 1.0,
+      "state_rows": 219
+    },
+    "target_2": {
+      "n_steps": 129,
+      "feasible_frac": 1.0,
+      "solve_time_mean": null,
+      "solve_time_max": null,
+      "solve_time_nan_frac": 1.0,
+      "state_rows": 129
+    },
+    "ego_3": {
+      "n_steps": 198,
+      "feasible_frac": 0.9949494949494949,
+      "solve_time_mean": 0.058644185883248726,
+      "solve_time_max": 0.136504668,
+      "solve_time_nan_frac": 0.005050505050505083,
+      "state_rows": 198
+    }
+  },
+  "extra": {
+    "policy_types": [
+      "StaticAgent",
+      "StaticAgent",
+      "DefensiveReactiveAgent",
+      "SMPCAgent"
+    ],
+    "collision_event_count": 0,
+    "collision_events": [],
+    "map": "Carla/Maps/Town05",
+    "completion_tail_iters": 20
+  }
+}

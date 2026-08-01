@@ -1,6 +1,6 @@
 # Day 6 正式 200-rollout 采集运行指南
 
-状态：脚本已实现并通过本地 preflight/resume 正向测试、服务器空数据集负向审计测试和 shell/Python 语法检查。未启动正式 CARLA 采集。
+状态：正式采集已完成。200/200 rollouts、四个 cell 各 50、200 manifests、11,230 prediction samples，最终审计 `pass` 并已生成 `DAY6_COMPLETE.json`。Day 7 续接见 `docs/paper/Day6完成与Day7执行指南.md`。
 
 ## 1. 正式入口
 

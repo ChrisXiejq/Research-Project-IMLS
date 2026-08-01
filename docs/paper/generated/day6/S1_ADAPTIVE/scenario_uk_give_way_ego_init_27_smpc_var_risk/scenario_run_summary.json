@@ -1,0 +1,139 @@
+{
+  "scenario_kind": "intersection",
+  "savedir": "/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200/S1_ADAPTIVE/scenario_uk_give_way_ego_init_27_smpc_var_risk",
+  "ran_successfully": true,
+  "max_iters": 600,
+  "carla_fps": 20,
+  "utc_iso": "2026-07-31T21:03:45.800607+00:00",
+  "stats": {
+    "static_0": {
+      "n_steps": 252,
+      "feasible_frac": 1.0,
+      "solve_time_mean": null,
+      "solve_time_max": null,
+      "solve_time_nan_frac": 1.0,
+      "state_rows": 252
+    },
+    "static_1": {
+      "n_steps": 252,
+      "feasible_frac": 1.0,
+      "solve_time_mean": null,
+      "solve_time_max": null,
+      "solve_time_nan_frac": 1.0,
+      "state_rows": 252
+    },
+    "target_2": {
+      "n_steps": 129,
+      "feasible_frac": 1.0,
+      "solve_time_mean": null,
+      "solve_time_max": null,
+      "solve_time_nan_frac": 1.0,
+      "state_rows": 129
+    },
+    "ego_3": {
+      "n_steps": 231,
+      "feasible_frac": 0.9913419913419913,
+      "solve_time_mean": 0.08127355602183406,
+      "solve_time_max": 0.22137471,
+      "solve_time_nan_frac": 0.008658008658008698,
+      "state_rows": 231
+    }
+  },
+  "extra": {
+    "policy_types": [
+      "StaticAgent",
+      "StaticAgent",
+      "DefensiveReactiveAgent",
+      "SMPCAgent"
+    ],
+    "collision_event_count": 12,
+    "collision_events": [
+      {
+        "frame": 412256,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 107.44478810055915
+      },
+      {
+        "frame": 412256,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 373.2291892371498
+      },
+      {
+        "frame": 412256,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 205.3784735921207
+      },
+      {
+        "frame": 412257,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 107.53850365553814
+      },
+      {
+        "frame": 412259,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 31.120445595044057
+      },
+      {
+        "frame": 412259,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 53.97811064817679
+      },
+      {
+        "frame": 412259,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 135.06245895342076
+      },
+      {
+        "frame": 412259,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 9.939119348748267
+      },
+      {
+        "frame": 412262,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 115.52652052271306
+      },
+      {
+        "frame": 412262,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 123.46233660955409
+      },
+      {
+        "frame": 412262,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 2.766491168304752
+      },
+      {
+        "frame": 412262,
+        "monitored_role": "target_2",
+        "other_actor_id": 106,
+        "other_actor_type": "traffic.traffic_light",
+        "normal_impulse_magnitude": 16.278814932087325
+      }
+    ],
+    "map": "Carla/Maps/Town05",
+    "completion_tail_iters": 20
+  }
+}
