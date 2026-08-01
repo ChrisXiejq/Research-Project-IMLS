@@ -6,6 +6,8 @@
 
 修复后的规则是：all/assertive/reactive 为必需子集；pre-response/response-active 为可选诊断子集。可选子集为空时写入带原因和零样本数的 `status=not_applicable` 证据，不重新定义该子集、不伪造指标，也不把它用于模型排序。该事实作为数据时序覆盖限制写入最终汇总。
 
+中期 8-run 审计进一步发现 V1 evaluator 的 `source_subrun` 键会把 S0/S1 同名 rollout 合并。V2 evaluator 改用 `cell_id::source_subrun` 识别 20 个真实 validation rollouts，并单独用 `ego_init_id` 报告 5 个 paired clustering units。旧的逐样本指标仍有效，但所有 calibration 和 rollout-macro 指标会自动按 V2 重算；已有模型无需重训。详细中期结果见 `docs/paper/Day8中期模型性能审计_8runs.md`。
+
 ## 1. Day 7 结论
 
 Day 7 两个完成门均为 `pass`。真实数据事实为：
@@ -67,6 +69,7 @@ B1 / B2-M / B2-D / T1 / T2
 - `day8_run_contract.json` 阻止 epochs、batch size、learning rate、输入路径等在续跑时漂移；
 - 最终完成标志为 `DAY8_VALIDATION_COMPLETE.json`；
 - 自动生成不含 SavedModel/weights 的紧凑证据包 `day8_validation_snapshot.tar.gz`。
+- 每次正式训练和 validation evaluator 前强制检查 TensorFlow GPU；GPU 不可见时停止并保留 checkpoint，禁止静默退回 CPU。
 
 ## 4. 同步并建立 Day 8 worktree
 

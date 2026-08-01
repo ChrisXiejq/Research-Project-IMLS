@@ -36,6 +36,7 @@ from multipath_gmm_utils import (
 from prediction_dataset_utils import (
     finite_or_none,
     has_full_horizon,
+    infer_init_id,
     interaction_context_from_sample,
     mean,
     percentile,
@@ -55,6 +56,56 @@ CHI2_THRESHOLDS_2D = {
 
 class NoUsableSubsetSamples(ValueError):
     """Raised when a requested evaluation subset has no full-horizon samples."""
+
+
+def rollout_group_key(sample: Mapping[str, Any]) -> str:
+    """Uniquely identify one experimental rollout, including its 2x2 cell."""
+
+    return f"{sample.get('cell_id', '<missing-cell>')}::{sample.get('source_subrun', '<missing-subrun>')}"
+
+
+def init_group_key(sample: Mapping[str, Any]) -> str:
+    """Return the paired-design clustering unit shared by all four cells."""
+
+    init_id = sample.get("ego_init_id")
+    if init_id is None:
+        init_id = infer_init_id(str(sample.get("source_subrun", "")))
+    return f"ego_init_{int(init_id):02d}" if init_id is not None else "<missing-init>"
+
+
+def aggregate_group_rows(
+    rows_by_group: Mapping[str, Sequence[Mapping[str, float]]]
+) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Any]]:
+    metrics_by_group: Dict[str, Dict[str, Any]] = {}
+    for group_key, rows in sorted(rows_by_group.items()):
+        metrics_by_group[group_key] = {
+            "samples": len(rows),
+            "top1_ADE_mean": finite_or_none(mean([row["top1_ADE"] for row in rows])),
+            "top1_FDE_mean": finite_or_none(mean([row["top1_FDE"] for row in rows])),
+            "top1_FDE_p90": finite_or_none(
+                percentile([row["top1_FDE"] for row in rows], 90)
+            ),
+            "trajectory_mixture_NLL_per_step_mean": finite_or_none(
+                mean([row["trajectory_mixture_NLL_per_step"] for row in rows])
+            ),
+            "pointwise_mixture_NLL_mean": finite_or_none(
+                mean([row["pointwise_mixture_NLL"] for row in rows])
+            ),
+        }
+    fields = (
+        "top1_ADE_mean",
+        "top1_FDE_mean",
+        "top1_FDE_p90",
+        "trajectory_mixture_NLL_per_step_mean",
+        "pointwise_mixture_NLL_mean",
+    )
+    macro = {
+        field: finite_or_none(
+            mean([metrics[field] for metrics in metrics_by_group.values()])
+        )
+        for field in fields
+    }
+    return metrics_by_group, macro
 
 
 def parse_args() -> argparse.Namespace:
@@ -354,6 +405,7 @@ def evaluate_decoded(
     }
     per_horizon_total = [0 for _ in range(horizon)]
     rollout_rows: Dict[str, List[Dict[str, float]]] = collections.defaultdict(list)
+    init_group_rows: Dict[str, List[Dict[str, float]]] = collections.defaultdict(list)
 
     for sample_index, sample in enumerate(samples):
         probs = probabilities[sample_index].astype(np.float64)
@@ -410,17 +462,16 @@ def evaluate_decoded(
         trajectory_nll_per_step.append(trajectory_nll)
         pointwise_nll.append(point_nll)
 
-        source_subrun = str(sample.get("source_subrun", "<missing>"))
-        rollout_rows[source_subrun].append(
-            {
-                "top1_ADE": top_ade_value,
-                "minADE": min_ade_value,
-                "top1_FDE": top_fde_value,
-                "minFDE": min_fde_value,
-                "trajectory_mixture_NLL_per_step": trajectory_nll,
-                "pointwise_mixture_NLL": point_nll,
-            }
-        )
+        row = {
+            "top1_ADE": top_ade_value,
+            "minADE": min_ade_value,
+            "top1_FDE": top_fde_value,
+            "minFDE": min_fde_value,
+            "trajectory_mixture_NLL_per_step": trajectory_nll,
+            "pointwise_mixture_NLL": point_nll,
+        }
+        rollout_rows[rollout_group_key(sample)].append(row)
+        init_group_rows[init_group_key(sample)].append(row)
 
     coverage = {}
     coverage_errors = []
@@ -443,35 +494,8 @@ def evaluate_decoded(
             ],
         }
 
-    rollout_metrics: Dict[str, Dict[str, Any]] = {}
-    for source_subrun, rows in sorted(rollout_rows.items()):
-        rollout_metrics[source_subrun] = {
-            "samples": len(rows),
-            "top1_ADE_mean": finite_or_none(mean([row["top1_ADE"] for row in rows])),
-            "top1_FDE_mean": finite_or_none(mean([row["top1_FDE"] for row in rows])),
-            "top1_FDE_p90": finite_or_none(
-                percentile([row["top1_FDE"] for row in rows], 90)
-            ),
-            "trajectory_mixture_NLL_per_step_mean": finite_or_none(
-                mean([row["trajectory_mixture_NLL_per_step"] for row in rows])
-            ),
-            "pointwise_mixture_NLL_mean": finite_or_none(
-                mean([row["pointwise_mixture_NLL"] for row in rows])
-            ),
-        }
-    rollout_fields = (
-        "top1_ADE_mean",
-        "top1_FDE_mean",
-        "top1_FDE_p90",
-        "trajectory_mixture_NLL_per_step_mean",
-        "pointwise_mixture_NLL_mean",
-    )
-    rollout_macro = {
-        field: finite_or_none(
-            mean([metrics[field] for metrics in rollout_metrics.values()])
-        )
-        for field in rollout_fields
-    }
+    rollout_metrics, rollout_macro = aggregate_group_rows(rollout_rows)
+    init_group_metrics, init_group_macro = aggregate_group_rows(init_group_rows)
 
     covariance_audit = audit_covariances(covariance_array)
     historical_axis_stds = np.asarray(decoded.axis_standard_deviations)[:, :, :horizon]
@@ -553,8 +577,16 @@ def evaluate_decoded(
         },
         "rollout_aggregation": {
             "independent_rollouts": len(rollout_metrics),
+            "group_key": "cell_id::source_subrun",
             "macro_mean": rollout_macro,
             "per_rollout": rollout_metrics,
+        },
+        "init_group_aggregation": {
+            "independent_init_groups": len(init_group_metrics),
+            "group_key": "ego_init_id",
+            "design_role": "paired clustering unit shared by all available 2x2 cells",
+            "macro_mean": init_group_macro,
+            "per_init_group": init_group_metrics,
         },
     }
 
@@ -616,10 +648,10 @@ def fit_validation_calibration(
     )
     logits = np.asarray(base.logits, dtype=np.float64)
     rollout_indices: Dict[str, List[int]] = collections.defaultdict(list)
+    init_group_ids = set()
     for sample_index, sample in enumerate(samples):
-        rollout_indices[str(sample.get("source_subrun", "<missing>"))].append(
-            sample_index
-        )
+        rollout_indices[rollout_group_key(sample)].append(sample_index)
+        init_group_ids.add(init_group_key(sample))
     temperatures = positive_log_grid(
         args.temperature_min, args.temperature_max, args.temperature_count
     )
@@ -670,7 +702,7 @@ def fit_validation_calibration(
         + abs(math.log(item["covariance_scale"])),
     )
     return {
-        "calibration_schema_version": "multipath_posthoc_calibration_v1",
+        "calibration_schema_version": "multipath_posthoc_calibration_v2",
         "fit_split": "val",
         "fit_criterion": (
             "macro mean over validation rollouts of trajectory mixture NLL per valid step"
@@ -685,6 +717,9 @@ def fit_validation_calibration(
             "covariance_scale_candidates": len(covariance_scales),
             "joint_candidates": len(candidates),
             "independent_validation_rollouts": len(rollout_indices),
+            "validation_rollout_group_key": "cell_id::source_subrun",
+            "independent_validation_init_groups": len(init_group_ids),
+            "validation_init_group_key": "ego_init_id",
             "temperature_range": [float(temperatures[0]), float(temperatures[-1])],
             "covariance_scale_range": [
                 float(covariance_scales[0]),
@@ -753,7 +788,7 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         if args.subset == "all":
             raise
         return {
-            "evaluation_schema_version": "multipath_accuracy_calibration_v1",
+            "evaluation_schema_version": "multipath_accuracy_calibration_v2",
             "status": "not_applicable",
             "reason": "no_full_horizon_samples_in_requested_validation_subset",
             "model": os.path.abspath(args.model),
@@ -765,6 +800,7 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
             "uses_interaction_context": bool(input_count >= 3),
             "samples": 0,
             "independent_rollouts": 0,
+            "independent_init_groups": 0,
         }
     uncalibrated_decoded = decode_raw_predictions(raw_predictions, anchors)
     uncalibrated_metrics = evaluate_decoded(
@@ -829,7 +865,7 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         failing_gates.append("calibrated_invalid_covariance")
 
     return {
-        "evaluation_schema_version": "multipath_accuracy_calibration_v1",
+        "evaluation_schema_version": "multipath_accuracy_calibration_v2",
         "status": "pass" if not failing_gates else "fail",
         "failing_gates": failing_gates,
         "model": os.path.abspath(args.model),
@@ -844,9 +880,8 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         "model_input_count": input_count,
         "uses_interaction_context": bool(input_count >= 3),
         "samples": len(samples),
-        "independent_rollouts": len(
-            {str(sample.get("source_subrun", "<missing>")) for sample in samples}
-        ),
+        "independent_rollouts": len({rollout_group_key(sample) for sample in samples}),
+        "independent_init_groups": len({init_group_key(sample) for sample in samples}),
         "horizon": args.horizon,
         "latency": latency,
         "uncalibrated": uncalibrated_metrics,

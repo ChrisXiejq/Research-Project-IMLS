@@ -54,6 +54,7 @@ def metrics_for(payload: dict) -> dict:
         "status": "pass",
         "samples": int(payload["samples"]),
         "independent_rollouts": int(payload["independent_rollouts"]),
+        "independent_init_groups": int(payload["independent_init_groups"]),
         "top1_ADE_mean": finite(uncalibrated["top1_ADE_mean"], "top1_ADE_mean"),
         "top1_FDE_mean": finite(uncalibrated["top1_FDE_mean"], "top1_FDE_mean"),
         "uncalibrated_trajectory_NLL_per_step_mean": finite(
@@ -99,6 +100,11 @@ def main() -> None:
                 evaluation_path = run_dir / f"validation_{subset}.json"
                 evaluation = json.loads(evaluation_path.read_text())
                 status = evaluation.get("status")
+                if (
+                    evaluation.get("evaluation_schema_version")
+                    != "multipath_accuracy_calibration_v2"
+                ):
+                    raise ValueError(f"Stale evaluation schema: {evaluation_path}")
                 if evaluation.get("split") != "val":
                     raise ValueError(f"Invalid validation artifact: {evaluation_path}")
                 if evaluation.get("subset") != subset:
@@ -116,12 +122,28 @@ def main() -> None:
                         "status": "not_applicable",
                         "samples": 0,
                         "independent_rollouts": 0,
+                        "independent_init_groups": 0,
                         "reason": evaluation.get("reason"),
                     }
                 elif status == "pass":
                     subsets[subset] = metrics_for(evaluation)
                 else:
                     raise ValueError(f"Invalid validation artifact: {evaluation_path}")
+            expected_groups = {
+                "all": (20, 5),
+                "assertive": (10, 5),
+                "reactive": (10, 5),
+            }
+            for subset, (expected_rollouts, expected_inits) in expected_groups.items():
+                observed = subsets[subset]
+                if (
+                    observed["independent_rollouts"] != expected_rollouts
+                    or observed["independent_init_groups"] != expected_inits
+                ):
+                    raise ValueError(
+                        f"{subset} grouping mismatch for {variant}/seed_{seed}: "
+                        f"rollouts={observed['independent_rollouts']} inits={observed['independent_init_groups']}"
+                    )
             runs.append(
                 {
                     "variant": variant,

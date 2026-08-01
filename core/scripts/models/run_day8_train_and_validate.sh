@@ -44,6 +44,10 @@ trap cleanup EXIT
 test -f "${DAY7_RESULTS}/DAY7_COMPLETE.json"
 test -f "${DAY7_RESULTS}/DAY7_MODEL_IMPLEMENTATION_COMPLETE.json"
 
+require_gpu() {
+  "${PYTHON_BIN}" -c 'import sys, tensorflow as tf; devices=tf.config.list_physical_devices("GPU"); print("Day8 GPU devices:", devices); sys.exit(0 if devices else 3)'
+}
+
 "${PYTHON_BIN}" - "${DAY8_RESULTS}/day8_run_contract.json" <<PY
 import json, os, sys
 from pathlib import Path
@@ -76,6 +80,8 @@ try:
     payload = json.load(open(sys.argv[1]))
 except Exception:
     raise SystemExit(1)
+if payload.get("evaluation_schema_version") != "multipath_accuracy_calibration_v2":
+    raise SystemExit(1)
 raise SystemExit(0 if payload.get("status") in ("pass", "not_applicable") else 1)
 PY
 }
@@ -83,6 +89,7 @@ PY
 preflight_dir="${DAY8_RESULTS}/preflight/T2_seed_11"
 mkdir -p "${preflight_dir}"
 if ! json_pass "${preflight_dir}/validation_all.json"; then
+  require_gpu
   echo "[$(date --iso-8601=seconds)] Day 8 TensorFlow preflight"
   "${PYTHON_BIN}" "${SCRIPT_DIR}/train_prediction_model_v2_day8.py" \
     --merged-dir "${DAY7_RESULTS}" \
@@ -97,6 +104,7 @@ if ! json_pass "${preflight_dir}/validation_all.json"; then
     --patience 1 \
     --max-train-samples 32 \
     --max-val-samples 16
+  require_gpu
   "${PYTHON_BIN}" "${SCRIPT_DIR}/evaluate_multipath_model_on_dataset.py" \
     --merged_dir "${DAY7_RESULTS}" \
     --split val \
@@ -118,6 +126,7 @@ for variant in "${variants[@]}"; do
   for seed in "${seeds[@]}"; do
     run_dir="${DAY8_RESULTS}/runs/${variant}/seed_${seed}"
     mkdir -p "${run_dir}"
+    require_gpu
     echo "[$(date --iso-8601=seconds)] train ${variant} seed=${seed}"
     "${PYTHON_BIN}" "${SCRIPT_DIR}/train_prediction_model_v2_day8.py" \
       --merged-dir "${DAY7_RESULTS}" \
@@ -132,6 +141,7 @@ for variant in "${variants[@]}"; do
       --patience "${PATIENCE}"
 
     if ! json_pass "${run_dir}/validation_all.json"; then
+      require_gpu
       echo "[$(date --iso-8601=seconds)] validate/calibrate ${variant} seed=${seed} subset=all"
       "${PYTHON_BIN}" "${SCRIPT_DIR}/evaluate_multipath_model_on_dataset.py" \
         --merged_dir "${DAY7_RESULTS}" \
@@ -147,6 +157,7 @@ for variant in "${variants[@]}"; do
 
     for subset in "${subsets[@]}"; do
       if ! json_pass "${run_dir}/validation_${subset}.json"; then
+        require_gpu
         echo "[$(date --iso-8601=seconds)] validate ${variant} seed=${seed} subset=${subset}"
         "${PYTHON_BIN}" "${SCRIPT_DIR}/evaluate_multipath_model_on_dataset.py" \
           --merged_dir "${DAY7_RESULTS}" \
