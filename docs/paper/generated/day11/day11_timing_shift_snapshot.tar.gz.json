@@ -1,0 +1,8 @@
+{
+  "archive": "/root/autodl-tmp/results/give_way_transformer/day11/day11_timing_shift_v1/day11_timing_shift_snapshot.tar.gz",
+  "archive_sha256": "9928d53821be27a765d1879e0d218fca4284fa216aaccfe309f36a480bfd1ac9",
+  "excludes_model_weights_rasters_and_video": true,
+  "files": 828,
+  "schema_version": "closed_loop_snapshot_v1",
+  "status": "pass"
+}

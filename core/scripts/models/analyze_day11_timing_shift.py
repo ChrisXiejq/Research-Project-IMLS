@@ -56,7 +56,7 @@ def load_rollouts(root: Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     return rows,{"complete":complete,"audit":audit,"contract":contract}
 
 
-def paired(rows: list[dict[str, Any]], left_filter: dict[str, Any], right_filter: dict[str, Any], pair_fields: tuple[str,...], label: str) -> list[dict[str, Any]]:
+def paired(rows: list[dict[str, Any]], left_filter: dict[str, Any], right_filter: dict[str, Any], pair_fields: tuple[str,...], label: str, inference_scope: str) -> list[dict[str, Any]]:
     def select(filters):
         selected={}
         for row in rows:
@@ -67,8 +67,12 @@ def paired(rows: list[dict[str, Any]], left_filter: dict[str, Any], right_filter
     output=[]
     for metric in PRIMARY_METRICS:
         deltas=[left[key][metric]-right[key][metric] for key in sorted(left)]
-        low,high=bootstrap_mean_ci(deltas,f"day11:{label}:{metric}")
-        output.append({"contrast":label,"metric":metric,"left_minus_right_mean":statistics.fmean(deltas),"ci95_low":low,"ci95_high":high,"exact_sign_flip_p":exact_sign_flip_p(deltas),"pairs":len(deltas)})
+        init_position=pair_fields.index("ego_init_id")
+        by_init: dict[Any,list[float]]={}
+        for key,delta in zip(sorted(left),deltas): by_init.setdefault(key[init_position],[]).append(delta)
+        cluster_means=[statistics.fmean(values) for _,values in sorted(by_init.items())]
+        low,high=bootstrap_mean_ci(cluster_means,f"day11:init_cluster:{label}:{metric}")
+        output.append({"inference_scope":inference_scope,"contrast":label,"metric":metric,"left_minus_right_mean":statistics.fmean(deltas),"ci95_low":low,"ci95_high":high,"exact_init_cluster_sign_flip_p":exact_sign_flip_p(cluster_means),"condition_pairs":len(deltas),"independent_init_groups":len(cluster_means)})
     return output
 
 
@@ -80,6 +84,7 @@ def difference_in_differences(
     b_minus: dict[str, Any],
     pair_fields: tuple[str, ...],
     label: str,
+    inference_scope: str,
 ) -> list[dict[str, Any]]:
     def select(filters: dict[str, Any]) -> dict[tuple[Any, ...], dict[str, Any]]:
         return {
@@ -92,10 +97,29 @@ def difference_in_differences(
     if not keys or any(set(group)!=keys for group in groups[1:]): raise ValueError(f"Unbalanced interaction {label}")
     output=[]
     for metric in PRIMARY_METRICS:
-        deltas=[(groups[0][key][metric]-groups[1][key][metric])-(groups[2][key][metric]-groups[3][key][metric]) for key in sorted(keys)]
-        low,high=bootstrap_mean_ci(deltas,f"day11:{label}:{metric}")
-        output.append({"contrast":label,"metric":metric,"left_minus_right_mean":statistics.fmean(deltas),"ci95_low":low,"ci95_high":high,"exact_sign_flip_p":exact_sign_flip_p(deltas),"pairs":len(deltas)})
+        ordered_keys=sorted(keys)
+        deltas=[(groups[0][key][metric]-groups[1][key][metric])-(groups[2][key][metric]-groups[3][key][metric]) for key in ordered_keys]
+        init_position=pair_fields.index("ego_init_id")
+        by_init: dict[Any,list[float]]={}
+        for key,delta in zip(ordered_keys,deltas): by_init.setdefault(key[init_position],[]).append(delta)
+        cluster_means=[statistics.fmean(values) for _,values in sorted(by_init.items())]
+        low,high=bootstrap_mean_ci(cluster_means,f"day11:init_cluster:{label}:{metric}")
+        output.append({"inference_scope":inference_scope,"contrast":label,"metric":metric,"left_minus_right_mean":statistics.fmean(deltas),"ci95_low":low,"ci95_high":high,"exact_init_cluster_sign_flip_p":exact_sign_flip_p(cluster_means),"condition_pairs":len(deltas),"independent_init_groups":len(cluster_means)})
     return output
+
+
+def add_holm_adjustment(contrasts: list[dict[str, Any]]) -> None:
+    scopes: dict[str, list[dict[str, Any]]] = {}
+    for contrast in contrasts:
+        scopes.setdefault(contrast["inference_scope"], []).append(contrast)
+    for rows in scopes.values():
+        ordered = sorted(rows, key=lambda row: row["exact_init_cluster_sign_flip_p"])
+        running = 0.0
+        total = len(ordered)
+        for rank, row in enumerate(ordered):
+            adjusted = min(1.0, (total - rank) * row["exact_init_cluster_sign_flip_p"])
+            running = max(running, adjusted)
+            row["holm_adjusted_p_within_scope"] = running
 
 
 def analyze(root: Path, output_dir: Path) -> dict[str, Any]:
@@ -106,13 +130,13 @@ def analyze(root: Path, output_dir: Path) -> dict[str, Any]:
         summaries.append({"predictor":key[0],"risk_policy":key[1],"target_style":key[2],"target_offset_m":key[3],"rollouts":len(subset),**{f"mean_{metric}":statistics.fmean(r[metric] for r in subset) for metric in PRIMARY_METRICS},"collisions":sum(r["footprint_collision"] for r in subset),"yield_order_failures":sum(1-r["yield_order_valid"] for r in subset)})
     contrasts=[]
     for policy in ("fixed_medium","adaptive"):
-        contrasts+=paired(rows,{"predictor":"B1","risk_policy":policy},{"predictor":"B0","risk_policy":policy},("target_style","target_offset_m","ego_init_id"),f"B1_minus_B0__{policy}")
+        contrasts+=paired(rows,{"predictor":"B1","risk_policy":policy},{"predictor":"B0","risk_policy":policy},("target_style","target_offset_m","ego_init_id"),f"B1_minus_B0__{policy}","predictor_primary")
     for predictor in ("B1","B0"):
-        contrasts+=paired(rows,{"predictor":predictor,"risk_policy":"adaptive"},{"predictor":predictor,"risk_policy":"fixed_medium"},("target_style","target_offset_m","ego_init_id"),f"adaptive_minus_fixed_medium__{predictor}")
+        contrasts+=paired(rows,{"predictor":predictor,"risk_policy":"adaptive"},{"predictor":predictor,"risk_policy":"fixed_medium"},("target_style","target_offset_m","ego_init_id"),f"adaptive_minus_fixed_medium__{predictor}","policy_primary")
     # Difference-in-differences across offsets, evaluated for every predictor/policy combination.
     for predictor in ("B1","B0"):
         for policy in ("fixed_medium","adaptive"):
-            contrasts+=paired(rows,{"predictor":predictor,"risk_policy":policy,"target_offset_m":3.0},{"predictor":predictor,"risk_policy":policy,"target_offset_m":-3.0},("target_style","ego_init_id"),f"offset_p3_minus_m3__{predictor}__{policy}")
+            contrasts+=paired(rows,{"predictor":predictor,"risk_policy":policy,"target_offset_m":3.0},{"predictor":predictor,"risk_policy":policy,"target_offset_m":-3.0},("target_style","ego_init_id"),f"offset_p3_minus_m3__{predictor}__{policy}","offset_primary")
     for policy in ("fixed_medium","adaptive"):
         contrasts+=difference_in_differences(
             rows,
@@ -120,7 +144,7 @@ def analyze(root: Path, output_dir: Path) -> dict[str, Any]:
             {"predictor":"B1","risk_policy":policy,"target_offset_m":-3.0},
             {"predictor":"B0","risk_policy":policy,"target_offset_m":3.0},
             {"predictor":"B0","risk_policy":policy,"target_offset_m":-3.0},
-            ("target_style","ego_init_id"),f"predictor_x_offset__{policy}",
+            ("target_style","ego_init_id"),f"predictor_x_offset__{policy}","predictor_x_offset_primary",
         )
     for predictor in ("B1","B0"):
         contrasts+=difference_in_differences(
@@ -129,10 +153,11 @@ def analyze(root: Path, output_dir: Path) -> dict[str, Any]:
             {"predictor":predictor,"risk_policy":"adaptive","target_offset_m":-3.0},
             {"predictor":predictor,"risk_policy":"fixed_medium","target_offset_m":3.0},
             {"predictor":predictor,"risk_policy":"fixed_medium","target_offset_m":-3.0},
-            ("target_style","ego_init_id"),f"policy_x_offset__{predictor}",
+            ("target_style","ego_init_id"),f"policy_x_offset__{predictor}","policy_x_offset_primary",
         )
+    add_holm_adjustment(contrasts)
     write_csv(output_dir/"day11_rollout_metrics.csv",rows); write_csv(output_dir/"day11_cell_summary.csv",summaries); write_csv(output_dir/"day11_paired_contrasts.csv",contrasts)
-    payload={"schema_version":"day11_timing_shift_analysis_v1","status":"pass","analysis_unit":"paired rollout condition; simulator steps are not treated as independent","rollouts":len(rows),"cells":len(summaries),"primary_metrics":list(PRIMARY_METRICS),"pre_registered_contrasts":contrasts,"safety_gate":{"collisions":sum(r["footprint_collision"] for r in rows),"yield_order_failures":sum(1-r["yield_order_valid"] for r in rows)},"source_contract_schema":sources["contract"]["schema_version"]}
+    payload={"schema_version":"day11_timing_shift_analysis_v3","status":"pass","analysis_unit":"rollout-condition effects aggregated within ego_init_id before inference; five independent init clusters","rollouts":len(rows),"cells":len(summaries),"primary_metrics":list(PRIMARY_METRICS),"pre_registered_contrasts":contrasts,"multiplicity_control":"Holm family-wise adjustment within each declared inference_scope","statistical_notes":["Effect means use all balanced rollout conditions.","Bootstrap intervals and exact sign-flip p-values operate on five ego-init cluster means, not 20 Hz steps or repeated conditions.","With five init clusters, the smallest attainable two-sided exact p-value is 0.0625 before multiplicity correction."],"safety_gate":{"collisions":sum(r["footprint_collision"] for r in rows),"yield_order_failures":sum(1-r["yield_order_valid"] for r in rows)},"source_contract_schema":sources["contract"]["schema_version"]}
     (output_dir/"day11_analysis_summary.json").write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n")
     return payload
 

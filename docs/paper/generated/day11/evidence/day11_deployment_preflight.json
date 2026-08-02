@@ -1,0 +1,145 @@
+{
+  "anchors": {
+    "bytes": 6528,
+    "path": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_clusters_16.npy",
+    "sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982"
+  },
+  "b0": {
+    "deployment": {
+      "calibration_artifact": null,
+      "calibration_fit_split": null,
+      "calibration_model_artifact": null,
+      "calibration_parameters": {
+        "covariance_scale": 1.0,
+        "temperature": 1.0
+      },
+      "calibration_source": null,
+      "model_artifact": {
+        "bytes": 37832101,
+        "files": 4,
+        "path": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_multipath_10",
+        "sha256_tree": "369c09a7aab28a721983f0baa50e7611b3cfc93803b73e600a0b44188d06f8bb"
+      },
+      "model_input_count": 2,
+      "schema_version": "multipath_online_deployment_v1",
+      "uses_interaction_context": false
+    },
+    "numerical_smoke": {
+      "checks": {
+        "covariances_finite": true,
+        "covariances_positive_definite": true,
+        "covariances_symmetric": true,
+        "means_finite": true,
+        "probabilities_finite": true,
+        "probabilities_nonnegative": true,
+        "probabilities_sum_to_one": true
+      },
+      "covariance_shape": [
+        16,
+        25,
+        2,
+        2
+      ],
+      "mean_shape": [
+        16,
+        25,
+        2
+      ],
+      "minimum_covariance_eigenvalue": 1.0001920650715852,
+      "probability_shape": [
+        16
+      ],
+      "probability_sum": 0.9999999766005203,
+      "status": "pass"
+    }
+  },
+  "b1": {
+    "deployment": {
+      "calibration_artifact": {
+        "bytes": 4129,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B1/seed_37/calibration.json",
+        "sha256": "fcfb203384f900ea43d53651934979c660d85be5827944e34a63d2338b2da301"
+      },
+      "calibration_fit_split": "val",
+      "calibration_model_artifact": {
+        "bytes": 45157094,
+        "files": 5,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B1/seed_37/best_model",
+        "sha256_tree": "860e2c4513273982e26cb7ea36177029c1620a3761e631eee64818fb85ec2231"
+      },
+      "calibration_parameters": {
+        "covariance_scale": 0.008270371084000278,
+        "temperature": 1.259921049894873
+      },
+      "calibration_source": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B1/seed_37/calibration.json",
+      "model_artifact": {
+        "bytes": 45157094,
+        "files": 5,
+        "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B1/seed_37/best_model",
+        "sha256_tree": "860e2c4513273982e26cb7ea36177029c1620a3761e631eee64818fb85ec2231"
+      },
+      "model_input_count": 2,
+      "schema_version": "multipath_online_deployment_v1",
+      "uses_interaction_context": false
+    },
+    "numerical_smoke": {
+      "checks": {
+        "covariances_finite": true,
+        "covariances_positive_definite": true,
+        "covariances_symmetric": true,
+        "means_finite": true,
+        "probabilities_finite": true,
+        "probabilities_nonnegative": true,
+        "probabilities_sum_to_one": true
+      },
+      "covariance_shape": [
+        16,
+        25,
+        2,
+        2
+      ],
+      "mean_shape": [
+        16,
+        25,
+        2
+      ],
+      "minimum_covariance_eigenvalue": 0.008271959352821207,
+      "probability_shape": [
+        16
+      ],
+      "probability_sum": 0.9999998422235876,
+      "status": "pass"
+    }
+  },
+  "day8_complete": true,
+  "normalization": {
+    "interaction_normalization": "not_applicable_for_two_input_B1",
+    "past_states": "no explicit normalization",
+    "raster": "shared ResNet preprocess_input contract"
+  },
+  "schema_version": "day9_deployment_preflight_v1",
+  "selected_seed": 37,
+  "selected_variant": "B1",
+  "selection_freeze_sha256": "7d88ca0a7523bed66bcde37b23a48340b83177b724641b244dc182f17974c849",
+  "status": "pass",
+  "warmup_input": {
+    "cell_id": "S0_FIXED",
+    "ego_init_id": 1,
+    "image_shape": [
+      500,
+      500,
+      3
+    ],
+    "jsonl": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/train.jsonl",
+    "jsonl_sha256": "b09e02e735b022ad42df274559e91e6cf4a42e46f55e23e4a2caf68e2073d55b",
+    "past_states_shape": [
+      5,
+      4
+    ],
+    "raster": "/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200/S0_FIXED/scenario_uk_give_way_ego_init_01_smpc_fixed_risk/prediction_dataset/rasters/sample_000000.png",
+    "raster_sha256": "7fdea5a1dddffd0e96d9f94473f1e965056742897b6d1959fca53b28ff5b3067",
+    "sample_id": 0,
+    "source_subrun": "scenario_uk_give_way_ego_init_01_smpc_fixed_risk",
+    "split": "train"
+  }
+}

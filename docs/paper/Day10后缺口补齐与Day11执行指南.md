@@ -91,7 +91,7 @@ Shuffle 保持 receiver 的 raster、target history 和 future label 不变，�
 /root/autodl-tmp/results/give_way_transformer/day10_gaps/context_ablation_v1/CONTEXT_ABLATION_COMPLETE.json
 ```
 
-## 5. Gap 4：Day11 局部时序稳健性
+## 5. Gap 4：Day11 局部时序稳健性（已完成）
 
 ### 5.1 实验矩阵
 
