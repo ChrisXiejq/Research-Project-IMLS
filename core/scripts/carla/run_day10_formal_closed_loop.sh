@@ -190,7 +190,10 @@ if output.exists():
         if not old_git: raise SystemExit("Day 10 legacy contract has no git commit")
         ancestor=subprocess.run(["git","-C",str(repo_dir),"merge-base","--is-ancestor",old_git,current_git]).returncode==0
         if not ancestor: raise SystemExit("Day 10 contract migration is not a fast-forward descendant")
-        changed=subprocess.check_output(["git","-C",str(repo_dir),"diff","--name-only",old_git,current_git],text=True).splitlines()
+        changed=subprocess.check_output(
+          ["git","-C",str(repo_dir),"-c","core.quotepath=false","diff","--name-only",old_git,current_git],
+          text=True,
+        ).splitlines()
         allowed_exact={
           "core/scripts/carla/run_day10_formal_closed_loop.sh",
           "core/scripts/models/audit_day10_closed_loop.py",
