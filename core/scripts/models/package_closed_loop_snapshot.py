@@ -20,6 +20,7 @@ INCLUDE_NAMES = {
     "df_full.csv", "paper_metrics_summary.csv", "comparison_manifest.jsonl",
     "day11_analysis_summary.json", "day11_rollout_metrics.csv", "day11_cell_summary.csv",
     "day11_paired_contrasts.csv", "day11_contract_resume_provenance.json",
+    "day11_audit_repair_provenance.json",
 }
 
 

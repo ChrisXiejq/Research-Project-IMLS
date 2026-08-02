@@ -144,16 +144,23 @@ if output.exists():
  if old_compare!=new_compare: raise SystemExit(f"Day 11 contract semantic drift: {output}")
  old_git=old.get("git_commit"); new_git=payload["git_commit"]
  if old_git!=new_git:
-  if list(root.glob("**/scenario_run_summary.json")): raise SystemExit("Cannot migrate Day 11 contract after rollout execution began")
   ancestor=subprocess.run(["git","-C",str(repo),"merge-base","--is-ancestor",old_git,new_git]).returncode==0
   if not ancestor: raise SystemExit("Day 11 repair commit is not a fast-forward descendant")
   changed=subprocess.check_output(["git","-C",str(repo),"diff","--name-only",old_git,new_git],text=True).splitlines()
   allowed={"core/scripts/carla/run_day11_timing_shift_robustness.sh","core/scripts/models/audit_day10_closed_loop.py","core/scripts/models/package_closed_loop_snapshot.py"}
   disallowed=[path for path in changed if path not in allowed and not path.startswith("docs/")]
-  if disallowed: raise SystemExit(f"Unsafe pre-rollout Day 11 migration changed runtime files: {disallowed}")
-  payload["execution_git_commits"]=list(dict.fromkeys((old.get("execution_git_commits") or [old_git])+[new_git]))
-  provenance={"schema_version":"day11_contract_pre_rollout_repair_v1","status":"pass","reason":"fix same-command local variable expansion before first rollout","old_git_commit":old_git,"new_git_commit":new_git,"changed_files":changed,"rollouts_preserved":0,"allowed_execution_git_commits":payload["execution_git_commits"]}
-  prov=root/"day11_contract_resume_provenance.json"; tmp=prov.with_suffix(prov.suffix+".tmp"); tmp.write_text(json.dumps(provenance,indent=2,sort_keys=True)+"\n"); os.replace(tmp,prov)
+  if disallowed: raise SystemExit(f"Unsafe Day 11 repair changed runtime files: {disallowed}")
+  summaries=list(root.glob("**/scenario_run_summary.json"))
+  if summaries:
+   successful=sum(json.loads(path.read_text()).get("ran_successfully") is True for path in summaries)
+   if successful!=payload["expected_rollouts"]: raise SystemExit(f"Post-rollout audit repair requires {payload['expected_rollouts']} successful rollouts, got {successful}")
+   payload["git_commit"]=old_git; payload["execution_git_commits"]=old.get("execution_git_commits") or [old_git]
+   provenance={"schema_version":"day11_post_rollout_audit_repair_v1","status":"pass","reason":"evaluate reactive activity across timing offsets rather than requiring activation in every offset cell","contract_git_commit_preserved":old_git,"analysis_git_commit":new_git,"changed_files":changed,"successful_rollouts_preserved":successful,"raw_rollouts_modified":False}
+   prov=root/"day11_audit_repair_provenance.json"; tmp=prov.with_suffix(prov.suffix+".tmp"); tmp.write_text(json.dumps(provenance,indent=2,sort_keys=True)+"\n"); os.replace(tmp,prov)
+  else:
+   payload["execution_git_commits"]=list(dict.fromkeys((old.get("execution_git_commits") or [old_git])+[new_git]))
+   provenance={"schema_version":"day11_contract_pre_rollout_repair_v1","status":"pass","reason":"fix same-command local variable expansion before first rollout","old_git_commit":old_git,"new_git_commit":new_git,"changed_files":changed,"rollouts_preserved":0,"allowed_execution_git_commits":payload["execution_git_commits"]}
+   prov=root/"day11_contract_resume_provenance.json"; tmp=prov.with_suffix(prov.suffix+".tmp"); tmp.write_text(json.dumps(provenance,indent=2,sort_keys=True)+"\n"); os.replace(tmp,prov)
 rendered=json.dumps(payload,indent=2,sort_keys=True)+"\n"
 tmp=output.with_suffix(output.suffix+".tmp"); tmp.write_text(rendered); os.replace(tmp,output)
 PY

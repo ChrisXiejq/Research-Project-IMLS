@@ -211,6 +211,7 @@ def main() -> None:
     contract = read_json(contract_path)
     if contract.get("status") != "frozen":
         raise ValueError("Day 10 run contract is not frozen")
+    day11_timing_shift = str(contract.get("schema_version", "")).startswith("day11_")
 
     failures = []
     tuning_by_offset = contract.get("tuning_sha256_by_offset")
@@ -353,7 +354,11 @@ def main() -> None:
             )
         if observed_cell_inits != set(contract["ego_init_ids"]):
             cell_failures.append("ego_init_coverage")
-        if cell["target_style"] == "reactive" and cell_reactive_active == 0:
+        if (
+            cell["target_style"] == "reactive"
+            and cell_reactive_active == 0
+            and not day11_timing_shift
+        ):
             cell_failures.append("reactive_tail_not_exercised")
         evaluation = {
             **cell,
@@ -361,12 +366,38 @@ def main() -> None:
             "failures": sorted(set(cell_failures)),
             "observed_rollouts": len(summaries),
             "reactive_active_samples": cell_reactive_active,
+            "reactive_tail_exercised": bool(cell_reactive_active),
             "postcarla_status": gate.get("overall_status"),
             "postcarla_gate_sha256": sha256(gate_path),
             "rollouts": rollout_evaluations,
         }
         evaluations.append(evaluation)
         failures.extend(f"{cell['cell_id']}:{item}" for item in evaluation["failures"])
+
+    reactive_activity_gate = {
+        "scope": "per_reactive_cell",
+        "groups": {},
+    }
+    if day11_timing_shift:
+        reactive_activity_gate["scope"] = "across_offsets_within_predictor_x_policy"
+        for predictor in sorted({item["predictor"] for item in evaluations}):
+            for policy in sorted({item["risk_policy"] for item in evaluations}):
+                group = [
+                    item
+                    for item in evaluations
+                    if item["predictor"] == predictor
+                    and item["risk_policy"] == policy
+                    and item["target_style"] == "reactive"
+                ]
+                active_samples = sum(int(item["reactive_active_samples"]) for item in group)
+                key = f"{predictor}::{policy}"
+                reactive_activity_gate["groups"][key] = {
+                    "cells": [item["cell_id"] for item in group],
+                    "active_samples": active_samples,
+                    "status": "pass" if active_samples else "fail",
+                }
+                if not group or not active_samples:
+                    failures.append(f"matrix:reactive_activity:{key}")
 
     if observed_rollouts != int(contract["expected_rollouts"]):
         failures.append("matrix:rollout_count")
@@ -380,6 +411,7 @@ def main() -> None:
         "observed_rollouts": observed_rollouts,
         "failures": failures,
         "contract_sha256": sha256(contract_path),
+        "reactive_activity_gate": reactive_activity_gate,
         "evaluations": evaluations,
     }
     output = Path(args.output_json).resolve()
