@@ -64,6 +64,11 @@ logs/
 wandb/
 lightning_logs/
 runs/
+# Day 10 raw compact evidence is 125 MB and exceeds GitHub's single-file
+# limit.  Audited manifests, per-rollout tables and derived statistics remain
+# versioned under docs/paper/generated/day10/.
+docs/paper/generated/day10/day10_formal_snapshot.tar.gz
+docs/paper/generated/day10/day10_df_full.tar.gz
 *.ckpt
 *.h5
 *.pb

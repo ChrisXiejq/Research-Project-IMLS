@@ -21,7 +21,7 @@
 
 `day5/` 保存 init01–05 四单元 20-rollout 的 19-gate 完整冻结审计，以及覆盖模型、行为参数、runner/scenario/tuning/init 文件哈希的 frozen collection config。云端对应路径为 `/root/autodl-tmp/results/give_way_transformer/day5/final/`。
 
-`day6/` 保存 200-rollout 正式 V2 数据采集证据；`day7/` 保存 merge/split 与五种模型实现 smoke；`day8/` 保存 15-run validation、冻结选择和一次性 test；`day9/` 保存 8-arm CARLA deployment smoke 的完成标记、审计、provenance 与 110-file compact snapshot。Day 9 仅是 development smoke，不属于正式 closed-loop outcome matrix。
+`day6/` 保存 200-rollout 正式 V2 数据采集证据；`day7/` 保存 merge/split 与五种模型实现 smoke；`day8/` 保存 15-run validation、冻结选择和一次性 test；`day9/` 保存 8-arm CARLA deployment smoke；`day10/` 保存 80-rollout 正式闭环矩阵的审计、逐 rollout 指标、配对 contrasts 与统计摘要。Day 9 仅是 development smoke；Day 10 才是正式 closed-loop outcome matrix。
 
 解释和论文 claim 以：
 
@@ -31,6 +31,8 @@
 ../Day3_GMM评估器与校准报告.md
 ../Day4_V2交互数据链路与ReactiveTarget报告.md
 ../Day5_开发实验与Reactive参数冻结报告.md
+../Day8最终Test结果与结论.md
+../Day10正式闭环结果与结论.md
 ../两周_最终研究主线_数据扩展与实验执行方案.md
 ```
 

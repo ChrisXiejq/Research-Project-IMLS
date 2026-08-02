@@ -31,6 +31,10 @@ INCLUDE_NAMES = {
     "risk_by_conflict_distance_summary.json",
     "risk_by_conflict_distance_summary.csv",
     "risk_by_conflict_distance_comparison.csv",
+    # Per-rollout outcomes are required for paired statistics.  The aggregate
+    # paper table alone is not sufficient to reproduce confidence intervals or
+    # interaction contrasts.
+    "df_full.csv",
     "paper_metrics_summary.csv",
     "comparison_manifest.jsonl",
 }

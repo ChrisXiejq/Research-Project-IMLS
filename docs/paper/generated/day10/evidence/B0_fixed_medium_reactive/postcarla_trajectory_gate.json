@@ -1,0 +1,248 @@
+{
+  "evaluations": [
+    {
+      "collision_envelope_logged": true,
+      "completion_valid": true,
+      "ego_key": "ego_3",
+      "errors": [],
+      "is_required_policy": true,
+      "pair_safety": [
+        {
+          "collision_duration_s": 0.0,
+          "collision_first_time_s": null,
+          "collision_last_time_s": null,
+          "collision_steps": 0,
+          "footprint_collision": false,
+          "min_center_distance_m": 4.330941164392526,
+          "min_center_step": 48,
+          "min_center_time_s": 977.3556591100969,
+          "min_footprint_separation_m": 0.8390618828096366,
+          "min_footprint_step": 50,
+          "min_footprint_time_s": 977.4556591100968,
+          "target_key": "target_2"
+        }
+      ],
+      "policy": "smpc_fixed_risk",
+      "scenario_dir": "/root/autodl-tmp/results/give_way_transformer/day10/day10_formal_v1/B0_fixed_medium_reactive/scenario_uk_give_way_ego_init_46_smpc_fixed_risk",
+      "solver_failure_frac": 0.004132231404958678,
+      "status": "PASS",
+      "target_keys": [
+        "target_2"
+      ],
+      "warnings": [],
+      "yield_rules": [
+        {
+          "conflict_point_xy": [
+            30.221257209777832,
+            3.72460675239563
+          ],
+          "conflict_radius_m": 4.0,
+          "ego_enter_time_s": 978.9056591689587,
+          "ego_exit_time_s": 980.955659199506,
+          "target_clears_before_ego_enters": true,
+          "target_enter_time_s": 976.1056591272354,
+          "target_exit_time_s": 977.455659147352,
+          "target_key": "target_2"
+        }
+      ]
+    },
+    {
+      "collision_envelope_logged": true,
+      "completion_valid": true,
+      "ego_key": "ego_3",
+      "errors": [],
+      "is_required_policy": true,
+      "pair_safety": [
+        {
+          "collision_duration_s": 0.0,
+          "collision_first_time_s": null,
+          "collision_last_time_s": null,
+          "collision_steps": 0,
+          "footprint_collision": false,
+          "min_center_distance_m": 4.543220716822272,
+          "min_center_step": 40,
+          "min_center_time_s": 999.7157282158714,
+          "min_footprint_separation_m": 1.1073864239981686,
+          "min_footprint_step": 42,
+          "min_footprint_time_s": 999.8157282158713,
+          "target_key": "target_2"
+        }
+      ],
+      "policy": "smpc_fixed_risk",
+      "scenario_dir": "/root/autodl-tmp/results/give_way_transformer/day10/day10_formal_v1/B0_fixed_medium_reactive/scenario_uk_give_way_ego_init_47_smpc_fixed_risk",
+      "solver_failure_frac": 0.0,
+      "status": "PASS",
+      "target_keys": [
+        "target_2"
+      ],
+      "warnings": [],
+      "yield_rules": [
+        {
+          "conflict_point_xy": [
+            29.595783233642578,
+            3.7115222215652466
+          ],
+          "conflict_radius_m": 4.0,
+          "ego_enter_time_s": 1000.8157282620668,
+          "ego_exit_time_s": 1002.6157282888889,
+          "target_clears_before_ego_enters": true,
+          "target_enter_time_s": 998.9157282337546,
+          "target_exit_time_s": 999.7157282456756,
+          "target_key": "target_2"
+        }
+      ]
+    },
+    {
+      "collision_envelope_logged": true,
+      "completion_valid": true,
+      "ego_key": "ego_3",
+      "errors": [],
+      "is_required_policy": true,
+      "pair_safety": [
+        {
+          "collision_duration_s": 0.0,
+          "collision_first_time_s": null,
+          "collision_last_time_s": null,
+          "collision_steps": 0,
+          "footprint_collision": false,
+          "min_center_distance_m": 4.577838221991885,
+          "min_center_step": 48,
+          "min_center_time_s": 1021.5510844416895,
+          "min_footprint_separation_m": 1.1184883358607784,
+          "min_footprint_step": 48,
+          "min_footprint_time_s": 1021.5510844416895,
+          "target_key": "target_2"
+        }
+      ],
+      "policy": "smpc_fixed_risk",
+      "scenario_dir": "/root/autodl-tmp/results/give_way_transformer/day10/day10_formal_v1/B0_fixed_medium_reactive/scenario_uk_give_way_ego_init_48_smpc_fixed_risk",
+      "solver_failure_frac": 0.004201680672268907,
+      "status": "PASS",
+      "target_keys": [
+        "target_2"
+      ],
+      "warnings": [],
+      "yield_rules": [
+        {
+          "conflict_point_xy": [
+            30.079745292663574,
+            3.668249011039734
+          ],
+          "conflict_radius_m": 4.0,
+          "ego_enter_time_s": 1023.1010845005512,
+          "ego_exit_time_s": 1025.2010845318437,
+          "target_clears_before_ego_enters": true,
+          "target_enter_time_s": 1020.351084459573,
+          "target_exit_time_s": 1021.6010844781995,
+          "target_key": "target_2"
+        }
+      ]
+    },
+    {
+      "collision_envelope_logged": true,
+      "completion_valid": true,
+      "ego_key": "ego_3",
+      "errors": [],
+      "is_required_policy": true,
+      "pair_safety": [
+        {
+          "collision_duration_s": 0.0,
+          "collision_first_time_s": null,
+          "collision_last_time_s": null,
+          "collision_steps": 0,
+          "footprint_collision": false,
+          "min_center_distance_m": 4.610481068369436,
+          "min_center_step": 45,
+          "min_center_time_s": 1045.0203232429901,
+          "min_footprint_separation_m": 1.1561054928566235,
+          "min_footprint_step": 45,
+          "min_footprint_time_s": 1045.0203232429901,
+          "target_key": "target_2"
+        }
+      ],
+      "policy": "smpc_fixed_risk",
+      "scenario_dir": "/root/autodl-tmp/results/give_way_transformer/day10/day10_formal_v1/B0_fixed_medium_reactive/scenario_uk_give_way_ego_init_49_smpc_fixed_risk",
+      "solver_failure_frac": 0.004484304932735426,
+      "status": "PASS",
+      "target_keys": [
+        "target_2"
+      ],
+      "warnings": [],
+      "yield_rules": [
+        {
+          "conflict_point_xy": [
+            30.29502010345459,
+            3.692402720451355
+          ],
+          "conflict_radius_m": 4.0,
+          "ego_enter_time_s": 1046.5703232996166,
+          "ego_exit_time_s": 1048.670323330909,
+          "target_clears_before_ego_enters": true,
+          "target_enter_time_s": 1043.8703232593834,
+          "target_exit_time_s": 1045.0703232772648,
+          "target_key": "target_2"
+        }
+      ]
+    },
+    {
+      "collision_envelope_logged": true,
+      "completion_valid": true,
+      "ego_key": "ego_3",
+      "errors": [],
+      "is_required_policy": true,
+      "pair_safety": [
+        {
+          "collision_duration_s": 0.0,
+          "collision_first_time_s": null,
+          "collision_last_time_s": null,
+          "collision_steps": 0,
+          "footprint_collision": false,
+          "min_center_distance_m": 5.126695715743496,
+          "min_center_step": 40,
+          "min_center_time_s": 1067.9255911670607,
+          "min_footprint_separation_m": 1.7972736600469343,
+          "min_footprint_step": 41,
+          "min_footprint_time_s": 1067.9755911670607,
+          "target_key": "target_2"
+        }
+      ],
+      "policy": "smpc_fixed_risk",
+      "scenario_dir": "/root/autodl-tmp/results/give_way_transformer/day10/day10_formal_v1/B0_fixed_medium_reactive/scenario_uk_give_way_ego_init_50_smpc_fixed_risk",
+      "solver_failure_frac": 0.00411522633744856,
+      "status": "PASS",
+      "target_keys": [
+        "target_2"
+      ],
+      "warnings": [],
+      "yield_rules": [
+        {
+          "conflict_point_xy": [
+            30.139077186584473,
+            3.669605016708374
+          ],
+          "conflict_radius_m": 4.0,
+          "ego_enter_time_s": 1069.2255912162364,
+          "ego_exit_time_s": 1071.3755912482738,
+          "target_clears_before_ego_enters": true,
+          "target_enter_time_s": 1067.0255911834538,
+          "target_exit_time_s": 1067.8755911961198,
+          "target_key": "target_2"
+        }
+      ]
+    }
+  ],
+  "gate_settings": {
+    "clearance_tolerance_s": 0.2,
+    "conflict_radius_m": 4.0,
+    "footprint_margin_m": 0.25,
+    "max_solver_failure_frac": 0.05,
+    "require_collision_envelope_log": true,
+    "required_policies": [
+      "smpc_fixed_risk"
+    ],
+    "source": "script_defaults"
+  },
+  "generated_at": "2026-08-02T12:25:00",
+  "overall_status": "PASS",
+  "results_dir": "/root/autodl-tmp/results/give_way_transformer/day10/day10_formal_v1/B0_fixed_medium_reactive"
+}
