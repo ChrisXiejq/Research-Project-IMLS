@@ -1,0 +1,34 @@
+{
+  "audit": "day13_filter_audit.json",
+  "files": {
+    "all": {
+      "bytes": 55873600,
+      "path": "all.jsonl",
+      "sha256": "dd8aad6da7c4762807a475ebe4cdc4d55ef366a15a529f4f3d5c744b8ad358c9"
+    },
+    "test": {
+      "bytes": 5673913,
+      "path": "test.jsonl",
+      "sha256": "29291fe2a172047267c3a0c4c3d5693519f550881010a965fb60166a5013d770"
+    },
+    "train": {
+      "bytes": 44390720,
+      "path": "train.jsonl",
+      "sha256": "1ace230f87a1fff60539e6e076737f10dcab35ae476b039c8d4fb54137f6ecb6"
+    },
+    "val": {
+      "bytes": 5808967,
+      "path": "val.jsonl",
+      "sha256": "5ad6210b44b83f5c2ea3a8e64eaae32413bc73bdd337189999d2778b20c993ed"
+    }
+  },
+  "normalization": {
+    "path": "interaction_normalization_train.json",
+    "sha256": "efb8503a734c3c347f34ce6f18ccb4c32e1fbd69fbda39bbd080cc1bc42a4eec"
+  },
+  "original_day7_results": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1",
+  "schema_version": "day13_collision_filtered_merged_dataset_v1",
+  "status": "pass",
+  "test_accessed": false,
+  "training_filter": "exclude every usable training sample from the six rollout directories with native CARLA callbacks"
+}

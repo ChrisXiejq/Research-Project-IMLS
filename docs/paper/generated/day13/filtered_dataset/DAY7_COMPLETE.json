@@ -1,0 +1,15 @@
+{
+  "full_horizon_sample_count": null,
+  "manifest_sha256": "c25fdd36b7f13d52da640049170b3dcac1fb6b323cb8838fc4528653205ea8c5",
+  "normalization_sha256": "efb8503a734c3c347f34ce6f18ccb4c32e1fbd69fbda39bbd080cc1bc42a4eec",
+  "rollout_count": 194,
+  "schema_version": "day13_filtered_day7_compatibility_gate_v1",
+  "source_hashes": {
+    "collision_audit": "b428cc1cc1963b08411cca1a31474364b73815be627b017fb31176d6f500aa7b",
+    "collision_rollouts": "e051dc600b2b5d837c65fa9fe4b57cae8b24a933f5f404ca7e2bdc20f320cab8",
+    "day7_complete": "0c7aeeac95e691ad09b4a367bea18bfef5bae209ad9446988af7107a155b5040"
+  },
+  "split_audit_sha256": "3d48151fb8bb4f788a137217e869240c42b1cf9ca10e9a76b28ab3d7cbc99835",
+  "status": "pass",
+  "usable_sample_count": 4875
+}

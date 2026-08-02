@@ -1,0 +1,9 @@
+threat_id,threat,mitigation,remaining_boundary
+T1,Only five independent validation/test init groups,"rollout-macro metrics, init-cluster bootstrap/sign-flip inference",minimum two-sided exact p=0.0625
+T2,Single CARLA map and controlled give-way geometry,"factorial target style, risk and ±3 m timing shifts",no cross-map or real-world generalisation claim
+T3,Day6 callback frames lack per-rollout sample-clock anchor,whole-rollout conservative exclusion and 15-run sensitivity,exact affected-window fraction remains unidentified
+T4,Supervisor and solver can mask predictor/controller effects,A3 authority regime plus supervisor/solver mechanism metrics,closed-loop effect remains a coupled-system property
+T5,Zero observed closed-loop collisions,report event count and footprint margins separately,does not estimate zero collision probability
+T6,Global calibration fails in response-active tail,report aggregate and response-active calibration separately,tail calibration requires more interaction data
+T7,Nominal and shifted timing batches ran separately,contract/hash compatibility gate and shared five init groups,residual batch effect cannot be fully excluded
+T8,Post-hoc filtered sensitivity reuses validation,original experiment remains primary; no filtered test evaluation,"sensitivity supports robustness, not new model selection"

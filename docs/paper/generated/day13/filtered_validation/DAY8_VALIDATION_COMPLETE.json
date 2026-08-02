@@ -1,0 +1,9 @@
+{
+  "observed_runs": 15,
+  "provisional_representative_seed": 11,
+  "provisional_selected_variant": "B1",
+  "status": "pass",
+  "test_accessed": false,
+  "validation_summary": "/root/autodl-tmp/results/give_way_transformer/day13/day13_collision_filtered_v1/filtered_validation/day8_validation_summary.json",
+  "validation_summary_sha256": "94129bb18d70efa78548f30e91a79dbb47095ca6b8fc080074b1cc65f1516009"
+}

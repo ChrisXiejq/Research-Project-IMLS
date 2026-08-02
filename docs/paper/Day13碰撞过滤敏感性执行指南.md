@@ -1,6 +1,8 @@
 # Day13 碰撞 rollout 过滤敏感性执行指南
 
 > 定位：这是 Day12 collision audit 触发的 **post-hoc training-data sensitivity**，不是新的主体研究问题，也不替代原始 Day8 model selection。
+>
+> 状态：**2026-08-02 已完成，15/15 runs PASS，B1 架构选择保持不变。**最终结果见 `Day13结果与论文数字Manifest.md`。
 
 ## 1. 为什么需要做
 
@@ -88,3 +90,15 @@ cat "$DAY13_RESULTS/DAY13_COMPLETE.json"
 - completion status = pass。
 
 完成后只需通知我。我会拉取小型 audit/summary/CSV，判断 B1 排名是否稳健，然后进入论文数字 manifest、核心表格和图的生成，不需要拉取全部 sensitivity model weights。
+
+## 7. 实际完成结果
+
+- filtered train usable windows：`3874`；排除 `162/4036 = 4.0139%`；
+- 训练/验证：`5 variants × 3 seeds = 15/15` 完成；
+- 原始与过滤后 ranking：`B1 > B2-D > T2 > T1 > B2-M`；
+- B1 validation macro NLL：原始 median `1.86055`，过滤后 median `1.86218`，matched-seed median delta `+0.00132`；
+- B1 reactive ADE matched-seed median delta：`+0.00318 m`；
+- 原始 representative seed 为 37，过滤后为 11；这不改变架构层结论；
+- `test_accessed=false`，没有用 sensitivity 重新打开 test 或替换 Day10 predictor。
+
+因此 `H13-Sensitivity` 获支持：保守删除全部 callback-containing training rollouts 后，B1 仍是 validation-only 选择。该结果只用于反驳“少数 callback rollouts 决定模型排名”这一数据质量威胁。
