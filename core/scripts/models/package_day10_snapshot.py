@@ -15,6 +15,7 @@ INCLUDE_NAMES = {
     "day10_run_contract.json",
     "day10_deployment_preflight.json",
     "day10_closed_loop_audit.json",
+    "day10_contract_resume_provenance.json",
     "DAY10_COMPLETE.json",
     "tuning_day10_frozen.json",
     "scenario_run_summary.json",

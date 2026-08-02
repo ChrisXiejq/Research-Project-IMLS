@@ -11,6 +11,9 @@ from pathlib import Path
 
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(SCRIPT_DIR))
+
+from audit_day10_closed_loop import preflight_semantics, semantic_sha256
 
 
 def write_json(path: Path, payload: dict) -> None:
@@ -186,12 +189,15 @@ class Day10AuditTest(unittest.TestCase):
                 "target_offset_m": 0.0,
                 "target_speed_mps": 9.0,
                 "git_commit": "fixturecommit",
+                "execution_git_commits": ["oldfixturecommit", "fixturecommit"],
                 "reactive_parameters": {
                     "caution_speed_mps": 4.5,
                     "minimum_speed_mps": 2.5,
                 },
                 "tuning_sha256": hashlib.sha256(tuning_path.read_bytes()).hexdigest(),
-                "preflight_sha256": hashlib.sha256(preflight_path.read_bytes()).hexdigest(),
+                "preflight_semantic_sha256": semantic_sha256(
+                    preflight_semantics(json.loads(preflight_path.read_text()))
+                ),
                 "anchors_sha256": "anchorhash",
                 "normalization": normalization,
                 "predictors": {
@@ -209,6 +215,16 @@ class Day10AuditTest(unittest.TestCase):
             contract_path = root / "day10_run_contract.json"
             output = root / "day10_closed_loop_audit.json"
             write_json(contract_path, contract)
+            write_json(
+                root / "day10_contract_resume_provenance.json",
+                {
+                    "status": "pass",
+                    "allowed_execution_git_commits": [
+                        "oldfixturecommit",
+                        "fixturecommit",
+                    ],
+                },
+            )
             subprocess.run(
                 [
                     sys.executable,

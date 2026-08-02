@@ -133,6 +133,23 @@ from pathlib import Path
 preflight_path,output,tuning_path,day9_complete,init_dir,repo_dir=map(Path,[sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[5],sys.argv[6],sys.argv[7]])
 reactive=json.loads(sys.argv[4]); preflight=json.loads(preflight_path.read_text())
 if json.loads(day9_complete.read_text()).get("status") != "pass": raise SystemExit("Day 9 is not complete")
+def preflight_semantics(value):
+    return {
+      "status":value.get("status"),"selected_variant":value.get("selected_variant"),"selected_seed":value.get("selected_seed"),
+      "selection_freeze_sha256":value.get("selection_freeze_sha256"),"anchors":value.get("anchors"),
+      "normalization":value.get("normalization"),"warmup_input":value.get("warmup_input"),
+      "b1_deployment":(value.get("b1") or {}).get("deployment"),
+      "b1_numerical_status":((value.get("b1") or {}).get("numerical_smoke") or {}).get("status"),
+      "b1_numerical_checks":((value.get("b1") or {}).get("numerical_smoke") or {}).get("checks"),
+      "b0_deployment":(value.get("b0") or {}).get("deployment"),
+      "b0_numerical_status":((value.get("b0") or {}).get("numerical_smoke") or {}).get("status"),
+      "b0_numerical_checks":((value.get("b0") or {}).get("numerical_smoke") or {}).get("checks"),
+    }
+def semantic_sha256(value):
+    return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+def atomic_json(path,value):
+    temporary=path.with_suffix(path.suffix+".tmp"); temporary.write_text(json.dumps(value,indent=2,sort_keys=True)+"\n"); os.replace(temporary,path)
+current_git=subprocess.check_output(["git","-C",str(repo_dir),"rev-parse","HEAD"],text=True).strip()
 cells=[]
 for predictor in ("B1","B0"):
     for policy in ("fixed_aggressive","fixed_medium","fixed_conservative","adaptive"):
@@ -140,7 +157,7 @@ for predictor in ("B1","B0"):
             cells.append({"cell_id":f"{predictor}_{policy}_{style}","predictor":predictor,"risk_policy":policy,"target_style":style})
 init_hashes={str(i):hashlib.sha256((init_dir/f"ego_init_{i}.json").read_bytes()).hexdigest() for i in range(46,51)}
 payload={
- "schema_version":"day10_formal_closed_loop_contract_v1","status":"frozen","formal_evidence":True,
+ "schema_version":"day10_formal_closed_loop_contract_v2","status":"frozen","formal_evidence":True,
  "research_comparison":"B1_finetuned_vs_B0_pretrained_x_fixed_frontier_vs_adaptive_x_target_style",
  "ego_init_ids":list(range(46,51)),"target_offset_m":0.0,"target_speed_mps":9.0,
  "authority_regime":"A3_risk_owned_yield","expected_rollouts":80,"cells":cells,
@@ -153,16 +170,51 @@ payload={
  "adaptive_parameters":{"variant_name":"floor_weak","approach_preclearance_floor":1.66,"critical_preclearance_floor":1.72,"near_preclearance_floor":1.78},
  "reactive_parameters":reactive,"init_sha256":init_hashes,
  "tuning_sha256":hashlib.sha256(tuning_path.read_bytes()).hexdigest(),
- "preflight_sha256":hashlib.sha256(preflight_path.read_bytes()).hexdigest(),
+ "preflight_semantic_sha256":semantic_sha256(preflight_semantics(preflight)),
  "day9_complete_sha256":hashlib.sha256(day9_complete.read_bytes()).hexdigest(),
- "git_commit":subprocess.check_output(["git","-C",str(repo_dir),"rev-parse","HEAD"],text=True).strip(),
+ "git_commit":current_git,"execution_git_commits":[current_git],
  "analysis_unit":"paired rollout condition (ego_init_id,target_style)",
  "primary_factors":["predictor","risk_policy","target_style"],
  "no_post_result_tuning":True,
 }
-if output.exists() and json.loads(output.read_text()) != payload:
-    raise SystemExit(f"Day 10 contract drift: {output}")
-temporary=output.with_suffix(output.suffix+".tmp"); temporary.write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n"); os.replace(temporary,output)
+if output.exists():
+    existing=json.loads(output.read_text())
+    if existing.get("schema_version")=="day10_formal_closed_loop_contract_v2":
+        payload["execution_git_commits"]=existing.get("execution_git_commits") or [existing.get("git_commit")]
+        if existing != payload: raise SystemExit(f"Day 10 contract drift: {output}")
+    elif existing.get("schema_version")=="day10_formal_closed_loop_contract_v1":
+        ignored={"schema_version","preflight_sha256","git_commit"}
+        drift=[key for key,value in existing.items() if key not in ignored and payload.get(key)!=value]
+        if drift: raise SystemExit(f"Day 10 legacy contract semantic drift keys: {drift}")
+        old_git=existing.get("git_commit")
+        if not old_git: raise SystemExit("Day 10 legacy contract has no git commit")
+        ancestor=subprocess.run(["git","-C",str(repo_dir),"merge-base","--is-ancestor",old_git,current_git]).returncode==0
+        if not ancestor: raise SystemExit("Day 10 contract migration is not a fast-forward descendant")
+        changed=subprocess.check_output(["git","-C",str(repo_dir),"diff","--name-only",old_git,current_git],text=True).splitlines()
+        allowed_exact={
+          "core/scripts/carla/run_day10_formal_closed_loop.sh",
+          "core/scripts/models/audit_day10_closed_loop.py",
+          "core/scripts/models/package_day10_snapshot.py",
+          "core/scripts/models/tests/test_day10_closed_loop_audit.py",
+        }
+        disallowed=[path for path in changed if path not in allowed_exact and not path.startswith("docs/")]
+        if disallowed: raise SystemExit(f"Unsafe Day 10 contract migration changed runtime files: {disallowed}")
+        payload["execution_git_commits"]=list(dict.fromkeys([old_git,current_git]))
+        provenance={
+          "schema_version":"day10_contract_resume_provenance_v1","status":"pass",
+          "reason":"replace nondeterministic full preflight hash with stable deployment semantics",
+          "old_contract_schema":existing.get("schema_version"),"new_contract_schema":payload["schema_version"],
+          "old_git_commit":old_git,"new_git_commit":current_git,
+          "allowed_execution_git_commits":payload["execution_git_commits"],"changed_files":changed,
+          "old_preflight_observed_sha256":existing.get("preflight_sha256"),
+          "new_preflight_observed_sha256":hashlib.sha256(preflight_path.read_bytes()).hexdigest(),
+          "preflight_semantic_sha256":payload["preflight_semantic_sha256"],
+          "raw_rollouts_preserved":True,
+        }
+        atomic_json(output.parent/"day10_contract_resume_provenance.json",provenance)
+    else:
+        raise SystemExit(f"Unsupported Day 10 contract schema: {existing.get('schema_version')}")
+atomic_json(output,payload)
 PY
 
 postprocess_cell() {

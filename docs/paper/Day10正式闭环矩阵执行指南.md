@@ -106,6 +106,8 @@ find "$DAY10_RESULTS" -name scenario_run_summary.json -type f | wc -l
 
 服务器中断后，保持同一 Git commit、环境变量和 `DAY10_RESULTS`，原样重跑 `nohup` 命令；`--skip_completed_subruns` 会跳过成功项。不得删除失败证据、修改 contract 或根据中期趋势调参。
 
+首次中断审计记录：Day 10 在 16 个成功 rollout 后因 CARLA `world.apply_settings` 超时停止；第 17 个目录明确记录 `ran_successfully=false`，因此不被 resume skip。随后发现 v1 contract 错误冻结了包含 GPU 浮点 warm-up 诊断的整个 preflight JSON 字节哈希，同一模型与配置在重跑 preflight 时也会产生无意义 hash drift。v2 contract 仅冻结 model/calibration/anchors/normalization、warm-up input hashes 和数值 checks 等稳定语义字段。一次性 migration 只在旧、新合同除 preflight hash/Git 外完全相同，且 Git diff 仅包含 runner/audit/docs 修复时允许；它记录旧/新 commit、观测 hash 和 changed files 到 `day10_contract_resume_provenance.json`，保留已有 16 个 raw rollouts。模型、控制器、scenario、tuning 或 init 的任何变化仍会拒绝续跑。
+
 最终检查：
 
 ```bash

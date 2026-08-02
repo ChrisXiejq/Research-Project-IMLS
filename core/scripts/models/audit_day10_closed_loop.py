@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -12,6 +13,30 @@ import numpy as np
 
 from audit_day9_smoke import atomic_json, finite_summary, read_json, read_jsonl, sha256
 from audit_day9_smoke import solver_failed, warmup_passed
+
+
+def preflight_semantics(preflight: dict) -> dict:
+    """Return deployment invariants, excluding nondeterministic GPU float diagnostics."""
+    return {
+        "status": preflight.get("status"),
+        "selected_variant": preflight.get("selected_variant"),
+        "selected_seed": preflight.get("selected_seed"),
+        "selection_freeze_sha256": preflight.get("selection_freeze_sha256"),
+        "anchors": preflight.get("anchors"),
+        "normalization": preflight.get("normalization"),
+        "warmup_input": preflight.get("warmup_input"),
+        "b1_deployment": (preflight.get("b1") or {}).get("deployment"),
+        "b1_numerical_status": ((preflight.get("b1") or {}).get("numerical_smoke") or {}).get("status"),
+        "b1_numerical_checks": ((preflight.get("b1") or {}).get("numerical_smoke") or {}).get("checks"),
+        "b0_deployment": (preflight.get("b0") or {}).get("deployment"),
+        "b0_numerical_status": ((preflight.get("b0") or {}).get("numerical_smoke") or {}).get("status"),
+        "b0_numerical_checks": ((preflight.get("b0") or {}).get("numerical_smoke") or {}).get("checks"),
+    }
+
+
+def semantic_sha256(payload: dict) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def deployment_failures(deployment: dict, predictor: str, contract: dict) -> list[str]:
@@ -68,7 +93,8 @@ def prediction_failures(rows: list[dict], cell: dict, contract: dict) -> tuple[l
             failures.append("risk_policy_label")
         if row.get("protocol_id") != "day10_a3_heldout_closed_loop_v1":
             failures.append("protocol_id")
-        if row.get("git_commit") != contract["git_commit"]:
+        allowed_commits = contract.get("execution_git_commits") or [contract["git_commit"]]
+        if row.get("git_commit") not in allowed_commits:
             failures.append("git_commit")
         if row.get("target_style") != expected_style:
             failures.append("target_style")
@@ -185,14 +211,28 @@ def main() -> None:
         raise ValueError("Day 10 run contract is not frozen")
 
     failures = []
-    frozen_inputs = {
-        "tuning_day10_frozen.json": "tuning_sha256",
-        "day10_deployment_preflight.json": "preflight_sha256",
-    }
-    for filename, contract_key in frozen_inputs.items():
-        path = root / filename
-        if not path.is_file() or sha256(path) != contract.get(contract_key):
-            failures.append(f"matrix:{contract_key}")
+    tuning_path = root / "tuning_day10_frozen.json"
+    if not tuning_path.is_file() or sha256(tuning_path) != contract.get("tuning_sha256"):
+        failures.append("matrix:tuning_sha256")
+    preflight_path = root / "day10_deployment_preflight.json"
+    if (
+        not preflight_path.is_file()
+        or semantic_sha256(preflight_semantics(read_json(preflight_path)))
+        != contract.get("preflight_semantic_sha256")
+    ):
+        failures.append("matrix:preflight_semantics")
+    allowed_commits = contract.get("execution_git_commits") or [contract.get("git_commit")]
+    if len(allowed_commits) > 1:
+        provenance_path = root / "day10_contract_resume_provenance.json"
+        if not provenance_path.is_file():
+            failures.append("matrix:resume_provenance")
+        else:
+            provenance = read_json(provenance_path)
+            if (
+                provenance.get("status") != "pass"
+                or provenance.get("allowed_execution_git_commits") != allowed_commits
+            ):
+                failures.append("matrix:resume_provenance")
     evaluations = []
     observed_rollouts = 0
     for cell in contract["cells"]:
