@@ -155,12 +155,43 @@ PYTHON_BIN=/root/miniconda3/envs/carla_modern/bin/python \
 bash core/scripts/models/run_interaction_context_ablation.sh
 ```
 
-Day11 需要 CARLA server 已启动、Gurobi 可用：
+Day11 需要先在独立终端启动 CARLA：
 
 ```bash
+cd /root/autodl-tmp/carla_0.9.14
+./CarlaUE4.sh -RenderOffScreen -quality-level=Low
+```
+
+然后在实验终端固定完整环境并后台运行：
+
+```bash
+cd /root/autodl-tmp/Research-Project-IMLS-day8
+
 export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
-PYTHON_BIN=/root/miniconda3/envs/carla_modern/bin/python \
-bash core/scripts/carla/run_day11_timing_shift_robustness.sh
+export PYTHON_BIN=/root/miniconda3/envs/carla_modern/bin/python
+export DAY7_RESULTS=/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1
+export DAY8_RESULTS=/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1
+export DAY9_RESULTS=/root/autodl-tmp/results/give_way_transformer/day9/day9_smoke_v1
+export DAY10_RESULTS=/root/autodl-tmp/results/give_way_transformer/day10/day10_formal_v1
+export DAY11_RESULTS=/root/autodl-tmp/results/give_way_transformer/day11/day11_timing_shift_v1
+export GUROBI_HOME=/root/autodl-tmp/Research-Project-IMLS/gurobi/gurobi1103/linux64
+export GUROBI_VERSION=110
+export GRB_LICENSE_FILE=/root/autodl-tmp/Research-Project-IMLS/gurobi/gurobi.lic
+export LD_LIBRARY_PATH="$GUROBI_HOME/lib:${LD_LIBRARY_PATH:-}"
+
+mkdir -p "$(dirname "$DAY11_RESULTS")"
+nohup env \
+  CARLA_ROOT="$CARLA_ROOT" PYTHON_BIN="$PYTHON_BIN" \
+  DAY7_RESULTS="$DAY7_RESULTS" DAY8_RESULTS="$DAY8_RESULTS" \
+  DAY9_RESULTS="$DAY9_RESULTS" DAY10_RESULTS="$DAY10_RESULTS" \
+  DAY11_RESULTS="$DAY11_RESULTS" GUROBI_HOME="$GUROBI_HOME" \
+  GUROBI_VERSION="$GUROBI_VERSION" GRB_LICENSE_FILE="$GRB_LICENSE_FILE" \
+  LD_LIBRARY_PATH="$LD_LIBRARY_PATH" \
+  bash core/scripts/carla/run_day11_timing_shift_robustness.sh \
+  > "$DAY11_RESULTS.launcher.log" 2>&1 &
+
+echo $! > "$DAY11_RESULTS.launcher.pid"
+echo "Day11 PID=$(cat "$DAY11_RESULTS.launcher.pid")"
 ```
 
 三个 runner 都具有：完成标志短路、活进程锁、已验证输出跳过、无效旧输出拒绝覆盖。服务器中断后使用相同命令续跑即可。
