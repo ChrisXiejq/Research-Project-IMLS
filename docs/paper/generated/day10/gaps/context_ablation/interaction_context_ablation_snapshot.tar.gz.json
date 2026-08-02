@@ -1,0 +1,8 @@
+{
+  "archive": "/root/autodl-tmp/results/give_way_transformer/day10_gaps/context_ablation_v1/interaction_context_ablation_snapshot.tar.gz",
+  "archive_sha256": "71d05917b083342c50aeb546df08c8fe456b502292fb0aa22247e7ac3e4c3f94",
+  "excludes_model_weights_and_rasters": true,
+  "files": 22,
+  "schema_version": "interaction_context_ablation_snapshot_v1",
+  "status": "pass"
+}

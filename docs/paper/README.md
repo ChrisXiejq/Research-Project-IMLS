@@ -15,6 +15,7 @@
 11. `Day10正式闭环结果与结论.md`：80-rollout paired analysis、假设判定与论文主张边界；
 12. `Day10后缺口补齐与Day11执行指南.md`：B0 offline bridge、Transformer context ablation 与 ±3 m timing-shift robustness；
 13. `Gap2_B0冻结离线对照结果.md`：B0/B1 同口径离线比较与 response-active calibration 限制；
-14. `已完成实验与证据账本.md` 与 `generated/`：已完成证据。
+14. `Gap3_Transformer交互序列诊断结果.md`：T1/T2 zero/shuffle input ablation 与机制结论；
+15. `已完成实验与证据账本.md` 与 `generated/`：已完成证据。
 
 论文正文尚未进入最终写作阶段，因此不保留会迅速失效的 Results draft 或重复的 Markdown 表格。正式 Results/Discussion 将在模型与闭环实验冻结后从机器可读证据生成。

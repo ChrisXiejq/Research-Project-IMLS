@@ -41,7 +41,7 @@ rollout_start_time + completion_time == rollout_end_time
 
 80 条 Day10 rollout 的时钟残差均为 0。该指标避免把不同 target style 的清空时刻差异错误归因给 ego predictor 或 risk policy。原始 completion time 保留为描述性指标，不再用于跨 style 的主效率结论。
 
-## 3. Gap 2：B0 frozen offline bridge
+## 3. Gap 2：B0 frozen offline bridge（已完成）
 
 ### 3.1 目的
 
@@ -65,7 +65,7 @@ Day10 中 B0 仍保持 identity calibration；本实验不会事后替换 Day10 
 /root/autodl-tmp/results/give_way_transformer/day10_gaps/b0_offline_v1/B0_OFFLINE_COMPLETE.json
 ```
 
-## 4. Gap 3：T1/T2 交互序列诊断
+## 4. Gap 3：T1/T2 交互序列诊断（已完成）
 
 ### 4.1 实验组与对照组
 
@@ -158,7 +158,7 @@ bash core/scripts/models/run_interaction_context_ablation.sh
 Day11 需要 CARLA server 已启动、Gurobi 可用：
 
 ```bash
-export CARLA_ROOT=/root/autodl-tmp/CARLA_0.9.14
+export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
 PYTHON_BIN=/root/miniconda3/envs/carla_modern/bin/python \
 bash core/scripts/carla/run_day11_timing_shift_robustness.sh
 ```

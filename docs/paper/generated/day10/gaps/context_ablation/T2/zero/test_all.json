@@ -1,0 +1,1078 @@
+{
+  "anchors": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_clusters_16.npy",
+  "anchors_artifact": {
+    "bytes": 6528,
+    "path": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_clusters_16.npy",
+    "sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982"
+  },
+  "best_mode_counts": [
+    0,
+    0,
+    52,
+    0,
+    0,
+    7,
+    0,
+    217,
+    0,
+    0,
+    39,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "calibrated": {
+    "accuracy": {
+      "best_mode_counts": [
+        0,
+        0,
+        52,
+        0,
+        0,
+        7,
+        0,
+        217,
+        0,
+        0,
+        39,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "mean_mode_entropy": 0.2551363706588745,
+      "minADE": {
+        "count": 315,
+        "max": 1.318769682933072,
+        "mean": 0.2762422561645508,
+        "p50": 0.2050565630197525,
+        "p90": 0.4893704116344452
+      },
+      "minFDE": {
+        "count": 315,
+        "max": 2.032766770033834,
+        "mean": 0.29733914136886597,
+        "p50": 0.20780259370803833,
+        "p90": 0.5906382918357849
+      },
+      "top1_ADE": {
+        "count": 315,
+        "max": 4.406381715724732,
+        "mean": 0.4441855847835541,
+        "p50": 0.2053111493587494,
+        "p90": 0.6751404047012329
+      },
+      "top1_FDE": {
+        "count": 315,
+        "max": 9.357205565361795,
+        "mean": 0.6945213079452515,
+        "p50": 0.31257364153862,
+        "p90": 0.8832784652709961
+      },
+      "top_prob_mode_is_best_fraction": 0.6857142857142857
+    },
+    "best_mode_counts": [
+      0,
+      0,
+      52,
+      0,
+      0,
+      7,
+      0,
+      217,
+      0,
+      0,
+      39,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "calibration_parameters": {
+      "covariance_scale": 0.016038130606994976,
+      "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+      "temperature": 0.7071067811865475
+    },
+    "historical_std_parameterization": {
+      "formula": "axis_std = exp(abs(raw_std_parameter))",
+      "name": "exp_abs_raw",
+      "posthoc_scaled_axis_standard_deviation": {
+        "count": 100800,
+        "max": 0.18993903696537018,
+        "mean": 0.12849724292755127,
+        "p50": 0.1276988685131073,
+        "p90": 0.13078984916210173
+      },
+      "raw_parameter_absolute": {
+        "count": 100800,
+        "max": 0.40534108877182007,
+        "mean": 0.014181133359670639,
+        "p50": 0.008312690071761608,
+        "p90": 0.03222968876361847
+      },
+      "theoretical_uncalibrated_minimum_std": 1.0,
+      "uncalibrated_axis_standard_deviation": {
+        "count": 100800,
+        "max": 1.4998139142990112,
+        "mean": 1.0146514177322388,
+        "p50": 1.0083473920822144,
+        "p90": 1.0327546834945678
+      }
+    },
+    "init_group_aggregation": {
+      "design_role": "paired clustering unit shared by all available 2x2 cells",
+      "group_key": "ego_init_id",
+      "independent_init_groups": 5,
+      "macro_mean": {
+        "pointwise_mixture_NLL_mean": 2.1842074394226074,
+        "top1_ADE_mean": 0.4380427896976471,
+        "top1_FDE_mean": 0.6820792555809021,
+        "top1_FDE_p90": 1.605835199356079,
+        "trajectory_mixture_NLL_per_step_mean": 2.9567689895629883
+      },
+      "per_init_group": {
+        "ego_init_46": {
+          "pointwise_mixture_NLL_mean": 3.4889705181121826,
+          "samples": 66,
+          "top1_ADE_mean": 0.7166183590888977,
+          "top1_FDE_mean": 1.2839937210083008,
+          "top1_FDE_p90": 4.105605840682983,
+          "trajectory_mixture_NLL_per_step_mean": 5.361175060272217
+        },
+        "ego_init_47": {
+          "pointwise_mixture_NLL_mean": 1.376203179359436,
+          "samples": 60,
+          "top1_ADE_mean": 0.28529831767082214,
+          "top1_FDE_mean": 0.3720635771751404,
+          "top1_FDE_p90": 0.8201113224029541,
+          "trajectory_mixture_NLL_per_step_mean": 0.9740139245986938
+        },
+        "ego_init_48": {
+          "pointwise_mixture_NLL_mean": 2.901228189468384,
+          "samples": 66,
+          "top1_ADE_mean": 0.5006128549575806,
+          "top1_FDE_mean": 0.771676778793335,
+          "top1_FDE_p90": 1.382015883922577,
+          "trajectory_mixture_NLL_per_step_mean": 4.753102779388428
+        },
+        "ego_init_49": {
+          "pointwise_mixture_NLL_mean": 1.7727830410003662,
+          "samples": 63,
+          "top1_ADE_mean": 0.40074822306632996,
+          "top1_FDE_mean": 0.6054724454879761,
+          "top1_FDE_p90": 0.8824321627616882,
+          "trajectory_mixture_NLL_per_step_mean": 2.771829605102539
+        },
+        "ego_init_50": {
+          "pointwise_mixture_NLL_mean": 1.3818511962890625,
+          "samples": 60,
+          "top1_ADE_mean": 0.2869362533092499,
+          "top1_FDE_mean": 0.3771898150444031,
+          "top1_FDE_p90": 0.8390105307102204,
+          "trajectory_mixture_NLL_per_step_mean": 0.9237242341041565
+        }
+      }
+    },
+    "mean_mode_entropy": 0.2551363706588745,
+    "mean_probability_assigned_to_best_mode": 0.6668084859848022,
+    "mean_top_mode_probability": 0.9192665815353394,
+    "minADE_mean": 0.2762422561645508,
+    "minADE_p50": 0.2050565630197525,
+    "minADE_p90": 0.4893704116344452,
+    "minFDE_mean": 0.29733914136886597,
+    "minFDE_p50": 0.20780259370803833,
+    "minFDE_p90": 0.5906382918357849,
+    "pointwise_mixture_NLL_mean": 2.218799114227295,
+    "probabilistic": {
+      "covariance_audit": {
+        "invalid_matrices": 0,
+        "invalid_rate": 0.0,
+        "maximum_symmetry_error": 0.0,
+        "minimum_determinant": 0.0002572215744294226,
+        "minimum_eigenvalue": 0.01603812724351883,
+        "non_positive_definite_matrices": 0,
+        "nonfinite_matrices": 0,
+        "nonsymmetric_matrices": 0,
+        "total_matrices": 50400
+      },
+      "coverage_mean_absolute_error": 0.2515000104904175,
+      "pointwise_mixture_NLL": {
+        "count": 315,
+        "max": 27.85650191589745,
+        "mean": 2.218799114227295,
+        "p50": -0.69126957654953,
+        "p90": 9.025139236450197
+      },
+      "top_mode_2d_covariance_coverage": {
+        "1sigma": {
+          "absolute_error": 0.16904920634920628,
+          "empirical_coverage": 0.5136507936507937,
+          "mahalanobis_sq": 2.3,
+          "nominal_coverage": 0.6827,
+          "per_horizon_empirical": [
+            0.8285714285714286,
+            0.6761904761904762,
+            0.580952380952381,
+            0.546031746031746,
+            0.5523809523809524,
+            0.4380952380952381,
+            0.44126984126984126,
+            0.3873015873015873,
+            0.3333333333333333,
+            0.3523809523809524
+          ],
+          "signed_error": -0.16904920634920628
+        },
+        "2sigma": {
+          "absolute_error": 0.3065634920634921,
+          "empirical_coverage": 0.6479365079365079,
+          "mahalanobis_sq": 6.18,
+          "nominal_coverage": 0.9545,
+          "per_horizon_empirical": [
+            0.9746031746031746,
+            0.7873015873015873,
+            0.6857142857142857,
+            0.6412698412698413,
+            0.6412698412698413,
+            0.6095238095238096,
+            0.6063492063492063,
+            0.5523809523809524,
+            0.47619047619047616,
+            0.5047619047619047
+          ],
+          "signed_error": -0.3065634920634921
+        },
+        "3sigma": {
+          "absolute_error": 0.2788873015873016,
+          "empirical_coverage": 0.7184126984126984,
+          "mahalanobis_sq": 11.83,
+          "nominal_coverage": 0.9973,
+          "per_horizon_empirical": [
+            0.9809523809523809,
+            0.8857142857142857,
+            0.7746031746031746,
+            0.7047619047619048,
+            0.6952380952380952,
+            0.6793650793650794,
+            0.6349206349206349,
+            0.6031746031746031,
+            0.6158730158730159,
+            0.6095238095238096
+          ],
+          "signed_error": -0.2788873015873016
+        }
+      },
+      "top_mode_2sigma_tail_rate": 0.3520634920634921,
+      "top_mode_covariance_determinant": {
+        "count": 3150,
+        "max": 0.0002860270028677834,
+        "mean": 0.00025748592452146113,
+        "p50": 0.00025722163263708353,
+        "p90": 0.00025722163263708353
+      },
+      "top_mode_log_covariance_determinant": {
+        "count": 3150,
+        "max": -8.159424335979676,
+        "mean": -8.264569282531738,
+        "p50": -8.265572547912598,
+        "p90": -8.265572547912598
+      },
+      "trajectory_mixture_NLL_per_step": {
+        "count": 315,
+        "max": 64.31159632127543,
+        "mean": 3.0350215435028076,
+        "p50": -0.6896061301231384,
+        "p90": 7.715545749664321
+      }
+    },
+    "rollout_aggregation": {
+      "group_key": "cell_id::source_subrun",
+      "independent_rollouts": 20,
+      "macro_mean": {
+        "pointwise_mixture_NLL_mean": 2.110386610031128,
+        "top1_ADE_mean": 0.42560285329818726,
+        "top1_FDE_mean": 0.6570833921432495,
+        "top1_FDE_p90": 1.600569486618042,
+        "trajectory_mixture_NLL_per_step_mean": 2.787846088409424
+      },
+      "per_rollout": {
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_46_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.2899703979492188,
+          "samples": 15,
+          "top1_ADE_mean": 0.28088507056236267,
+          "top1_FDE_mean": 0.36742183566093445,
+          "top1_FDE_p90": 0.7546088218688964,
+          "trajectory_mixture_NLL_per_step_mean": 0.8671295642852783
+        },
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_47_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.3522027730941772,
+          "samples": 15,
+          "top1_ADE_mean": 0.2844051122665405,
+          "top1_FDE_mean": 0.37117698788642883,
+          "top1_FDE_p90": 0.772461724281311,
+          "trajectory_mixture_NLL_per_step_mean": 0.937817394733429
+        },
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_48_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.2682229280471802,
+          "samples": 15,
+          "top1_ADE_mean": 0.27972152829170227,
+          "top1_FDE_mean": 0.36428818106651306,
+          "top1_FDE_p90": 0.739897084236145,
+          "trajectory_mixture_NLL_per_step_mean": 0.8816839456558228
+        },
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_49_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.3351433277130127,
+          "samples": 15,
+          "top1_ADE_mean": 0.2824591398239136,
+          "top1_FDE_mean": 0.37287217378616333,
+          "top1_FDE_p90": 0.7736407399177551,
+          "trajectory_mixture_NLL_per_step_mean": 0.945403516292572
+        },
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_50_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.3890423774719238,
+          "samples": 15,
+          "top1_ADE_mean": 0.28746381402015686,
+          "top1_FDE_mean": 0.3779011070728302,
+          "top1_FDE_p90": 0.7845675826072692,
+          "trajectory_mixture_NLL_per_step_mean": 0.9264412522315979
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_46_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.211249589920044,
+          "samples": 15,
+          "top1_ADE_mean": 0.2764642536640167,
+          "top1_FDE_mean": 0.3610108494758606,
+          "top1_FDE_p90": 0.751292061805725,
+          "trajectory_mixture_NLL_per_step_mean": 0.8061009049415588
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_47_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.348642349243164,
+          "samples": 15,
+          "top1_ADE_mean": 0.2857409715652466,
+          "top1_FDE_mean": 0.37319502234458923,
+          "top1_FDE_p90": 0.7685219764709472,
+          "trajectory_mixture_NLL_per_step_mean": 0.9356734752655029
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_48_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.254852533340454,
+          "samples": 15,
+          "top1_ADE_mean": 0.2786836326122284,
+          "top1_FDE_mean": 0.36310234665870667,
+          "top1_FDE_p90": 0.7403434753417968,
+          "trajectory_mixture_NLL_per_step_mean": 0.8616705536842346
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_49_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.305113673210144,
+          "samples": 15,
+          "top1_ADE_mean": 0.28064095973968506,
+          "top1_FDE_mean": 0.37046852707862854,
+          "top1_FDE_p90": 0.7763123512268066,
+          "trajectory_mixture_NLL_per_step_mean": 0.9152457118034363
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_50_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.3575146198272705,
+          "samples": 15,
+          "top1_ADE_mean": 0.2854854464530945,
+          "top1_FDE_mean": 0.3755258619785309,
+          "top1_FDE_p90": 0.7803359627723694,
+          "trajectory_mixture_NLL_per_step_mean": 0.9044420123100281
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_46_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 5.351668357849121,
+          "samples": 18,
+          "top1_ADE_mean": 1.0811550617218018,
+          "top1_FDE_mean": 2.0498881340026855,
+          "top1_FDE_p90": 7.23257703781128,
+          "trajectory_mixture_NLL_per_step_mean": 9.133922576904297
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_47_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.4179574251174927,
+          "samples": 15,
+          "top1_ADE_mean": 0.2859375774860382,
+          "top1_FDE_mean": 0.37167471647262573,
+          "top1_FDE_p90": 0.7841877698898315,
+          "trajectory_mixture_NLL_per_step_mean": 1.0307104587554932
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_48_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 4.28584098815918,
+          "samples": 18,
+          "top1_ADE_mean": 0.6859452724456787,
+          "top1_FDE_mean": 1.112663745880127,
+          "top1_FDE_p90": 2.0119766473770144,
+          "trajectory_mixture_NLL_per_step_mean": 7.9905829429626465
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_49_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 0.46004071831703186,
+          "samples": 16,
+          "top1_ADE_mean": 0.3842952847480774,
+          "top1_FDE_mean": 0.5660631656646729,
+          "top1_FDE_p90": 0.6954914629459381,
+          "trajectory_mixture_NLL_per_step_mean": 0.3379959762096405
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_50_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.3890249729156494,
+          "samples": 15,
+          "top1_ADE_mean": 0.2875503897666931,
+          "top1_FDE_mean": 0.37756073474884033,
+          "top1_FDE_p90": 0.783346676826477,
+          "trajectory_mixture_NLL_per_step_mean": 0.9225186705589294
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_46_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 5.356873512268066,
+          "samples": 18,
+          "top1_ADE_mean": 1.0819876194000244,
+          "top1_FDE_mean": 2.0510616302490234,
+          "top1_FDE_p90": 7.230587911605836,
+          "trajectory_mixture_NLL_per_step_mean": 9.129358291625977
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_47_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.3860105276107788,
+          "samples": 15,
+          "top1_ADE_mean": 0.28510966897010803,
+          "top1_FDE_mean": 0.3722076416015625,
+          "top1_FDE_p90": 0.7847673535346984,
+          "trajectory_mixture_NLL_per_step_mean": 0.9918543696403503
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_48_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 4.249434471130371,
+          "samples": 18,
+          "top1_ADE_mean": 0.6842973232269287,
+          "top1_FDE_mean": 1.1106592416763306,
+          "top1_FDE_p90": 2.015948116779328,
+          "trajectory_mixture_NLL_per_step_mean": 7.984665870666504
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_49_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 3.807107448577881,
+          "samples": 17,
+          "top1_ADE_mean": 0.6265832781791687,
+          "top1_FDE_mean": 1.0551552772521973,
+          "top1_FDE_p90": 2.0424078464508058,
+          "trajectory_mixture_NLL_per_step_mean": 8.312211036682129
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_50_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.3918232917785645,
+          "samples": 15,
+          "top1_ADE_mean": 0.28724539279937744,
+          "top1_FDE_mean": 0.37777167558670044,
+          "top1_FDE_p90": 0.7881193995475768,
+          "trajectory_mixture_NLL_per_step_mean": 0.9414951205253601
+        }
+      }
+    },
+    "samples": 315,
+    "top1_ADE_mean": 0.4441855847835541,
+    "top1_FDE_mean": 0.6945213079452515,
+    "top_prob_mode_is_best_frac": 0.6857142857142857,
+    "trajectory_mixture_NLL_per_step_mean": 3.0350215435028076
+  },
+  "calibration": {
+    "anchors_artifact": {
+      "bytes": 6528,
+      "path": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_clusters_16.npy",
+      "sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982"
+    },
+    "calibration_schema_version": "multipath_posthoc_calibration_v2",
+    "fit_criterion": "macro mean over validation rollouts of trajectory mixture NLL per valid step",
+    "fit_split": "val",
+    "horizon": 10,
+    "model_artifact": {
+      "bytes": 39936544,
+      "files": 5,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T2/seed_23/best_model",
+      "sha256_tree": "a37a153891c93f2404154574ca26c1919656ae2d22dbcd4e21dcb0355d0081e9"
+    },
+    "parameters": {
+      "covariance_scale": 0.016038130606994976,
+      "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+      "temperature": 0.7071067811865475
+    },
+    "samples": 326,
+    "search": {
+      "best_validation_NLL_per_step": -1.201978657846217,
+      "covariance_scale_candidates": 50,
+      "covariance_scale_range": [
+        0.0001,
+        4.0
+      ],
+      "identity_validation_NLL_per_step": 1.8778936106943445,
+      "independent_validation_init_groups": 5,
+      "independent_validation_rollouts": 20,
+      "joint_candidates": 1250,
+      "temperature_candidates": 25,
+      "temperature_range": [
+        0.25,
+        4.0
+      ],
+      "top_candidates": [
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 4.479359819314286,
+          "temperature": 0.7071067811865475,
+          "validation_trajectory_mixture_NLL_per_step": -1.201978657846217
+        },
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 4.594884349407611,
+          "temperature": 0.6299605249474365,
+          "validation_trajectory_mixture_NLL_per_step": -1.2017118008157048
+        },
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 4.363835289220962,
+          "temperature": 0.7937005259840997,
+          "validation_trajectory_mixture_NLL_per_step": -1.201622866974907
+        },
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 4.7104088795009345,
+          "temperature": 0.5612310241546865,
+          "validation_trajectory_mixture_NLL_per_step": -1.2009194764631368
+        },
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 4.248310759127638,
+          "temperature": 0.8908987181403392,
+          "validation_trajectory_mixture_NLL_per_step": -1.2005289618393664
+        },
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 4.825933409594259,
+          "temperature": 0.5,
+          "validation_trajectory_mixture_NLL_per_step": -1.199688927454935
+        },
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 4.132786229034314,
+          "temperature": 1.0,
+          "validation_trajectory_mixture_NLL_per_step": -1.1985567243930486
+        },
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 4.9414579396875835,
+          "temperature": 0.44544935907016964,
+          "validation_trajectory_mixture_NLL_per_step": -1.198093720466582
+        },
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 5.056982469780907,
+          "temperature": 0.3968502629920498,
+          "validation_trajectory_mixture_NLL_per_step": -1.196169109174177
+        },
+        {
+          "covariance_scale": 0.016038130606994976,
+          "distance_from_identity": 4.248310759127637,
+          "temperature": 1.1224620483093728,
+          "validation_trajectory_mixture_NLL_per_step": -1.1955430371123077
+        }
+      ],
+      "validation_init_group_key": "ego_init_id",
+      "validation_rollout_group_key": "cell_id::source_subrun"
+    },
+    "std_parameterization": "exp_abs_raw",
+    "validation_jsonl": {
+      "bytes": 5808967,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/val.jsonl",
+      "sha256": "5ad6210b44b83f5c2ea3a8e64eaae32413bc73bdd337189999d2778b20c993ed"
+    }
+  },
+  "calibration_fit_uses_test": false,
+  "evaluation_schema_version": "multipath_accuracy_calibration_v2",
+  "failing_gates": [],
+  "horizon": 10,
+  "independent_init_groups": 5,
+  "independent_rollouts": 20,
+  "interaction_ablation": {
+    "applied": true,
+    "cross_init_donors": null,
+    "mapping_sha256": "a55d3a31710510de056822550b209132aef73971a2c3ee85ad80eb438589a5e9",
+    "mode": "zero",
+    "samples": 315,
+    "seed": 20260802,
+    "semantics": "each raw valid token is replaced by the train-only normalization mean, which becomes an exact zero feature vector after MaskedZScore; the original mask is retained"
+  },
+  "jsonl": {
+    "bytes": 5673913,
+    "path": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/test.jsonl",
+    "sha256": "29291fe2a172047267c3a0c4c3d5693519f550881010a965fb60166a5013d770"
+  },
+  "latency": {
+    "batch_size": 16,
+    "mean_prediction_ms_per_sample": 20.182932996087604,
+    "prediction_calls": 20,
+    "total_prediction_seconds": 6.357623893767595
+  },
+  "mean_mode_entropy": 0.4950947165489197,
+  "mean_probability_assigned_to_best_mode": 0.6348044872283936,
+  "mean_top_mode_probability": 0.857190728187561,
+  "merged_dir": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1",
+  "minADE_mean": 0.2762422561645508,
+  "minADE_p50": 0.2050565630197525,
+  "minADE_p90": 0.4893704116344452,
+  "minFDE_mean": 0.29733914136886597,
+  "minFDE_p50": 0.20780259370803833,
+  "minFDE_p90": 0.5906382918357849,
+  "model": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T2/seed_23/best_model",
+  "model_artifact": {
+    "bytes": 39936544,
+    "files": 5,
+    "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T2/seed_23/best_model",
+    "sha256_tree": "a37a153891c93f2404154574ca26c1919656ae2d22dbcd4e21dcb0355d0081e9"
+  },
+  "model_input_count": 4,
+  "samples": 315,
+  "split": "test",
+  "status": "pass",
+  "subset": "all",
+  "top1_ADE_mean": 0.4441855847835541,
+  "top1_FDE_mean": 0.6945213079452515,
+  "top_prob_mode_is_best_frac": 0.6857142857142857,
+  "uncalibrated": {
+    "accuracy": {
+      "best_mode_counts": [
+        0,
+        0,
+        52,
+        0,
+        0,
+        7,
+        0,
+        217,
+        0,
+        0,
+        39,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "mean_mode_entropy": 0.4950947165489197,
+      "minADE": {
+        "count": 315,
+        "max": 1.318769682933072,
+        "mean": 0.2762422561645508,
+        "p50": 0.2050565630197525,
+        "p90": 0.4893704116344452
+      },
+      "minFDE": {
+        "count": 315,
+        "max": 2.032766770033834,
+        "mean": 0.29733914136886597,
+        "p50": 0.20780259370803833,
+        "p90": 0.5906382918357849
+      },
+      "top1_ADE": {
+        "count": 315,
+        "max": 4.406381715724732,
+        "mean": 0.4441855847835541,
+        "p50": 0.2053111493587494,
+        "p90": 0.6751404047012329
+      },
+      "top1_FDE": {
+        "count": 315,
+        "max": 9.357205565361795,
+        "mean": 0.6945213079452515,
+        "p50": 0.31257364153862,
+        "p90": 0.8832784652709961
+      },
+      "top_prob_mode_is_best_fraction": 0.6857142857142857
+    },
+    "best_mode_counts": [
+      0,
+      0,
+      52,
+      0,
+      0,
+      7,
+      0,
+      217,
+      0,
+      0,
+      39,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "calibration_parameters": {
+      "covariance_scale": 1.0,
+      "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+      "temperature": 1.0
+    },
+    "historical_std_parameterization": {
+      "formula": "axis_std = exp(abs(raw_std_parameter))",
+      "name": "exp_abs_raw",
+      "posthoc_scaled_axis_standard_deviation": {
+        "count": 100800,
+        "max": 1.4998139142990112,
+        "mean": 1.0146514177322388,
+        "p50": 1.0083473920822144,
+        "p90": 1.0327546834945678
+      },
+      "raw_parameter_absolute": {
+        "count": 100800,
+        "max": 0.40534108877182007,
+        "mean": 0.014181133359670639,
+        "p50": 0.008312690071761608,
+        "p90": 0.03222968876361847
+      },
+      "theoretical_uncalibrated_minimum_std": 1.0,
+      "uncalibrated_axis_standard_deviation": {
+        "count": 100800,
+        "max": 1.4998139142990112,
+        "mean": 1.0146514177322388,
+        "p50": 1.0083473920822144,
+        "p90": 1.0327546834945678
+      }
+    },
+    "init_group_aggregation": {
+      "design_role": "paired clustering unit shared by all available 2x2 cells",
+      "group_key": "ego_init_id",
+      "independent_init_groups": 5,
+      "macro_mean": {
+        "pointwise_mixture_NLL_mean": 2.0639829635620117,
+        "top1_ADE_mean": 0.4380427896976471,
+        "top1_FDE_mean": 0.6820792555809021,
+        "top1_FDE_p90": 1.605835199356079,
+        "trajectory_mixture_NLL_per_step_mean": 1.973366379737854
+      },
+      "per_init_group": {
+        "ego_init_46": {
+          "pointwise_mixture_NLL_mean": 2.2120912075042725,
+          "samples": 66,
+          "top1_ADE_mean": 0.7166183590888977,
+          "top1_FDE_mean": 1.2839937210083008,
+          "top1_FDE_p90": 4.105605840682983,
+          "trajectory_mixture_NLL_per_step_mean": 2.04569411277771
+        },
+        "ego_init_47": {
+          "pointwise_mixture_NLL_mean": 1.9784462451934814,
+          "samples": 60,
+          "top1_ADE_mean": 0.28529831767082214,
+          "top1_FDE_mean": 0.3720635771751404,
+          "top1_FDE_p90": 0.8201113224029541,
+          "trajectory_mixture_NLL_per_step_mean": 1.922146201133728
+        },
+        "ego_init_48": {
+          "pointwise_mixture_NLL_mean": 2.121220350265503,
+          "samples": 66,
+          "top1_ADE_mean": 0.5006128549575806,
+          "top1_FDE_mean": 0.771676778793335,
+          "top1_FDE_p90": 1.382015883922577,
+          "trajectory_mixture_NLL_per_step_mean": 2.0171775817871094
+        },
+        "ego_init_49": {
+          "pointwise_mixture_NLL_mean": 2.0309646129608154,
+          "samples": 63,
+          "top1_ADE_mean": 0.40074822306632996,
+          "top1_FDE_mean": 0.6054724454879761,
+          "top1_FDE_p90": 0.8824321627616882,
+          "trajectory_mixture_NLL_per_step_mean": 1.9597879648208618
+        },
+        "ego_init_50": {
+          "pointwise_mixture_NLL_mean": 1.9771919250488281,
+          "samples": 60,
+          "top1_ADE_mean": 0.2869362533092499,
+          "top1_FDE_mean": 0.3771898150444031,
+          "top1_FDE_p90": 0.8390105307102204,
+          "trajectory_mixture_NLL_per_step_mean": 1.9220261573791504
+        }
+      }
+    },
+    "mean_mode_entropy": 0.4950947165489197,
+    "mean_probability_assigned_to_best_mode": 0.6348044872283936,
+    "mean_top_mode_probability": 0.857190728187561,
+    "minADE_mean": 0.2762422561645508,
+    "minADE_p50": 0.2050565630197525,
+    "minADE_p90": 0.4893704116344452,
+    "minFDE_mean": 0.29733914136886597,
+    "minFDE_p50": 0.20780259370803833,
+    "minFDE_p90": 0.5906382918357849,
+    "pointwise_mixture_NLL_mean": 2.067579746246338,
+    "probabilistic": {
+      "covariance_audit": {
+        "invalid_matrices": 0,
+        "invalid_rate": 0.0,
+        "maximum_symmetry_error": 0.0,
+        "minimum_determinant": 0.9999997615814209,
+        "minimum_eigenvalue": 0.9999998807907104,
+        "non_positive_definite_matrices": 0,
+        "nonfinite_matrices": 0,
+        "nonsymmetric_matrices": 0,
+        "total_matrices": 50400
+      },
+      "coverage_mean_absolute_error": 0.10257301479578018,
+      "pointwise_mixture_NLL": {
+        "count": 315,
+        "max": 3.939448028381517,
+        "mean": 2.067579746246338,
+        "p50": 1.8836919069290161,
+        "p90": 2.4657952785491943
+      },
+      "top_mode_2d_covariance_coverage": {
+        "1sigma": {
+          "absolute_error": 0.27380793650793656,
+          "empirical_coverage": 0.9565079365079365,
+          "mahalanobis_sq": 2.3,
+          "nominal_coverage": 0.6827,
+          "per_horizon_empirical": [
+            1.0,
+            1.0,
+            0.9746031746031746,
+            0.9523809523809523,
+            0.946031746031746,
+            0.946031746031746,
+            0.9428571428571428,
+            0.9365079365079365,
+            0.9301587301587302,
+            0.9365079365079365
+          ],
+          "signed_error": 0.27380793650793656
+        },
+        "2sigma": {
+          "absolute_error": 0.01788095238095233,
+          "empirical_coverage": 0.9723809523809523,
+          "mahalanobis_sq": 6.18,
+          "nominal_coverage": 0.9545,
+          "per_horizon_empirical": [
+            1.0,
+            1.0,
+            1.0,
+            0.9809523809523809,
+            0.9682539682539683,
+            0.9619047619047619,
+            0.9555555555555556,
+            0.9555555555555556,
+            0.946031746031746,
+            0.9555555555555556
+          ],
+          "signed_error": 0.01788095238095233
+        },
+        "3sigma": {
+          "absolute_error": 0.016030158730158672,
+          "empirical_coverage": 0.9812698412698413,
+          "mahalanobis_sq": 11.83,
+          "nominal_coverage": 0.9973,
+          "per_horizon_empirical": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.9873015873015873,
+            0.9714285714285714,
+            0.9682539682539683,
+            0.9619047619047619,
+            0.9619047619047619,
+            0.9619047619047619
+          ],
+          "signed_error": -0.016030158730158672
+        }
+      },
+      "top_mode_2sigma_tail_rate": 0.027619047619047654,
+      "top_mode_covariance_determinant": {
+        "count": 3150,
+        "max": 1.111986465669931,
+        "mean": 1.0010275840759277,
+        "p50": 1.0,
+        "p90": 1.0
+      },
+      "top_mode_log_covariance_determinant": {
+        "count": 3150,
+        "max": 0.10614802459418743,
+        "mean": 0.0010033170692622662,
+        "p50": 0.0,
+        "p90": 0.0
+      },
+      "trajectory_mixture_NLL_per_step": {
+        "count": 315,
+        "max": 3.4386995515306418,
+        "mean": 1.9754490852355957,
+        "p50": 1.8685938119888306,
+        "p90": 2.1056692123413088
+      }
+    },
+    "rollout_aggregation": {
+      "group_key": "cell_id::source_subrun",
+      "independent_rollouts": 20,
+      "macro_mean": {
+        "pointwise_mixture_NLL_mean": 2.056612730026245,
+        "top1_ADE_mean": 0.42560285329818726,
+        "top1_FDE_mean": 0.6570833921432495,
+        "top1_FDE_p90": 1.600569486618042,
+        "trajectory_mixture_NLL_per_step_mean": 1.9689792394638062
+      },
+      "per_rollout": {
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_46_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.9731768369674683,
+          "samples": 15,
+          "top1_ADE_mean": 0.28088507056236267,
+          "top1_FDE_mean": 0.36742183566093445,
+          "top1_FDE_p90": 0.7546088218688964,
+          "trajectory_mixture_NLL_per_step_mean": 1.9198473691940308
+        },
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_47_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.9776694774627686,
+          "samples": 15,
+          "top1_ADE_mean": 0.2844051122665405,
+          "top1_FDE_mean": 0.37117698788642883,
+          "top1_FDE_p90": 0.772461724281311,
+          "trajectory_mixture_NLL_per_step_mean": 1.921486735343933
+        },
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_48_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.9696980714797974,
+          "samples": 15,
+          "top1_ADE_mean": 0.27972152829170227,
+          "top1_FDE_mean": 0.36428818106651306,
+          "top1_FDE_p90": 0.739897084236145,
+          "trajectory_mixture_NLL_per_step_mean": 1.9188780784606934
+        },
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_49_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.9734175205230713,
+          "samples": 15,
+          "top1_ADE_mean": 0.2824591398239136,
+          "top1_FDE_mean": 0.37287217378616333,
+          "top1_FDE_p90": 0.7736407399177551,
+          "trajectory_mixture_NLL_per_step_mean": 1.9203851222991943
+        },
+        "S0_ADAPTIVE::scenario_uk_give_way_ego_init_50_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.977295994758606,
+          "samples": 15,
+          "top1_ADE_mean": 0.28746381402015686,
+          "top1_FDE_mean": 0.3779011070728302,
+          "top1_FDE_p90": 0.7845675826072692,
+          "trajectory_mixture_NLL_per_step_mean": 1.922149419784546
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_46_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.9717422723770142,
+          "samples": 15,
+          "top1_ADE_mean": 0.2764642536640167,
+          "top1_FDE_mean": 0.3610108494758606,
+          "top1_FDE_p90": 0.751292061805725,
+          "trajectory_mixture_NLL_per_step_mean": 1.9180880784988403
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_47_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.9776941537857056,
+          "samples": 15,
+          "top1_ADE_mean": 0.2857409715652466,
+          "top1_FDE_mean": 0.37319502234458923,
+          "top1_FDE_p90": 0.7685219764709472,
+          "trajectory_mixture_NLL_per_step_mean": 1.9213569164276123
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_48_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.9691425561904907,
+          "samples": 15,
+          "top1_ADE_mean": 0.2786836326122284,
+          "top1_FDE_mean": 0.36310234665870667,
+          "top1_FDE_p90": 0.7403434753417968,
+          "trajectory_mixture_NLL_per_step_mean": 1.9185082912445068
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_49_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.9728559255599976,
+          "samples": 15,
+          "top1_ADE_mean": 0.28064095973968506,
+          "top1_FDE_mean": 0.37046852707862854,
+          "top1_FDE_p90": 0.7763123512268066,
+          "trajectory_mixture_NLL_per_step_mean": 1.919943928718567
+        },
+        "S0_FIXED::scenario_uk_give_way_ego_init_50_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.9765292406082153,
+          "samples": 15,
+          "top1_ADE_mean": 0.2854854464530945,
+          "top1_FDE_mean": 0.3755258619785309,
+          "top1_FDE_p90": 0.7803359627723694,
+          "trajectory_mixture_NLL_per_step_mean": 1.92141854763031
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_46_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 2.411045551300049,
+          "samples": 18,
+          "top1_ADE_mean": 1.0811550617218018,
+          "top1_FDE_mean": 2.0498881340026855,
+          "top1_FDE_p90": 7.23257703781128,
+          "trajectory_mixture_NLL_per_step_mean": 2.1512651443481445
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_47_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.9798064231872559,
+          "samples": 15,
+          "top1_ADE_mean": 0.2859375774860382,
+          "top1_FDE_mean": 0.37167471647262573,
+          "top1_FDE_p90": 0.7841877698898315,
+          "trajectory_mixture_NLL_per_step_mean": 1.9232087135314941
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_48_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 2.248450517654419,
+          "samples": 18,
+          "top1_ADE_mean": 0.6859452724456787,
+          "top1_FDE_mean": 1.112663745880127,
+          "top1_FDE_p90": 2.0119766473770144,
+          "trajectory_mixture_NLL_per_step_mean": 2.0996110439300537
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_49_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.9745099544525146,
+          "samples": 16,
+          "top1_ADE_mean": 0.3842952847480774,
+          "top1_FDE_mean": 0.5660631656646729,
+          "top1_FDE_p90": 0.6954914629459381,
+          "trajectory_mixture_NLL_per_step_mean": 1.9028997421264648
+        },
+        "S1_ADAPTIVE::scenario_uk_give_way_ego_init_50_smpc_var_risk": {
+          "pointwise_mixture_NLL_mean": 1.9774008989334106,
+          "samples": 15,
+          "top1_ADE_mean": 0.2875503897666931,
+          "top1_FDE_mean": 0.37756073474884033,
+          "top1_FDE_p90": 0.783346676826477,
+          "trajectory_mixture_NLL_per_step_mean": 1.922186017036438
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_46_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 2.4125232696533203,
+          "samples": 18,
+          "top1_ADE_mean": 1.0819876194000244,
+          "top1_FDE_mean": 2.0510616302490234,
+          "top1_FDE_p90": 7.230587911605836,
+          "trajectory_mixture_NLL_per_step_mean": 2.1513335704803467
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_47_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.9786144495010376,
+          "samples": 15,
+          "top1_ADE_mean": 0.28510966897010803,
+          "top1_FDE_mean": 0.3722076416015625,
+          "top1_FDE_p90": 0.7847673535346984,
+          "trajectory_mixture_NLL_per_step_mean": 1.9225324392318726
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_48_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 2.2469911575317383,
+          "samples": 18,
+          "top1_ADE_mean": 0.6842973232269287,
+          "top1_FDE_mean": 1.1106592416763306,
+          "top1_FDE_p90": 2.015948116779328,
+          "trajectory_mixture_NLL_per_step_mean": 2.0988852977752686
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_49_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 2.186147928237915,
+          "samples": 17,
+          "top1_ADE_mean": 0.6265832781791687,
+          "top1_FDE_mean": 1.0551552772521973,
+          "top1_FDE_p90": 2.0424078464508058,
+          "trajectory_mixture_NLL_per_step_mean": 2.0832533836364746
+        },
+        "S1_FIXED::scenario_uk_give_way_ego_init_50_smpc_fixed_risk": {
+          "pointwise_mixture_NLL_mean": 1.9775420427322388,
+          "samples": 15,
+          "top1_ADE_mean": 0.28724539279937744,
+          "top1_FDE_mean": 0.37777167558670044,
+          "top1_FDE_p90": 0.7881193995475768,
+          "trajectory_mixture_NLL_per_step_mean": 1.922350287437439
+        }
+      }
+    },
+    "samples": 315,
+    "top1_ADE_mean": 0.4441855847835541,
+    "top1_FDE_mean": 0.6945213079452515,
+    "top_prob_mode_is_best_frac": 0.6857142857142857,
+    "trajectory_mixture_NLL_per_step_mean": 1.9754490852355957
+  },
+  "uses_interaction_context": true
+}
