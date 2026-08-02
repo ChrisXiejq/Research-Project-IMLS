@@ -137,8 +137,24 @@ payload={"schema_version":"day11_timing_shift_contract_v1","status":"frozen","fo
  "deployment_preflight_filename":"day11_deployment_preflight.json",
  "pre_registered_primary_contrasts":["B1_minus_B0 within each policy pooled over offsets/styles","adaptive_minus_fixed_medium within each predictor pooled over offsets/styles","predictor_x_offset and policy_x_offset interactions"],
  "no_post_result_tuning":True,"test_used_for_model_selection":False}
+if output.exists():
+ old=json.loads(output.read_text())
+ old_compare={k:v for k,v in old.items() if k not in ("git_commit","execution_git_commits")}
+ new_compare={k:v for k,v in payload.items() if k not in ("git_commit","execution_git_commits")}
+ if old_compare!=new_compare: raise SystemExit(f"Day 11 contract semantic drift: {output}")
+ old_git=old.get("git_commit"); new_git=payload["git_commit"]
+ if old_git!=new_git:
+  if list(root.glob("**/scenario_run_summary.json")): raise SystemExit("Cannot migrate Day 11 contract after rollout execution began")
+  ancestor=subprocess.run(["git","-C",str(repo),"merge-base","--is-ancestor",old_git,new_git]).returncode==0
+  if not ancestor: raise SystemExit("Day 11 repair commit is not a fast-forward descendant")
+  changed=subprocess.check_output(["git","-C",str(repo),"diff","--name-only",old_git,new_git],text=True).splitlines()
+  allowed={"core/scripts/carla/run_day11_timing_shift_robustness.sh","core/scripts/models/audit_day10_closed_loop.py","core/scripts/models/package_closed_loop_snapshot.py"}
+  disallowed=[path for path in changed if path not in allowed and not path.startswith("docs/")]
+  if disallowed: raise SystemExit(f"Unsafe pre-rollout Day 11 migration changed runtime files: {disallowed}")
+  payload["execution_git_commits"]=list(dict.fromkeys((old.get("execution_git_commits") or [old_git])+[new_git]))
+  provenance={"schema_version":"day11_contract_pre_rollout_repair_v1","status":"pass","reason":"fix same-command local variable expansion before first rollout","old_git_commit":old_git,"new_git_commit":new_git,"changed_files":changed,"rollouts_preserved":0,"allowed_execution_git_commits":payload["execution_git_commits"]}
+  prov=root/"day11_contract_resume_provenance.json"; tmp=prov.with_suffix(prov.suffix+".tmp"); tmp.write_text(json.dumps(provenance,indent=2,sort_keys=True)+"\n"); os.replace(tmp,prov)
 rendered=json.dumps(payload,indent=2,sort_keys=True)+"\n"
-if output.exists() and output.read_text()!=rendered: raise SystemExit(f"Day 11 contract drift: {output}")
 tmp=output.with_suffix(output.suffix+".tmp"); tmp.write_text(rendered); os.replace(tmp,output)
 PY
 
@@ -151,7 +167,8 @@ postprocess_cell() {
 
 run_cell() {
   local predictor="$1" policy="$2" style="$3" label="$4" offset="$5"
-  local cell_id="${predictor}_${policy}_${style}_offset_${label}" cell_dir="${DAY11_RESULTS}/${cell_id}"
+  local cell_id="${predictor}_${policy}_${style}_offset_${label}"
+  local cell_dir="${DAY11_RESULTS}/${cell_id}"
   local model policy_name risk_profile target_style tuning="${DAY11_RESULTS}/tuning_configs/offset_${label}.json"
   local calibration_arg=() adaptive_arg=()
   if [[ "${predictor}" == "B1" ]]; then model="${B1_MODEL}"; calibration_arg=(--prediction_model_calibration "${B1_CALIBRATION}"); else model="${B0_MODEL}"; fi

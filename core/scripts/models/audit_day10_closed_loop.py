@@ -234,7 +234,12 @@ def main() -> None:
         failures.append("matrix:preflight_semantics")
     allowed_commits = contract.get("execution_git_commits") or [contract.get("git_commit")]
     if len(allowed_commits) > 1:
-        provenance_path = root / "day10_contract_resume_provenance.json"
+        provenance_name = (
+            "day11_contract_resume_provenance.json"
+            if str(contract.get("schema_version", "")).startswith("day11_")
+            else "day10_contract_resume_provenance.json"
+        )
+        provenance_path = root / provenance_name
         if not provenance_path.is_file():
             failures.append("matrix:resume_provenance")
         else:
