@@ -1,0 +1,235 @@
+{
+  "B0_model_sha256_tree": "369c09a7aab28a721983f0baa50e7611b3cfc93803b73e600a0b44188d06f8bb",
+  "B0_validation_calibration_parameters": {
+    "covariance_scale": 0.09379155676525602,
+    "covariance_scale_semantics": "multiplicative factor applied to the 2x2 covariance matrix",
+    "temperature": 2.5198420997897464
+  },
+  "closed_loop_selection_unchanged": {
+    "seed": 37,
+    "variant": "B1"
+  },
+  "comparison_scope": {
+    "calibrated": "deployment-package contrast using separately validation-fitted calibration",
+    "closed_loop_B0_calibration": "identity; calibrated B0 is not retroactively substituted into Day 10",
+    "uncalibrated": "model adaptation contrast under the shared identity GMM decoder"
+  },
+  "retraining_or_retuning_after_test_permitted": false,
+  "role": "post-selection gap completion; reporting only",
+  "schema_version": "b0_frozen_offline_bridge_v1",
+  "source_sha256": {
+    "b0_test_all": "3e4117a59272dc8ee1d990377711f0668e873e9bd5a1c40051c82ab5f706e9cc",
+    "b0_test_assertive": "6351fcaccca97ffabe2dee3576ada66416bcedee10fb5d2bdc6e77300e924b40",
+    "b0_test_pre_response": "3bc7e2e161da8e4466d0855859e8d0aa1509b034a98ab25f1541effbbac23d42",
+    "b0_test_reactive": "9e0eca3c891fd514af26d3a70a70425ccba9c9e0c257a2a8bfbd5adb00ff27bd",
+    "b0_test_response_active": "5ebd076a5c00cc5663a7d9fdcfb065a1689fb166c01b1fd228a4f07ab5ce8184",
+    "b0_validation_calibration": "fc9a8817d65eb6527d9d7e2571c8744b155fcb06c991ba3ae830b5259825c9ba",
+    "b0_validation_evaluation": "15951434429d83094ad101a64063ca456d8e6b6059bf9f5e3a92e93090a33015",
+    "day10_run_contract": "79fb371e09591840627f78c8346b8685bc8a31f31b66cc5a1163bb73909137f1",
+    "day8_frozen_test_summary": "f66241f08e6ecc783cf72239626b21129fb1c71f5b66679f8a5dc2b407487f2f"
+  },
+  "status": "pass",
+  "subsets": {
+    "all": {
+      "B0": {
+        "calibrated_coverage_MAE": 0.406843900680542,
+        "calibrated_rollout_macro_NLL": 0.5820950865745544,
+        "independent_init_groups": 5,
+        "independent_rollouts": 20,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 17.62398991083342,
+        "samples": 315,
+        "status": "pass",
+        "top1_ADE_mean": 1.2987937927246094,
+        "top1_FDE_mean": 2.6845109462738037,
+        "uncalibrated_coverage_MAE": 0.05530846491456032,
+        "uncalibrated_rollout_macro_NLL": 2.1707117557525635
+      },
+      "B1": {
+        "calibrated_coverage_MAE": 0.07657831162214279,
+        "calibrated_rollout_macro_NLL": -2.0685722827911377,
+        "independent_init_groups": 5,
+        "independent_rollouts": 20,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 18.51353103679324,
+        "samples": 315,
+        "status": "pass",
+        "top1_ADE_mean": 0.10587570071220398,
+        "top1_FDE_mean": 0.12916770577430725,
+        "uncalibrated_coverage_MAE": 0.1141074001789093,
+        "uncalibrated_rollout_macro_NLL": 1.857094407081604
+      },
+      "contrasts": {
+        "B1_minus_B0_calibrated_coverage_MAE": -0.3302655890583992,
+        "B1_minus_B0_calibrated_rollout_macro_NLL": -2.650667369365692,
+        "B1_minus_B0_mean_prediction_ms_per_sample": 0.8895411259598198,
+        "B1_minus_B0_top1_ADE_mean": -1.1929180920124054,
+        "B1_minus_B0_top1_FDE_mean": -2.5553432404994965,
+        "B1_minus_B0_uncalibrated_coverage_MAE": 0.058798935264348984,
+        "B1_minus_B0_uncalibrated_rollout_macro_NLL": -0.3136173486709595
+      },
+      "status": "pass"
+    },
+    "assertive": {
+      "B0": {
+        "calibrated_coverage_MAE": 0.3832777738571167,
+        "calibrated_rollout_macro_NLL": 0.4110836386680603,
+        "independent_init_groups": 5,
+        "independent_rollouts": 10,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 24.95554563899835,
+        "samples": 150,
+        "status": "pass",
+        "top1_ADE_mean": 1.154692530632019,
+        "top1_FDE_mean": 2.3206136226654053,
+        "uncalibrated_coverage_MAE": 0.044144440442323685,
+        "uncalibrated_rollout_macro_NLL": 2.1382243633270264
+      },
+      "B1": {
+        "calibrated_coverage_MAE": 0.0902777835726738,
+        "calibrated_rollout_macro_NLL": -2.7137835025787354,
+        "independent_init_groups": 5,
+        "independent_rollouts": 10,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 25.785109226902325,
+        "samples": 150,
+        "status": "pass",
+        "top1_ADE_mean": 0.043354377150535583,
+        "top1_FDE_mean": 0.04789244756102562,
+        "uncalibrated_coverage_MAE": 0.12183333188295364,
+        "uncalibrated_rollout_macro_NLL": 1.844127893447876
+      },
+      "contrasts": {
+        "B1_minus_B0_calibrated_coverage_MAE": -0.2929999902844429,
+        "B1_minus_B0_calibrated_rollout_macro_NLL": -3.1248671412467957,
+        "B1_minus_B0_mean_prediction_ms_per_sample": 0.8295635879039764,
+        "B1_minus_B0_top1_ADE_mean": -1.1113381534814835,
+        "B1_minus_B0_top1_FDE_mean": -2.2727211751043797,
+        "B1_minus_B0_uncalibrated_coverage_MAE": 0.07768889144062996,
+        "B1_minus_B0_uncalibrated_rollout_macro_NLL": -0.2940964698791504
+      },
+      "status": "pass"
+    },
+    "pre_response": {
+      "B0": {
+        "calibrated_coverage_MAE": 0.36594441533088684,
+        "calibrated_rollout_macro_NLL": 0.42809394001960754,
+        "independent_init_groups": 2,
+        "independent_rollouts": 4,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 54.01514992117882,
+        "samples": 60,
+        "status": "pass",
+        "top1_ADE_mean": 1.1226788759231567,
+        "top1_FDE_mean": 2.2542500495910645,
+        "uncalibrated_coverage_MAE": 0.04803333804011345,
+        "uncalibrated_rollout_macro_NLL": 2.1382832527160645
+      },
+      "B1": {
+        "calibrated_coverage_MAE": 0.08516667038202286,
+        "calibrated_rollout_macro_NLL": -2.697277069091797,
+        "independent_init_groups": 2,
+        "independent_rollouts": 4,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 43.84978308031956,
+        "samples": 60,
+        "status": "pass",
+        "top1_ADE_mean": 0.04406885802745819,
+        "top1_FDE_mean": 0.04940439388155937,
+        "uncalibrated_coverage_MAE": 0.12183333188295364,
+        "uncalibrated_rollout_macro_NLL": 1.844423770904541
+      },
+      "contrasts": {
+        "B1_minus_B0_calibrated_coverage_MAE": -0.280777744948864,
+        "B1_minus_B0_calibrated_rollout_macro_NLL": -3.1253710091114044,
+        "B1_minus_B0_mean_prediction_ms_per_sample": -10.165366840859257,
+        "B1_minus_B0_top1_ADE_mean": -1.0786100178956985,
+        "B1_minus_B0_top1_FDE_mean": -2.204845655709505,
+        "B1_minus_B0_uncalibrated_coverage_MAE": 0.0737999938428402,
+        "B1_minus_B0_uncalibrated_rollout_macro_NLL": -0.29385948181152344
+      },
+      "status": "pass"
+    },
+    "reactive": {
+      "B0": {
+        "calibrated_coverage_MAE": 0.4282676875591278,
+        "calibrated_rollout_macro_NLL": 0.753100574016571,
+        "independent_init_groups": 5,
+        "independent_rollouts": 10,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 23.947933361385807,
+        "samples": 165,
+        "status": "pass",
+        "top1_ADE_mean": 1.4297927618026733,
+        "top1_FDE_mean": 3.0153205394744873,
+        "uncalibrated_coverage_MAE": 0.06644949316978455,
+        "uncalibrated_rollout_macro_NLL": 2.203197479248047
+      },
+      "B1": {
+        "calibrated_coverage_MAE": 0.09313434362411499,
+        "calibrated_rollout_macro_NLL": -1.4234793186187744,
+        "independent_init_groups": 5,
+        "independent_rollouts": 10,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 23.65708500146866,
+        "samples": 165,
+        "status": "pass",
+        "top1_ADE_mean": 0.16271176934242249,
+        "top1_FDE_mean": 0.20305058360099792,
+        "uncalibrated_coverage_MAE": 0.10872019082307816,
+        "uncalibrated_rollout_macro_NLL": 1.870059609413147
+      },
+      "contrasts": {
+        "B1_minus_B0_calibrated_coverage_MAE": -0.3351333439350128,
+        "B1_minus_B0_calibrated_rollout_macro_NLL": -2.1765798926353455,
+        "B1_minus_B0_mean_prediction_ms_per_sample": -0.29084835991714897,
+        "B1_minus_B0_top1_ADE_mean": -1.2670809924602509,
+        "B1_minus_B0_top1_FDE_mean": -2.8122699558734894,
+        "B1_minus_B0_uncalibrated_coverage_MAE": 0.04227069765329361,
+        "B1_minus_B0_uncalibrated_rollout_macro_NLL": -0.3331378698348999
+      },
+      "status": "pass"
+    },
+    "response_active": {
+      "B0": {
+        "calibrated_coverage_MAE": 0.4181666672229767,
+        "calibrated_rollout_macro_NLL": 2.958937883377075,
+        "independent_init_groups": 3,
+        "independent_rollouts": 6,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 130.64786220590273,
+        "samples": 15,
+        "status": "pass",
+        "top1_ADE_mean": 1.7633986473083496,
+        "top1_FDE_mean": 4.7082719802856445,
+        "uncalibrated_coverage_MAE": 0.15372222661972046,
+        "uncalibrated_rollout_macro_NLL": 2.471771478652954
+      },
+      "B1": {
+        "calibrated_coverage_MAE": 0.44261112809181213,
+        "calibrated_rollout_macro_NLL": 8.572831153869629,
+        "independent_init_groups": 3,
+        "independent_rollouts": 6,
+        "invalid_covariances": 0,
+        "mean_prediction_ms_per_sample": 88.67770830790202,
+        "samples": 15,
+        "status": "pass",
+        "top1_ADE_mean": 0.9420049786567688,
+        "top1_FDE_mean": 1.244974970817566,
+        "uncalibrated_coverage_MAE": 0.10747778415679932,
+        "uncalibrated_rollout_macro_NLL": 2.0763132572174072
+      },
+      "contrasts": {
+        "B1_minus_B0_calibrated_coverage_MAE": 0.02444446086883545,
+        "B1_minus_B0_calibrated_rollout_macro_NLL": 5.613893270492554,
+        "B1_minus_B0_mean_prediction_ms_per_sample": -41.9701538980007,
+        "B1_minus_B0_top1_ADE_mean": -0.8213936686515808,
+        "B1_minus_B0_top1_FDE_mean": -3.4632970094680786,
+        "B1_minus_B0_uncalibrated_coverage_MAE": -0.04624444246292114,
+        "B1_minus_B0_uncalibrated_rollout_macro_NLL": -0.3954582214355469
+      },
+      "status": "pass"
+    }
+  },
+  "test_used_for_selection": false
+}
