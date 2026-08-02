@@ -1,0 +1,104 @@
+{
+  "bundles": {
+    "dataset": {
+      "bytes": 225505134,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day12/day12_evidence_freeze_v1/asset_backup/day12_v2_prediction_dataset_bundle.tar.gz",
+      "sha256": "85cf90fc134001d27f3ee377504eafe21ecf309de79d6bcff9e7e37c03f7410a"
+    },
+    "day10_full_results": {
+      "bytes": 130678888,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day12/day12_evidence_freeze_v1/asset_backup/day10_formal_snapshot.tar.gz",
+      "sha256": "6307146c6bbddd57fdaba657432491790a052848033d5eddafc162217a96f2e3"
+    },
+    "day11_full_results": {
+      "bytes": 134154415,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day12/day12_evidence_freeze_v1/asset_backup/day11_timing_shift_snapshot.tar.gz",
+      "sha256": "9928d53821be27a765d1879e0d218fca4284fa216aaccfe309f36a480bfd1ac9"
+    },
+    "frozen_models": {
+      "bytes": 194805701,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day12/day12_evidence_freeze_v1/asset_backup/day12_frozen_model_packages.tar.gz",
+      "sha256": "cff581e23f3eeb7bb99a1c67b2ab2810d705ad0ced976e520ab25e76a914680f"
+    }
+  },
+  "model_artifacts": {
+    "B0": {
+      "bytes": 37832101,
+      "expected_sha256_tree": "369c09a7aab28a721983f0baa50e7611b3cfc93803b73e600a0b44188d06f8bb",
+      "files": 4,
+      "path": "/root/autodl-tmp/Research-Project-IMLS-day12/core/scripts/models/l5kit_multipath_10",
+      "sha256_tree": "369c09a7aab28a721983f0baa50e7611b3cfc93803b73e600a0b44188d06f8bb"
+    },
+    "B1": {
+      "bytes": 45157094,
+      "expected_sha256_tree": "860e2c4513273982e26cb7ea36177029c1620a3761e631eee64818fb85ec2231",
+      "files": 5,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B1/seed_37/best_model",
+      "seed": 37,
+      "sha256_tree": "860e2c4513273982e26cb7ea36177029c1620a3761e631eee64818fb85ec2231"
+    },
+    "B2-D": {
+      "bytes": 39682225,
+      "expected_sha256_tree": "667d3f535def0cc4afddd76d4b376d4def396ef3aa5c038714c665787927ac0b",
+      "files": 5,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-D/seed_11/best_model",
+      "seed": 11,
+      "sha256_tree": "667d3f535def0cc4afddd76d4b376d4def396ef3aa5c038714c665787927ac0b"
+    },
+    "B2-M": {
+      "bytes": 38436781,
+      "expected_sha256_tree": "374a8ad4cc1b33a84babc57ddfb5baf3edcc6db414b3e30d4a80a0642320a828",
+      "files": 5,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B2-M/seed_37/best_model",
+      "seed": 37,
+      "sha256_tree": "374a8ad4cc1b33a84babc57ddfb5baf3edcc6db414b3e30d4a80a0642320a828"
+    },
+    "T1": {
+      "bytes": 38924841,
+      "expected_sha256_tree": "897b8f14fa1dae771800008f44458f24d7698dc31684f8dabaaed57266949a44",
+      "files": 5,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T1/seed_23/best_model",
+      "seed": 23,
+      "sha256_tree": "897b8f14fa1dae771800008f44458f24d7698dc31684f8dabaaed57266949a44"
+    },
+    "T2": {
+      "bytes": 39936544,
+      "expected_sha256_tree": "a37a153891c93f2404154574ca26c1919656ae2d22dbcd4e21dcb0355d0081e9",
+      "files": 5,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/T2/seed_23/best_model",
+      "seed": 23,
+      "sha256_tree": "a37a153891c93f2404154574ca26c1919656ae2d22dbcd4e21dcb0355d0081e9"
+    }
+  },
+  "offsite_copy_verified": false,
+  "resume_semantics": "Each completed bundle is skipped only when its sidecar SHA-256 matches; partial bundles are rebuilt atomically.",
+  "schema_version": "day12_critical_asset_backup_manifest_v1",
+  "source_markers": {
+    "day10_complete": {
+      "bytes": 406,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day10/day10_formal_v1/DAY10_COMPLETE.json",
+      "sha256": "c143739d2f85b48580160650f0de5fafefc03fb7585935a9a38c405dbcad0bbc"
+    },
+    "day11_complete": {
+      "bytes": 341,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day11/day11_timing_shift_v1/DAY11_COMPLETE.json",
+      "sha256": "b9b2a3d48efa23969931e62fd7d4d33b28e2712c334ec88377786af95813826e"
+    },
+    "day6_complete": {
+      "bytes": 768,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200/DAY6_COMPLETE.json",
+      "sha256": "024817ca37f987bb177d3f01de8c6a6c437b02755b62fd94a848aa49b12b42bc"
+    },
+    "day7_complete": {
+      "bytes": 390,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/DAY7_COMPLETE.json",
+      "sha256": "0c7aeeac95e691ad09b4a367bea18bfef5bae209ad9446988af7107a155b5040"
+    },
+    "day8_selection_freeze": {
+      "bytes": 7080,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/final_test_v1/DAY8_MODEL_SELECTION_FROZEN.json",
+      "sha256": "7d88ca0a7523bed66bcde37b23a48340b83177b724641b244dc182f17974c849"
+    }
+  },
+  "status": "prepared_for_offsite_copy"
+}

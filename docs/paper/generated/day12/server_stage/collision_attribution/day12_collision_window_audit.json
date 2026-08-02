@@ -1,0 +1,55 @@
+{
+  "immutable_source": true,
+  "interpretation": [
+    "Native CARLA callbacks are not independent collision episodes.",
+    "Day 6 stores collision callbacks on CARLA's global frame clock but does not store a per-rollout frame anchor for sample timestamps.",
+    "Exact per-window overlap is therefore not identifiable retrospectively; every usable window in a callback-containing rollout is counted as a conservative upper bound.",
+    "No raw sample or rollout is deleted by this audit."
+  ],
+  "schema_version": "day12_day6_collision_window_audit_v1",
+  "sensitivity_decision": {
+    "decision": "material_reactive_train_overlap_full_filtered_matrix_review",
+    "decision_basis": "conservative_upper_bound_due_missing_per_rollout_carla_frame_anchor",
+    "frozen_thresholds": {
+      "any_val_or_test_affected": "critical review",
+      "reactive_train_affected_fraction_gt_0.01": "full filtered-matrix review",
+      "reactive_train_affected_fraction_lte_0.01": "B1 seed37 sensitivity",
+      "zero_affected_usable_windows": "no retraining"
+    },
+    "reactive_train_affected_fraction": 0.07655954631379962
+  },
+  "source": {
+    "day6_complete_sha256": "024817ca37f987bb177d3f01de8c6a6c437b02755b62fd94a848aa49b12b42bc",
+    "day6_results": "/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200"
+  },
+  "status": "pass",
+  "totals": {
+    "affected_reactive_train_windows": 162,
+    "affected_usable_by_split": {
+      "test": 0,
+      "train": 162,
+      "val": 0
+    },
+    "affected_usable_windows": 162,
+    "affected_window_measure": "conservative_upper_bound",
+    "collision_callbacks": 253,
+    "contact_episodes": 16,
+    "monitored_roles": [
+      "target_2"
+    ],
+    "observed_rollouts": 200,
+    "other_actor_types": [
+      "static.wall",
+      "traffic.traffic_light"
+    ],
+    "reactive_train_usable_windows": 2116,
+    "rollouts_with_callbacks": 6,
+    "unique_collision_frames": 62,
+    "usable_by_split": {
+      "test": 495,
+      "train": 4036,
+      "val": 506
+    },
+    "usable_windows": 5037
+  }
+}

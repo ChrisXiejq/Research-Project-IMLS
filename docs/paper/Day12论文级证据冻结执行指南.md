@@ -1,6 +1,6 @@
 # Day12 论文级证据冻结执行指南
 
-> 状态：Day10 v3 cluster inference 与 Day10+Day11 timing synthesis 已在本地完成；服务器 collision-window attribution 和关键资产打包待执行。
+> 状态：**2026-08-02 全部完成。** 服务器三个完成门通过，四个关键资产包已下载到服务器之外并通过 SHA-256、大小和 tar 成员完整性验证。
 
 ## 1. Day12 当前完成情况
 
@@ -138,3 +138,16 @@ python core/scripts/models/verify_day12_offsite_backup.py \
 ```
 
 只有生成 `DAY12_OFFSITE_BACKUP_VERIFIED.json` 后，Day12 资产保护门才算真正关闭。
+
+## 7. 最终完成结果
+
+- collision attribution：200/200 rollouts；6 个 callback-containing rollout 全部位于 reactive training split；253 callbacks 合并为 16 contact episodes、62 unique frames；只有 `target_2` 与 traffic light/static wall 接触；validation/test 上界为 0；
+- Day6 没有保存 sample clock 到 CARLA global frame 的每 rollout anchor，因此不能诚实声称完成了逐窗口精确对齐；采用预先声明的保守上界，将六个 rollout 的全部 162 usable windows 计为可能受影响；
+- reactive train 上界：`162/2116 = 7.656%`；全部 train 上界：`162/4036 = 4.014%`；触发 filtered full-matrix review；
+- Day10 v3 服务器复算与本地结果逐字节一致；
+- Day10+Day11 synthesis：120 rollouts、24 cells、160 contrasts、0 observed collision/yield failure；
+- 四个备份归档合计约 654 MiB，SHA-256 全部匹配，验证 14,148 个 tar members；
+- 本地仓库外副本：`/Users/bytedance/my/Dissertation/offsite_backups/day12_evidence_freeze_v1`；
+- 机器完成标记：`generated/day12/asset_backup_manifest/DAY12_OFFSITE_BACKUP_VERIFIED.json`。
+
+Day12 已关闭。由于 7.656% 是无法进一步缩小的保守 reactive-train 上界，下一步不是改写原实验，而是运行 validation-only filtered 5×3 sensitivity matrix；原 Day8 与 frozen test 始终保持 primary evidence。

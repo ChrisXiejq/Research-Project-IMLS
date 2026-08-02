@@ -285,7 +285,11 @@ Git 中有完整 hashes、configs、metrics 和 curated closed-loop evidence，�
 
 完成门：关键资产至少存在服务器之外的一份已验证副本。
 
-### Day13：把实验变成论文表格、图和可追溯数字
+### Day13-A（由 Day12 实际结果触发）：collision-filtered validation sensitivity
+
+Day12 最终得到 reactive-train affected-window 保守上界 `162/2116 = 7.656%`，超过预冻结 1% 阈值；同时 validation/test 为 0。由于缺少 per-rollout CARLA frame anchor，不能再从旧数据中可靠缩小上界。因此先排除 6 个 callback-containing training rollouts，复用 Day8 协议运行 5 variants × 3 seeds validation-only matrix。原 Day8/frozen test 保持 primary，test 不重新访问，filtered analysis 只判断 architecture ranking 是否稳健。执行细节见 `Day13碰撞过滤敏感性执行指南.md`。
+
+### Day13-B：把实验变成论文表格、图和可追溯数字
 
 建立一个 `paper_results_manifest.json`，给每个论文数字稳定 ID，例如 `R_OFFLINE_B1_ADE`、`R_DAY10_B1_DELAY`、`R_DAY11_OFFSET_MARGIN`。每个 ID 必须记录 source file、filter、aggregation unit 和 value。
 

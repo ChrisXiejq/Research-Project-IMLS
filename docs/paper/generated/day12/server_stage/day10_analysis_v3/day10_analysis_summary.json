@@ -1,0 +1,52 @@
+{
+  "analysis_unit": "paired rollout condition (ego_init_id,target_style)",
+  "counts": {
+    "cells": 16,
+    "paired_contrasts": 136,
+    "rollouts": 80
+  },
+  "mean_absolute_predictor_delta_by_target_style": {
+    "assertive": {
+      "min_footprint_separation_m": 0.057082054467804254,
+      "solver_failure_fraction": 0.0006962080171358067,
+      "supervisor_active_fraction": 0.006930637022222612,
+      "target_clearance_adjusted_completion_delay_s": 0.5125000076368451
+    },
+    "reactive": {
+      "min_footprint_separation_m": 0.07825674683467165,
+      "solver_failure_fraction": 0.0006401837618327334,
+      "supervisor_active_fraction": 0.008489764578113063,
+      "target_clearance_adjusted_completion_delay_s": 0.6650000099092722
+    }
+  },
+  "reliability": {
+    "completion_failures": 0,
+    "footprint_collisions": 0,
+    "invalid_covariances": 0,
+    "invalid_probabilities": 0,
+    "max_solver_failure_fraction": 0.01,
+    "min_footprint_separation_m": 0.825184024410073,
+    "solver_gate_failures": 0,
+    "yield_order_failures": 0
+  },
+  "schema_version": "day10_paired_analysis_v3",
+  "source": {
+    "closed_loop_audit_sha256": "9ef70b193fc735bd4e71c6b646d2ee2d970759fd80abed69233b16af10487ac2",
+    "day10_complete_sha256": "c143739d2f85b48580160650f0de5fafefc03fb7585935a9a38c405dbcad0bbc",
+    "execution_git_commits": [
+      "9aeed8cbb30049f25bc35e7b17ff969e7916f35f",
+      "915b0e2aa357d9dc6a4bde26c88f07c54ff8022e"
+    ],
+    "run_contract_sha256": "79fb371e09591840627f78c8346b8685bc8a31f31b66cc5a1163bb73909137f1"
+  },
+  "statistical_notes": [
+    "Effect means use all balanced paired rollout conditions.",
+    "Bootstrap intervals and exact sign-flip p-values operate on five ego-init cluster means, not simulator steps or repeated target-style conditions.",
+    "The frozen efficiency outcome is ego completion time minus target conflict-zone clearance time; the scenario clock identity is checked to 1e-6 s.",
+    "Bootstrap intervals are deterministic percentile intervals over five init-cluster means.",
+    "With five independent init groups, the smallest attainable two-sided exact p-value is 0.0625 before multiplicity correction.",
+    "Holm adjustment controls family-wise error within each declared inference scope; style-specific contrasts are descriptive.",
+    "Raw jerk is retained only as a secondary descriptive metric because it is sensitive to 20 Hz numerical differentiation."
+  ],
+  "status": "pass"
+}

@@ -19,6 +19,7 @@
 15. `Day11时序偏移稳健性结果与最终论文定位.md`：±3 m closed-loop robustness、init-cluster inference 与最终论文论点；
 16. `Day11后论文级实验审计与Day12至Day14执行方案.md`：论文级证据审计、剩余缺口、Day12–Day14 收尾和写作方案；
 17. `Day12论文级证据冻结执行指南.md`：collision attribution、Day10 cluster 修正、三水平 timing synthesis 与资产备份命令；
-18. `已完成实验与证据账本.md` 与 `generated/`：已完成证据。
+18. `Day13碰撞过滤敏感性执行指南.md`：训练集保守过滤、5 模型 × 3 seed validation-only sensitivity 与断点续跑；
+19. `已完成实验与证据账本.md` 与 `generated/`：已完成证据。
 
 论文正文尚未进入最终写作阶段，因此不保留会迅速失效的 Results draft 或重复的 Markdown 表格。正式 Results/Discussion 将在模型与闭环实验冻结后从机器可读证据生成。

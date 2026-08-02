@@ -1,0 +1,12 @@
+{
+  "bundles": {
+    "dataset": "85cf90fc134001d27f3ee377504eafe21ecf309de79d6bcff9e7e37c03f7410a",
+    "day10_full_results": "6307146c6bbddd57fdaba657432491790a052848033d5eddafc162217a96f2e3",
+    "day11_full_results": "9928d53821be27a765d1879e0d218fca4284fa216aaccfe309f36a480bfd1ac9",
+    "frozen_models": "cff581e23f3eeb7bb99a1c67b2ab2810d705ad0ced976e520ab25e76a914680f"
+  },
+  "manifest_sha256": "61a83b18a1e264e3c89e9b9c4320394b5cc0a1c4e9839796a4c84f63a5890712",
+  "offsite_copy_pending": true,
+  "schema_version": "day12_asset_backup_server_stage_v1",
+  "status": "pass"
+}
