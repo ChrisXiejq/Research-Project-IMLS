@@ -19,7 +19,7 @@ Day 10 已完整结束并通过审计：
 
 ## 2. 分析方法
 
-正式分析单位是 paired `(ego_init_id, target_style)`，不把 20 Hz simulator steps 当作独立样本。报告：
+Effect mean 使用 paired `(ego_init_id, target_style)` conditions，但正式推断单位是 `ego_init_id`：同一 init 的两种 target style 先聚合，再对 5 个 init-cluster means 做 bootstrap/sign-flip。20 Hz simulator steps 和同一 init 的重复 conditions 都不作为独立样本。报告：
 
 1. B1−B0，同 risk、style、init 配对；
 2. adaptive−每个 fixed frontier point，同 predictor、style、init 配对；
@@ -46,12 +46,12 @@ B1 没有形成跨 risk policy 的整体 closed-loop 优势。平均 completion 
 
 | Risk policy | B1−B0 adjusted delay (s) | B1−B0 footprint (m) | B1−B0 supervisor fraction | Delay exact p / Holm p |
 | --- | ---: | ---: | ---: | ---: |
-| fixed aggressive | -0.305 | -0.039 | +0.0040 | 0.0117 / 0.1875 |
-| fixed medium | +0.295 | -0.041 | -0.0020 | 0.5117 / 1.0000 |
-| fixed conservative | +0.090 | -0.098 | -0.0035 | 0.9805 / 1.0000 |
-| adaptive | +0.105 | -0.021 | -0.0010 | 0.8906 / 1.0000 |
+| fixed aggressive | -0.305 | -0.039 | +0.0040 | 0.0625 / 1.0000 |
+| fixed medium | +0.295 | -0.041 | -0.0020 | 0.5000 / 1.0000 |
+| fixed conservative | +0.090 | -0.098 | -0.0035 | 0.9375 / 1.0000 |
+| adaptive | +0.105 | -0.021 | -0.0010 | 0.8125 / 1.0000 |
 
-在 fixed-aggressive 下，B1 的 clearance-adjusted delay 平均小 0.305 s，但同时 margin 小 3.9 cm、supervisor active fraction 高 0.40 percentage points。delay 与 supervisor intervention 的未校正 exact p 均为 0.0117；两者在预定义 predictor 主结果 family 内做 Holm 校正后均为 0.1875，因此只能作为值得在 Day 11 复核的条件性信号，不能写成确认性优势。
+在 fixed-aggressive 下，B1 的 clearance-adjusted delay 平均小 0.305 s，但同时 margin 小 3.9 cm、supervisor active fraction 高 0.40 percentage points。按 5 个 init clusters 修正后，delay 与 supervisor intervention 的未校正 exact p 均为理论最小值 0.0625，Holm 校正后均为 1.0；这只能作为已由 Day11 复核的条件性信号，不能写成确认性优势。修正没有改变任何 effect mean，只消除了将两个 target styles 当作独立重复的偏乐观推断。
 
 ## 4. Target responsiveness 是否放大模型效果
 
@@ -96,7 +96,7 @@ H10-Risk 的方法论假设得到支持：只与 fixed-medium 单点比较会给
 
 B1−B0 adjusted-delay effect 从 fixed-aggressive 的 `-0.305 s` 变化到 fixed-medium 的 `+0.295 s`，跨度为 0.600 s；这说明 offline 选择的 predictor package 不会产生与 risk policy 无关的单调收益。
 
-不过 predictor × risk 的 primary interaction 在 multiplicity control 后均未确认。唯一未校正 `p<0.05` 的 interaction 是 adaptive 相对 fixed-medium 的 solver-failure difference-in-differences `+0.00105`，exact p=0.0469；其绝对量只有 0.105 percentage points，且 Holm p=0.5625，不构成实际或统计上的强证据。
+不过 predictor × risk 的 primary interaction 在 multiplicity control 后均未确认。Adaptive 相对 fixed-medium 的 solver-failure difference-in-differences 为 `+0.00105`；按 init-cluster 修正后的 exact p=0.125、Holm p=1.0，不构成实际或统计上的强证据。旧版 condition-level `p=0.0469` 已废止，不得进入论文。
 
 因此 H10-Interaction 的结论是：存在清楚的描述性 effect heterogeneity，但当前 5-init 设计不足以确认特定 interaction contrast。Day 11 应预注册复核 fixed-medium/adaptive 的 timing-shift transfer，而不是根据 Day 10 结果改 policy 参数。
 
@@ -136,5 +136,7 @@ generated/day10/analysis/day10_cell_summary.csv
 generated/day10/analysis/day10_paired_contrasts.csv
 generated/day10/analysis/day10_analysis_summary.json
 ```
+
+当前 canonical analysis schema 为 `day10_paired_analysis_v3`。V2 condition-level inference 已由 Day12 审计废止；所有 effect means 保持不变，CI/p 使用 5-init cluster inference。
 
 原始 125 MB snapshot 因超过 GitHub 单文件限制只保留在本机和服务器结果目录，不提交 Git；其 SHA256 已在本报告冻结。仓库中的逐 rollout evidence 与 derived tables 足以复现本报告统计。快照打包器已修复，未来重打包会自动包含 `df_full.csv`。

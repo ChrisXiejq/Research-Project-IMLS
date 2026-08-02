@@ -156,11 +156,11 @@ Day6 collection audit 如实记录了 253 个 native CARLA collision callbacks�
 
 不得因为这些 rollout 表现异常而静默删除并重新声称原协议结果；任何 filtered analysis 必须标为 sensitivity analysis。
 
-#### P1-2 Day10 pooled inferential unit 仍不够严格
+#### P1-2 Day10 pooled inferential unit 仍不够严格（本地已关闭）
 
 Day10 的 effect mean 是正确的，但 pooled predictor/risk contrasts 把同一 init 下的 assertive 和 reactive 两个 condition delta 作为 `n=10` 做 bootstrap/sign-flip。它没有把 20 Hz step 当样本，但两种 style 共享同一个 init，不能视作完全独立。
 
-必须仿照 Day11：
+Day12 已仿照 Day11 完成修正：
 
 1. 保留所有 condition pairs 用于计算平均 effect；
 2. 先在每个 init 内聚合 style；
@@ -168,13 +168,13 @@ Day10 的 effect mean 是正确的，但 pooled predictor/risk contrasts 把同�
 4. 继续在预定义 family 内做 Holm 校正；
 5. 生成 Day10 analysis v3，并更新 Day10 文档中 CI、p 和方向计数。
 
-这项修复预计不会推翻当前结论，因为 Day10 现有 Holm 结果本来就没有确认主要优势；它会消除未校正 `p=0.0117` 可能造成的过度解读。
+修正后的 136 个 contrast effect means 与旧版逐项一致；所有推断均为 5 个 init groups。Fixed-aggressive delay 的 exact p 从错误的 `0.0117` 修正为理论最小值 `0.0625`，Holm p 从 `0.1875` 修正为 `1.0`。主体结论不变，旧版 p 值废止。
 
-#### P1-3 Day10 nominal 与 Day11 ±3 m 尚未统一分析
+#### P1-3 Day10 nominal 与 Day11 ±3 m 尚未统一分析（本地已关闭）
 
 两个 contract 的 predictors、模型树哈希、B1 calibration、anchors、normalization、init、authority regime、reactive parameters、adaptive parameters 和 target speed 全部一致；Day11 也冻结了 Day10 contract SHA。因此可以用现有数据构建 offset `{-3, 0, +3} m` 的统一分析。
 
-必须输出：
+Day12 已输出：
 
 - 每个 predictor×risk×offset 的 cell mean；
 - B1−B0 随 offset 的变化；
@@ -183,7 +183,7 @@ Day10 的 effect mean 是正确的，但 pooled predictor/risk contrasts 把同�
 - 5-init cluster bootstrap、exact sign flip、Holm adjustment；
 - 明确标记 offset=0 来自 Day10 batch，±3 来自 Day11 batch，不能完全排除 batch effect。
 
-该分析比新增一个偏离主线的 v12 robustness subset 更直接地支持论文中心论点。
+三水平 synthesis 覆盖 120 rollouts、24 cells、160 paired contrasts，0 collision/yield failure。跨三个 offsets，B1−B0 adjusted delay 为 fixed-medium `-0.370 s`、adaptive `-0.337 s`，但 margin 分别为 `-0.069/-0.035 m`；adaptive−fixed-medium delay 仅为 B1 `-0.063 s`、B0 `-0.097 s`。所有 inference-family Holm p 均为 1.0。它强化了“局部效率信号与 controller trade-off 并存、adaptive 不普遍支配”的结论。
 
 #### P1-4 不可替代资产目前主要保存在单台云服务器
 

@@ -29,7 +29,7 @@
     "solver_gate_failures": 0,
     "yield_order_failures": 0
   },
-  "schema_version": "day10_paired_analysis_v2",
+  "schema_version": "day10_paired_analysis_v3",
   "source": {
     "closed_loop_audit_sha256": "9ef70b193fc735bd4e71c6b646d2ee2d970759fd80abed69233b16af10487ac2",
     "day10_complete_sha256": "c143739d2f85b48580160650f0de5fafefc03fb7585935a9a38c405dbcad0bbc",
@@ -40,10 +40,11 @@
     "run_contract_sha256": "79fb371e09591840627f78c8346b8685bc8a31f31b66cc5a1163bb73909137f1"
   },
   "statistical_notes": [
-    "Paired rollouts, not simulator steps, are the analysis unit.",
+    "Effect means use all balanced paired rollout conditions.",
+    "Bootstrap intervals and exact sign-flip p-values operate on five ego-init cluster means, not simulator steps or repeated target-style conditions.",
     "The frozen efficiency outcome is ego completion time minus target conflict-zone clearance time; the scenario clock identity is checked to 1e-6 s.",
-    "Bootstrap intervals are deterministic percentile intervals over paired conditions.",
-    "Exact p-values use all sign flips of paired deltas and are exploratory with n=5 or n=10.",
+    "Bootstrap intervals are deterministic percentile intervals over five init-cluster means.",
+    "With five independent init groups, the smallest attainable two-sided exact p-value is 0.0625 before multiplicity correction.",
     "Holm adjustment controls family-wise error within each declared inference scope; style-specific contrasts are descriptive.",
     "Raw jerk is retained only as a secondary descriptive metric because it is sensitive to 20 Hz numerical differentiation."
   ],

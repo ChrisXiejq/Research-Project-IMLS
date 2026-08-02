@@ -271,11 +271,20 @@ def describe_contrast(
     name: str,
     metric: str,
     deltas: list[float],
+    init_ids: list[int],
     a_label: str,
     b_label: str,
 ) -> dict[str, Any]:
     clean = finite(deltas)
-    low, high = bootstrap_mean_ci(clean, f"{family}|{name}|{metric}")
+    if len(clean) != len(deltas) or len(init_ids) != len(deltas):
+        raise ValueError(f"{name}/{metric}: non-finite or unbalanced clustered deltas")
+    by_init: dict[int, list[float]] = {}
+    for init_id, delta in zip(init_ids, deltas):
+        by_init.setdefault(init_id, []).append(delta)
+    cluster_means = [statistics.fmean(values) for _, values in sorted(by_init.items())]
+    low, high = bootstrap_mean_ci(
+        cluster_means, f"day10:init_cluster:{family}|{name}|{metric}"
+    )
     return {
         "contrast_family": family,
         "inference_scope": inference_scope,
@@ -283,13 +292,14 @@ def describe_contrast(
         "metric": metric,
         "a_label": a_label,
         "b_label": b_label,
-        "n_pairs": len(clean),
+        "condition_pairs": len(clean),
+        "independent_init_groups": len(cluster_means),
         "mean_delta_a_minus_b": mean(clean),
         "median_delta_a_minus_b": statistics.median(clean),
         "sd_delta": statistics.stdev(clean) if len(clean) > 1 else 0.0,
         "bootstrap_95ci_low": low,
         "bootstrap_95ci_high": high,
-        "exact_sign_flip_p_two_sided": exact_sign_flip_p(clean),
+        "exact_init_cluster_sign_flip_p": exact_sign_flip_p(cluster_means),
         "positive_pairs": sum(value > 0 for value in clean),
         "negative_pairs": sum(value < 0 for value in clean),
         "zero_pairs": sum(math.isclose(value, 0.0, abs_tol=1e-15) for value in clean),
@@ -302,11 +312,11 @@ def add_holm_adjustment(contrasts: list[dict[str, Any]]) -> None:
     for contrast in contrasts:
         scopes.setdefault(contrast["inference_scope"], []).append(contrast)
     for rows in scopes.values():
-        ordered = sorted(rows, key=lambda row: row["exact_sign_flip_p_two_sided"])
+        ordered = sorted(rows, key=lambda row: row["exact_init_cluster_sign_flip_p"])
         running = 0.0
         total = len(ordered)
         for rank, row in enumerate(ordered):
-            adjusted = min(1.0, (total - rank) * row["exact_sign_flip_p_two_sided"])
+            adjusted = min(1.0, (total - rank) * row["exact_init_cluster_sign_flip_p"])
             running = max(running, adjusted)
             row["holm_adjusted_p_within_scope"] = running
 
@@ -331,12 +341,14 @@ def build_contrasts(rollouts: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     for style in selected_styles
                     for init_id in inits
                 ]
+                cluster_ids = [init_id for style in selected_styles for init_id in inits]
                 contrasts.append(describe_contrast(
                     "predictor_within_risk",
                     "predictor_within_risk_pooled_primary" if style_group == "pooled" else "predictor_within_risk_style_descriptive",
                     f"B1_minus_B0__{risk}__{style_group}",
                     metric,
                     deltas,
+                    cluster_ids,
                     "B1",
                     "B0",
                 ))
@@ -351,12 +363,14 @@ def build_contrasts(rollouts: list[dict[str, Any]]) -> list[dict[str, Any]]:
                         for style in selected_styles
                         for init_id in inits
                     ]
+                    cluster_ids = [init_id for style in selected_styles for init_id in inits]
                     contrasts.append(describe_contrast(
                         "adaptive_vs_fixed",
                         "adaptive_vs_fixed_pooled_primary" if style_group == "pooled" else "adaptive_vs_fixed_style_descriptive",
                         f"adaptive_minus_{fixed_policy}__{predictor}__{style_group}",
                         metric,
                         deltas,
+                        cluster_ids,
                         "adaptive",
                         fixed_policy,
                     ))
@@ -381,6 +395,7 @@ def build_contrasts(rollouts: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 f"B1_B0_effect__adaptive_minus_{fixed_policy}",
                 metric,
                 deltas,
+                [init_id for style in styles for init_id in inits],
                 "B1-B0 under adaptive",
                 f"B1-B0 under {fixed_policy}",
             ))
@@ -405,6 +420,7 @@ def build_contrasts(rollouts: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "B1_B0_effect__reactive_minus_assertive",
             metric,
             deltas,
+            inits,
             "B1-B0 under reactive",
             "B1-B0 under assertive",
         ))
@@ -436,7 +452,7 @@ def build_summary(
             by_style[style][metric] = mean(values)
 
     return {
-        "schema_version": "day10_paired_analysis_v2",
+        "schema_version": "day10_paired_analysis_v3",
         "status": "pass",
         "analysis_unit": metadata["contract"]["analysis_unit"],
         "source": {
@@ -462,10 +478,11 @@ def build_summary(
         },
         "mean_absolute_predictor_delta_by_target_style": by_style,
         "statistical_notes": [
-            "Paired rollouts, not simulator steps, are the analysis unit.",
+            "Effect means use all balanced paired rollout conditions.",
+            "Bootstrap intervals and exact sign-flip p-values operate on five ego-init cluster means, not simulator steps or repeated target-style conditions.",
             "The frozen efficiency outcome is ego completion time minus target conflict-zone clearance time; the scenario clock identity is checked to 1e-6 s.",
-            "Bootstrap intervals are deterministic percentile intervals over paired conditions.",
-            "Exact p-values use all sign flips of paired deltas and are exploratory with n=5 or n=10.",
+            "Bootstrap intervals are deterministic percentile intervals over five init-cluster means.",
+            "With five independent init groups, the smallest attainable two-sided exact p-value is 0.0625 before multiplicity correction.",
             "Holm adjustment controls family-wise error within each declared inference scope; style-specific contrasts are descriptive.",
             "Raw jerk is retained only as a secondary descriptive metric because it is sensitive to 20 Hz numerical differentiation.",
         ],
