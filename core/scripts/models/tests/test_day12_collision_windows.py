@@ -9,7 +9,12 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from audit_day6_collision_windows import classify_window, contact_episodes, sensitivity_decision
+from audit_day6_collision_windows import (
+    classify_unanchored_window,
+    classify_window,
+    contact_episodes,
+    sensitivity_decision,
+)
 
 
 class Day12CollisionWindowTest(unittest.TestCase):
@@ -28,18 +33,32 @@ class Day12CollisionWindowTest(unittest.TestCase):
     def test_future_overlap_and_post_collision_are_affected(self) -> None:
         sample = {
             "sample_id": 1,
-            "step": 4,
+            "step": 100,
             "sim_time_s": 5.0,
             "future_times_s": [5.2, 5.4, 5.6],
             "future_valid_mask": [True, True, True],
             "horizon_steps": 3,
+            "dt_s": 0.2,
         }
         future = classify_window(sample, [108], 20)
         self.assertTrue(future["future_collision_overlap"])
         self.assertTrue(future["collision_affected_usable"])
-        post = classify_window({**sample, "sim_time_s": 6.0, "future_times_s": [6.2, 6.4, 6.6]}, [108], 20)
+        post = classify_window({**sample, "step": 120, "sim_time_s": 6.0, "future_times_s": [6.2, 6.4, 6.6]}, [108], 20)
         self.assertTrue(post["sample_after_first_collision"])
         self.assertTrue(post["collision_affected_usable"])
+
+    def test_missing_frame_anchor_uses_conservative_upper_bound(self) -> None:
+        sample = {
+            "sample_id": 2,
+            "step": 24,
+            "future_times_s": [1.2, 1.4],
+            "future_valid_mask": [True, True],
+            "horizon_steps": 2,
+        }
+        bounded = classify_unanchored_window(sample, True)
+        self.assertTrue(bounded["collision_affected_usable"])
+        self.assertIsNone(bounded["history_collision_overlap"])
+        self.assertIn("conservative_upper_bound", bounded["temporal_attribution"])
 
     def test_decision_uses_reactive_train_fraction(self) -> None:
         summary = {

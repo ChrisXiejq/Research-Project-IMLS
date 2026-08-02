@@ -14,7 +14,6 @@ import argparse
 import csv
 import hashlib
 import json
-import math
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
@@ -116,16 +115,17 @@ def contact_episodes(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return episodes
 
 
-def sample_frame(value: float, fps: int) -> tuple[int, float]:
-    scaled = value * fps
-    rounded = int(round(scaled))
-    return rounded, abs(scaled - rounded)
+def classify_window(sample: dict[str, Any], event_steps: list[int], fps: int) -> dict[str, Any]:
+    """Classify a sample when collision events share the scenario-step clock.
 
+    Day 6 does not contain the CARLA-frame anchor required to construct
+    ``event_steps`` from the stored global collision frames.  The audit therefore
+    uses :func:`classify_unanchored_window` for the real dataset.  This helper is
+    retained for fixtures and future datasets that persist the missing anchor.
+    """
 
-def classify_window(sample: dict[str, Any], event_frames: list[int], fps: int) -> dict[str, Any]:
-    sim_time = float(sample["sim_time_s"])
-    current_frame, current_residual = sample_frame(sim_time, fps)
-    history_start = current_frame - int(round(HISTORY_SECONDS * fps))
+    current_step = int(sample["step"])
+    history_start = current_step - int(round(HISTORY_SECONDS * fps))
     valid_future_times = [
         float(time_value)
         for time_value, valid in zip(
@@ -133,25 +133,21 @@ def classify_window(sample: dict[str, Any], event_frames: list[int], fps: int) -
         )
         if bool(valid)
     ]
-    future_frames = [sample_frame(value, fps)[0] for value in valid_future_times]
-    future_residual = max(
-        [sample_frame(value, fps)[1] for value in valid_future_times] or [0.0]
-    )
-    future_end = max(future_frames) if future_frames else current_frame
-    history_overlap = any(history_start <= frame <= current_frame for frame in event_frames)
-    future_overlap = any(current_frame < frame <= future_end for frame in event_frames)
-    first_event = min(event_frames) if event_frames else None
-    post_collision = first_event is not None and current_frame > first_event
+    dt_s = float(sample.get("dt_s", sample.get("dt", 0.2)))
+    future_end = current_step + int(round(len(valid_future_times) * dt_s * fps))
+    history_overlap = any(history_start <= step <= current_step for step in event_steps)
+    future_overlap = any(current_step < step <= future_end for step in event_steps)
+    first_event = min(event_steps) if event_steps else None
+    post_collision = first_event is not None and current_step > first_event
     usable = bool(valid_future_times)
     full_horizon = len(valid_future_times) == int(sample.get("horizon_steps", 10))
     collision_affected = usable and (history_overlap or future_overlap or post_collision)
     return {
         "sample_id": int(sample["sample_id"]),
-        "sample_step": int(sample["step"]),
-        "sample_frame_inferred": current_frame,
-        "history_start_frame_inferred": history_start,
-        "future_end_frame_inferred": future_end,
-        "frame_lattice_max_residual": max(current_residual, future_residual),
+        "sample_step": current_step,
+        "history_start_step": history_start,
+        "future_end_step": future_end,
+        "temporal_attribution": "exact_scenario_step_clock",
         "valid_future_steps": len(valid_future_times),
         "usable": usable,
         "full_horizon": full_horizon,
@@ -159,6 +155,37 @@ def classify_window(sample: dict[str, Any], event_frames: list[int], fps: int) -
         "future_collision_overlap": future_overlap,
         "sample_after_first_collision": post_collision,
         "collision_affected_usable": collision_affected,
+    }
+
+
+def classify_unanchored_window(sample: dict[str, Any], has_events: bool) -> dict[str, Any]:
+    """Return a conservative upper bound when global-frame alignment is absent."""
+
+    valid_future_times = [
+        float(time_value)
+        for time_value, valid in zip(
+            sample.get("future_times_s") or [], sample.get("future_valid_mask") or []
+        )
+        if bool(valid)
+    ]
+    usable = bool(valid_future_times)
+    return {
+        "sample_id": int(sample["sample_id"]),
+        "sample_step": int(sample["step"]),
+        "history_start_step": None,
+        "future_end_step": None,
+        "temporal_attribution": (
+            "rollout_level_conservative_upper_bound_missing_carla_frame_anchor"
+            if has_events
+            else "no_collision_callbacks"
+        ),
+        "valid_future_steps": len(valid_future_times),
+        "usable": usable,
+        "full_horizon": len(valid_future_times) == int(sample.get("horizon_steps", 10)),
+        "history_collision_overlap": None,
+        "future_collision_overlap": None,
+        "sample_after_first_collision": None,
+        "collision_affected_usable": bool(has_events and usable),
     }
 
 
@@ -179,6 +206,7 @@ def sensitivity_decision(summary: dict[str, Any]) -> dict[str, Any]:
         decision = "material_reactive_train_overlap_full_filtered_matrix_review"
     return {
         "decision": decision,
+        "decision_basis": "conservative_upper_bound_due_missing_per_rollout_carla_frame_anchor",
         "frozen_thresholds": {
             "any_val_or_test_affected": "critical review",
             "zero_affected_usable_windows": "no retraining",
@@ -224,12 +252,9 @@ def audit(day6_root: Path, output_dir: Path) -> dict[str, Any]:
                 raise ValueError(f"Collision callback count mismatch: {summary_path}")
             frames = sorted({int(event["frame"]) for event in events})
             episodes = contact_episodes(events)
-            classified = [classify_window(sample, frames, fps) for sample in read_jsonl(labeled_path)]
-            max_residual = max((row["frame_lattice_max_residual"] for row in classified), default=0.0)
-            if max_residual > 1.0e-3:
-                raise ValueError(
-                    f"{scenario_dir}: sim_time is not aligned to CARLA frame lattice ({max_residual})"
-                )
+            classified = [
+                classify_unanchored_window(sample, bool(events)) for sample in read_jsonl(labeled_path)
+            ]
             usable = [row for row in classified if row["usable"]]
             affected = [row for row in usable if row["collision_affected_usable"]]
             usable_by_split[split] += len(usable)
@@ -251,10 +276,11 @@ def audit(day6_root: Path, output_dir: Path) -> dict[str, Any]:
                     "labeled_samples": len(classified),
                     "usable_windows": len(usable),
                     "full_horizon_windows": sum(row["full_horizon"] for row in usable),
-                    "history_overlap_windows": sum(row["history_collision_overlap"] for row in usable),
-                    "future_overlap_windows": sum(row["future_collision_overlap"] for row in usable),
-                    "post_collision_windows": sum(row["sample_after_first_collision"] for row in usable),
+                    "history_overlap_windows": None if events else 0,
+                    "future_overlap_windows": None if events else 0,
+                    "post_collision_windows": None if events else 0,
                     "affected_usable_windows": len(affected),
+                    "affected_window_semantics": "conservative_upper_bound" if events else "exact_zero",
                 }
             )
             for episode_number, episode in enumerate(episodes, 1):
@@ -266,8 +292,8 @@ def audit(day6_root: Path, output_dir: Path) -> dict[str, Any]:
                         "scenario_dir": scenario_dir.name,
                         "rollout_episode_index": episode_number,
                         **episode,
-                        "start_time_s_inferred": episode["start_frame"] / fps,
-                        "end_time_s_inferred": episode["end_frame"] / fps,
+                        "start_global_carla_time_s": episode["start_frame"] / fps,
+                        "end_global_carla_time_s": episode["end_frame"] / fps,
                     }
                 )
             if events:
@@ -315,6 +341,7 @@ def audit(day6_root: Path, output_dir: Path) -> dict[str, Any]:
         "affected_usable_by_split": dict(affected_by_split),
         "reactive_train_usable_windows": reactive_train_usable,
         "affected_reactive_train_windows": affected_reactive_train,
+        "affected_window_measure": "conservative_upper_bound",
     }
     decision = sensitivity_decision(totals)
     status = "pass" if not any(role.startswith("ego") for role in monitored_roles) else "review"
@@ -330,7 +357,8 @@ def audit(day6_root: Path, output_dir: Path) -> dict[str, Any]:
         "sensitivity_decision": decision,
         "interpretation": [
             "Native CARLA callbacks are not independent collision episodes.",
-            "A window is affected if its history/future overlaps a callback or its current time follows the first callback in that rollout.",
+            "Day 6 stores collision callbacks on CARLA's global frame clock but does not store a per-rollout frame anchor for sample timestamps.",
+            "Exact per-window overlap is therefore not identifiable retrospectively; every usable window in a callback-containing rollout is counted as a conservative upper bound.",
             "No raw sample or rollout is deleted by this audit.",
         ],
     }
