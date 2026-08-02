@@ -91,7 +91,9 @@ def prediction_failures(rows: list[dict], cell: dict, contract: dict) -> tuple[l
             failures.append("cell_identity")
         if row.get("ego_policy") != cell["risk_policy"]:
             failures.append("risk_policy_label")
-        if row.get("protocol_id") != "day10_a3_heldout_closed_loop_v1":
+        if row.get("protocol_id") != contract.get(
+            "prediction_protocol_id", "day10_a3_heldout_closed_loop_v1"
+        ):
             failures.append("protocol_id")
         allowed_commits = contract.get("execution_git_commits") or [contract["git_commit"]]
         if row.get("git_commit") not in allowed_commits:
@@ -100,7 +102,7 @@ def prediction_failures(rows: list[dict], cell: dict, contract: dict) -> tuple[l
             failures.append("target_style")
         if not math.isclose(
             float(row.get("target_start_offset_m", math.nan)),
-            float(contract["target_offset_m"]),
+            float(cell.get("target_offset_m", contract.get("target_offset_m", 0.0))),
             abs_tol=1e-12,
         ):
             failures.append("target_offset")
@@ -211,10 +213,19 @@ def main() -> None:
         raise ValueError("Day 10 run contract is not frozen")
 
     failures = []
-    tuning_path = root / "tuning_day10_frozen.json"
-    if not tuning_path.is_file() or sha256(tuning_path) != contract.get("tuning_sha256"):
-        failures.append("matrix:tuning_sha256")
-    preflight_path = root / "day10_deployment_preflight.json"
+    tuning_by_offset = contract.get("tuning_sha256_by_offset")
+    if tuning_by_offset:
+        for entry in tuning_by_offset.values():
+            tuning_path = root / entry["path"]
+            if not tuning_path.is_file() or sha256(tuning_path) != entry["sha256"]:
+                failures.append(f"matrix:tuning_sha256:{entry['path']}")
+    else:
+        tuning_path = root / contract.get("tuning_filename", "tuning_day10_frozen.json")
+        if not tuning_path.is_file() or sha256(tuning_path) != contract.get("tuning_sha256"):
+            failures.append("matrix:tuning_sha256")
+    preflight_path = root / contract.get(
+        "deployment_preflight_filename", "day10_deployment_preflight.json"
+    )
     if (
         not preflight_path.is_file()
         or semantic_sha256(preflight_semantics(read_json(preflight_path)))
@@ -355,7 +366,7 @@ def main() -> None:
     if observed_rollouts != int(contract["expected_rollouts"]):
         failures.append("matrix:rollout_count")
     payload = {
-        "schema_version": "day10_closed_loop_audit_v1",
+        "schema_version": contract.get("audit_schema_version", "day10_closed_loop_audit_v1"),
         "status": "pass" if not failures else "fail",
         "formal_evidence": True,
         "expected_cells": len(contract["cells"]),

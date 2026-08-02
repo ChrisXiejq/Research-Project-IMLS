@@ -13,6 +13,7 @@
 9. `Day9部署与CARLA_Smoke执行指南.md`：冻结模型的在线部署与 smoke；
 10. `Day10正式闭环矩阵执行指南.md`：B1/B0 × fixed frontier/adaptive × held-out target-style 正式矩阵；
 11. `Day10正式闭环结果与结论.md`：80-rollout paired analysis、假设判定与论文主张边界；
-12. `已完成实验与证据账本.md` 与 `generated/`：已完成证据。
+12. `Day10后缺口补齐与Day11执行指南.md`：B0 offline bridge、Transformer context ablation 与 ±3 m timing-shift robustness；
+13. `已完成实验与证据账本.md` 与 `generated/`：已完成证据。
 
 论文正文尚未进入最终写作阶段，因此不保留会迅速失效的 Results draft 或重复的 Markdown 表格。正式 Results/Discussion 将在模型与闭环实验冻结后从机器可读证据生成。

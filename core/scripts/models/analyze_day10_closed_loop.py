@@ -21,6 +21,7 @@ from typing import Any, Iterable
 
 ROLLOUT_METRICS = (
     "completion_time_s",
+    "target_clearance_adjusted_completion_delay_s",
     "min_footprint_separation_m",
     "min_center_distance_m",
     "clearance_s",
@@ -35,7 +36,7 @@ ROLLOUT_METRICS = (
 )
 
 PRIMARY_METRICS = (
-    "completion_time_s",
+    "target_clearance_adjusted_completion_delay_s",
     "min_footprint_separation_m",
     "solver_failure_fraction",
     "supervisor_active_fraction",
@@ -80,6 +81,11 @@ def weighted_mean(rows: list[dict[str, str]], key: str) -> float:
             pairs.append((value, weight))
     total = sum(weight for _, weight in pairs)
     return sum(value * weight for value, weight in pairs) / total if total else math.nan
+
+
+def finite_extreme(rows: list[dict[str, str]], key: str, fn: Any) -> float:
+    values = finite(as_float(row.get(key)) for row in rows)
+    return fn(values) if values else math.nan
 
 
 def sha256(path: Path) -> str:
@@ -182,13 +188,30 @@ def load_rollouts(root: Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:
             yield_rule = gate_item["yield_rules"][0]
             audit_item = audit_by_init[init_id]
             mechanism = mechanism_by_init[init_id]
+            rollout_start_s = finite_extreme(mechanism, "sim_time_start_s", min)
+            rollout_end_s = finite_extreme(mechanism, "sim_time_end_s", max)
+            completion_time_s = as_float(metric["completion_time"])
+            completion_clock_residual_s = rollout_start_s + completion_time_s - rollout_end_s
+            if not math.isclose(completion_clock_residual_s, 0.0, abs_tol=1e-6):
+                raise ValueError(
+                    f"{cell_id}/init{init_id}: completion clock is inconsistent "
+                    f"({completion_clock_residual_s:+.9f} s)"
+                )
+            target_clearance_time_s = as_float(yield_rule["target_exit_time_s"])
             rollout = {
                 "cell_id": cell_id,
                 "predictor": cell["predictor"],
                 "risk_policy": cell["risk_policy"],
                 "target_style": cell["target_style"],
                 "ego_init_id": init_id,
-                "completion_time_s": as_float(metric["completion_time"]),
+                "completion_time_s": completion_time_s,
+                "target_clearance_adjusted_completion_delay_s": (
+                    rollout_start_s + completion_time_s - target_clearance_time_s
+                ),
+                "rollout_start_time_s": rollout_start_s,
+                "ego_completion_time_s": rollout_end_s,
+                "target_clearance_time_s": target_clearance_time_s,
+                "completion_clock_residual_s": completion_clock_residual_s,
                 "completion_valid": as_float(metric["completion_valid"]),
                 "min_footprint_separation_m": as_float(safety["min_footprint_separation_m"]),
                 "min_center_distance_m": as_float(safety["min_center_distance_m"]),
@@ -413,7 +436,7 @@ def build_summary(
             by_style[style][metric] = mean(values)
 
     return {
-        "schema_version": "day10_paired_analysis_v1",
+        "schema_version": "day10_paired_analysis_v2",
         "status": "pass",
         "analysis_unit": metadata["contract"]["analysis_unit"],
         "source": {
@@ -440,6 +463,7 @@ def build_summary(
         "mean_absolute_predictor_delta_by_target_style": by_style,
         "statistical_notes": [
             "Paired rollouts, not simulator steps, are the analysis unit.",
+            "The frozen efficiency outcome is ego completion time minus target conflict-zone clearance time; the scenario clock identity is checked to 1e-6 s.",
             "Bootstrap intervals are deterministic percentile intervals over paired conditions.",
             "Exact p-values use all sign flips of paired deltas and are exploratory with n=5 or n=10.",
             "Holm adjustment controls family-wise error within each declared inference scope; style-specific contrasts are descriptive.",

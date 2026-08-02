@@ -26,6 +26,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(SCRIPT_DIR)
 # Import registers the V2 custom Keras layers before SavedModel restoration.
 import interaction_adapter_v2  # noqa: F401,E402
+from interaction_context_ablation import prepare_interaction_ablation  # noqa: E402
 from multipath_gmm_utils import (
     COVARIANCE_SCALE_SEMANTICS,
     STD_PARAMETERIZATION,
@@ -134,6 +135,17 @@ def parse_args() -> argparse.Namespace:
         choices=["all", "assertive", "reactive", "pre_response", "response_active"],
         help="Optional V2 behavioural subset; split selection remains unchanged.",
     )
+    parser.add_argument(
+        "--interaction-ablation",
+        default="none",
+        choices=["none", "zero", "shuffle"],
+        help=(
+            "Frozen diagnostic for four-input interaction models. 'zero' replaces valid "
+            "tokens with the train-normalization mean; 'shuffle' assigns context from a "
+            "different ego-init group without changing the receiver label/raster."
+        ),
+    )
+    parser.add_argument("--ablation-seed", type=int, default=20260802)
     return parser.parse_args()
 
 
@@ -768,22 +780,45 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
 
     model = tf.keras.models.load_model(args.model, compile=False)
     input_count = len(getattr(model, "inputs", []))
+    normalization_mean = None
+    if args.interaction_ablation != "none":
+        if input_count != 4:
+            raise RuntimeError(
+                "Interaction-context ablation is only valid for four-input sequence "
+                f"models; loaded model has {input_count} inputs"
+            )
+        try:
+            normalization_layer = model.get_layer("train_only_zscore")
+            normalization_mean = np.asarray(
+                normalization_layer.mean_values, dtype=np.float32
+            )
+        except (ValueError, AttributeError) as exc:
+            raise RuntimeError(
+                "Could not read the frozen train-only normalization mean required for "
+                "interaction-context ablation"
+            ) from exc
     preloaded_calibration = (
         load_calibration(args.calibration_json) if args.calibration_json else None
     )
-    iterator = load_samples(
+    sample_items = list(load_samples(
         jsonl_path,
         result_dir,
         args.horizon,
         max_samples=args.max_samples,
         no_image=args.no_image,
         subset=args.subset,
+    ))
+    sample_items, interaction_ablation = prepare_interaction_ablation(
+        sample_items,
+        mode=args.interaction_ablation,
+        seed=args.ablation_seed,
+        normalization_mean=normalization_mean,
     )
     try:
         samples, raw_predictions, labels, latency = run_model(
             model,
             input_count,
-            iterator,
+            sample_items,
             args.batch_size,
             args.no_image,
         )
@@ -802,6 +837,7 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
             "calibration_fit_uses_test": False,
             "model_input_count": input_count,
             "uses_interaction_context": bool(input_count >= 3),
+            "interaction_ablation": interaction_ablation,
             "samples": 0,
             "independent_rollouts": 0,
             "independent_init_groups": 0,
@@ -881,6 +917,7 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         "calibration_fit_uses_test": False,
         "model_input_count": input_count,
         "uses_interaction_context": bool(input_count >= 3),
+        "interaction_ablation": interaction_ablation,
         "samples": len(samples),
         "independent_rollouts": len({rollout_group_key(sample) for sample in samples}),
         "independent_init_groups": len({init_group_key(sample) for sample in samples}),
