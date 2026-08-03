@@ -1,7 +1,0 @@
-{
-  "archive": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/day8_validation_snapshot.tar.gz",
-  "archive_sha256": "6cbf7f0f626f2b3c1d5162d937b964772c198dfe26dd5f678aede8b5831a561e",
-  "excludes_model_weights": true,
-  "files": 153,
-  "status": "pass"
-}

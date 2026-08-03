@@ -10,13 +10,13 @@ interaction- and calibration-aware trajectory prediction
 
 ## 当前文档
 
-1. `docs/paper/两周_最终研究主线_数据扩展与实验执行方案.md`：当前唯一实验与论文 canonical 文档。
-2. `docs/paper/Day1_冻结协议与服务器资产审计报告.md`：本地/服务器资产、数据、checkpoint 和 Git 状态审计。
-3. `docs/paper/Day2_数据审计与V2协议冻结报告.md`：旧数据完整性、V2 interaction schema 和 200-rollout collection matrix。
-4. `docs/paper/Day3_GMM评估器与校准报告.md`：部署等价 GMM evaluator、raster channel 诊断与 calibration 结果。
-5. `docs/paper/Day4_V2交互数据链路与ReactiveTarget报告.md`：V2 共享输入、交互序列、reactive target 与四单元 smoke。
-6. `docs/paper/已完成实验与证据账本.md`：已完成控制、预测和闭环实验的结果路径、可支持论点与限制。
-7. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、CasADi 和 Gurobi 启动检查。
+实验已经完成到 Day14，进入论文写作阶段：
+
+1. `docs/paper/01_研究问题与实验方法.md`：最终 RQs、模型、数据和实验设计；
+2. `docs/paper/02_最终结果与审计结论.md`：结果、假设判定、缺陷和结论边界；
+3. `docs/paper/03_论文写作路线与章节大纲.md`：全文结构与写作步骤；
+4. `docs/paper/04_复现与证据资产索引.md`：表格、图片、result IDs 与审计入口；
+5. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、CasADi 和 Gurobi 环境说明。
 
 完整索引见 `docs/README.md`。
 
@@ -44,7 +44,7 @@ give_way_reduced_clear_path_release_v13_risk_owned_yield.json
 give_way_smpc_tuning.json
 ```
 
-已完成的一次性 sweep/ablation runner 和旧模型 pilot runner 已删除；历史版本可从 Git 恢复，结果证据保留在账本和 `docs/paper/generated/`。
+已完成的一次性 sweep/ablation runner、运行指南和重复 snapshots 已删除；历史版本可从 Git 恢复，最终证据保留在 `docs/paper/generated/paper_assets_v1/`。
 
 ## 运行边界
 

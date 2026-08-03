@@ -1,8 +1,0 @@
-{
-  "archive": "/root/autodl-tmp/results/give_way_transformer/day10_gaps/b0_offline_v1/b0_frozen_offline_snapshot.tar.gz",
-  "archive_sha256": "6d5d3cb6ce650153c13662979f1d8c00b2e581f4e3b698dc94fde7263c31d0dc",
-  "excludes_model_weights_and_rasters": true,
-  "files": 9,
-  "schema_version": "b0_frozen_offline_snapshot_v1",
-  "status": "pass"
-}

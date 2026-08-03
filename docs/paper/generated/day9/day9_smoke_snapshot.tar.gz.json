@@ -1,8 +1,0 @@
-{
-  "archive": "/root/autodl-tmp/results/give_way_transformer/day9/day9_smoke_v1/day9_smoke_snapshot.tar.gz",
-  "archive_sha256": "f27a2b394854da5b5098b5452f83596ab0bd626943e76cbbceb7b5d219e4dfd0",
-  "excludes_model_weights": true,
-  "excludes_rasters_and_video": true,
-  "files": 110,
-  "status": "pass"
-}
