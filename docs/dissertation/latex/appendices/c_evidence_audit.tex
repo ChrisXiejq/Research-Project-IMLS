@@ -1,0 +1,31 @@
+\section{Claim-to-evidence audit}
+\label{app:evidence}
+
+The final evidence audit reports 14/14 hard checks passed, no unresolved result
+identifiers and no source-hash mismatch. The canonical evidence package
+contains 210 stable result IDs, eight tables and eight figures in both SVG and
+PNG form. \TODO{Add the final Git commit and SHA-256 of the audit JSON used for
+the submitted PDF.}
+
+\subsection{Primary and secondary evidence boundary}
+
+Primary evidence comprises the rollout-disjoint collection, three-seed
+validation selection, frozen test, and the nominal/shifted formal closed-loop
+matrices. Context ablations, calibration subsets, collision reconstruction and
+Day13 filtered validation are diagnostic or sensitivity evidence. They support
+mechanism and robustness claims but do not reopen model selection.
+
+\subsection{Result provenance}
+
+Every numerical sentence in the final paper should have an adjacent source
+comment of the form:
+
+\begin{verbatim}
+% EVIDENCE: R_TEST_B1_MINUS_B0_ADE
+% SOURCE: docs/paper/generated/paper_assets_v1/paper_key_results.csv
+\end{verbatim}
+
+The submitted archive should include the LaTeX source, bibliography, official
+style assets, figures and a machine-readable claim-to-evidence table, while
+excluding secrets, raw credentials and non-anonymised supplementary metadata.
+

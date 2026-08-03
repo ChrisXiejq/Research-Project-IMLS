@@ -1,0 +1,27 @@
+\section{Reproducibility specification}
+\label{app:reproducibility}
+
+\subsection{Environment and frozen artefacts}
+
+\TODO{Insert a table containing CARLA, Python, TensorFlow, CUDA/cuDNN, solver
+and operating-system versions; hardware; Git commit; dataset manifest hash;
+model-package hashes; calibration hash; random seeds; and execution commands.}
+
+\subsection{Model and optimisation hyperparameters}
+
+\TODO{Transcribe the exact frozen hyperparameters and trainable-parameter
+counts. Do not infer missing values from memory; cite the configuration and
+manifest paths in source comments.}
+
+\subsection{Closed-loop contract}
+
+\TODO{Give the factorial cell identifiers, init IDs, arrival-offset definition,
+fixed-risk values, adaptive-risk rule, termination conditions, retry policy and
+measurement formulas.}
+
+\subsection{Statistical algorithms}
+
+Specify rollout macro-aggregation, construction of paired init-cluster means,
+deterministic cluster bootstrap, exhaustive sign-flip enumeration and Holm
+family boundaries in sufficient detail to reproduce each interval and p-value.
+

@@ -1,0 +1,108 @@
+\section{Methodology}
+\label{sec:methods}
+
+\subsection{CARLA scenario and system architecture}
+
+Experiments use a controlled give-way junction in CARLA's Town05
+\citep{dosovitskiy2017carla}. The ego follows a fixed route and encounters an
+assertive or reactive target vehicle. Fixed-risk and adaptive-risk policies
+share the trajectory solver and safety supervisor, making the executed motion
+a coupled system outcome. \TODO{Insert CARLA version, synchronous step,
+vehicle blueprints, route coordinates, weather, solver settings, supervisor
+thresholds and A3 authority-regime definition from the frozen configuration.}
+
+\subsection{Data collection and representation}
+
+The factorial collection contains 200 rollouts: 50 ego initialisations crossed
+with two target styles and two collection policies. Each prediction sample
+contains a deployment-equivalent raster and six interaction tokens covering
+$-1.0$ to $0.0$~s. Each token has 12 relative position, velocity, yaw and
+distance features. The target future covers ten steps at 0.2~s intervals, for
+a 2.0~s horizon, in the current target-local right-handed frame. Target style,
+policy, factorial cell, split and initialisation ID are prohibited inputs.
+
+Rollouts, not windows, are split: initialisations 1--40 train, 41--45
+validation and 46--50 test. Normalisation is fit on train only. Samples with no
+future label are excluded; partial-horizon samples use a masked loss.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figure01_research_workflow.png}
+  \caption{Research workflow and evidence gates. The study progresses from
+  the original planning question through controlled data, matched model
+  comparison and frozen closed-loop evaluation; mixed and negative findings
+  remain part of the evidence chain.}
+  \label{fig:workflow}
+\end{figure}
+
+\begin{table}[t]
+  \caption{Rollout-disjoint dataset split and usable prediction windows}
+  \label{tab:dataset}
+  \centering
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Split & Init IDs & Rollouts & Raw & Usable & Full horizon \\
+    \midrule
+    Train & 1--40 & 160 & 9,121 & 4,036 & 2,596 \\
+    Validation & 41--45 & 20 & 1,034 & 506 & 326 \\
+    Test & 46--50 & 20 & 1,075 & 495 & 315 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Prediction models}
+
+\Bzero{} is the frozen pretrained MultiPath control. \Bone{} retrains only the
+final MultiPath dense prediction head. \BtwoM{} and \BtwoD{} add flattened-
+sequence MLP adapters; the former updates trajectory means and the latter
+updates means, covariance/orientation and mixture logits. \Tone{} and \Ttwo{}
+replace the corresponding MLP adapter with a masked Transformer. The
+\BtwoM{}/\Tone{} and \BtwoD{}/\Ttwo{} parameter gaps are 10.48\% and 5.89\%,
+below the preregistered 20\% matched-capacity ceiling.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figure02_model_architecture.png}
+  \caption{Matched architecture and capacity controls. \Bone{} is the simple
+  adaptation control; the MLP/Transformer pairs isolate attention from
+  approximate adapter capacity while sharing the base prediction contract.}
+  \label{fig:architecture}
+\end{figure}
+
+\TODO{Add an exact hyperparameter table: layer widths, heads, embedding size,
+dropout, optimiser, learning rate, batch size, loss terms, epoch/early-stopping
+rule, anchor count, frozen/trainable parameters and software versions.}
+
+\subsection{Training, selection and calibration}
+
+Five candidate variants are trained with seeds 11, 23 and 37 under the same
+split, anchors, decoder, loss, optimiser budget and validation ranking metric.
+The variant is selected by median validation rollout-macro NLL and a
+representative seed is chosen using validation only. Selection is frozen before
+the test set is opened. Context zero/shuffle ablations and collision-filtered
+sensitivity runs are post-selection diagnostics and do not alter the primary
+model selection.
+
+Calibration parameters are fit on validation and frozen for test/deployment.
+The closed-loop contrast uses the identity-calibrated \Bzero{} stack and the
+validation-calibrated \Bone{} stack; it must therefore be interpreted as a
+frozen predictor-stack treatment rather than a weights-only intervention.
+
+\subsection{Statistical analysis}
+
+Effect estimates can average the balanced paired conditions, but uncertainty
+and exact sign-flip tests operate on five ego-initialisation cluster means.
+The smallest attainable non-zero two-sided exact p-value is therefore 0.0625.
+Holm correction is applied within each predefined family. Results emphasise
+effect sizes, cluster intervals, sign consistency and exact/Holm p-values;
+windows and simulator steps are never treated as independent replications.
+
+\subsection{Data-quality audit and sensitivity}
+
+Logging recorded 253 collision callbacks in six reactive training rollouts.
+Episode reconstruction reduced these to 16 contact episodes and 62 unique
+frames involving the target and infrastructure, not 253 ego--target crashes.
+Because old callbacks cannot be aligned exactly to the sample clock, all 162
+usable windows from the six rollouts are conservatively removed in a
+validation-only sensitivity analysis. The primary dataset remains frozen; the
+sensitivity asks only whether the architecture ranking changes.

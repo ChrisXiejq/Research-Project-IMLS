@@ -1,0 +1,84 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Why simple adaptation beat the tested Transformers}
+
+The result favours task adaptation, not a general rejection of Transformers.
+The controlled distribution is narrow, training contains 160 rollouts and
+4,036 usable windows, the pretrained MultiPath representation is strong, and
+the explicit history covers only one second. A low-capacity head can therefore
+correct a substantial domain mismatch without learning a new interaction
+representation. The ablations show that \Tone{} and \Ttwo{} do use sequence
+information; their lower rank is not explained by total input neglect. A
+critical discussion should contrast representation sufficiency, sample
+efficiency, optimisation and the scarcity of response-active cases.
+
+\subsection{Why offline gain did not imply uniform closed-loop gain}
+
+The planner consumes a calibrated distribution rather than ADE alone. Risk
+allocation transforms it into constraints, solver feasibility limits candidate
+motion, and the supervisor changes execution. The response-tail calibration
+failure supplies a concrete mechanism by which excellent aggregate prediction
+can coexist with conditional downstream effects. Because \Bone{} also differs
+from \Bzero{} in frozen calibration, the correct conclusion concerns the
+predictor stack, not neural weights in isolation.
+
+\subsection{Adaptive risk as a frontier point}
+
+Adaptive risk remains useful even though universal dominance is refuted. It can
+move the safety--efficiency operating point, but its value depends on predictor,
+target style and timing. Comparing it against aggressive, medium and
+conservative fixed controls prevents a favourable single-baseline comparison
+from being mistaken for general superiority. This negative result directly
+refines the project's original planning hypothesis.
+
+\subsection{Threats to validity}
+
+\begin{table}[t]
+  \caption{Threats, mitigations and remaining boundaries}
+  \label{tab:threats}
+  \centering
+  \small
+  \begin{tabular}{@{}L{0.25\linewidth}L{0.31\linewidth}L{0.34\linewidth}@{}}
+    \toprule
+    Threat & Mitigation & Remaining boundary \\
+    \midrule
+    Five independent init groups & Macro metrics, cluster intervals and exact tests & Minimum two-sided exact $p=0.0625$ \\
+    Single map/geometry & Style, risk and timing factorials & No cross-map or real-road claim \\
+    Callback alignment unavailable & Whole-rollout removal and 15-run sensitivity & Exact affected-window fraction unknown \\
+    Coupled solver/supervisor & Mechanism metrics and shared stack & No single-component causal attribution \\
+    Zero observed collisions & Report margins and counts separately & Population collision risk not zero \\
+    Tail calibration failure & Separate aggregate/tail reporting & Tail sample is very small \\
+    Timing batches run separately & Frozen contracts/hashes and paired inits & Residual batch effect possible \\
+    Post-hoc filtered validation & Primary experiment unchanged; no filtered test & Robustness evidence, not reselection \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Two additional boundaries require explicit wording. Offline test and closed
+loop share initialisation IDs 46--50; closed loop was not used for model
+selection but is not an externally independent population replication. Also,
+the implementation diagram describes information flow and must not be presented
+as a causal graph.
+
+\subsection{Implications and future work}
+
+For research practice, simple adaptation should be a mandatory baseline before
+claiming an interaction architecture improvement, and closed-loop evaluation
+should expose policy and timing moderators rather than collapse them into one
+score. For system design, calibration should be evaluated on response-active
+subsets, and solver/supervisor telemetry should accompany safety--efficiency
+metrics.
+
+Future work should replicate across maps and junctions, increase independent
+initialisation clusters, enrich response-active data, test subgroup-aware
+calibration, run a matched calibration factorial, extend the interaction
+history, and evaluate graph/attention architectures at a scale commensurate
+with their capacity. Joint training of predictive uncertainty and risk
+allocation is a further direction, but requires new controls to preserve causal
+interpretability.
+
+\TODO{Tie each interpretive claim to related work and state where the result
+agrees, conflicts, or adds a boundary. Include practical scale/production
+implications without implying that the current single-map experiment itself is
+production evidence.}

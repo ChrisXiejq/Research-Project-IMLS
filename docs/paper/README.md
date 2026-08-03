@@ -1,5 +1,10 @@
 # Dissertation paper workspace
 
+The canonical TMLR-format dissertation source is maintained in
+[`../dissertation/latex/`](../dissertation/latex/). This directory remains the
+source of frozen methods, evidence, figures and audit records used by that
+manuscript.
+
 > 当前阶段：**Day14 已完成，实验与证据冻结结束，进入正式论文写作。**
 >
 > 最后审计：14/14 hard checks PASS；无需新增正式实验；8 项方法边界必须在论文中明确。

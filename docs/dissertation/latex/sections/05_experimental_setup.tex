@@ -1,0 +1,59 @@
+\section{Experimental design}
+\label{sec:experiments}
+
+\subsection{Offline model-selection experiment}
+
+The selection experiment is $5$ variants $\times$ $3$ seeds, giving 15
+validation runs. Primary comparison: rollout-macro NLL. Secondary comparisons:
+top-1 ADE/FDE, reactive-subset ADE and latency. A one-shot frozen test evaluates
+the validation-selected checkpoint of each variant and the pretrained \Bzero{}
+control. This tests H1 and H3 without test-set tuning.
+
+\subsection{Sequence-use and calibration diagnostics}
+
+For \Tone{} and \Ttwo{}, valid interaction tokens are replaced by zeros or
+shuffled while weights remain frozen. An increase in NLL supports input use,
+but not causal interaction understanding. Aggregate and response-active
+calibration are reported separately. These analyses test H2 and diagnose
+tail behaviour; they cannot reselect the model.
+
+\subsection{Deployment reliability gate}
+
+Day9 runs eight smoke arms through raster/sequence input, GMM decoding,
+calibration, risk allocation, solver and supervisor. Passing this gate supports
+deployability but is not an effect experiment. Formal closed-loop conclusions
+are based only on Days10--12.
+
+\subsection{Nominal closed-loop factorial}
+
+The nominal design is
+\[
+2\ \text{predictors}\times4\ \text{risk policies}\times
+2\ \text{target styles}\times5\ \text{initialisations}=80
+\]
+rollouts. Predictors are \Bzero{} and frozen \Bone{}. Risk policies are fixed
+aggressive, fixed medium, fixed conservative and adaptive. The matrix evaluates
+the full fixed frontier rather than a single hand-picked control.
+
+\subsection{Arrival-timing robustness and pooled synthesis}
+
+The shifted-timing design is
+\[
+2\ \text{predictors}\times2\ \text{risk policies}\times
+2\ \text{target styles}\times2\ \text{offsets}\times
+5\ \text{initialisations}=80
+\]
+rollouts, using fixed medium/adaptive risk and target offsets $-3$ and $+3$~m.
+Combining these with matching nominal ($0$~m) conditions yields 24 cells and
+120 formal rollouts for the three-offset synthesis. This design tests H4--H6
+and records delay, footprint separation, solver failure, supervisor activity
+and observed reliability events.
+
+\subsection{Controls and validity safeguards}
+
+Key controls are the pretrained \Bzero{}, simple \Bone{}, matched MLP adapters,
+fixed-risk frontier, target-style factorial, paired initialisations, train-only
+normalisation, validation-only selection, frozen calibration/deployment hashes,
+and a collision-filtered sensitivity. Table~\ref{tab:threats} later separates
+each mitigation from the limitation that remains.
+

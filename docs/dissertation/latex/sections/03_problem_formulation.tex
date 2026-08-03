@@ -1,0 +1,52 @@
+\section{Problem formulation}
+\label{sec:problem}
+
+\subsection{Coupled prediction--planning system}
+
+At time $t$, the predictor $\model$ consumes a raster observation $r_t$ and,
+for sequence models, an interaction history $s_{t-H:t}$ with validity mask
+$m_{t-H:t}$. It outputs a $K$-component trajectory distribution
+\begin{equation}
+  p_{\theta}(Y_{t+1:t+T}\mid r_t,s_{t-H:t},m_{t-H:t})
+  = \sum_{k=1}^{K}\pi_k\,
+  \mathcal{N}(Y;\mu_k,\Sigma_k).
+\end{equation}
+A risk policy maps this distribution and the current state to a risk budget
+$\risk_t$. A trajectory solver then constructs a candidate ego trajectory;
+the supervisor may override it before execution. Figure~\ref{fig:chain}
+summarises this implemented feedback path.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figure08_deployment_chain.png}
+  \caption{Deployment chain and measurement boundaries. Prediction, risk
+  allocation, optimisation, supervision and execution form a feedback system.
+  The arrows show implemented information flow, not causal identification.}
+  \label{fig:chain}
+\end{figure}
+
+\subsection{Offline objectives}
+
+The primary selection metric is rollout-macro mixture NLL per valid prediction
+step. Secondary metrics are top-1 ADE and FDE. Macro aggregation first averages
+valid windows within a rollout and then averages rollouts, avoiding the
+incorrect treatment of overlapping windows as independent experiments.
+
+\subsection{Closed-loop objectives}
+
+Closed-loop performance is multi-objective. Efficiency is measured by
+target-clearance-adjusted completion delay. Safety-related outcomes include
+minimum vehicle-footprint separation and observed collision, yield-order and
+completion failures. Solver failure fraction and supervisor active fraction
+are mechanism measurements, not interchangeable safety outcomes. A policy
+dominates another only if it improves the relevant safety and efficiency
+objectives without a countervailing loss under the declared comparison scope.
+
+\subsection{Scope of inference}
+
+The target population is the controlled Town05 give-way geometry under the
+specified routes, target styles and timing perturbations. It excludes other
+maps, junctions, weather, traffic populations and real vehicles. The five held-
+out ego initialisation groups are the independent clusters for confirmatory
+uncertainty calculations.
+

@@ -1,0 +1,65 @@
+\section{Related work}
+\label{sec:related}
+
+This section should be organised by the argument, not as a sequence of paper
+summaries. The final version must cover sufficiently broad and current primary
+literature, then end each subsection with a critical synthesis tied to an RQ.
+
+\subsection{Risk-aware autonomous intersection planning}
+
+Review chance-constrained and stochastic model-predictive planning, fixed risk
+budgets, adaptive or state-dependent risk allocation, and the role of a safety
+filter or supervisor. Distinguish a probabilistic planning constraint from
+observed physical separation and collision events.
+
+\TODO{Compare at least: assumptions about prediction uncertainty; how risk is
+allocated; whether a full fixed-risk frontier is evaluated; and whether the
+executed trajectory or only the planned trajectory is measured.}
+
+\subsection{Multimodal motion prediction for autonomous driving}
+
+Anchor-based multimodal prediction such as MultiPath represents multiple
+future modes and their uncertainty rather than a single deterministic path
+\citep{chai2019multipath}. Related work should compare raster-based and
+vector/agent-centric representations, transfer or task adaptation, and
+metrics including ADE, FDE, likelihood and calibration.
+
+\TODO{Critically explain why ADE/FDE can ignore multimodal probability quality,
+why likelihood can improve through covariance, and why aggregate calibration
+can conceal an interaction-response tail.}
+
+\subsection{Interaction-aware and Transformer predictors}
+
+Transformers provide content-dependent attention over a sequence
+\citep{vaswani2017attention}, and interaction-prediction methods can model
+temporal and inter-agent context. However, a better architecture claim needs a
+matched task, data split, optimisation budget and non-attention capacity
+control. The present comparison therefore pairs \BtwoM{} with \Tone{} and
+\BtwoD{} with \Ttwo{}, while retaining the simpler \Bone{} adaptation.
+
+\TODO{Add recent interaction-aware driving predictors. Compare their dataset
+scale, history/horizon, agent representation, closed-loop evaluation and
+ablation quality. Avoid implying that the small adapters tested here represent
+all Transformer methods.}
+
+\subsection{Prediction-aware planning and closed-loop evaluation}
+
+Open-loop accuracy is not equivalent to downstream driving utility because a
+planner reacts to the full predictive distribution and because solver and
+supervisor logic can attenuate, amplify or reverse a predictor change. Review
+work that trains or evaluates prediction through planning objectives, and work
+that contrasts open-loop with closed-loop metrics.
+
+\TODO{Identify the precise remaining gap: few studies jointly vary a frozen
+predictor, a risk-policy frontier, target behaviour and timing while reporting
+solver and supervisor mechanisms.}
+
+\subsection{Synthesis and study positioning}
+
+The study does not propose a universal new prediction architecture. It uses a
+strictly controlled setting to test a chain of increasingly demanding claims:
+task adaptation, sequence use, architecture superiority, closed-loop transfer
+and risk-policy dominance. This positioning connects the machine-learning
+contribution to the original planning question without attributing all
+closed-loop behaviour to the supervisor.
+

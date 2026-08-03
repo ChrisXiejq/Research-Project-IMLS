@@ -1,0 +1,93 @@
+\section{Introduction}
+\label{sec:introduction}
+
+\subsection{Motivation and context}
+
+Autonomous vehicles approaching an unsignalised give-way junction must reason
+about another road user's future motion while trading progress against risk.
+In a modular stack, the realised manoeuvre is not determined by the predictor
+alone: its distribution is consumed by a risk-allocation rule and trajectory
+solver, may be overridden by a safety supervisor, and changes the next
+observation. Consequently, a model can improve displacement error or
+likelihood without producing a uniform closed-loop benefit.
+
+This dissertation began with the planning-level hypothesis that adaptive risk
+allocation would outperform fixed risk in the give-way scenario. Pilot
+analysis showed that a shared supervisor and predictor could compress the
+observable difference between planning policies. Rather than treating this as
+a failed comparison, the final study follows the mechanism upstream: it first
+tests whether scenario-specific prediction can be improved, then whether
+explicit temporal interaction modelling adds value, and finally whether the
+frozen predictor improvement changes the closed-loop safety--efficiency
+frontier.
+
+\subsection{Research gap}
+
+The dissertation addresses three linked gaps. First, motion-prediction studies
+often stop at open-loop ADE, FDE or likelihood, leaving the downstream value of
+an improvement uncertain. Second, architectural complexity and attention are
+frequently compared without a simple task-adaptation baseline and an
+approximately capacity-matched non-attention control. Third, a claim that an
+adaptive risk rule is superior can be an artefact of comparing it with a
+single fixed setting rather than a fixed-risk frontier and of omitting
+moderators such as target behaviour and arrival timing.
+
+\TODO{Support each gap with a critical synthesis of primary literature. State
+what each cited paper evaluates, what it leaves unresolved, and why the three
+gaps intersect in this system.}
+
+\subsection{Research questions and hypotheses}
+
+The study asks:
+
+\begin{description}
+  \item[RQ1] Does task adaptation improve in-distribution give-way trajectory
+  prediction relative to a pretrained MultiPath control?
+  \item[RQ2] Do explicit interaction sequences and Transformer encoders add
+  benefit beyond simple adaptation and approximately matched MLP capacity?
+  \item[RQ3] Do offline prediction gains translate consistently into
+  closed-loop benefit across risk policies, target styles and arrival timing?
+  \item[RQ4] Does adaptive risk allocation dominate the fixed-risk
+  safety--efficiency frontier?
+\end{description}
+
+These questions are evaluated through eight hypotheses: task adaptation
+improves prediction (H1); sequence models use their added input (H2);
+Transformers outperform simple adaptation (H3); offline improvement produces
+a uniform closed-loop gain (H4); adaptive risk universally dominates the
+fixed frontier (H5); predictor effects are moderated by policy and timing
+(H6); collision-containing training rollouts determine the architecture
+ranking (H7); and the frozen deployment chain passes its reliability gates
+(H8). Table~\ref{tab:hypotheses} reports the final, evidence-bounded verdicts.
+
+\subsection{Contributions}
+
+The dissertation makes five contributions:
+
+\begin{enumerate}
+  \item a rollout-disjoint, deployment-equivalent data protocol for a
+  controlled CARLA give-way interaction;
+  \item a leakage-controlled comparison of pretrained, simply adapted,
+  capacity-matched MLP and Transformer predictors across three seeds;
+  \item sequence-input ablations and calibration-tail diagnostics that
+  separate model ranking from mechanism evidence;
+  \item a frozen closed-loop factorial evaluation spanning predictor, risk
+  policy, target style and arrival-timing conditions; and
+  \item a reproducible claim-to-evidence package, including a conservative
+  collision-data sensitivity analysis and explicit limits on inference.
+\end{enumerate}
+
+The contribution is not a claim of general Transformer superiority or
+real-road safety. It is an empirical account of where task adaptation helps,
+where added sequence complexity does not, and why predictor quality and risk
+allocation must be assessed as a coupled system.
+
+\subsection{Paper organisation}
+
+Section~\ref{sec:related} critically reviews prediction, interaction modelling
+and risk-aware planning. Section~\ref{sec:problem} defines the coupled problem.
+Sections~\ref{sec:methods} and~\ref{sec:experiments} specify the reproducible
+protocol, Section~\ref{sec:results} reports the evidence, and
+Sections~\ref{sec:discussion}--\ref{sec:conclusion} interpret the findings and
+their boundaries.
+

@@ -1,0 +1,100 @@
+\documentclass[10pt]{article}
+
+% UCL dissertation draft in the official TMLR layout. For a genuinely
+% anonymous TMLR submission, remove [preprint]. Do not modify the style files.
+\usepackage[preprint]{vendor/tmlr}
+
+\input{macros.tex}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{url}
+
+\graphicspath{{../../paper/generated/paper_assets_v1/figures/}}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{Task-Adapted Motion Prediction and\\
+Predictor--Risk Coupling for Give-Way Intersection\\
+Planning in CARLA}
+
+\author{\name [Student Name] \email [UCL email] \\
+  \addr Candidate number: [Candidate number] \\
+  MSc [Programme name], University College London \\
+  Supervisor: [Supervisor name]}
+
+% Only used by the accepted TMLR mode.
+\def\month{MM}
+\def\year{YYYY}
+\def\openreview{\url{https://openreview.net/forum?id=XXXX}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Motion prediction and risk allocation are commonly evaluated in isolation,
+although their benefit in autonomous driving is realised through a coupled
+prediction--planning--supervision stack. This dissertation studies a
+controlled give-way intersection in CARLA and asks whether task adaptation,
+explicit interaction-sequence modelling and adaptive risk allocation improve
+offline prediction and closed-loop safety--efficiency outcomes. A
+rollout-disjoint dataset of 200 factorial rollouts is used to compare a
+pretrained MultiPath control, a simple task-adapted prediction head,
+capacity-matched multilayer perceptron controls and two Transformer adapters
+under a validation-frozen, one-shot test protocol. Simple task adaptation
+reduces held-out ADE by 1.193~m, FDE by 2.555~m and rollout-macro NLL by
+0.314~nats/step relative to the pretrained control, while the tested
+Transformer variants use their sequence input but do not outperform the
+simple adapter. In 160 nominal and shifted-timing closed-loop rollouts, the
+effect of the frozen predictor stack varies with risk policy, target behaviour
+and arrival timing; adaptive risk occupies a safety--efficiency frontier but
+does not universally dominate fixed-risk controls. These findings show that
+strong in-distribution prediction gains do not imply uniform closed-loop
+benefit and motivate joint, mechanism-aware evaluation of prediction and
+planning components. \TODO{Recheck every number and reduce to the programme's
+abstract word limit after the final prose is complete.}
+\end{abstract}
+
+\input{sections/01_introduction.tex}
+\input{sections/02_related_work.tex}
+\input{sections/03_problem_formulation.tex}
+\input{sections/04_methodology.tex}
+\input{sections/05_experimental_setup.tex}
+\input{sections/06_results.tex}
+\input{sections/07_discussion.tex}
+\input{sections/08_conclusion.tex}
+
+\subsubsection*{Broader impact statement}
+This work evaluates autonomous-driving components only in a controlled CARLA
+scenario and must not be interpreted as evidence of real-road safety. A
+failure mode identified here is particularly relevant to deployment: global
+calibration may improve aggregate likelihood while worsening rare
+response-active cases. Reporting coupled solver and supervisor behaviour,
+negative findings and population limits reduces the risk that an offline
+metric improvement is presented as a safety guarantee. The released evidence
+contains simulator trajectories and metrics rather than personal data.
+
+\subsubsection*{Reproducibility statement}
+The repository freezes dataset splits, model/configuration hashes, deployment
+contracts, completion manifests, analysis tables and figure provenance. The
+main experimental unit and all post-selection analyses are declared in
+Sections~\ref{sec:methods}--\ref{sec:experiments}; additional audit detail is
+provided in Appendices~\ref{app:reproducibility}--\ref{app:evidence}.
+
+\subsubsection*{Acknowledgements}
+\TODO{Add the supervisor, programme and any computing-credit acknowledgement.
+Remove this subsection in an anonymous TMLR version.}
+
+\bibliography{references}
+\bibliographystyle{vendor/tmlr}
+
+\appendix
+\input{appendices/a_reproducibility.tex}
+\input{appendices/b_supplementary_results.tex}
+\input{appendices/c_evidence_audit.tex}
+
+\end{document}
