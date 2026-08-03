@@ -1,0 +1,111 @@
+{
+  "captions_sha256": "1351e02efcc29586550b68884b597d45b92708ffd5bcfe9ea7b07bbacc04e8de",
+  "figure_count": 8,
+  "figures": {
+    "figure01_research_workflow.svg": {
+      "evidence_ids": [
+        "R_DATA_TRAIN_ROLLOUTS",
+        "R_TEST_B1_MINUS_B0_ADE",
+        "R_SENS_SELECTED_ARCHITECTURE_STABLE"
+      ],
+      "sha256": "a99221569a9aea065ddd88856c411f8ca9f59e5b39d83768b403c82a3572721c",
+      "source_files": [
+        "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "docs/paper/generated/day13/analysis/day13_filtered_sensitivity_summary.json",
+        "docs/paper/generated/day7/day7_split_audit.json"
+      ]
+    },
+    "figure02_model_architecture.svg": {
+      "evidence_ids": [
+        "R_VAL_B1_S11_MACRO_NLL",
+        "R_ABLATION_T1_SHUFFLE_MACRO_NLL",
+        "R_ABLATION_T2_SHUFFLE_MACRO_NLL"
+      ],
+      "sha256": "e0a78b234969d7500de4602a19d3530cb8e70c20afc9d9c41daf5c2b84e4bd7b",
+      "source_files": [
+        "docs/paper/generated/day10/gaps/context_ablation/interaction_context_ablation_summary.json",
+        "docs/paper/generated/day8/final_validation/day8_validation_summary.json"
+      ]
+    },
+    "figure03_offline_model_comparison.svg": {
+      "evidence_ids": [
+        "R_TEST_B1_MACRO_NLL",
+        "R_TEST_B1_TOP1_ADE_M",
+        "R_TEST_B1_MINUS_B0_ADE",
+        "R_TEST_B1_MINUS_B0_FDE"
+      ],
+      "sha256": "69ca3be487cd1acdf659d5d29cc1a513a928c7b230c83808141c8955d2d6b0c1",
+      "source_files": [
+        "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "docs/paper/generated/day8/final_test/day8_frozen_test_summary.json"
+      ]
+    },
+    "figure04_calibration_tail.svg": {
+      "evidence_ids": [
+        "R_CAL_B1_RESPONSE_ACTIVE_MINUS_B0_CAL_NLL"
+      ],
+      "sha256": "70ce6ead8e057b1df5928516ba253e879fd4fc0e877901ce304f6a3e9ab4d18b",
+      "source_files": [
+        "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json"
+      ]
+    },
+    "figure05_day10_frontier.svg": {
+      "evidence_ids": [
+        "R_DAY10_RELIABILITY_FOOTPRINT_COLLISIONS",
+        "R_DAY10_RELIABILITY_YIELD_ORDER_FAILURES",
+        "R_DAY10_RELIABILITY_MIN_FOOTPRINT_SEPARATION_M",
+        "R_DAY10_B1_REACTIVE_ADAPTIVE_ADJUSTED_DELAY_S",
+        "R_DAY10_B1_REACTIVE_FIXED_AGGRESSIVE_ADJUSTED_DELAY_S",
+        "R_DAY10_B1_REACTIVE_ADAPTIVE_FOOTPRINT_MARGIN_M",
+        "R_DAY10_B1_REACTIVE_FIXED_AGGRESSIVE_FOOTPRINT_MARGIN_M"
+      ],
+      "sha256": "37f8d794adf1fc047cbb52c0cabae0f7e94092d35afa2d0b3f369fd8c8f0d5cd",
+      "source_files": [
+        "docs/paper/generated/day10/analysis/day10_analysis_summary.json",
+        "docs/paper/generated/day10/analysis/day10_cell_summary.csv"
+      ]
+    },
+    "figure06_predictor_effect_moderation.svg": {
+      "evidence_ids": [
+        "R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_M3_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S",
+        "R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_0_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S",
+        "R_TIMING_B1_MINUS_B0_ADAPTIVE_OFFSET_P3_MIN_FOOTPRINT_SEPARATION_M"
+      ],
+      "sha256": "ad975573ba1870360792c5d147bedefaa302a0ed3b4066607c325cdeb9528c5e",
+      "source_files": [
+        "docs/paper/generated/day12/timing_synthesis/day12_timing_paired_contrasts.csv"
+      ]
+    },
+    "figure07_arrival_timing_mechanisms.svg": {
+      "evidence_ids": [
+        "R_TIMING_OFFSET_P3_MINUS_M3_B1_FIXED_MEDIUM_MIN_FOOTPRINT_SEPARATION_M",
+        "R_TIMING_OFFSET_P3_MINUS_M3_B1_ADAPTIVE_SOLVER_FAILURE_FRACTION",
+        "R_TIMING_OFFSET_P3_MINUS_M3_B1_ADAPTIVE_SUPERVISOR_ACTIVE_FRACTION"
+      ],
+      "sha256": "a2bbea5d8d41daab4ff047bb2afcb7a1bca17ceef0b62e10aa9838adee4256fc",
+      "source_files": [
+        "docs/paper/generated/day12/timing_synthesis/day12_timing_paired_contrasts.csv"
+      ]
+    },
+    "figure08_deployment_chain.svg": {
+      "evidence_ids": [
+        "R_DAY10_RELIABILITY_MAX_SOLVER_FAILURE_FRACTION",
+        "R_TIMING_OBSERVED_COLLISIONS"
+      ],
+      "sha256": "6b6cf872c5b782970ac7852abc4ab41111af5cf22c989f2cd836e15263c5e4ad",
+      "source_files": [
+        "docs/paper/generated/day10/analysis/day10_analysis_summary.json",
+        "docs/paper/generated/day12/timing_synthesis/day12_timing_synthesis_summary.json"
+      ]
+    }
+  },
+  "rules": [
+    "Data figures use canonical paper tables generated from the frozen result manifest.",
+    "Intervals use five ego-init clusters, never simulator steps.",
+    "Zero observed collision counts are not population-risk estimates.",
+    "Schematic arrows show implemented flow, not causal identification."
+  ],
+  "schema_version": "ucl_thesis_paper_figures_v1",
+  "source_results_manifest_sha256": "c50959104779c3ed0443041a8c1d334d9090617dad3ee9fb284ebd28a4f92d2e",
+  "status": "pass"
+}

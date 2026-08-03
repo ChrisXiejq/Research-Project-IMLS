@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+<title id="title">Matched model architecture and controls</title>
+<desc id="desc">Thesis figure generated from the frozen paper results manifest.</desc>
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#5B6773"/></marker>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#17212B} .title{font-size:24px;font-weight:700}.subtitle{font-size:14px;fill:#5B6773}.panel{font-size:17px;font-weight:700}.label{font-size:14px}.small{font-size:12px;fill:#5B6773}.tiny{font-size:10.5px;fill:#5B6773}.axis{stroke:#5B6773;stroke-width:1.2}.grid{stroke:#D7DEE5;stroke-width:1}.box{fill:#F3F6F8;stroke:#AAB4BE;stroke-width:1.2}</style>
+</defs>
+<rect x="0" y="0" width="1200" height="700" fill="#FFFFFF"/>
+<text x="60.00" y="42.00" class="title" text-anchor="start">Matched model architecture and controls</text>
+<text x="60.00" y="66.00" class="subtitle" text-anchor="start">All variants share the same frozen MultiPath base, data split, loss, anchors and evaluation contract.</text>
+<rect x="55.00" y="140.00" width="230.00" height="190.00" rx="12" fill="#FFFFFF" stroke="#2474B5" stroke-width="2"/>
+<text x="170.00" y="177.00" class="panel" text-anchor="middle">Frozen MultiPath base</text>
+<text x="170.00" y="214.00" class="label" text-anchor="middle">Raster + target history</text>
+<text x="170.00" y="245.00" class="small" text-anchor="middle">10 modes × 20 steps</text>
+<text x="170.00" y="278.00" class="small" text-anchor="middle">Base means / covariance / logits</text>
+<rect x="55.00" y="390.00" width="230.00" height="145.00" rx="12" fill="#FFFFFF" stroke="#17845B" stroke-width="2"/>
+<text x="170.00" y="425.00" class="panel" text-anchor="middle">Interaction sequence</text>
+<text x="170.00" y="460.00" class="label" text-anchor="middle">6 tokens × 12 features + mask</text>
+<text x="170.00" y="493.00" class="small" text-anchor="middle">Train-only normalization</text>
+<rect x="420.00" y="125.00" width="300.00" height="130.00" rx="12" fill="#FFFFFF" stroke="#2474B5" stroke-width="2"/>
+<text x="445.00" y="159.00" class="panel" text-anchor="start">B1</text>
+<text x="445.00" y="193.00" class="label" text-anchor="start">No sequence branch</text>
+<text x="445.00" y="223.00" class="small" text-anchor="start">Fine-tune final base head</text>
+<line x1="285.00" y1="230.00" x2="410.00" y2="190.00" stroke="#5B6773" stroke-width="1.8" marker-end="url(#arrow)"/>
+<line x1="720.00" y1="190.00" x2="805.00" y2="190.00" stroke="#5B6773" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="420.00" y="315.00" width="300.00" height="130.00" rx="12" fill="#FFFFFF" stroke="#D97706" stroke-width="2"/>
+<text x="445.00" y="349.00" class="panel" text-anchor="start">B2-M / B2-D</text>
+<text x="445.00" y="383.00" class="label" text-anchor="start">Flatten + matched MLP</text>
+<text x="445.00" y="413.00" class="small" text-anchor="start">Mean-only / distributional</text>
+<line x1="285.00" y1="455.00" x2="410.00" y2="380.00" stroke="#5B6773" stroke-width="1.8" marker-end="url(#arrow)"/>
+<line x1="285.00" y1="230.00" x2="410.00" y2="380.00" stroke="#5B6773" stroke-width="1.2" marker-end="url(#arrow)"/>
+<line x1="720.00" y1="380.00" x2="805.00" y2="380.00" stroke="#5B6773" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="420.00" y="505.00" width="300.00" height="130.00" rx="12" fill="#FFFFFF" stroke="#8A55A3" stroke-width="2"/>
+<text x="445.00" y="539.00" class="panel" text-anchor="start">T1 / T2</text>
+<text x="445.00" y="573.00" class="label" text-anchor="start">Masked self-attention</text>
+<text x="445.00" y="603.00" class="small" text-anchor="start">Mean-only / distributional</text>
+<line x1="285.00" y1="455.00" x2="410.00" y2="570.00" stroke="#5B6773" stroke-width="1.8" marker-end="url(#arrow)"/>
+<line x1="285.00" y1="230.00" x2="410.00" y2="570.00" stroke="#5B6773" stroke-width="1.2" marker-end="url(#arrow)"/>
+<line x1="720.00" y1="570.00" x2="805.00" y2="570.00" stroke="#5B6773" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="820.00" y="215.00" width="325.00" height="255.00" rx="12" fill="#FFFFFF" stroke="#7A8793" stroke-width="2"/>
+<text x="982.00" y="254.00" class="panel" text-anchor="middle">Structured residual merge</text>
+<text x="850.00" y="296.00" class="label" text-anchor="start">Mean-only: B2-M ↔ T1</text>
+<text x="850.00" y="330.00" class="label" text-anchor="start">Distributional: B2-D ↔ T2</text>
+<line x1="850.00" y1="350.00" x2="1115.00" y2="350.00" stroke="#D7DEE5" stroke-width="1"/>
+<text x="850.00" y="382.00" class="small" text-anchor="start">Matched comparisons isolate</text>
+<text x="850.00" y="407.00" class="small" text-anchor="start">temporal inductive bias from capacity.</text>
+<text x="850.00" y="444.00" class="small" text-anchor="start">B1 remains the simple-adaptation control.</text>
+<text x="600.00" y="655.00" class="small" text-anchor="middle">Frozen test is opened once after validation-only ranking; context ablation is post-selection reporting only.</text>
+</svg>

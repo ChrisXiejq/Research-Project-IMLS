@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+<title id="title">Deployment chain and measurement boundaries</title>
+<desc id="desc">Thesis figure generated from the frozen paper results manifest.</desc>
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#5B6773"/></marker>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#17212B} .title{font-size:24px;font-weight:700}.subtitle{font-size:14px;fill:#5B6773}.panel{font-size:17px;font-weight:700}.label{font-size:14px}.small{font-size:12px;fill:#5B6773}.tiny{font-size:10.5px;fill:#5B6773}.axis{stroke:#5B6773;stroke-width:1.2}.grid{stroke:#D7DEE5;stroke-width:1}.box{fill:#F3F6F8;stroke:#AAB4BE;stroke-width:1.2}</style>
+</defs>
+<rect x="0" y="0" width="1200" height="700" fill="#FFFFFF"/>
+<text x="60.00" y="42.00" class="title" text-anchor="start">Deployment chain and measurement boundaries</text>
+<text x="60.00" y="66.00" class="subtitle" text-anchor="start">The closed-loop result is a property of the coupled stack; each stage has a separately reported mechanism metric.</text>
+<rect x="45.00" y="190.00" width="165.00" height="180.00" rx="12" fill="#FFFFFF" stroke="#2474B5" stroke-width="2"/>
+<rect x="45.00" y="190.00" width="165.00" height="42.00" rx="12" fill="#2474B5" stroke="#2474B5" stroke-width="0"/>
+<text x="127.50" y="218.00" class="panel" text-anchor="middle" fill="#FFFFFF">Prediction</text>
+<text x="127.50" y="278.00" class="label" text-anchor="middle">Mixture trajectories</text>
+<text x="127.50" y="306.00" class="label" text-anchor="middle">NLL, ADE/FDE</text>
+<line x1="215.00" y1="280.00" x2="277.00" y2="280.00" stroke="#5B6773" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="285.00" y="190.00" width="165.00" height="180.00" rx="12" fill="#FFFFFF" stroke="#D97706" stroke-width="2"/>
+<rect x="285.00" y="190.00" width="165.00" height="42.00" rx="12" fill="#D97706" stroke="#D97706" stroke-width="0"/>
+<text x="367.50" y="218.00" class="panel" text-anchor="middle" fill="#FFFFFF">Risk allocation</text>
+<text x="367.50" y="278.00" class="label" text-anchor="middle">Fixed frontier or</text>
+<text x="367.50" y="306.00" class="label" text-anchor="middle">adaptive policy</text>
+<line x1="455.00" y1="280.00" x2="517.00" y2="280.00" stroke="#5B6773" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="525.00" y="190.00" width="165.00" height="180.00" rx="12" fill="#FFFFFF" stroke="#17845B" stroke-width="2"/>
+<rect x="525.00" y="190.00" width="165.00" height="42.00" rx="12" fill="#17845B" stroke="#17845B" stroke-width="0"/>
+<text x="607.50" y="218.00" class="panel" text-anchor="middle" fill="#FFFFFF">Trajectory solver</text>
+<text x="607.50" y="278.00" class="label" text-anchor="middle">Feasibility and</text>
+<text x="607.50" y="306.00" class="label" text-anchor="middle">failure fraction</text>
+<line x1="695.00" y1="280.00" x2="757.00" y2="280.00" stroke="#5B6773" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="765.00" y="190.00" width="165.00" height="180.00" rx="12" fill="#FFFFFF" stroke="#8A55A3" stroke-width="2"/>
+<rect x="765.00" y="190.00" width="165.00" height="42.00" rx="12" fill="#8A55A3" stroke="#8A55A3" stroke-width="0"/>
+<text x="847.50" y="218.00" class="panel" text-anchor="middle" fill="#FFFFFF">Supervisor</text>
+<text x="847.50" y="278.00" class="label" text-anchor="middle">Safety override and</text>
+<text x="847.50" y="306.00" class="label" text-anchor="middle">active fraction</text>
+<line x1="935.00" y1="280.00" x2="997.00" y2="280.00" stroke="#5B6773" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1005.00" y="190.00" width="165.00" height="180.00" rx="12" fill="#FFFFFF" stroke="#C44E52" stroke-width="2"/>
+<rect x="1005.00" y="190.00" width="165.00" height="42.00" rx="12" fill="#C44E52" stroke="#C44E52" stroke-width="0"/>
+<text x="1087.50" y="218.00" class="panel" text-anchor="middle" fill="#FFFFFF">Executed motion</text>
+<text x="1087.50" y="278.00" class="label" text-anchor="middle">Delay, separation,</text>
+<text x="1087.50" y="306.00" class="label" text-anchor="middle">yield and collisions</text>
+<line x1="1085.00" y1="375.00" x2="1085.00" y2="465.00" stroke="#5B6773" stroke-width="1.8"/>
+<line x1="1085.00" y1="465.00" x2="130.00" y2="465.00" stroke="#5B6773" stroke-width="1.8"/>
+<line x1="130.00" y1="465.00" x2="130.00" y2="380.00" stroke="#5B6773" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="600.00" y="487.00" class="small" text-anchor="middle">Closed-loop feedback: observed motion changes the next raster, state history and interaction sequence</text>
+<rect x="170.00" y="555.00" width="150.00" height="50.00" rx="10" fill="#F3F6F8" stroke="#D7DEE5" stroke-width="1.2"/>
+<text x="245.00" y="586.00" class="label" text-anchor="middle">Arrival timing</text>
+<line x1="245.00" y1="555.00" x2="245.00" y2="500.00" stroke="#D7DEE5" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="410.00" y="555.00" width="150.00" height="50.00" rx="10" fill="#F3F6F8" stroke="#D7DEE5" stroke-width="1.2"/>
+<text x="485.00" y="586.00" class="label" text-anchor="middle">Target style</text>
+<line x1="485.00" y1="555.00" x2="485.00" y2="500.00" stroke="#D7DEE5" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="650.00" y="555.00" width="150.00" height="50.00" rx="10" fill="#F3F6F8" stroke="#D7DEE5" stroke-width="1.2"/>
+<text x="725.00" y="586.00" class="label" text-anchor="middle">Data regime</text>
+<line x1="725.00" y1="555.00" x2="725.00" y2="500.00" stroke="#D7DEE5" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="890.00" y="555.00" width="150.00" height="50.00" rx="10" fill="#F3F6F8" stroke="#D7DEE5" stroke-width="1.2"/>
+<text x="965.00" y="586.00" class="label" text-anchor="middle">Calibration</text>
+<line x1="965.00" y1="555.00" x2="965.00" y2="500.00" stroke="#D7DEE5" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="600.00" y="660.00" class="small" text-anchor="middle">Arrows show implemented information/control flow, not identification of a single causal main effect.</text>
+</svg>

@@ -38,7 +38,7 @@ docs/paper/generated/paper_assets_v1/
 
 - `PAPER_TABLES_COMPLETE.json`: `status=pass`；
 - 10 个被实际引用的机器证据源；
-- 130 个稳定 result IDs；
+- 210 个稳定 result IDs；
 - 8 张 canonical CSV tables；
 - Manifest SHA-256：以完成门中的 `manifest_sha256` 为准。
 
@@ -77,7 +77,7 @@ Markdown 预览 `paper_tables.md` 由生成器自动产生，不能手工改数�
 
 ## 6. 下一步
 
-1. 从 canonical tables 生成 4 张主图：offline selection、calibration tail、closed-loop frontier、timing moderation；
-2. 建立 Results 章节骨架，每段只引用 Manifest IDs；
-3. 将 H1–H8 转成 Results 小节与 Discussion 中的 claim boundary；
-4. 最后做一次数字引用审计，禁止出现 Manifest 外的新数值。
+1. 8 张 canonical figures 已生成，包含 SVG 与 PNG；
+2. Results 章节骨架和英文草稿见 `Day14论文写作证据包与Results草稿.md`；
+3. H1–H8 已映射到稳定 result IDs、表格、图片和 claim boundary；
+4. `PAPER_EVIDENCE_PACKAGE_COMPLETE.json` 已执行数字引用与来源完整性审计。

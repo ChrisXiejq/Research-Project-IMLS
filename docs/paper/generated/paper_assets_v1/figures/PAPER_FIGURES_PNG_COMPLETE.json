@@ -1,0 +1,15 @@
+{
+  "schema_version": "paper_figures_png_complete_v1",
+  "status": "pass",
+  "figure_count": 8,
+  "files": {
+    "figure01_research_workflow.png": 384118,
+    "figure02_model_architecture.png": 364583,
+    "figure03_offline_model_comparison.png": 222219,
+    "figure04_calibration_tail.png": 245344,
+    "figure05_day10_frontier.png": 218648,
+    "figure06_predictor_effect_moderation.png": 200588,
+    "figure07_arrival_timing_mechanisms.png": 246304,
+    "figure08_deployment_chain.png": 291111
+  }
+}

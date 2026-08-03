@@ -139,6 +139,54 @@
 | synthesis_policy_by_offset_primary | adaptive_minus_fixed_medium__B0__offset_p3 | min_footprint_separation_m | 0.186335 | 0.0620893 | 0.31058 | 0.125 | 1 | 5 |
 | synthesis_policy_by_offset_primary | adaptive_minus_fixed_medium__B0__offset_p3 | solver_failure_fraction | 0.00174241 | -0.00220409 | 0.00568891 | 0.625 | 1 | 5 |
 | synthesis_policy_by_offset_primary | adaptive_minus_fixed_medium__B0__offset_p3 | supervisor_active_fraction | 0.000622836 | -0.00875636 | 0.0146175 | 1 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B1__fixed_medium | target_clearance_adjusted_completion_delay_s | 0.295 | -0.36 | 0.97 | 0.5 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B1__fixed_medium | min_footprint_separation_m | 0.0947834 | 0.0405277 | 0.150314 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B1__fixed_medium | solver_failure_fraction | 0.00390327 | 0.0018008 | 0.0055511 | 0.125 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B1__fixed_medium | supervisor_active_fraction | -0.0367976 | -0.053585 | -0.017974 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B1__fixed_medium | target_clearance_adjusted_completion_delay_s | -0.515 | -0.905 | 0.065 | 0.1875 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B1__fixed_medium | min_footprint_separation_m | 0.42451 | 0.284285 | 0.593591 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B1__fixed_medium | solver_failure_fraction | 0.016638 | 0.0119834 | 0.0219195 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B1__fixed_medium | supervisor_active_fraction | -0.0339028 | -0.0421339 | -0.0256718 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B1__fixed_medium | target_clearance_adjusted_completion_delay_s | -0.22 | -0.99 | 0.55 | 0.6875 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B1__fixed_medium | min_footprint_separation_m | 0.519293 | 0.341508 | 0.701857 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B1__fixed_medium | solver_failure_fraction | 0.0205413 | 0.0153505 | 0.026865 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B1__fixed_medium | supervisor_active_fraction | -0.0707004 | -0.0859603 | -0.0542058 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B1__adaptive | target_clearance_adjusted_completion_delay_s | -0.065 | -0.255 | 0.18 | 0.6875 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B1__adaptive | min_footprint_separation_m | 0.16756 | 0.0137943 | 0.350305 | 0.1875 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B1__adaptive | solver_failure_fraction | 0.00406602 | 0.00189324 | 0.00559251 | 0.125 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B1__adaptive | supervisor_active_fraction | -0.0321941 | -0.0431183 | -0.0237175 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B1__adaptive | target_clearance_adjusted_completion_delay_s | 0.075 | -1.155 | 1.555 | 0.8125 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B1__adaptive | min_footprint_separation_m | 0.728655 | 0.411541 | 1.05718 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B1__adaptive | solver_failure_fraction | 0.0197061 | 0.0155238 | 0.0236111 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B1__adaptive | supervisor_active_fraction | -0.0371967 | -0.0524482 | -0.0219452 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B1__adaptive | target_clearance_adjusted_completion_delay_s | 0.01 | -1.055 | 1.48 | 0.9375 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B1__adaptive | min_footprint_separation_m | 0.896215 | 0.454452 | 1.33798 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B1__adaptive | solver_failure_fraction | 0.0237721 | 0.0180626 | 0.0289863 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B1__adaptive | supervisor_active_fraction | -0.0693908 | -0.0935973 | -0.046544 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B0__fixed_medium | target_clearance_adjusted_completion_delay_s | -0.755 | -1.58 | 0.005 | 0.1875 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B0__fixed_medium | min_footprint_separation_m | 0.0146949 | -0.135163 | 0.113297 | 0.9375 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B0__fixed_medium | solver_failure_fraction | 0.00458924 | 0.00224912 | 0.00648879 | 0.125 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B0__fixed_medium | supervisor_active_fraction | -0.0233629 | -0.0364617 | -0.00912131 | 0.125 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B0__fixed_medium | target_clearance_adjusted_completion_delay_s | 0.43 | -0.575 | 1.44 | 0.5625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B0__fixed_medium | min_footprint_separation_m | 0.429008 | 0.271591 | 0.595861 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B0__fixed_medium | solver_failure_fraction | 0.0150651 | 0.00984985 | 0.0212363 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B0__fixed_medium | supervisor_active_fraction | -0.0414734 | -0.0456317 | -0.0354043 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B0__fixed_medium | target_clearance_adjusted_completion_delay_s | -0.325 | -1.805 | 1.21 | 0.75 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B0__fixed_medium | min_footprint_separation_m | 0.443703 | 0.324369 | 0.54966 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B0__fixed_medium | solver_failure_fraction | 0.0196543 | 0.0139976 | 0.0267101 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B0__fixed_medium | supervisor_active_fraction | -0.0648363 | -0.0816217 | -0.048051 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B0__adaptive | target_clearance_adjusted_completion_delay_s | -0.92 | -1.595 | -0.23 | 0.125 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B0__adaptive | min_footprint_separation_m | 0.0280334 | -0.0885936 | 0.121635 | 0.75 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B0__adaptive | solver_failure_fraction | 0.00370318 | 0.00184797 | 0.00464762 | 0.125 | 1 | 5 |
+| synthesis_offset_primary | offset_0_minus_m3__B0__adaptive | supervisor_active_fraction | -0.0199049 | -0.034604 | -0.00520576 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B0__adaptive | target_clearance_adjusted_completion_delay_s | 0.545 | -0.265 | 1.57 | 0.4375 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B0__adaptive | min_footprint_separation_m | 0.632144 | 0.391159 | 0.873156 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B0__adaptive | solver_failure_fraction | 0.0176935 | 0.0135549 | 0.0221197 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_0__B0__adaptive | supervisor_active_fraction | -0.0434162 | -0.0528393 | -0.0324181 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B0__adaptive | target_clearance_adjusted_completion_delay_s | -0.375 | -1.205 | 0.455 | 0.4375 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B0__adaptive | min_footprint_separation_m | 0.660178 | 0.431302 | 0.884469 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B0__adaptive | solver_failure_fraction | 0.0213967 | 0.0153961 | 0.0266232 | 0.0625 | 1 | 5 |
+| synthesis_offset_primary | offset_p3_minus_m3__B0__adaptive | supervisor_active_fraction | -0.063321 | -0.0763956 | -0.0500524 | 0.0625 | 1 | 5 |
 
 ## Table 7: table07_hypothesis_evidence_verdicts.csv
 
@@ -148,7 +196,7 @@
 | H2 | Explicit interaction-sequence models use the added sequence input. | R_ABLATION_T1_SHUFFLE_MACRO_NLL; R_ABLATION_T2_ZERO_MACRO_NLL; R_ABLATION_T2_SHUFFLE_MACRO_NLL | supported mechanistically | input sensitivity is not causal understanding |
 | H3 | Transformer variants outperform simple B1 adaptation. | R_VAL_B1_S11_MACRO_NLL; R_TEST_B1_MACRO_NLL | refuted | finite controlled dataset and tested architectures |
 | H4 | Better offline prediction produces uniform closed-loop gains. | R_TEST_B1_MINUS_B0_ADE; R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_M3_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_0_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S | refuted | effects are policy/style/timing conditional |
-| H5 | Adaptive risk universally dominates the fixed-risk frontier. | R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_ALL_OFFSETS_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_OFFSET_P3_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_OFFSET_P3_MIN_FOOTPRINT_SEPARATION_M | refuted | adaptive remains a frontier point, not a universal replacement |
+| H5 | Adaptive risk universally dominates the fixed-risk frontier. | R_DAY10_B1_REACTIVE_ADAPTIVE_ADJUSTED_DELAY_S; R_DAY10_B1_REACTIVE_FIXED_AGGRESSIVE_ADJUSTED_DELAY_S; R_DAY10_B1_REACTIVE_ADAPTIVE_FOOTPRINT_MARGIN_M; R_DAY10_B1_REACTIVE_FIXED_AGGRESSIVE_FOOTPRINT_MARGIN_M; R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_OFFSET_P3_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_OFFSET_P3_MIN_FOOTPRINT_SEPARATION_M | refuted | adaptive remains a frontier point, not a universal replacement |
 | H6 | Predictor effects are moderated by risk policy and arrival timing. | R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_M3_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_0_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_B1_MINUS_B0_ADAPTIVE_OFFSET_P3_MIN_FOOTPRINT_SEPARATION_M | descriptively supported | five init groups limit confirmatory power |
 | H7 | Collision-containing training rollouts determine the selected architecture. | R_SENS_SELECTED_ARCHITECTURE_STABLE | refuted | whole-rollout conservative filter |
 | H8 | The frozen deployment chain satisfies the declared reliability gates. | R_DAY10_RELIABILITY_FOOTPRINT_COLLISIONS; R_DAY10_RELIABILITY_YIELD_ORDER_FAILURES | supported for observed runs | zero observed events is not zero population risk |

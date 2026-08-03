@@ -312,20 +312,35 @@ def build(repo: Path, output: Path) -> dict[str, Any]:
 
     day10_rows = []
     for row in read_csv(paths["day10_cells"]):
-        day10_rows.append(
-            {
-                "predictor": row["predictor"],
-                "risk_policy": row["risk_policy"],
-                "target_style": row["target_style"],
-                "rollouts": int(row["n_rollouts"]),
-                "adjusted_delay_s": float(row["target_clearance_adjusted_completion_delay_s_mean"]),
-                "footprint_margin_m": float(row["min_footprint_separation_m_mean"]),
-                "solver_failure_fraction": float(row["solver_failure_fraction_mean"]),
-                "supervisor_active_fraction": float(row["supervisor_active_fraction_mean"]),
-                "observed_collisions": int(float(row["collision_rate"]) * int(row["n_rollouts"])),
-                "yield_success_rate": float(row["yield_success_rate"]),
-            }
-        )
+        compact = {
+            "predictor": row["predictor"],
+            "risk_policy": row["risk_policy"],
+            "target_style": row["target_style"],
+            "rollouts": int(row["n_rollouts"]),
+            "adjusted_delay_s": float(row["target_clearance_adjusted_completion_delay_s_mean"]),
+            "footprint_margin_m": float(row["min_footprint_separation_m_mean"]),
+            "solver_failure_fraction": float(row["solver_failure_fraction_mean"]),
+            "supervisor_active_fraction": float(row["supervisor_active_fraction_mean"]),
+            "observed_collisions": int(float(row["collision_rate"]) * int(row["n_rollouts"])),
+            "yield_success_rate": float(row["yield_success_rate"]),
+        }
+        day10_rows.append(compact)
+        cell = f"{slug(row['predictor'])}_{slug(row['target_style'])}_{slug(row['risk_policy'])}"
+        for metric, unit in (("adjusted_delay_s", "s"), ("footprint_margin_m", "m")):
+            source_column = {
+                "adjusted_delay_s": "target_clearance_adjusted_completion_delay_s_mean",
+                "footprint_margin_m": "min_footprint_separation_m_mean",
+            }[metric]
+            results.add(
+                f"R_DAY10_{cell}_{slug(metric)}",
+                compact[metric],
+                source=paths["day10_cells"],
+                locator=f"filter: predictor={row['predictor']}; target_style={row['target_style']}; risk_policy={row['risk_policy']}; column={source_column}",
+                metric=metric,
+                unit=unit,
+                aggregation_unit="cell mean over five paired ego-init rollouts",
+                filter_rule=f"predictor={row['predictor']}; style={row['target_style']}; risk={row['risk_policy']}",
+            )
     tables["table05_day10_predictor_risk_frontier.csv"] = day10_rows
     for key, value in day10["reliability"].items():
         if isinstance(value, (int, float)):
@@ -345,6 +360,7 @@ def build(repo: Path, output: Path) -> dict[str, Any]:
         "synthesis_policy_pooled_primary",
         "synthesis_predictor_by_offset_primary",
         "synthesis_policy_by_offset_primary",
+        "synthesis_offset_primary",
     }
     for row in read_csv(paths["timing_contrasts"]):
         if row["inference_scope"] not in kept_scopes:
@@ -378,7 +394,7 @@ def build(repo: Path, output: Path) -> dict[str, Any]:
         {"hypothesis_id": "H2", "claim": "Explicit interaction-sequence models use the added sequence input.", "evidence_ids": "R_ABLATION_T1_SHUFFLE_MACRO_NLL; R_ABLATION_T2_ZERO_MACRO_NLL; R_ABLATION_T2_SHUFFLE_MACRO_NLL", "verdict": "supported mechanistically", "boundary": "input sensitivity is not causal understanding"},
         {"hypothesis_id": "H3", "claim": "Transformer variants outperform simple B1 adaptation.", "evidence_ids": "R_VAL_B1_S11_MACRO_NLL; R_TEST_B1_MACRO_NLL", "verdict": "refuted", "boundary": "finite controlled dataset and tested architectures"},
         {"hypothesis_id": "H4", "claim": "Better offline prediction produces uniform closed-loop gains.", "evidence_ids": "R_TEST_B1_MINUS_B0_ADE; R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_M3_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_0_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S", "verdict": "refuted", "boundary": "effects are policy/style/timing conditional"},
-        {"hypothesis_id": "H5", "claim": "Adaptive risk universally dominates the fixed-risk frontier.", "evidence_ids": "R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_ALL_OFFSETS_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_OFFSET_P3_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_OFFSET_P3_MIN_FOOTPRINT_SEPARATION_M", "verdict": "refuted", "boundary": "adaptive remains a frontier point, not a universal replacement"},
+        {"hypothesis_id": "H5", "claim": "Adaptive risk universally dominates the fixed-risk frontier.", "evidence_ids": "R_DAY10_B1_REACTIVE_ADAPTIVE_ADJUSTED_DELAY_S; R_DAY10_B1_REACTIVE_FIXED_AGGRESSIVE_ADJUSTED_DELAY_S; R_DAY10_B1_REACTIVE_ADAPTIVE_FOOTPRINT_MARGIN_M; R_DAY10_B1_REACTIVE_FIXED_AGGRESSIVE_FOOTPRINT_MARGIN_M; R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_OFFSET_P3_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_ADAPTIVE_MINUS_FIXED_MEDIUM_B1_OFFSET_P3_MIN_FOOTPRINT_SEPARATION_M", "verdict": "refuted", "boundary": "adaptive remains a frontier point, not a universal replacement"},
         {"hypothesis_id": "H6", "claim": "Predictor effects are moderated by risk policy and arrival timing.", "evidence_ids": "R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_M3_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_B1_MINUS_B0_FIXED_MEDIUM_OFFSET_0_TARGET_CLEARANCE_ADJUSTED_COMPLETION_DELAY_S; R_TIMING_B1_MINUS_B0_ADAPTIVE_OFFSET_P3_MIN_FOOTPRINT_SEPARATION_M", "verdict": "descriptively supported", "boundary": "five init groups limit confirmatory power"},
         {"hypothesis_id": "H7", "claim": "Collision-containing training rollouts determine the selected architecture.", "evidence_ids": "R_SENS_SELECTED_ARCHITECTURE_STABLE", "verdict": "refuted", "boundary": "whole-rollout conservative filter"},
         {"hypothesis_id": "H8", "claim": "The frozen deployment chain satisfies the declared reliability gates.", "evidence_ids": "R_DAY10_RELIABILITY_FOOTPRINT_COLLISIONS; R_DAY10_RELIABILITY_YIELD_ORDER_FAILURES", "verdict": "supported for observed runs", "boundary": "zero observed events is not zero population risk"},

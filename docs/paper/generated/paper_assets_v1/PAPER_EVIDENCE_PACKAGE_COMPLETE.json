@@ -1,0 +1,18 @@
+{
+  "claim_matrix_sha256": "9183c8746fe512d3122412d97d31dd24850921ae30de33ba8e3c55f6525f01c0",
+  "figure_count": 8,
+  "figures_manifest_sha256": "c99895c2f947d0e702d8b1a2336ea6d1b639f6e210ba242b130ebb876bcb42f5",
+  "hypothesis_count": 8,
+  "inventory_count": 32,
+  "inventory_sha256": "d5fc3d8b96258bd6484c9069f5a4d7ca4d5f9f833e6f04c40ec0287c2e0e44fa",
+  "key_result_count": 20,
+  "key_results_sha256": "734b91186ef6dee4a6562f7e88a4a7e0c3a929134fcd3d18f6d0ba05dd1ca25e",
+  "png_figure_count": 8,
+  "result_count": 210,
+  "results_manifest_sha256": "c50959104779c3ed0443041a8c1d334d9090617dad3ee9fb284ebd28a4f92d2e",
+  "schema_version": "paper_evidence_package_complete_v1",
+  "source_integrity_failures": 0,
+  "status": "pass",
+  "table_count": 8,
+  "unresolved_evidence_ids": 0
+}
