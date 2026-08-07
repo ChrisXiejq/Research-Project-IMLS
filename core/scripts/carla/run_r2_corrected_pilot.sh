@@ -61,12 +61,23 @@ cleanup() { rm -f "${LOCK}/pid"; rmdir "${LOCK}" 2>/dev/null || true; }
 trap cleanup EXIT
 
 export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla:${CARLA_ROOT}/PythonAPI/carla/agents:${MODELS_DIR}:${PYTHONPATH:-}"
-if [[ -z "${GUROBI_HOME:-}" && -d "${REPO_DIR}/gurobi/gurobi1103/linux64" ]]; then
-  export GUROBI_HOME="${REPO_DIR}/gurobi/gurobi1103/linux64"
+GUROBI_BUNDLE_ROOT="${GUROBI_BUNDLE_ROOT:-/root/autodl-tmp/Research-Project-IMLS/gurobi}"
+if [[ -z "${GUROBI_HOME:-}" ]]; then
+  for candidate in "${REPO_DIR}/gurobi/gurobi1103/linux64" "${GUROBI_BUNDLE_ROOT}/gurobi1103/linux64"; do
+    if [[ -d "${candidate}" ]]; then
+      export GUROBI_HOME="${candidate}"
+      break
+    fi
+  done
 fi
 export GUROBI_VERSION="${GUROBI_VERSION:-110}"
-if [[ -z "${GRB_LICENSE_FILE:-}" && -f "${REPO_DIR}/gurobi/gurobi.lic" ]]; then
-  export GRB_LICENSE_FILE="${REPO_DIR}/gurobi/gurobi.lic"
+if [[ -z "${GRB_LICENSE_FILE:-}" ]]; then
+  for candidate in "${REPO_DIR}/gurobi/gurobi.lic" "${GUROBI_BUNDLE_ROOT}/gurobi.lic"; do
+    if [[ -f "${candidate}" ]]; then
+      export GRB_LICENSE_FILE="${candidate}"
+      break
+    fi
+  done
 fi
 if [[ -n "${GUROBI_HOME:-}" ]]; then
   export LD_LIBRARY_PATH="${GUROBI_HOME}/lib:${LD_LIBRARY_PATH:-}"
