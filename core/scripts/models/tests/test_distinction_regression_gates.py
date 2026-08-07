@@ -111,6 +111,13 @@ class CorrectedControlContractTests(unittest.TestCase):
         ):
             self.assertIn(token, agent)
 
+    def test_debug_json_serializes_bool_before_int(self):
+        agent = self.agent_path.read_text(encoding="utf-8")
+        self.assertLess(
+            agent.index("if isinstance(value, (np.bool_, bool))"),
+            agent.index("if isinstance(value, (np.integer, int))"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

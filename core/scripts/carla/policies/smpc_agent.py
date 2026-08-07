@@ -640,10 +640,12 @@ class SMPCAgent(object):
         if isinstance(value, (np.floating, float)):
             value = float(value)
             return value if np.isfinite(value) else None
-        if isinstance(value, (np.integer, int)):
-            return int(value)
+        # bool is a subclass of int in Python, so this must precede the integer
+        # branch to keep corrected-v1 telemetry canonical JSON true/false.
         if isinstance(value, (np.bool_, bool)):
             return bool(value)
+        if isinstance(value, (np.integer, int)):
+            return int(value)
         if isinstance(value, dict):
             return {str(k): self._debug_json_safe(v) for k, v in value.items()}
         if isinstance(value, (list, tuple)):
