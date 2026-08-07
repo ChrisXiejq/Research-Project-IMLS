@@ -1,0 +1,231 @@
+{
+  "claim_boundary": "Report the observed variant ranking as a comparison of complete model/training configurations, not as a clean causal estimate of transformer attention or interaction-token design.",
+  "conclusions": [
+    "All variants used the same nominal epoch ceiling and seed set, but they were not parameter matched.",
+    "B1 contains substantially more trainable parameters than every compact interaction-aware variant.",
+    "Architecture-only causal attribution is therefore not supported by this experiment.",
+    "10/15 runs selected their final allowed epoch, so some comparisons may be training-budget censored."
+  ],
+  "created_at_utc": "2026-08-07T19:02:49.108867+00:00",
+  "fairness_checks": {
+    "all_15_histories_available": true,
+    "parameter_matched": false,
+    "runs_best_at_budget_boundary": 10,
+    "same_epoch_ceiling": true,
+    "same_seed_set": true,
+    "training_histories_available_count": 15
+  },
+  "result_generation": "distinction_v1",
+  "runs": 15,
+  "schema_version": "distinction_model_capacity_budget_audit_v1",
+  "source_sha256": {
+    "history_tar": "2e07a19016d2d0eaa6c7a52bdaceae1be334f2d01c7a2d41857305d59bdd1129",
+    "model_tar": "cff581e23f3eeb7bb99a1c67b2ab2810d705ad0ced976e520ab25e76a914680f",
+    "validation_summary": "fffc0552f1dccd75a0bf8e6e6595e4e4b4f6959fc4892331769b7bd9b64645d6"
+  },
+  "status": "pass",
+  "training_histories": [
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 0.0706237405538559,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.0020353253930807114,
+      "last_validation_value": 0.0706237405538559,
+      "member": "runs/B1/seed_11/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 0.06979741156101227,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.002287488430738449,
+      "last_validation_value": 0.06979741156101227,
+      "member": "runs/B1/seed_23/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 0.07062225043773651,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.0020329728722572327,
+      "last_validation_value": 0.07062225043773651,
+      "member": "runs/B1/seed_37/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 0.17276422679424286,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.0011489279568195343,
+      "last_validation_value": 0.17276422679424286,
+      "member": "runs/B2-D/seed_11/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 19,
+      "best_validation_value": 0.17414973676204681,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.0003666095435619354,
+      "last_validation_value": 0.17473049461841583,
+      "member": "runs/B2-D/seed_23/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 0.17196832597255707,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.001474175602197647,
+      "last_validation_value": 0.17196832597255707,
+      "member": "runs/B2-D/seed_37/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 18,
+      "best_validation_value": 1.843819499015808,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.00030860304832458496,
+      "last_validation_value": 1.843910574913025,
+      "member": "runs/B2-M/seed_11/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 19,
+      "best_validation_value": 1.8440279960632324,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": 3.445148468017578e-05,
+      "last_validation_value": 1.844618797302246,
+      "member": "runs/B2-M/seed_23/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 1.843580961227417,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.0001297593116760254,
+      "last_validation_value": 1.843580961227417,
+      "member": "runs/B2-M/seed_37/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 19,
+      "best_validation_value": 1.8448173999786377,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.00022023916244506836,
+      "last_validation_value": 1.8448439836502075,
+      "member": "runs/T1/seed_11/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 1.8451942205429077,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.00022405385971069336,
+      "last_validation_value": 1.8451942205429077,
+      "member": "runs/T1/seed_23/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 1.8448468446731567,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.00035068392753601074,
+      "last_validation_value": 1.8448468446731567,
+      "member": "runs/T1/seed_37/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 0.1766974776983261,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.0020528696477413177,
+      "last_validation_value": 0.1766974776983261,
+      "member": "runs/T2/seed_11/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 18,
+      "best_validation_value": 0.17836356163024902,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.0007105022668838501,
+      "last_validation_value": 0.180177241563797,
+      "member": "runs/T2/seed_23/history.csv",
+      "validation_field": "val_loss"
+    },
+    {
+      "best_epoch_from_history": 20,
+      "best_validation_value": 0.1750306785106659,
+      "epochs": 20,
+      "last5_linear_change_per_epoch": -0.0013710372149944305,
+      "last_validation_value": 0.1750306785106659,
+      "member": "runs/T2/seed_37/history.csv",
+      "validation_field": "val_loss"
+    }
+  ],
+  "variants": [
+    {
+      "max_validation_rollout_macro_NLL": 1.8608615398406982,
+      "median_latency_ms_per_sample": 16.715906868957305,
+      "median_validation_rollout_macro_NLL": 1.8605518341064453,
+      "median_validation_top1_ADE_m": 0.11508596688508987,
+      "min_validation_rollout_macro_NLL": 1.8603261709213257,
+      "runs_best_at_epoch_budget_boundary": 3,
+      "seed_range_validation_rollout_macro_NLL": 0.0005353689193725586,
+      "seeds": 3,
+      "trainable_parameter_ratio_vs_B1": 1.0,
+      "trainable_parameters": 1034208,
+      "variant": "B1"
+    },
+    {
+      "max_validation_rollout_macro_NLL": 1.8728382587432861,
+      "median_latency_ms_per_sample": 18.370934836337902,
+      "median_validation_rollout_macro_NLL": 1.8727439641952515,
+      "median_validation_top1_ADE_m": 0.2627864181995392,
+      "min_validation_rollout_macro_NLL": 1.8719608783721924,
+      "runs_best_at_epoch_budget_boundary": 2,
+      "seed_range_validation_rollout_macro_NLL": 0.00087738037109375,
+      "seeds": 3,
+      "trainable_parameter_ratio_vs_B1": 0.17027135740586033,
+      "trainable_parameters": 176096,
+      "variant": "B2-D"
+    },
+    {
+      "max_validation_rollout_macro_NLL": 2.0287201404571533,
+      "median_latency_ms_per_sample": 18.046522158786562,
+      "median_validation_rollout_macro_NLL": 2.0255308151245117,
+      "median_validation_top1_ADE_m": 1.062926173210144,
+      "min_validation_rollout_macro_NLL": 1.9970422983169556,
+      "runs_best_at_epoch_budget_boundary": 1,
+      "seed_range_validation_rollout_macro_NLL": 0.031677842140197754,
+      "seeds": 3,
+      "trainable_parameter_ratio_vs_B1": 0.0750332621677651,
+      "trainable_parameters": 77600,
+      "variant": "B2-M"
+    },
+    {
+      "max_validation_rollout_macro_NLL": 2.023714542388916,
+      "median_latency_ms_per_sample": 16.805803574667387,
+      "median_validation_rollout_macro_NLL": 2.0088319778442383,
+      "median_validation_top1_ADE_m": 0.9651916027069092,
+      "min_validation_rollout_macro_NLL": 2.002960443496704,
+      "runs_best_at_epoch_budget_boundary": 2,
+      "seed_range_validation_rollout_macro_NLL": 0.020754098892211914,
+      "seeds": 3,
+      "trainable_parameter_ratio_vs_B1": 0.08382066276803118,
+      "trainable_parameters": 86688,
+      "variant": "T1"
+    },
+    {
+      "max_validation_rollout_macro_NLL": 1.878930687904358,
+      "median_latency_ms_per_sample": 17.99482312853351,
+      "median_validation_rollout_macro_NLL": 1.8778938055038452,
+      "median_validation_top1_ADE_m": 0.2854841947555542,
+      "min_validation_rollout_macro_NLL": 1.8772691488265991,
+      "runs_best_at_epoch_budget_boundary": 2,
+      "seed_range_validation_rollout_macro_NLL": 0.001661539077758789,
+      "seeds": 3,
+      "trainable_parameter_ratio_vs_B1": 0.16024629474921873,
+      "trainable_parameters": 165728,
+      "variant": "T2"
+    }
+  ]
+}

@@ -128,6 +128,7 @@ class VehicleParams:
     smpc_config : str = "full" # "var_risk", "open_loop", "fixed_risk"
     solver_backend : str = "gurobi"
     risk_profile : str = "upstream_code" # "upstream_code", "paper_eps_002", adaptive risk variants, or "rule_aware_static_risk"
+    control_implementation_version : str = "corrected_joint_modes_shared_amin_v1"
     adaptive_risk_config : Optional[Dict[str, Any]] = None
     collision_d_min : float = 0.5
     collision_ellipse_half_length : float = 3.8
@@ -402,7 +403,8 @@ def get_vehicle_policy(
                             lane_entry_heading_cost_goal_window=vehicle_params.lane_entry_heading_cost_goal_window,
                             lane_entry_heading_cost_weight=vehicle_params.lane_entry_heading_cost_weight,
                             lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi,
-                            adaptive_risk_config=vehicle_params.adaptive_risk_config)
+                            adaptive_risk_config=vehicle_params.adaptive_risk_config,
+                            control_implementation_version=vehicle_params.control_implementation_version)
         elif vehicle_params.smpc_config.endswith("obca"):
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -490,7 +492,8 @@ def get_vehicle_policy(
                             lane_entry_heading_cost_goal_window=vehicle_params.lane_entry_heading_cost_goal_window,
                             lane_entry_heading_cost_weight=vehicle_params.lane_entry_heading_cost_weight,
                             lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi,
-                            adaptive_risk_config=vehicle_params.adaptive_risk_config)
+                            adaptive_risk_config=vehicle_params.adaptive_risk_config,
+                            control_implementation_version=vehicle_params.control_implementation_version)
         else :
             return SMPCAgent(vehicle_actor, goal_transform.location, \
                             N=vehicle_params.N,
@@ -576,7 +579,8 @@ def get_vehicle_policy(
                             lane_entry_heading_cost_goal_window=vehicle_params.lane_entry_heading_cost_goal_window,
                             lane_entry_heading_cost_weight=vehicle_params.lane_entry_heading_cost_weight,
                             lane_entry_heading_cost_max_abs_epsi=vehicle_params.lane_entry_heading_cost_max_abs_epsi,
-                            adaptive_risk_config=vehicle_params.adaptive_risk_config)
+                            adaptive_risk_config=vehicle_params.adaptive_risk_config,
+                            control_implementation_version=vehicle_params.control_implementation_version)
     else:
         raise ValueError(f"Unsupported policy type: {vehicle_params.policy_type}")
 

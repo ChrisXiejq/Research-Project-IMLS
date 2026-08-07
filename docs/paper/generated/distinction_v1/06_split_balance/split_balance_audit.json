@@ -1,0 +1,187 @@
+{
+  "balance_interpretation": "acceptable_descriptive_balance",
+  "boundary": "SMDs are descriptive window-level diagnostics. The split is deliberately by ego initialization, so identical distributions are not expected and no independence is claimed between adjacent windows.",
+  "checks": {
+    "duplicate_sample_keys": 0,
+    "each_init_has_four_cells": true,
+    "init_groups_disjoint": true,
+    "rollout_count_is_200": true
+  },
+  "counts": {
+    "test": {
+      "cells": {
+        "S0_ADAPTIVE": 259,
+        "S0_FIXED": 255,
+        "S1_ADAPTIVE": 268,
+        "S1_FIXED": 293
+      },
+      "full_horizon_samples": 315,
+      "init_ids": [
+        46,
+        47,
+        48,
+        49,
+        50
+      ],
+      "raw_samples": 1075,
+      "rollouts": 20,
+      "styles": {
+        "assertive_constant_speed": 514,
+        "defensive_reactive": 561
+      }
+    },
+    "train": {
+      "cells": {
+        "S0_ADAPTIVE": 2222,
+        "S0_FIXED": 2201,
+        "S1_ADAPTIVE": 2365,
+        "S1_FIXED": 2333
+      },
+      "full_horizon_samples": 2596,
+      "init_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40
+      ],
+      "raw_samples": 9121,
+      "rollouts": 160,
+      "styles": {
+        "assertive_constant_speed": 4423,
+        "defensive_reactive": 4698
+      }
+    },
+    "val": {
+      "cells": {
+        "S0_ADAPTIVE": 258,
+        "S0_FIXED": 257,
+        "S1_ADAPTIVE": 262,
+        "S1_FIXED": 257
+      },
+      "full_horizon_samples": 326,
+      "init_ids": [
+        41,
+        42,
+        43,
+        44,
+        45
+      ],
+      "raw_samples": 1034,
+      "rollouts": 20,
+      "styles": {
+        "assertive_constant_speed": 515,
+        "defensive_reactive": 519
+      }
+    }
+  },
+  "covariate_balance": [
+    {
+      "covariate": "ego_speed_mps",
+      "test_mean": 3.2252705955202225,
+      "test_minus_train_SMD": 0.14005035695770698,
+      "test_std": 1.7458470171431126,
+      "train_mean": 2.9775528057373055,
+      "train_std": 1.7914126522322382,
+      "val_mean": 3.3427904085507283,
+      "val_minus_train_SMD": 0.20773181700378465,
+      "val_std": 1.7243823338522923
+    },
+    {
+      "covariate": "target_speed_mps",
+      "test_mean": 8.911630014804727,
+      "test_minus_train_SMD": 0.08991668067867652,
+      "test_std": 0.7199411771150658,
+      "train_mean": 8.838533583657107,
+      "train_std": 0.8963324430915827,
+      "val_mean": 8.828654734169259,
+      "val_minus_train_SMD": -0.010948740141888628,
+      "val_std": 0.9081922801415256
+    },
+    {
+      "covariate": "ego_target_distance_m",
+      "test_mean": 45.23756650164558,
+      "test_minus_train_SMD": -0.08787121512666253,
+      "test_std": 29.423394496214733,
+      "train_mean": 47.92929421497448,
+      "train_std": 31.795938425255915,
+      "val_mean": 42.318960183353155,
+      "val_minus_train_SMD": -0.18774652423584648,
+      "val_std": 27.837833440020123
+    },
+    {
+      "covariate": "future_valid_steps",
+      "test_mean": 3.7674418604651163,
+      "test_minus_train_SMD": 0.029242158769159813,
+      "test_std": 4.519959919846305,
+      "train_mean": 3.6355662756276725,
+      "train_std": 4.499568964495211,
+      "val_mean": 4.02321083172147,
+      "val_minus_train_SMD": 0.08549061155993941,
+      "val_std": 4.568870948334504
+    },
+    {
+      "covariate": "response_active",
+      "test_mean": 0.013953488372093023,
+      "test_minus_train_SMD": -0.08404369920290009,
+      "test_std": 0.11735245768373201,
+      "train_mean": 0.02565508167964039,
+      "train_std": 0.15811274253405638,
+      "val_mean": 0.02321083172147002,
+      "val_minus_train_SMD": -0.01582815209922439,
+      "val_std": 0.15064540093713094
+    },
+    {
+      "covariate": "target_start_offset_m",
+      "test_mean": 0.0,
+      "test_minus_train_SMD": 0.0,
+      "test_std": 0.0,
+      "train_mean": 0.0,
+      "train_std": 0.0,
+      "val_mean": 0.0,
+      "val_minus_train_SMD": 0.0,
+      "val_std": 0.0
+    }
+  ],
+  "created_at_utc": "2026-08-07T18:45:11.134871+00:00",
+  "dataset_sha256": "85cf90fc134001d27f3ee377504eafe21ecf309de79d6bcff9e7e37c03f7410a",
+  "maximum_absolute_window_level_SMD": 0.20773181700378465,
+  "result_generation": "distinction_v1",
+  "schema_version": "distinction_split_balance_audit_v1",
+  "status": "pass"
+}

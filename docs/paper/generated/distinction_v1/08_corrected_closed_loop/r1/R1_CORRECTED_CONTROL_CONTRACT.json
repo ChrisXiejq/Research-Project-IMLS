@@ -1,0 +1,110 @@
+{
+  "created_at_utc": "2026-08-07T19:13:44.116247+00:00",
+  "failures": [],
+  "formal_result_generation": "distinction_corrected_v1",
+  "gates": {
+    "all_equal_length_guard": {
+      "status": "pass"
+    },
+    "corrected_is_scenario_default": {
+      "default_version": "corrected_joint_modes_shared_amin_v1",
+      "status": "pass"
+    },
+    "corrected_multi_tv_base_k_mapping": {
+      "mapping": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "status": "pass"
+    },
+    "corrected_single_tv_mode_mapping": {
+      "mapping_by_profile": {
+        "adaptive_interaction_severity": [
+          0,
+          1,
+          2
+        ],
+        "fixed_frontier_medium": [
+          0,
+          1,
+          2
+        ],
+        "upstream_code": [
+          0,
+          1,
+          2
+        ]
+      },
+      "status": "pass"
+    },
+    "legacy_requires_explicit_flag": {
+      "legacy_version": "legacy_single_tv_mode0_split_amin_v0",
+      "mapping_when_explicitly_enabled": [
+        0,
+        0,
+        0
+      ],
+      "status": "pass"
+    },
+    "no_implicit_legacy_profile_switch": {
+      "status": "pass"
+    },
+    "per_step_mode_and_tensor_hash_telemetry": {
+      "status": "pass"
+    },
+    "shared_acceleration_bound": {
+      "corrected_reference_A_MIN": -3.0,
+      "corrected_solver_A_MIN": -3.0,
+      "status": "pass",
+      "units": "m/s^2"
+    }
+  },
+  "git_head_at_audit": "74179a18df0e7db695c26fda5402868bdc3432b6",
+  "implementation_version": "corrected_joint_modes_shared_amin_v1",
+  "legacy_result_generation": "legacy_pre_r1_read_only",
+  "legacy_version": "legacy_single_tv_mode0_split_amin_v0",
+  "schema_version": "r1_corrected_control_contract_v1",
+  "source_sha256": {
+    "core/scripts/carla/policies/smpc_agent.py": "13ff69a54aee932c1b4a3d00dfcf754d6ab432c5955a34df0e9f7a2cd47e48f9",
+    "core/scripts/carla/scenarios/run_intersection_scenario.py": "9c80813b1383798f188f3df308e0f81618dcab4a929f2ef8545da1cc2053e62c",
+    "core/scripts/carla/utils/mpc_utils.py": "febbacfb5fcd8edfdec0024bc3c8768473b36a32fd05df4ca04bc0453d2479fb",
+    "core/scripts/evaluation/closed_loop_metrics.py": "aa4b12c14f558dd164da4ec86e1bbd1d9a006ffac733f23d5c86e23b49bb4f1f",
+    "core/scripts/models/tests/test_distinction_regression_gates.py": "6fb9284c8c2f725206b01a73e8414e451111a3bf9e9ba64dceeda48722885b32"
+  },
+  "stage": "R1",
+  "status": "pass"
+}

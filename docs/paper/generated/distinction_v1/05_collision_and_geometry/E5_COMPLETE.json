@@ -1,0 +1,6 @@
+{
+  "artifact": "formal_safety_metric_sensitivity_audit.json",
+  "fixed_route_point_recompute_complete": false,
+  "stage": "E5",
+  "status": "pass_with_explicit_metric_boundary"
+}

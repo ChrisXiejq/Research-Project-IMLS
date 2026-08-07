@@ -1,0 +1,5 @@
+claim_id,claim,verdict,headline,boundary
+ML-C1,Frozen B1 task adaptation improves aggregate in-distribution give-way prediction beyond B0 and simple physical/route-prior baselines.,supported_descriptively,1,single Town05 give-way distribution; five held-out init groups; B1 is a complete adaptation configuration
+ML-C2,The lightweight Transformer residual adapter provides a consistent advantage over the corresponding MLP adapter.,not_supported,1,comparisons are not parameter matched and 10/15 runs reached the epoch ceiling
+ML-C3,Aggregate B1 improvement guarantees better prediction in the rare response-active interaction tail.,refuted_by_posthoc_tail_diagnostic,1,response-active windows are outcome-dependent and post hoc; -3 m tail is the clearest failure
+ML-C4,B1 uses its raster and target-history inputs rather than acting only as a fixed route-prior correction.,partially_supported_or_inconclusive,0,shuffle sensitivity is not proof of semantic or causal understanding; neutralisation is OOD

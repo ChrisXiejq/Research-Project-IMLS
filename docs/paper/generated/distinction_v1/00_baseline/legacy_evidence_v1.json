@@ -1,0 +1,166 @@
+{
+  "created_at_utc": "2026-08-07T18:40:34.141217+00:00",
+  "evidence_backup": {
+    "archives": [
+      {
+        "bytes": 130678888,
+        "file_member_count": 806,
+        "member_count": 806,
+        "path": "/Users/bytedance/my/Dissertation/offsite_backups/day12_evidence_freeze_v1/day10_formal_snapshot.tar.gz",
+        "sha256": "6307146c6bbddd57fdaba657432491790a052848033d5eddafc162217a96f2e3"
+      },
+      {
+        "bytes": 134154415,
+        "file_member_count": 828,
+        "member_count": 828,
+        "path": "/Users/bytedance/my/Dissertation/offsite_backups/day12_evidence_freeze_v1/day11_timing_shift_snapshot.tar.gz",
+        "sha256": "9928d53821be27a765d1879e0d218fca4284fa216aaccfe309f36a480bfd1ac9"
+      },
+      {
+        "bytes": 194805701,
+        "file_member_count": 58,
+        "member_count": 75,
+        "path": "/Users/bytedance/my/Dissertation/offsite_backups/day12_evidence_freeze_v1/day12_frozen_model_packages.tar.gz",
+        "sha256": "cff581e23f3eeb7bb99a1c67b2ab2810d705ad0ced976e520ab25e76a914680f"
+      },
+      {
+        "bytes": 225505134,
+        "file_member_count": 12038,
+        "member_count": 12439,
+        "path": "/Users/bytedance/my/Dissertation/offsite_backups/day12_evidence_freeze_v1/day12_v2_prediction_dataset_bundle.tar.gz",
+        "sha256": "85cf90fc134001d27f3ee377504eafe21ecf309de79d6bcff9e7e37c03f7410a"
+      }
+    ],
+    "json_files": [
+      {
+        "bytes": 1009,
+        "json_parse": "pass",
+        "path": "/Users/bytedance/my/Dissertation/offsite_backups/day12_evidence_freeze_v1/DAY12_OFFSITE_BACKUP_VERIFIED.json",
+        "sha256": "52c90dd27999fd11449f79425e15ad13afe217b7aac14cff24ae147683b2d5fe"
+      },
+      {
+        "bytes": 4980,
+        "json_parse": "pass",
+        "path": "/Users/bytedance/my/Dissertation/offsite_backups/day12_evidence_freeze_v1/day12_critical_asset_backup_manifest.json",
+        "sha256": "61a83b18a1e264e3c89e9b9c4320394b5cc0a1c4e9839796a4c84f63a5890712"
+      }
+    ],
+    "path": "/Users/bytedance/my/Dissertation/offsite_backups/day12_evidence_freeze_v1"
+  },
+  "repository": {
+    "cached_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "changed_file_snapshots": [
+      {
+        "bytes": 3100,
+        "path": "README.md",
+        "sha256": "3495ede21942321b5ff5abb16fb329a0060159c16cdb7cf2d6e6e3e7ba010115"
+      },
+      {
+        "bytes": 5711,
+        "path": "core/scripts/models/build_distinction_baseline.py",
+        "sha256": "588502465d4e6994a1f8bf9b4b3a1e46bc9307d3f09d426610c0996c6ca43fc6"
+      },
+      {
+        "bytes": 3799,
+        "path": "core/scripts/models/distinction_analysis_utils.py",
+        "sha256": "ad4bf4d97f28ede9ad193e74e1ffb9539bdbb8b5be64c862b022d7c770e9139f"
+      },
+      {
+        "bytes": 32651,
+        "path": "docs/dissertation/DISTINCTION_EXECUTION_PLAN.md",
+        "sha256": "54f9ffdfd755e479c3a2924b2efe2e1044475a86757c37d65375ed6d082186f7"
+      },
+      {
+        "bytes": 5028,
+        "path": "docs/dissertation/DISTINCTION_PROGRESS_TRACKER.md",
+        "sha256": "99b003f980f9d447f2ef3248212fbda711be085c5ecec7ff5ab04413c4b6dfa6"
+      },
+      {
+        "bytes": 46244,
+        "path": "docs/dissertation/DISTINCTION_READINESS_AUDIT_2026-08-08.md",
+        "sha256": "dd3b382c6748f98bf828e1390db55f6d98e74c8e06e002d64e0b021ab08c31ce"
+      },
+      {
+        "bytes": 1579,
+        "path": "docs/dissertation/README.md",
+        "sha256": "731ef4099a3c14541003be0a372e162fab09767a99dbcc66792e51efa6dfc43f"
+      },
+      {
+        "bytes": 4147,
+        "path": "docs/dissertation/latex/README.md",
+        "sha256": "7a663211288e1a39a07e61dc8efd489cfc42e633f18fc6ec0090e9e1bcf5d11d"
+      },
+      {
+        "bytes": 3060,
+        "path": "docs/dissertation/latex/RUBRIC_TO_STRUCTURE.md",
+        "sha256": "e3b025a4801382fa92c20e0a1e85635fb6a1c0e2479527491c02427351a5ea8b"
+      },
+      {
+        "bytes": 2898,
+        "path": "docs/dissertation/latex/WRITING_CHECKLIST.md",
+        "sha256": "f7ce02a208914905fb383b25817382e3e27ab9bead8b8e83bcab3f26224f5cc8"
+      },
+      {
+        "bytes": 4373,
+        "path": "docs/dissertation/latex/main.tex",
+        "sha256": "8ec45d5a2c581ebe8ff1fb629eb782ca156d341ae6b128b7b77583d338cb27ae"
+      },
+      {
+        "bytes": 5177,
+        "path": "docs/dissertation/latex/sections/01_introduction.tex",
+        "sha256": "0e62be4c835cbbe214c8538c33e57c16c2ccac315ab80799d0394f6aa0b797ac"
+      },
+      {
+        "bytes": 2696,
+        "path": "docs/dissertation/latex/sections/05_experimental_setup.tex",
+        "sha256": "c835986a24116251d8b11064345d693d5fb5b53f86c31b531ac1c6f2916088e1"
+      },
+      {
+        "bytes": 6342,
+        "path": "docs/dissertation/latex/sections/06_results.tex",
+        "sha256": "ade9ea11220313ca844acf2b6e12db5e36e3b399a08c0bb99cdf06c37fb30c97"
+      },
+      {
+        "bytes": 2113,
+        "path": "docs/paper/README.md",
+        "sha256": "da0d19999fd027b4d74cf3dff668132ec10ca6880641a81f59be69dfcf3c6c52"
+      },
+      {
+        "bytes": 796,
+        "path": "docs/paper/generated/distinction_v1/README.md",
+        "sha256": "a5b84c59b0a316d332fd80f249a485b865c5ac254ea0b3e4e6f43f7c347efdb3"
+      }
+    ],
+    "head": "74179a18df0e7db695c26fda5402868bdc3432b6",
+    "head_matches_origin_main": true,
+    "origin_main": "74179a18df0e7db695c26fda5402868bdc3432b6",
+    "path": "/Users/bytedance/my/Dissertation/Research-Project-IMLS",
+    "status_porcelain": [
+      "M docs/dissertation/README.md",
+      " M docs/dissertation/latex/README.md",
+      " M docs/dissertation/latex/RUBRIC_TO_STRUCTURE.md",
+      " M docs/dissertation/latex/WRITING_CHECKLIST.md",
+      " M docs/dissertation/latex/main.tex",
+      " M docs/dissertation/latex/sections/01_introduction.tex",
+      " M docs/dissertation/latex/sections/05_experimental_setup.tex",
+      " M docs/dissertation/latex/sections/06_results.tex",
+      " M \"docs/paper/01_\\347\\240\\224\\347\\251\\266\\351\\227\\256\\351\\242\\230\\344\\270\\216\\345\\256\\236\\351\\252\\214\\346\\226\\271\\346\\263\\225.md\"",
+      " M \"docs/paper/02_\\346\\234\\200\\347\\273\\210\\347\\273\\223\\346\\236\\234\\344\\270\\216\\345\\256\\241\\350\\256\\241\\347\\273\\223\\350\\256\\272.md\"",
+      " M \"docs/paper/03_\\350\\256\\272\\346\\226\\207\\345\\206\\231\\344\\275\\234\\350\\267\\257\\347\\272\\277\\344\\270\\216\\347\\253\\240\\350\\212\\202\\345\\244\\247\\347\\272\\262.md\"",
+      " M \"docs/paper/04_\\345\\244\\215\\347\\216\\260\\344\\270\\216\\350\\257\\201\\346\\215\\256\\350\\265\\204\\344\\272\\247\\347\\264\\242\\345\\274\\225.md\"",
+      " M docs/paper/README.md",
+      "?? core/scripts/models/build_distinction_baseline.py",
+      "?? core/scripts/models/distinction_analysis_utils.py",
+      "?? docs/dissertation/DISTINCTION_EXECUTION_PLAN.md",
+      "?? docs/dissertation/DISTINCTION_PROGRESS_TRACKER.md",
+      "?? docs/dissertation/DISTINCTION_READINESS_AUDIT_2026-08-08.md",
+      "?? \"docs/dissertation/\\350\\256\\272\\346\\226\\207\\345\\270\\246\\350\\257\\273\\347\\211\\210_\\351\\233\\266\\345\\237\\272\\347\\241\\200.md\"",
+      "?? \"docs/dissertation/\\350\\256\\272\\346\\226\\207\\351\\252\\250\\346\\236\\266\\344\\270\\255\\346\\226\\207\\347\\211\\210.md\"",
+      "?? docs/paper/generated/distinction_v1/README.md"
+    ],
+    "status_sha256": "6cae65da67d9b84d783ac18f9da70d3d8733b42bb76a77a8a23002b29079ee25",
+    "unstaged_diff_sha256": "a98973179cc1819f57dbfeaf87872150cd801ae160e3c2b173e1e29edae094e4"
+  },
+  "schema_version": "distinction_provenance_v1",
+  "scope_note": "Frozen after the distinction plan documents and S0 tooling were added, but before S1/E1-E6 analytical results were generated. Existing dirty files are preserved as user work."
+}

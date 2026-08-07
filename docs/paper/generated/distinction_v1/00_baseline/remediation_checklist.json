@@ -1,0 +1,70 @@
+{
+  "created_at_utc": "2026-08-07T18:40:34.141217+00:00",
+  "items": [
+    {
+      "evidence": [],
+      "id": "C1",
+      "resolution": null,
+      "risk": "formal profile mode mapping can collapse distinct supervisor profiles",
+      "status": "open"
+    },
+    {
+      "evidence": [],
+      "id": "C2",
+      "resolution": null,
+      "risk": "fixed/adaptive risk reference generators use different acceleration floors",
+      "status": "open"
+    },
+    {
+      "evidence": [],
+      "id": "C3",
+      "resolution": null,
+      "risk": "formal Day 9 predictor comparison excludes B2-D/T1/T2",
+      "status": "open"
+    },
+    {
+      "evidence": [],
+      "id": "C4",
+      "resolution": null,
+      "risk": "B1 has materially more trainable parameters than compact variants",
+      "status": "open"
+    },
+    {
+      "evidence": [],
+      "id": "C5",
+      "resolution": null,
+      "risk": "five initialization groups limit exact two-sided paired-test resolution",
+      "status": "open"
+    },
+    {
+      "evidence": [],
+      "id": "C6",
+      "resolution": null,
+      "risk": "target-light native collision callbacks need event-level de-duplication",
+      "status": "open"
+    },
+    {
+      "evidence": [],
+      "id": "C7",
+      "resolution": null,
+      "risk": "legacy evidence locators are not all machine-resolvable",
+      "status": "open"
+    },
+    {
+      "evidence": [],
+      "id": "C8",
+      "resolution": null,
+      "risk": "reported d_min is an actor-centre distance, not footprint clearance",
+      "status": "open"
+    },
+    {
+      "evidence": [],
+      "id": "C9",
+      "resolution": null,
+      "risk": "physical and input-ablation baselines are missing from the frozen evidence",
+      "status": "open"
+    }
+  ],
+  "rule": "open means acknowledged but not yet remediated; it is not a test failure",
+  "schema_version": "distinction_remediation_checklist_v1"
+}

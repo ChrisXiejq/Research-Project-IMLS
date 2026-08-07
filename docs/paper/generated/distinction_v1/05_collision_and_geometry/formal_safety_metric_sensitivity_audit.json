@@ -1,0 +1,185 @@
+{
+  "created_at_utc": "2026-08-07T18:52:48.477953+00:00",
+  "exclude_init50_sensitivity": {
+    "all_effect_signs_stable": false,
+    "contrasts": [
+      {
+        "contrast": "B1_minus_B0__fixed_medium",
+        "effect_sign_stable": 1,
+        "exclude_init50_effect": -0.4000000059604645,
+        "full_five_init_effect": -0.37000000551342965,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "target_clearance_adjusted_completion_delay_s"
+      },
+      {
+        "contrast": "B1_minus_B0__fixed_medium",
+        "effect_sign_stable": 1,
+        "exclude_init50_effect": -0.09068680831932409,
+        "full_five_init_effect": -0.06935149942789638,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "min_footprint_separation_m"
+      },
+      {
+        "contrast": "B1_minus_B0__fixed_medium",
+        "effect_sign_stable": 1,
+        "exclude_init50_effect": 0.005992308958763442,
+        "full_five_init_effect": 0.004955878115569533,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "supervisor_active_fraction"
+      },
+      {
+        "contrast": "B1_minus_B0__adaptive",
+        "effect_sign_stable": 1,
+        "exclude_init50_effect": -0.437500006519258,
+        "full_five_init_effect": -0.33666667168339093,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "target_clearance_adjusted_completion_delay_s"
+      },
+      {
+        "contrast": "B1_minus_B0__adaptive",
+        "effect_sign_stable": 1,
+        "exclude_init50_effect": -0.029027543354686283,
+        "full_five_init_effect": -0.0354984434450023,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "min_footprint_separation_m"
+      },
+      {
+        "contrast": "B1_minus_B0__adaptive",
+        "effect_sign_stable": 1,
+        "exclude_init50_effect": 0.007460443387861347,
+        "full_five_init_effect": 0.005219767402092366,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "supervisor_active_fraction"
+      },
+      {
+        "contrast": "adaptive_minus_fixed_medium__B1",
+        "effect_sign_stable": 0,
+        "exclude_init50_effect": 0.14375000214204192,
+        "full_five_init_effect": -0.06333333427707354,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "target_clearance_adjusted_completion_delay_s"
+      },
+      {
+        "contrast": "adaptive_minus_fixed_medium__B1",
+        "effect_sign_stable": 1,
+        "exclude_init50_effect": 0.08903347647881986,
+        "full_five_init_effect": 0.08031736422391646,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "min_footprint_separation_m"
+      },
+      {
+        "contrast": "adaptive_minus_fixed_medium__B1",
+        "effect_sign_stable": 0,
+        "exclude_init50_effect": -0.0001516154341280994,
+        "full_five_init_effect": 0.0010292246984164547,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "supervisor_active_fraction"
+      },
+      {
+        "contrast": "adaptive_minus_fixed_medium__B0",
+        "effect_sign_stable": 0,
+        "exclude_init50_effect": 0.18125000270083547,
+        "full_five_init_effect": -0.09666666810711225,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "target_clearance_adjusted_completion_delay_s"
+      },
+      {
+        "contrast": "adaptive_minus_fixed_medium__B0",
+        "effect_sign_stable": 1,
+        "exclude_init50_effect": 0.02737421151418203,
+        "full_five_init_effect": 0.04646430824102234,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "min_footprint_separation_m"
+      },
+      {
+        "contrast": "adaptive_minus_fixed_medium__B0",
+        "effect_sign_stable": 0,
+        "exclude_init50_effect": -0.001619749863226004,
+        "full_five_init_effect": 0.0007653354118936213,
+        "independent_init_groups_after_exclusion": 4,
+        "metric": "supervisor_active_fraction"
+      }
+    ],
+    "minimum_exact_two_sided_p_with_four_init_groups": 0.125,
+    "reason": "init 50 contains the only native infrastructure-contact callbacks"
+  },
+  "footprint_safety": {
+    "evaluations": 160,
+    "footprint_collisions": 0,
+    "logged_margin_m": 0.25,
+    "margin_sensitivity_certificates": [
+      {
+        "all_160_certified_collision_free": true,
+        "footprint_margin_m": 0.0,
+        "method": "monotonicity for smaller margins; two-polygon Minkowski expansion bound for larger margins",
+        "minimum_separation_lower_bound_m": 0.6049815449441112
+      },
+      {
+        "all_160_certified_collision_free": true,
+        "footprint_margin_m": 0.25,
+        "method": "monotonicity for smaller margins; two-polygon Minkowski expansion bound for larger margins",
+        "minimum_separation_lower_bound_m": 0.6049815449441112
+      },
+      {
+        "all_160_certified_collision_free": true,
+        "footprint_margin_m": 0.35,
+        "method": "monotonicity for smaller margins; two-polygon Minkowski expansion bound for larger margins",
+        "minimum_separation_lower_bound_m": 0.4049815449441112
+      },
+      {
+        "all_160_certified_collision_free": true,
+        "footprint_margin_m": 0.5,
+        "method": "monotonicity for smaller margins; two-polygon Minkowski expansion bound for larger margins",
+        "minimum_separation_lower_bound_m": 0.10498154494411116
+      }
+    ],
+    "minimum_logged_footprint_separation_m": 0.6049815449441112
+  },
+  "metric_semantics": {
+    "dmin_TV": "actor-centre Euclidean distance",
+    "min_footprint_separation_m": "oriented-rectangle polygon separation with logged 0.25 m margin per actor",
+    "native_collision_callbacks": "sensor callbacks; duplicated frames are collapsed into contiguous contact episodes"
+  },
+  "native_collision_attribution": {
+    "affected_rollouts": 1,
+    "callback_count": 91,
+    "contact_episodes": 2,
+    "finding": "The only native callbacks are target-to-traffic-light infrastructure contact in Day11 init 50; no ego-target vehicle callback is logged.",
+    "formal_rollouts": 160,
+    "traffic_light_callbacks": 91,
+    "unique_collision_frames": 20,
+    "vehicle_actor_callbacks": 0
+  },
+  "result_generation": "distinction_v1",
+  "schema_version": "distinction_formal_safety_metric_audit_v1",
+  "source_sha256": {
+    "day10": "6307146c6bbddd57fdaba657432491790a052848033d5eddafc162217a96f2e3",
+    "day11": "9928d53821be27a765d1879e0d218fca4284fa216aaccfe309f36a480bfd1ac9",
+    "timing_rollouts": "539a5561a8b7f94c36837e40fc4bd2506abe619b2629cf959be05fcb14e22a57"
+  },
+  "status": "pass_with_explicit_metric_boundary",
+  "yield_metric_geometry": {
+    "all_current_yield_order_valid": true,
+    "claim_boundary": "Use the unanimous yield-order result as a descriptive gate; do not present it as an unbiased continuous effect until raw trajectories are recomputed against a fixed route-defined point.",
+    "conflict_point_max_xy": [
+      31.1015567779541,
+      3.7813026905059814
+    ],
+    "conflict_point_mean_xy": [
+      30.158226948976516,
+      3.695706572383642
+    ],
+    "conflict_point_min_xy": [
+      29.539135932922363,
+      3.6228277683258057
+    ],
+    "conflict_point_std_xy": [
+      0.23912771674569316,
+      0.03656548986433565
+    ],
+    "current_implementation": "per-rollout conflict point chosen from closest realised trajectory pair",
+    "minimum_clearance_time_gap_s": 0.850000012665987,
+    "raw_trajectory_recompute_available_in_offsite_package": false,
+    "scientific_issue": "the conflict-zone centre is outcome-dependent, so yield-order timing is not a fully fixed ex-ante metric"
+  }
+}

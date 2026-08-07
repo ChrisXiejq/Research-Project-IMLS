@@ -33,10 +33,13 @@ class ClosedLoopTrajectory:
 
 	def __post_init__(self):
 		# Sanity check about constructor arguments..
-		if self.state_trajectory.shape[0] != \
-		   self.input_trajectory.shape[0] != \
-		   self.feasibility.size      != \
-		   self.solve_times.size:
+		lengths = {
+			"state_trajectory": self.state_trajectory.shape[0],
+			"input_trajectory": self.input_trajectory.shape[0],
+			"feasibility": self.feasibility.size,
+			"solve_times": self.solve_times.size,
+		}
+		if len(set(lengths.values())) != 1:
 			raise ValueError("Fields state_trajectory, input_trajectory, feasibility, and solve_times have varying number of timestamps")
 
 		if self.state_trajectory.shape[1] != 5:

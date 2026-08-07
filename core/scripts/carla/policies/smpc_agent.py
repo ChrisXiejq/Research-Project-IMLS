@@ -1,5 +1,6 @@
 import carla
 import csv
+import hashlib
 import json
 import os
 import sys
@@ -121,6 +122,7 @@ class SMPCAgent(object):
                  lane_entry_heading_cost_weight=0.2,
                  lane_entry_heading_cost_max_abs_epsi=0.35,
                  adaptive_risk_config=None,
+                 control_implementation_version=smpc.CONTROL_IMPLEMENTATION_CORRECTED_V1,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -494,6 +496,15 @@ class SMPCAgent(object):
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
         self.risk_profile = risk_profile
+        if control_implementation_version not in smpc.SUPPORTED_CONTROL_IMPLEMENTATIONS:
+            raise ValueError(
+                "Unsupported control implementation version: "
+                f"{control_implementation_version}"
+            )
+        self.control_implementation_version = control_implementation_version
+        self._legacy_control_implementation = (
+            control_implementation_version == smpc.CONTROL_IMPLEMENTATION_LEGACY_V0
+        )
         if adaptive_risk_config is None:
             adaptive_risk_config = {}
         if not isinstance(adaptive_risk_config, dict):
@@ -521,14 +532,13 @@ class SMPCAgent(object):
         else:
             raise ValueError(f"Invalid SMPC config: {smpc_config}")
 
-        # reference_regeneration() is called before the SMPC solver object is
-        # constructed. Keep policy-specific feasible-reference bounds here:
-        # fixed-risk benefited from a stronger local braking reference, while
-        # var-risk regressed when its reference generator used -4.0 globally.
-        if self.fixed_risk and not self.obca_flag:
-            self._ref_gen_a_min = -4.0
-        else:
-            self._ref_gen_a_min = -3.0
+        # R1 corrected-v1 freezes the same acceleration bounds for the reference
+        # generator and the SMPC solver in every fixed/adaptive comparison.
+        # Legacy split bounds remain available only through the explicit version.
+        self._ref_gen_a_min = (
+            -4.0 if self._legacy_control_implementation and self.fixed_risk else -3.0
+        )
+        self._solver_a_min = -4.0 if self._legacy_control_implementation else -3.0
         self._ref_gen_a_max = 2.0
 
 
@@ -600,7 +610,9 @@ class SMPCAgent(object):
             if not self.obca_flag:
                 self.SMPC=smpc.SMPC_MMPreds(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag, fixed_risk=self.fixed_risk,
                                     L_F=self.lf, L_R=self.lr, fps=self.fps, N_TV_MAX=n_tv_mpc,
-                                    risk_profile=solver_risk_profile)
+                                    A_MIN=self._solver_a_min,
+                                    risk_profile=solver_risk_profile,
+                                    legacy_mode_indexing=self._legacy_control_implementation)
             else:
                 self.SMPC=smpc.SMPC_MMPreds_OBCA(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag,
                                         L_F=self.lf, L_R=self.lr, fps=self.fps, pol_mode=self.obca_mode, N_TV_MAX=n_tv_mpc)
@@ -620,12 +632,6 @@ class SMPCAgent(object):
             self.debug_label = label
 
     def _reference_generator_accel_bounds(self):
-        solver = getattr(self, "SMPC", None)
-        if solver is not None and self.fixed_risk and not self.obca_flag:
-            return (
-                getattr(solver, "A_MIN", self._ref_gen_a_min),
-                getattr(solver, "A_MAX", self._ref_gen_a_max),
-            )
         return self._ref_gen_a_min, self._ref_gen_a_max
 
     def _debug_json_safe(self, value):
@@ -669,6 +675,14 @@ class SMPCAgent(object):
         except Exception:
             summary["head"] = arr.reshape(-1)[:max_items].tolist()
         return self._debug_json_safe(summary)
+
+    def _debug_array_sha256(self, value):
+        """Hash numeric prediction content deterministically for audit logs."""
+        arr = np.ascontiguousarray(np.asarray(value, dtype=np.float64))
+        digest = hashlib.sha256()
+        digest.update(str(arr.shape).encode("ascii"))
+        digest.update(arr.tobytes(order="C"))
+        return digest.hexdigest()
 
     def _debug_write_json(self, filename, payload):
         if not self.debug_savedir:
@@ -821,6 +835,22 @@ class SMPCAgent(object):
             "obca_flag": self.obca_flag,
             "ns_bl_flag": self.ns_bl_flag,
             "risk_profile": self.risk_profile,
+            "control_implementation": {
+                "version": self.control_implementation_version,
+                "legacy_explicitly_enabled": bool(self._legacy_control_implementation),
+                "mode_indexing": (
+                    "legacy_single_tv_mode0"
+                    if self._legacy_control_implementation
+                    else "base_k_joint_mode"
+                ),
+                "mode_consumption_map_at_n_tv_max": smpc._mode_consumption_map(
+                    self.N_modes,
+                    int(getattr(self.SMPC, "N_TV_max", 1)),
+                    legacy_mode_indexing=self._legacy_control_implementation,
+                ),
+                "reference_A_MIN": self._reference_generator_accel_bounds()[0],
+                "solver_A_MIN": getattr(self.SMPC, "A_MIN", None),
+            },
             "N": self.N,
             "N_modes": self.N_modes,
             "fps": self.fps,
@@ -977,8 +1007,41 @@ class SMPCAgent(object):
             "mode_probs": self._debug_array_summary(probs),
         }
         try:
-            payload["mus"] = self._debug_array_summary(preds[0])
-            payload["sigmas"] = self._debug_array_summary(preds[1])
+            mus = np.asarray(preds[0])
+            sigmas = np.asarray(preds[1])
+            payload["mus"] = self._debug_array_summary(mus)
+            payload["sigmas"] = self._debug_array_summary(sigmas)
+            n_tvs = int(mus.shape[0]) if mus.ndim >= 2 else 0
+            mode_map = smpc._mode_consumption_map(
+                self.N_modes,
+                n_tvs,
+                legacy_mode_indexing=self._legacy_control_implementation,
+            )
+            joint_modes = []
+            for joint_index, per_tv_modes in enumerate(mode_map):
+                consumed = []
+                for vehicle_index, spatial_mode_index in enumerate(per_tv_modes):
+                    consumed.append({
+                        "vehicle_index": vehicle_index,
+                        "spatial_mode_index": spatial_mode_index,
+                        "mean_sha256": self._debug_array_sha256(
+                            mus[vehicle_index, spatial_mode_index]
+                        ),
+                        "covariance_sha256": self._debug_array_sha256(
+                            sigmas[vehicle_index, spatial_mode_index]
+                        ),
+                    })
+                joint_modes.append({
+                    "joint_mode_index": joint_index,
+                    "per_vehicle": consumed,
+                })
+            payload["mode_consumption"] = {
+                "implementation_version": self.control_implementation_version,
+                "n_target_vehicles": n_tvs,
+                "n_spatial_modes": self.N_modes,
+                "mapping": mode_map,
+                "joint_modes": joint_modes,
+            }
         except Exception as exc:
             payload["prediction_error"] = repr(exc)
         return payload

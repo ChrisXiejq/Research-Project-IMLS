@@ -20,6 +20,16 @@ FIXED_FRONTIER_AGGRESSIVE_TIGHTENING = 1.2815515655446004
 FIXED_FRONTIER_MEDIUM_TIGHTENING = UPSTREAM_CODE_TIGHTENING
 FIXED_FRONTIER_CONSERVATIVE_TIGHTENING = PAPER_INTERSECTION_TIGHTENING
 
+# Closed-loop implementation contract.  Corrected-v1 is the only default used
+# by formal experiments.  The legacy identifier exists solely to reproduce the
+# pre-R1 single-TV mode-0 indexing and split acceleration bounds explicitly.
+CONTROL_IMPLEMENTATION_CORRECTED_V1 = "corrected_joint_modes_shared_amin_v1"
+CONTROL_IMPLEMENTATION_LEGACY_V0 = "legacy_single_tv_mode0_split_amin_v0"
+SUPPORTED_CONTROL_IMPLEMENTATIONS = {
+    CONTROL_IMPLEMENTATION_CORRECTED_V1,
+    CONTROL_IMPLEMENTATION_LEGACY_V0,
+}
+
 
 def _risk_profile_values(risk_profile, tightening_override=None):
     """Return (tightening, target_prob) for the desired reproduction profile."""
@@ -57,28 +67,41 @@ def _joint_mode_component(joint_index, vehicle_index, n_modes):
     return (joint_index // (n_modes ** vehicle_index)) % n_modes
 
 
-def _mode_component(joint_index, vehicle_index, n_modes, n_tvs, risk_profile=None):
+def _mode_component(
+    joint_index,
+    vehicle_index,
+    n_modes,
+    n_tvs,
+    risk_profile=None,
+    legacy_mode_indexing=False,
+):
     """Mode index used by collision constraints.
 
-    The upstream CARLA intersection code only ever uses one target vehicle in the
-    published experiment. In that case its historical indexing maps every joint
-    mode to target mode 0. Keep that behavior for ``upstream_code`` reproduction,
-    while retaining mathematically correct joint-mode indexing for paper/ablation
-    profiles and multi-TV runs.
+    Corrected-v1 always decodes the flat joint hypothesis in base ``n_modes``.
+    The pre-R1 single-TV mode-0 behavior is available only through the explicit
+    ``legacy_mode_indexing`` compatibility flag; a risk profile never selects it.
     """
-    normalized = (risk_profile or "upstream_code").lower()
-    if n_tvs == 1 and normalized in {
-        "upstream",
-        "upstream_code",
-        "smpc_mmpreds",
-        "adaptive_interaction_severity",
-        "rule_aware_static_risk",
-        "fixed_frontier_aggressive",
-        "fixed_frontier_medium",
-        "fixed_frontier_conservative",
-    }:
+    del risk_profile  # retained for backwards-compatible call signatures
+    if bool(legacy_mode_indexing) and n_tvs == 1:
         return 0
     return _joint_mode_component(joint_index, vehicle_index, n_modes)
+
+
+def _mode_consumption_map(n_modes, n_tvs, legacy_mode_indexing=False):
+    """Return the exact per-TV spatial modes consumed by every joint mode."""
+    return [
+        [
+            _mode_component(
+                joint_index,
+                vehicle_index,
+                n_modes,
+                n_tvs,
+                legacy_mode_indexing=legacy_mode_indexing,
+            )
+            for vehicle_index in range(n_tvs)
+        ]
+        for joint_index in range(n_modes ** n_tvs)
+    ]
 
 
 class RefTrajGenerator():
@@ -331,7 +354,8 @@ class SMPC_MMPreds():
                 fixed_risk=False,
                 inv_cdf      = [np.array([[0.02, 1.35],[0.508, 0.91]]), np.array([[1.35,2.],[0.91, 0.978]])],
                 fps = 20,
-                risk_profile = "upstream_code"
+                risk_profile = "upstream_code",
+                legacy_mode_indexing = False,
                 ):
         self.N=N
         self.DT=DT
@@ -352,6 +376,7 @@ class SMPC_MMPreds():
         self.N_seq_max=N_seq_MAX
         self.t_bar_max=T_BAR_MAX
         self.risk_profile = risk_profile
+        self.legacy_mode_indexing = bool(legacy_mode_indexing)
         self.tight, self.target_prob = _risk_profile_values(risk_profile, TIGHTENING)
         self.current_tight = self.tight
         self.current_target_prob = self.target_prob
@@ -701,7 +726,14 @@ class SMPC_MMPreds():
         self.opti[i].subject_to((-self.u_prev[i][1]+self.df_lin[i][0]+h[0][1,0])*self.fps<=slack+self.DF_DOT_MAX)
 
         nm = self.N_modes
-        mode = lambda m, v: _mode_component(m, v, nm, N_TV, self.risk_profile)
+        mode = lambda m, v: _mode_component(
+            m,
+            v,
+            nm,
+            N_TV,
+            self.risk_profile,
+            legacy_mode_indexing=self.legacy_mode_indexing,
+        )
 
         total_prob=0
 
@@ -814,6 +846,17 @@ class SMPC_MMPreds():
             "t_bar_max": int(self.t_bar_max),
             "N_modes": int(self.N_modes),
             "n_joint_modes": int(self.N_modes ** N_TV),
+            "control_implementation_version": (
+                CONTROL_IMPLEMENTATION_LEGACY_V0
+                if self.legacy_mode_indexing
+                else CONTROL_IMPLEMENTATION_CORRECTED_V1
+            ),
+            "legacy_mode_indexing": bool(self.legacy_mode_indexing),
+            "mode_consumption_map": _mode_consumption_map(
+                self.N_modes,
+                N_TV,
+                legacy_mode_indexing=self.legacy_mode_indexing,
+            ),
             "fixed_risk": bool(self.fixed_risk),
             "risk_profile": getattr(self, "risk_profile", None),
             "tight": getattr(self, "tight", None),
