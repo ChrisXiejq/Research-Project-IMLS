@@ -12,6 +12,7 @@ PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/envs/carla_modern/bin/python}"
 DAY7_RESULTS="${DAY7_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1}"
 DAY8_RESULTS="${DAY8_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1}"
 R2_RESULTS="${R2_RESULTS:-/root/autodl-tmp/results/give_way_transformer/distinction_v1/r2_corrected_pilot_v1}"
+R2_MAX_ATTEMPTS="${R2_MAX_ATTEMPTS:-3}"
 B1_MODEL="${B1_MODEL:-${DAY8_RESULTS}/runs/B1/seed_37/best_model}"
 B1_CALIBRATION="${B1_CALIBRATION:-${DAY8_RESULTS}/runs/B1/seed_37/calibration.json}"
 B0_MODEL="${B0_MODEL:-${MODELS_DIR}/l5kit_multipath_10}"
@@ -21,6 +22,10 @@ FROZEN_COLLECTION="${FROZEN_COLLECTION:-${REPO_DIR}/docs/paper/generated/day5/da
 R1_CONTRACT="${R1_CONTRACT:-${REPO_DIR}/docs/paper/generated/distinction_v1/08_corrected_closed_loop/r1/R1_CORRECTED_CONTROL_CONTRACT.json}"
 
 : "${CARLA_ROOT:?Set CARLA_ROOT to the CARLA 0.9.14 directory}"
+if [[ ! "${R2_MAX_ATTEMPTS}" =~ ^[1-9][0-9]*$ ]]; then
+  echo "R2_MAX_ATTEMPTS must be a positive integer, got ${R2_MAX_ATTEMPTS}" >&2
+  exit 2
+fi
 for required in \
   "${DAY7_RESULTS}/DAY7_COMPLETE.json" "${DAY7_RESULTS}/train.jsonl" \
   "${DAY8_RESULTS}/DAY8_COMPLETE.json" "${DAY8_RESULTS}/final_test_v1/DAY8_MODEL_SELECTION_FROZEN.json" \
@@ -143,7 +148,7 @@ for predictor in ("B1","B0"):
    cells.append({"cell_id":f"dev_{predictor}_{policy}_{style}_init45","predictor":predictor,"risk_policy":policy,"target_style":style,"ego_init_id":45,"target_offset_m":0.0,"tuning_path":"tuning_configs/dev_offset_0.json","tuning_sha256":h(tuning_dir/"dev_offset_0.json"),"probe":False})
 for predictor in ("B1","B0"):
  cells.append({"cell_id":f"probe_{predictor}_adaptive_reactive_offset_m3_init50","predictor":predictor,"risk_policy":"adaptive","target_style":"reactive","ego_init_id":50,"target_offset_m":-3.0,"tuning_path":"tuning_configs/probe_offset_m3.json","tuning_sha256":h(tuning_dir/"probe_offset_m3.json"),"probe":True})
-payload={"schema_version":"r2_corrected_pilot_contract_v1","status":"frozen","stage":"R2","non_statistical_pilot":True,"formal_evidence":False,"implementation_version":"corrected_joint_modes_shared_amin_v1","result_generation":"distinction_corrected_v1","expected_rollouts":10,"cells":cells,"authority_regime":"A3_risk_owned_yield","target_speed_mps":9.0,"n_modes":3,"shared_A_MIN_mps2":-3.0,"runtime_gate":{"max_p95_solve_time_s":0.5,"max_scenario_iters":600},"predictors":{"B1":{"seed":37,"model_sha256_tree":pre["b1"]["deployment"]["model_artifact"]["sha256_tree"],"calibration_sha256":pre["b1"]["deployment"]["calibration_artifact"]["sha256"],"calibration_parameters":pre["b1"]["deployment"]["calibration_parameters"]},"B0":{"model_sha256_tree":pre["b0"]["deployment"]["model_artifact"]["sha256_tree"],"calibration":"identity_no_calibration_artifact"}},"anchors_sha256":pre["anchors"]["sha256"],"reactive_parameters":reactive,"init_sha256":{"45":h(init_dir/"ego_init_45.json"),"50":h(init_dir/"ego_init_50.json")},"preflight_sha256":h(preflight_path),"r1_contract_sha256":h(r1_path),"r1_source_sha256":r1["source_sha256"],"git_commit":subprocess.check_output(["git","-C",str(repo),"rev-parse","HEAD"],text=True).strip(),"no_post_result_tuning":True}
+payload={"schema_version":"r2_corrected_pilot_contract_v1","status":"frozen","stage":"R2","non_statistical_pilot":True,"formal_evidence":False,"implementation_version":"corrected_joint_modes_shared_amin_v1","result_generation":"distinction_corrected_v1","expected_rollouts":10,"cells":cells,"authority_regime":"A3_risk_owned_yield","target_speed_mps":9.0,"n_modes":3,"shared_A_MIN_mps2":-3.0,"runtime_gate":{"max_p95_solve_time_s":0.5,"max_scenario_iters":600},"transient_retry_policy":{"max_attempts":int(os.environ.get("R2_MAX_ATTEMPTS","3")),"backoff_seconds":"5 * failed_attempt_index","completed_rollouts_never_repeated":True,"scientific_failures_not_accepted":True},"predictors":{"B1":{"seed":37,"model_sha256_tree":pre["b1"]["deployment"]["model_artifact"]["sha256_tree"],"calibration_sha256":pre["b1"]["deployment"]["calibration_artifact"]["sha256"],"calibration_parameters":pre["b1"]["deployment"]["calibration_parameters"]},"B0":{"model_sha256_tree":pre["b0"]["deployment"]["model_artifact"]["sha256_tree"],"calibration":"identity_no_calibration_artifact"}},"anchors_sha256":pre["anchors"]["sha256"],"reactive_parameters":reactive,"init_sha256":{"45":h(init_dir/"ego_init_45.json"),"50":h(init_dir/"ego_init_50.json")},"preflight_sha256":h(preflight_path),"r1_contract_sha256":h(r1_path),"r1_source_sha256":r1["source_sha256"],"git_commit":subprocess.check_output(["git","-C",str(repo),"rev-parse","HEAD"],text=True).strip(),"no_post_result_tuning":True}
 rendered=json.dumps(payload,indent=2,sort_keys=True)+"\n"
 if output.exists() and output.read_text()!=rendered: raise SystemExit(f"Frozen R2 contract drift: {output}")
 tmp=output.with_suffix(output.suffix+".tmp"); tmp.write_text(rendered); os.replace(tmp,output)
@@ -187,18 +192,34 @@ run_cell() {
     adaptive_arg=(--adaptive_risk_config_json '{"variant_name":"floor_weak","approach_preclearance_floor":1.66,"critical_preclearance_floor":1.72,"near_preclearance_floor":1.78}')
   fi
   if [[ "${style}" == "reactive" ]]; then target_style="defensive_reactive"; else target_style="assertive_constant_speed"; fi
-  echo "[$(date --iso-8601=seconds)] R2 cell=${cell_id}"
-  "${PYTHON_BIN}" "${SCRIPT_DIR}/run_all_scenarios.py" \
-    --scenario_glob scenario_uk_give_way.json \
-    --init_glob "${INIT_DIR}/ego_init_${init_id}.json" \
-    --results_dir "${cell_dir}" --policies "${policy_name}" --risk_profile "${risk_profile}" \
-    --tuning_config "${tuning}" --prediction_model_weights "${model}" \
-    --prediction_model_anchors "${ANCHORS}" "${calibration_arg[@]}" \
-    --target_style "${target_style}" --reactive_config_json "${REACTIVE_CONFIG_JSON}" \
-    --enable_prediction_logging --prediction_logging_stride 1 --prediction_logging_horizon 10 \
-    --prediction_protocol_id r2_corrected_pilot_v1 --prediction_cell_id "${cell_id}" \
-    --prediction_ego_policy_label "${policy}" --prediction_git_commit "$(git -C "${REPO_DIR}" rev-parse HEAD)" \
-    --disable_camera_viz --skip_completed_subruns --postprocess_no_plots "${adaptive_arg[@]}"
+  local attempt scenario_status=1
+  for ((attempt=1; attempt<=R2_MAX_ATTEMPTS; attempt++)); do
+    echo "[$(date --iso-8601=seconds)] R2 cell=${cell_id} attempt=${attempt}/${R2_MAX_ATTEMPTS}"
+    if "${PYTHON_BIN}" "${SCRIPT_DIR}/run_all_scenarios.py" \
+      --scenario_glob scenario_uk_give_way.json \
+      --init_glob "${INIT_DIR}/ego_init_${init_id}.json" \
+      --results_dir "${cell_dir}" --policies "${policy_name}" --risk_profile "${risk_profile}" \
+      --tuning_config "${tuning}" --prediction_model_weights "${model}" \
+      --prediction_model_anchors "${ANCHORS}" "${calibration_arg[@]}" \
+      --target_style "${target_style}" --reactive_config_json "${REACTIVE_CONFIG_JSON}" \
+      --enable_prediction_logging --prediction_logging_stride 1 --prediction_logging_horizon 10 \
+      --prediction_protocol_id r2_corrected_pilot_v1 --prediction_cell_id "${cell_id}" \
+      --prediction_ego_policy_label "${policy}" --prediction_git_commit "$(git -C "${REPO_DIR}" rev-parse HEAD)" \
+      --disable_camera_viz --skip_completed_subruns --postprocess_no_plots "${adaptive_arg[@]}"; then
+      scenario_status=0
+      break
+    else
+      scenario_status=$?
+    fi
+    if (( attempt < R2_MAX_ATTEMPTS )); then
+      echo "[$(date --iso-8601=seconds)] transient cell failure; retrying after $((5 * attempt))s"
+      sleep $((5 * attempt))
+    fi
+  done
+  if (( scenario_status != 0 )); then
+    echo "R2 cell failed after ${R2_MAX_ATTEMPTS} attempts: ${cell_id}" >&2
+    return "${scenario_status}"
+  fi
   postprocess_cell "${cell_dir}" "${policy_name}"
   "${PYTHON_BIN}" - "${cell_id}" "${cell_dir}" "${tuning}" "${policy_name}" <<'PY'
 import hashlib,json,os,sys

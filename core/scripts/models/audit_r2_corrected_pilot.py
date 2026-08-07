@@ -68,6 +68,13 @@ def main() -> None:
         raise ValueError("R2 corrected pilot contract is not frozen or uses the wrong implementation")
 
     failures: list[str] = []
+    retry_policy = contract.get("transient_retry_policy") or {}
+    if (
+        int(retry_policy.get("max_attempts", 0)) < 1
+        or retry_policy.get("completed_rollouts_never_repeated") is not True
+        or retry_policy.get("scientific_failures_not_accepted") is not True
+    ):
+        failures.append("global:invalid_transient_retry_policy")
     evaluations = []
     amin_pairs = set()
     total_native_collisions = 0
@@ -281,6 +288,7 @@ def main() -> None:
         "passing_rollouts": sum(item["status"] == "pass" for item in evaluations),
         "total_native_collisions": total_native_collisions,
         "total_valid_prediction_steps": total_valid_prediction_steps,
+        "transient_retry_policy": retry_policy,
         "observed_amin_pairs": [list(pair) for pair in sorted(amin_pairs, key=str)],
         "contract_sha256": sha256(contract_path),
         "failures": sorted(set(failures)),
