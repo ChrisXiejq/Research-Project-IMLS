@@ -2,8 +2,8 @@
 
 **Plan:** [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)  
 **Started:** 2026-08-08  
-**Current step:** R3 v3 raw collection complete at 80/80; offline derived-evidence finalization pending after a forward-compatibility loader failure
-**Overall status:** S0–G2, R1–R2 and M0 v2 complete; the large-scale CARLA collection is complete and no additional rollout is required
+**Current step:** M1 four-hypothesis evidence package complete; W1 manuscript integration is next
+**Overall status:** S0–M1 complete; R3 passed at 80/80 and large-scale CARLA collection is permanently closed for this dissertation
 **Closed-loop route:** Route R frozen prospectively at G2
 
 ## Status legend
@@ -31,10 +31,11 @@
 | R1 | Correct mode/A_MIN implementation | complete | No initially | `08_corrected_closed_loop/r1/R1_COMPLETE.json` | 10 tests PASS; corrected-v1 default; legacy explicit only |
 | R2 | Corrected 10-rollout pilot | complete | Yes | `08_corrected_closed_loop/r2/local_verification/r2_corrected_pilot_v4/R2_LOCAL_VERIFICATION.json` | 10/10 pass; non-statistical deployment gate only |
 | G2 | Freeze Route S or Route R | complete | No | `08_corrected_closed_loop/g2/G2_COMPLETE.json` | Route R frozen before R3 outcomes |
-| R3 | Corrected 80-rollout nominal matrix v2 | in_progress | Yes | `R3_COMPLETE.json` + verified archive | preflight hardening complete; user launch pending; this is the final large-scale CARLA run |
+| R3 | Corrected 80-rollout nominal matrix v2 | complete | Yes | `08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_COMPLETE.json` | 80/80; analysis, stop gate and verified archive pass; no further large-scale CARLA |
 | R4 | Calibration factorial | not_run | Yes | frozen scope decision | not required after stack-level estimand was fixed; future work only |
+| A2 | Corrected post-R3 synthesis | complete | No | `08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json` | H3 2/8 directional cells; H4 3/12 dominance cells; paper tables/figures hash-bound |
 | M0 | Freeze statistical analysis contract | complete | No | `09_analysis_contract/M0_AMENDMENT_COMPLETE.json` | v1 preserved; v2 primary outcomes, censoring, families, margins and study-stop rule frozen before R3 |
-| M1 | Four-hypothesis evidence package | pending | No | 0 locator/value mismatch | replaces old H1–H8 |
+| M1 | Four-hypothesis evidence package | complete | No | `10_four_hypothesis_evidence/M1_COMPLETE.json` | 82 records; 0 invalid locator, value mismatch, orphan claim or legacy/corrected pooling violation |
 | W1 | Full TMLR manuscript | pending | No | complete source/PDF | 0 TODO |
 | Q1 | Final scientific/rubric/PDF audit | pending | No | all gates PASS | no claim patching by hand |
 | V1 | Viva and submission package | pending | No | archive + viva documents | final deliverable |
@@ -97,3 +98,6 @@
 | 2026-08-08 | R3 hardening | Completed transactional runner, telemetry, integrity audit, analyzer and final stop/archive gates | 38 local preflight tests; 80 raw receipts and all derived tables will be hash-bound; adverse outcomes cannot trigger extra collection | `docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_prelaunch/R3_HARDENING_ACCEPTANCE.json` |
 | 2026-08-08 | R3 raw collection | Completed all prespecified treatment keys despite one CARLA restart | 80/80 accepted receipts; 7 infrastructure failures retained; zero pending or interrupted attempts | Server `r3_corrected_formal_v3/R3_ROLLOUT_*_COMPLETE.json` |
 | 2026-08-08 | R3 offline repair | Added a no-CARLA finalizer for the derived-only `actor_geometry` loader incompatibility | Original Git/source manifest and all raw hashes remain frozen; only declared deserialization drift is allowed | `core/scripts/models/finalize_r3_offline.py` |
+| 2026-08-08 | R3 finalization | Verified corrected formal data, analysis, stop gate and archive | 80/80 rollouts; all formal tables and integrity gates pass; `additional_large_scale_carla_required=false` | `08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_COMPLETE.json` |
+| 2026-08-08 | A2 | Generated deterministic corrected synthesis, four verdicts, two figures and four tables | B1 manipulation 40/40; H3 2/8; H4 3/12; universal claims rejected without reopening collection | `08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json` |
+| 2026-08-08 | M1 | Replaced the old non-resolving evidence index with a four-hypothesis value-audited package | 82/82 records resolve and reproduce; no orphan headline claim or legacy/corrected pooling | `10_four_hypothesis_evidence/M1_COMPLETE.json` |

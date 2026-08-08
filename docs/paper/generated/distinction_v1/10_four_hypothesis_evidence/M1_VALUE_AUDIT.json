@@ -1,0 +1,428 @@
+{
+  "checks": [
+    {
+      "error": null,
+      "evidence_id": "H1_B1_TEST_NLL",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H1_B0_TEST_NLL",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H1_B1_MINUS_B0_TEST_NLL",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H1_B1_TEST_ADE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H1_B0_TEST_ADE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H1_B1_MINUS_B0_TEST_ADE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H1_B1_TEST_FDE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H1_B0_TEST_FDE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H1_B1_MINUS_B0_TEST_FDE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H2_B2_M_TEST_NLL",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H2_T1_TEST_NLL",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H2_B2_D_TEST_NLL",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H2_T2_TEST_NLL",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H2_T1_MINUS_B2M_TEST_NLL",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H2_T2_MINUS_B2D_TEST_NLL",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H2_PARAMETER_MATCHED",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H2_RUNS_AT_EPOCH_BOUNDARY",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H1_TAIL_MINUS_B0_ADE_NEG3",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_SUPPORTED_CELLS",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_PRESPECIFIED_CELLS",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_ADAPTIVE_ASSERTIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_ADAPTIVE_ASSERTIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_ADAPTIVE_ASSERTIVE_SUPPORT",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_ADAPTIVE_REACTIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_ADAPTIVE_REACTIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_ADAPTIVE_REACTIVE_SUPPORT",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_AGGRESSIVE_ASSERTIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_AGGRESSIVE_ASSERTIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_AGGRESSIVE_ASSERTIVE_SUPPORT",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_AGGRESSIVE_REACTIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_AGGRESSIVE_REACTIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_AGGRESSIVE_REACTIVE_SUPPORT",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_CONSERVATIVE_ASSERTIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_CONSERVATIVE_ASSERTIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_CONSERVATIVE_ASSERTIVE_SUPPORT",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_CONSERVATIVE_REACTIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_CONSERVATIVE_REACTIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_CONSERVATIVE_REACTIVE_SUPPORT",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_MEDIUM_ASSERTIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_MEDIUM_ASSERTIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_MEDIUM_ASSERTIVE_SUPPORT",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_MEDIUM_REACTIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_MEDIUM_REACTIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H3_FIXED_MEDIUM_REACTIVE_SUPPORT",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_DOMINANCE_CELLS",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_PRESPECIFIED_CELLS",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_AGGRESSIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_AGGRESSIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_AGGRESSIVE_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_CONSERVATIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_CONSERVATIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_CONSERVATIVE_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_MEDIUM_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_MEDIUM_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_MEDIUM_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_REACTIVE_FIXED_AGGRESSIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_REACTIVE_FIXED_AGGRESSIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_REACTIVE_FIXED_AGGRESSIVE_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_REACTIVE_FIXED_CONSERVATIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_REACTIVE_FIXED_CONSERVATIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_REACTIVE_FIXED_CONSERVATIVE_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_REACTIVE_FIXED_MEDIUM_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_REACTIVE_FIXED_MEDIUM_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B0_REACTIVE_FIXED_MEDIUM_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_AGGRESSIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_AGGRESSIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_AGGRESSIVE_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_CONSERVATIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_CONSERVATIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_CONSERVATIVE_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_MEDIUM_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_MEDIUM_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_MEDIUM_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_REACTIVE_FIXED_AGGRESSIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_REACTIVE_FIXED_AGGRESSIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_REACTIVE_FIXED_AGGRESSIVE_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_REACTIVE_FIXED_CONSERVATIVE_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_REACTIVE_FIXED_CONSERVATIVE_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_REACTIVE_FIXED_CONSERVATIVE_DOMINANCE",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_REACTIVE_FIXED_MEDIUM_TIME",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_REACTIVE_FIXED_MEDIUM_SEPARATION",
+      "status": "pass"
+    },
+    {
+      "error": null,
+      "evidence_id": "H4_B1_REACTIVE_FIXED_MEDIUM_DOMINANCE",
+      "status": "pass"
+    }
+  ],
+  "hypotheses": [
+    "H1",
+    "H2",
+    "H3",
+    "H4"
+  ],
+  "invalid_evidence_roles": [],
+  "legacy_corrected_pooling_violations": [],
+  "locator_resolution_failures": 0,
+  "orphan_headline_claims": 0,
+  "record_count": 82,
+  "schema_version": "m1_value_resolving_audit_v1",
+  "status": "pass",
+  "value_mismatches": 0
+}

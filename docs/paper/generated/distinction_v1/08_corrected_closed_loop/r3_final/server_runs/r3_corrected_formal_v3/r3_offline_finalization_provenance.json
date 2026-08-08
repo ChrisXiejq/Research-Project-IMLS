@@ -1,0 +1,32 @@
+{
+  "carla_or_scientific_rollouts_permitted": false,
+  "classification": "authorized_derived_only_repair",
+  "collection_git_commit": "8ccecf848b87b6fa2936e081d9f6943cd7f5a449",
+  "collection_source_manifest": "r3_execution_source_manifest.json",
+  "collection_source_manifest_sha256": "f61cffe4e1db60f40a8752d84653aad509fd17061b4fa5e3812899cd28321477",
+  "created_at_utc": "2026-08-08T10:39:09.077208+00:00",
+  "critical_source_drift": [
+    {
+      "classification": "derived_only_schema_compatibility",
+      "collection_sha256": "aa4b12c14f558dd164da4ec86e1bbd1d9a006ffac733f23d5c86e23b49bb4f1f",
+      "finalizer_sha256": "389fc80342f479c2f651252b4f2c82aa95a5b0500c335789d3d3f12e6de471cf",
+      "justification": "Forward-compatible deserialization only: ignore non-dataclass telemetry keys while leaving immutable pickle bytes and metric inputs unchanged.",
+      "path": "core/scripts/evaluation/closed_loop_metrics.py"
+    }
+  ],
+  "finalizer_git_commit": "7fd0f70c87b19c750b3045dfd828b78c158450ff",
+  "frozen_repair_sources": {
+    "r3_closed_loop_metrics_compat_source.py": "389fc80342f479c2f651252b4f2c82aa95a5b0500c335789d3d3f12e6de471cf",
+    "r3_offline_finalizer_source.py": "8a492c03236f11c56971f77a99baaca47507befce6e2833e21cb3d2decfb241a"
+  },
+  "integrity_recovery_marker": "R3_INTEGRITY_RECOVERY_PREPARED.json",
+  "integrity_recovery_marker_sha256": "2375135fd4aa86a57e67fec63e50dbce34ec7a5924223a822241042c9dbe8af8",
+  "integrity_recovery_resolution_sha256": "bada616bdcd9dee32228dc2246a833e6fa5d8760c5a4cdff5572aa97088e31c9",
+  "raw_collection_marker": "R3_RAW_COLLECTION_COMPLETE.json",
+  "raw_collection_marker_sha256": "a025627d0b04ecd8309add55640e1cc26ed0095e89910bf52e56ebaaea304f33",
+  "raw_collection_mutation_permitted": false,
+  "repair_reason": "legacy_metric_loader_rejected_appended_actor_geometry_metadata",
+  "same_key_integrity_recovery_applied_before_finalization": true,
+  "schema_version": "r3_offline_finalization_provenance_v1",
+  "status": "pass"
+}

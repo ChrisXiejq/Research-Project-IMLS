@@ -1,0 +1,56 @@
+{
+  "additional_large_scale_carla_required": false,
+  "artifacts": {
+    "R3_FINAL_SYNTHESIS.md": "1a1534c780e2e508177c1ba01020d2b3ba73b85c7259bfc06981f2a8f85bf387",
+    "figure_r3_h3_translation.svg": "1ca2482f8f2b5074e7b04e25bb33757528be5af683bbfc29eda759dbe6108000",
+    "figure_r3_h4_dominance.svg": "2fe500b1ba761db8da14b72d1c9b5c6938f6e71ce1c8b03a3154acb45db72bb3",
+    "table_final_hypothesis_verdicts.csv": "d876992a860db5d40ea9ff5741879848b902a1d9283af7f3549027e373b04238",
+    "table_r3_h3_translation.csv": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef",
+    "table_r3_h4_dominance.csv": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03",
+    "table_r3_manipulation_and_safety.csv": "66038fe5053ecb4fe2966b16f1ef22b56b01bfd07c8668ea024e61ab1fc9523a"
+  },
+  "binary_failure_total_across_contrasts": 0,
+  "central_claim": "Task adaptation strongly improves prediction, but closed-loop benefit is conditional on predictor-risk-interaction coupling under the shared supervisor.",
+  "h3": {
+    "directionally_supported_cells": 2,
+    "prespecified_cells": 8,
+    "status": "not_supported_as_universal_claim"
+  },
+  "h4": {
+    "dominance_cells": 3,
+    "prespecified_cells": 12,
+    "status": "not_supported_as_universal_dominance"
+  },
+  "independent_init_groups": 5,
+  "prediction_manipulation": {
+    "all_init_better_checks": 40,
+    "checks": 40
+  },
+  "r3_rollouts": 80,
+  "schema_version": "r3_paper_synthesis_v1",
+  "source_files": {
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_COMPLETE.json": "790a5e337e2877b4a36a6e380340e42f537f42e21f2ef46f5b6e28183a9ce9d3",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_DATA_COMPLETE.json": "ce64d966e9896e58754c6084cd92231ebf9d7aea0b96b8308f317de79c0310d2",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_INTEGRITY_RECOVERY_RESOLVED.json": "bada616bdcd9dee32228dc2246a833e6fa5d8760c5a4cdff5572aa97088e31c9",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_RAW_COLLECTION_COMPLETE.json": "a025627d0b04ecd8309add55640e1cc26ed0095e89910bf52e56ebaaea304f33",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/R3_ANALYSIS_COMPLETE.json": "e12f894cac4b52a6a4a3768f927cfa1a47b0b8d937413ca15d673bd5200ad46d",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/R3_STUDY_STOP_GATE.json": "9f891b5cf7f03b98fe581426345e39b1f829add65cf28700c789d1d01e5e0e16",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_binary_failure_contrasts.csv": "075fb0c89cc2f18b2a6b93fb4414cec086ccd9e658d6ba978571b67229c3337e",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_cell_outcome_summary.csv": "6f504a29a158748d66e21e6b0590cb682525bd56195c391f693bb68bfb779429",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_collision_category_summary.csv": "e1364c483b3dfce90b10cf961730b4036588f00ef46ba29c42afbec0e09ac5fe",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_footprint_margin_outcomes.csv": "a5aad9ab7d7401cfda3656f342e5f7682a050b19dcc24712dde54a54e4958ce8",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h3_cell_support.csv": "659c1a0ecb8abbbbf562a3a2debc8f3858caae00460889be101085c461d48620",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h3_contrasts.csv": "3f291fc3c236d07391d8dc84b08d956464f41eff23c365bccf6f3cc4bdaa2598",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h3_init_effects.csv": "045863a2a7519a8259e659e83f3bea1495f3dd8ea30608ff5065b9d0bf872603",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_contrasts.csv": "862f5c3a6e4ca992b0137822ccdb9f42d7f6122383cf79e8b97c5b06599465eb",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_dominance.csv": "5641d0500a93521f432119b3789087535fac6b0125c711047880d2611f74c7df",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_footprint_margin_dominance_sensitivity.csv": "9843a399bc937c64251f1f5683aab02380fa91f2a46188832199011961037bdd",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_init_effects.csv": "4a8d2ba2ada37cbf48a6b6cc5bf418b64137ed8233284ab0b65ec1505a548f1f",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_predictor_manipulation_checks.csv": "0320676174f24c1f5f2ca61703cbb7288093d5d26bf4c023d3ecbf360a495723",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_risk_manipulation_checks.csv": "cd571cf077d5bb63adbbe2316684822ce882a7d79dc460d720e2dbd776dba201",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_rollout_outcomes.csv": "66139cf1c33b2c677866b68bd7924dcbecafac73534a42b927e0b4a7756aafb0"
+  },
+  "stage": "A2_corrected_synthesis",
+  "status": "pass",
+  "study_stop_decision": "stop_formal_large_scale_collection"
+}

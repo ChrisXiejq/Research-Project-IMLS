@@ -1,0 +1,822 @@
+{
+  "adaptive_parameters": {
+    "approach_preclearance_floor": 1.66,
+    "critical_preclearance_floor": 1.72,
+    "near_preclearance_floor": 1.78,
+    "variant_name": "floor_weak"
+  },
+  "analysis_unit": "ego_init_cluster",
+  "anchors_sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982",
+  "authority_regime": "A3_risk_owned_yield",
+  "cells": [
+    {
+      "cell_id": "B1_fixed_aggressive_assertive",
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_reactive",
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_assertive",
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_reactive",
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_assertive",
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_reactive",
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_adaptive_assertive",
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_adaptive_reactive",
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_assertive",
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_reactive",
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_assertive",
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_reactive",
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_assertive",
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_reactive",
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_adaptive_assertive",
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_adaptive_reactive",
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    }
+  ],
+  "dedicated_carla_instance": {
+    "concurrent_jobs_prohibited": true,
+    "host": "127.0.0.1",
+    "port": 2000,
+    "pre_attempt_stale_actor_types": [
+      "vehicle.*",
+      "sensor.*"
+    ]
+  },
+  "deployment_preflight_filename": "r3_deployment_preflight.json",
+  "ego_init_ids": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "environment_sha256": "6ad1b642e722caf2d49ce611afe0ce58965c6c4fcaa50ff182c174009a07768a",
+  "execution_order": [
+    {
+      "cell_id": "B0_fixed_medium_reactive",
+      "ego_init_id": 101,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_adaptive_assertive",
+      "ego_init_id": 101,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_assertive",
+      "ego_init_id": 101,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_assertive",
+      "ego_init_id": 101,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_adaptive_reactive",
+      "ego_init_id": 101,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_adaptive_reactive",
+      "ego_init_id": 101,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_reactive",
+      "ego_init_id": 101,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_reactive",
+      "ego_init_id": 101,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_assertive",
+      "ego_init_id": 101,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_assertive",
+      "ego_init_id": 101,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_reactive",
+      "ego_init_id": 101,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_assertive",
+      "ego_init_id": 101,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_adaptive_assertive",
+      "ego_init_id": 101,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_reactive",
+      "ego_init_id": 101,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_assertive",
+      "ego_init_id": 101,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_reactive",
+      "ego_init_id": 101,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_assertive",
+      "ego_init_id": 102,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_reactive",
+      "ego_init_id": 102,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_reactive",
+      "ego_init_id": 102,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_reactive",
+      "ego_init_id": 102,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_adaptive_reactive",
+      "ego_init_id": 102,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_assertive",
+      "ego_init_id": 102,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_assertive",
+      "ego_init_id": 102,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_reactive",
+      "ego_init_id": 102,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_adaptive_assertive",
+      "ego_init_id": 102,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_adaptive_assertive",
+      "ego_init_id": 102,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_assertive",
+      "ego_init_id": 102,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_assertive",
+      "ego_init_id": 102,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_reactive",
+      "ego_init_id": 102,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_adaptive_reactive",
+      "ego_init_id": 102,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_reactive",
+      "ego_init_id": 102,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_assertive",
+      "ego_init_id": 102,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_adaptive_assertive",
+      "ego_init_id": 103,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_adaptive_assertive",
+      "ego_init_id": 103,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_reactive",
+      "ego_init_id": 103,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_reactive",
+      "ego_init_id": 103,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_assertive",
+      "ego_init_id": 103,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_assertive",
+      "ego_init_id": 103,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_reactive",
+      "ego_init_id": 103,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_assertive",
+      "ego_init_id": 103,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_reactive",
+      "ego_init_id": 103,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_assertive",
+      "ego_init_id": 103,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_adaptive_reactive",
+      "ego_init_id": 103,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_assertive",
+      "ego_init_id": 103,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_assertive",
+      "ego_init_id": 103,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_adaptive_reactive",
+      "ego_init_id": 103,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_reactive",
+      "ego_init_id": 103,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_reactive",
+      "ego_init_id": 103,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_assertive",
+      "ego_init_id": 104,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_reactive",
+      "ego_init_id": 104,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_adaptive_reactive",
+      "ego_init_id": 104,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_adaptive_assertive",
+      "ego_init_id": 104,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_assertive",
+      "ego_init_id": 104,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_assertive",
+      "ego_init_id": 104,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_assertive",
+      "ego_init_id": 104,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_reactive",
+      "ego_init_id": 104,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_adaptive_assertive",
+      "ego_init_id": 104,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_assertive",
+      "ego_init_id": 104,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_adaptive_reactive",
+      "ego_init_id": 104,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_reactive",
+      "ego_init_id": 104,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_reactive",
+      "ego_init_id": 104,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_assertive",
+      "ego_init_id": 104,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_reactive",
+      "ego_init_id": 104,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_reactive",
+      "ego_init_id": 104,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_adaptive_reactive",
+      "ego_init_id": 105,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_assertive",
+      "ego_init_id": 105,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_assertive",
+      "ego_init_id": 105,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_assertive",
+      "ego_init_id": 105,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_adaptive_assertive",
+      "ego_init_id": 105,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_reactive",
+      "ego_init_id": 105,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_aggressive_reactive",
+      "ego_init_id": 105,
+      "predictor": "B1",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_conservative_reactive",
+      "ego_init_id": 105,
+      "predictor": "B1",
+      "risk_policy": "fixed_conservative",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_medium_reactive",
+      "ego_init_id": 105,
+      "predictor": "B0",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_reactive",
+      "ego_init_id": 105,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_reactive",
+      "ego_init_id": 105,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B1_fixed_medium_assertive",
+      "ego_init_id": 105,
+      "predictor": "B1",
+      "risk_policy": "fixed_medium",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_adaptive_assertive",
+      "ego_init_id": 105,
+      "predictor": "B0",
+      "risk_policy": "adaptive",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B1_adaptive_reactive",
+      "ego_init_id": 105,
+      "predictor": "B1",
+      "risk_policy": "adaptive",
+      "target_style": "reactive"
+    },
+    {
+      "cell_id": "B0_fixed_conservative_assertive",
+      "ego_init_id": 105,
+      "predictor": "B0",
+      "risk_policy": "fixed_conservative",
+      "target_style": "assertive"
+    },
+    {
+      "cell_id": "B0_fixed_aggressive_assertive",
+      "ego_init_id": 105,
+      "predictor": "B0",
+      "risk_policy": "fixed_aggressive",
+      "target_style": "assertive"
+    }
+  ],
+  "execution_order_method": "complete treatment block shuffled independently within each init",
+  "execution_order_seed": 20260808,
+  "execution_source_manifest_sha256": "f61cffe4e1db60f40a8752d84653aad509fd17061b4fa5e3812899cd28321477",
+  "expected_rollouts": 80,
+  "fixed_geometry_metric_required": true,
+  "formal_evidence": true,
+  "frozen_source_files": {
+    "environment": {
+      "path": "r3_environment.json",
+      "scope": "results",
+      "sha256": "6ad1b642e722caf2d49ce611afe0ce58965c6c4fcaa50ff182c174009a07768a"
+    },
+    "execution_sources": {
+      "path": "r3_execution_source_manifest.json",
+      "scope": "results",
+      "sha256": "f61cffe4e1db60f40a8752d84653aad509fd17061b4fa5e3812899cd28321477"
+    },
+    "scenario": {
+      "path": "_frozen_contracts/scenario_uk_give_way.json",
+      "scope": "results",
+      "sha256": "95b4c15074143cba15e3fcf958f3e334483127f823a811a28c932077a96b2df2"
+    },
+    "tuning": {
+      "path": "tuning_r3_frozen.json",
+      "scope": "results",
+      "sha256": "f297a84672f62ef1a178457285a03b8e9881608b7abc9ee86c0045a46b27f4b8"
+    }
+  },
+  "g2_decision_sha256": "d201127093164d23dea096a88d800bc270ed02ce0dcc921749a7b1f559dc3fe2",
+  "geometry_replay_contract": {
+    "actual_carla_bbox_and_local_pose_required": true,
+    "clearance_tolerance_s": 0.2,
+    "fixed_conflict_radius_m": 4.0,
+    "primary_footprint_margin_m_per_actor": 0.25,
+    "sensitivity_footprint_margins_m": [
+      0.0,
+      0.25,
+      0.35,
+      0.5
+    ]
+  },
+  "git_commit": "8ccecf848b87b6fa2936e081d9f6943cd7f5a449",
+  "implementation_version": "corrected_joint_modes_shared_amin_v1",
+  "init_generation_manifest_sha256": "85ec9738373f986347668a6495c8eb717883d70a3a8383174b0066f770a631d4",
+  "init_sha256": {
+    "101": "0ce13b46d9b8321966deefea59512741b79a2293f55dd31461aa8c5400e6f1c8",
+    "102": "cfb1b082fcfb98f182ad7904535097b6f1002187b6e4c1b298d479f6d60af50b",
+    "103": "22cc823927538aafc4789c88ad78419deed75a35200fba9b478254ff7b88a87f",
+    "104": "b86ac3118cec6b67d40a8fdb8fea34422b5459ca98525e3ec759d99dbaed12d3",
+    "105": "6cd3e37b3fa88f53661874ee64288628e63e18152f0d9130ab1289e76400f1f2"
+  },
+  "legacy_corrected_pooling_prohibited": true,
+  "m0_amendment_complete_sha256": "44f48c853d6a3cda30cbeb8eaef2d834277ab27bd19cd364592375e4f23353c8",
+  "m0_analysis_contract_sha256": "dc936202e368c5a72f2a48b97537204b6c0954f09cee0ce6391eda0fccb2c0f2",
+  "m0_original_contract_sha256": "81f61798087ce7aac4c76fbe4e6c539a9bc40a45617f823233640589f6d796db",
+  "n_modes": 3,
+  "no_post_result_tuning": true,
+  "pilot_rollouts_excluded": true,
+  "prediction_protocol_id": "r3_corrected_formal_v3",
+  "predictors": {
+    "B0": {
+      "calibration": "identity_no_calibration_artifact",
+      "model_sha256_tree": "369c09a7aab28a721983f0baa50e7611b3cfc93803b73e600a0b44188d06f8bb"
+    },
+    "B1": {
+      "calibration_parameters": {
+        "covariance_scale": 0.008270371084000278,
+        "temperature": 1.259921049894873
+      },
+      "calibration_sha256": "fcfb203384f900ea43d53651934979c660d85be5827944e34a63d2338b2da301",
+      "model_sha256_tree": "860e2c4513273982e26cb7ea36177029c1620a3761e631eee64818fb85ec2231",
+      "seed": 37
+    }
+  },
+  "preflight_semantic_sha256": "c6613f5d1db41b3f74c1f3606fce68348680729837a5859dfe0741080ce64438",
+  "r1_contract_sha256": "ea5b068e240f9999c6a382d0037b2020afbb7b111a2ca995c9ce655a3c1ca422",
+  "r2_complete_sha256": "223c197d90adca88c55f64f1a789b5786b02fe3053b793167f4db2df4033d7e8",
+  "reactive_parameters": {
+    "activation_distance_m": 10.0,
+    "arrival_time_gap_s": 0.5,
+    "caution_speed_mps": 4.5,
+    "closest_approach_distance_m": 6.0,
+    "closest_approach_time_s": 4.0,
+    "minimum_speed_mps": 2.5,
+    "release_clearance_m": 5.0,
+    "release_hold_s": 0.8
+  },
+  "research_comparison": "B1_vs_B0_predictor_stack_x_fixed_frontier_vs_adaptive_x_target_style",
+  "result_generation": "distinction_corrected_v1",
+  "risk_policies": [
+    "fixed_aggressive",
+    "fixed_medium",
+    "fixed_conservative",
+    "adaptive"
+  ],
+  "runtime_gate": {
+    "max_p95_solve_time_s": 0.5,
+    "max_scenario_iters": 600
+  },
+  "scenario_contract": {
+    "duration_limit_s": 30.0,
+    "fps": 20,
+    "map": "Town05",
+    "max_iters": 600,
+    "sha256": "95b4c15074143cba15e3fcf958f3e334483127f823a811a28c932077a96b2df2",
+    "source": "core/scripts/carla/scenarios/scenario_uk_give_way.json"
+  },
+  "scenario_source_sha256": "95b4c15074143cba15e3fcf958f3e334483127f823a811a28c932077a96b2df2",
+  "schema_version": "r3_corrected_formal_contract_v2",
+  "shared_A_MIN_mps2": -3.0,
+  "stage": "R3",
+  "status": "frozen",
+  "target_offset_m": 0.0,
+  "target_speed_mps": 9.0,
+  "transient_retry_policy": {
+    "allowed_automatic_retry_classes": [
+      "spawn_collision",
+      "scenario_setup",
+      "carla_connection",
+      "carla_timeout",
+      "process_resource",
+      "external_signal",
+      "world_hygiene",
+      "external_interruption"
+    ],
+    "attempts_isolated": true,
+    "backoff_seconds": "5 * failed_attempt_index",
+    "completed_rollouts_never_repeated": true,
+    "max_attempts": 10,
+    "scientific_outcomes_never_retried_or_excluded": true,
+    "unknown_failures_block_automatic_retry": true
+  },
+  "tuning_sha256": "f297a84672f62ef1a178457285a03b8e9881608b7abc9ee86c0045a46b27f4b8"
+}

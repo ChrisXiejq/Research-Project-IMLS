@@ -1,0 +1,2243 @@
+{
+  "additional_large_scale_carla_required": false,
+  "central_claim": "Task adaptation strongly improves prediction, but closed-loop benefit is conditional on predictor-risk-interaction coupling under the shared supervisor.",
+  "hypotheses": [
+    {
+      "claim": "B1 reduces frozen-test NLL relative to B0 by 0.314 nats/step, but the rare shifted active tail is not universally improved.",
+      "hypothesis": "H1",
+      "primary_evidence": "H1_B1_MINUS_B0_TEST_NLL",
+      "verdict": "supported_with_boundary"
+    },
+    {
+      "claim": "The two matched-head comparisons point in different directions; tested Transformers do not show a consistent advantage over MLP adapters.",
+      "hypothesis": "H2",
+      "primary_evidence": "H2_T1_MINUS_B2M_TEST_NLL; H2_T2_MINUS_B2D_TEST_NLL",
+      "verdict": "not_supported"
+    },
+    {
+      "claim": "B1 prediction gains jointly improve completion and separation in only 2/8 corrected closed-loop cells.",
+      "hypothesis": "H3",
+      "primary_evidence": "H3_SUPPORTED_CELLS; H3_PRESPECIFIED_CELLS",
+      "verdict": "not_supported_as_universal_claim"
+    },
+    {
+      "claim": "Adaptive risk dominates fixed risk in only 3/12 corrected comparisons.",
+      "hypothesis": "H4",
+      "primary_evidence": "H4_DOMINANCE_CELLS; H4_PRESPECIFIED_CELLS",
+      "verdict": "not_supported_as_universal_dominance"
+    }
+  ],
+  "record_count": 82,
+  "records": [
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1/H2 model comparison"
+      ],
+      "evidence_id": "H1_B1_TEST_NLL",
+      "evidence_role": "primary",
+      "hypothesis": "H1",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "uncalibrated trajectory mixture NLL",
+      "source": {
+        "file": "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/subsets/all/B1/uncalibrated_rollout_macro_NLL"
+        },
+        "sha256": "670f16ec68d0be209b6d8b6c1663b4ae8601ebbb22c8b17f03c9d28650b917ee"
+      },
+      "unit": "nats/step",
+      "value": 1.857094407081604,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1/H2 model comparison"
+      ],
+      "evidence_id": "H1_B0_TEST_NLL",
+      "evidence_role": "primary",
+      "hypothesis": "H1",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "uncalibrated trajectory mixture NLL",
+      "source": {
+        "file": "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/subsets/all/B0/uncalibrated_rollout_macro_NLL"
+        },
+        "sha256": "670f16ec68d0be209b6d8b6c1663b4ae8601ebbb22c8b17f03c9d28650b917ee"
+      },
+      "unit": "nats/step",
+      "value": 2.1707117557525635,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1/H2 model comparison"
+      ],
+      "evidence_id": "H1_B1_MINUS_B0_TEST_NLL",
+      "evidence_role": "primary",
+      "hypothesis": "H1",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "B1 minus B0 uncalibrated trajectory mixture NLL",
+      "source": {
+        "kind": "derived_subtraction",
+        "left_evidence_id": "H1_B1_TEST_NLL",
+        "right_evidence_id": "H1_B0_TEST_NLL"
+      },
+      "unit": "nats/step",
+      "value": -0.3136173486709595,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1 model comparison"
+      ],
+      "evidence_id": "H1_B1_TEST_ADE",
+      "evidence_role": "secondary",
+      "hypothesis": "H1",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "top-1 ADE",
+      "source": {
+        "file": "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/subsets/all/B1/top1_ADE_mean"
+        },
+        "sha256": "670f16ec68d0be209b6d8b6c1663b4ae8601ebbb22c8b17f03c9d28650b917ee"
+      },
+      "unit": "m",
+      "value": 0.10587570071220398,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1 model comparison"
+      ],
+      "evidence_id": "H1_B0_TEST_ADE",
+      "evidence_role": "secondary",
+      "hypothesis": "H1",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "top-1 ADE",
+      "source": {
+        "file": "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/subsets/all/B0/top1_ADE_mean"
+        },
+        "sha256": "670f16ec68d0be209b6d8b6c1663b4ae8601ebbb22c8b17f03c9d28650b917ee"
+      },
+      "unit": "m",
+      "value": 1.2987937927246094,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1 model comparison"
+      ],
+      "evidence_id": "H1_B1_MINUS_B0_TEST_ADE",
+      "evidence_role": "secondary",
+      "hypothesis": "H1",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "B1 minus B0 top-1 ADE",
+      "source": {
+        "kind": "derived_subtraction",
+        "left_evidence_id": "H1_B1_TEST_ADE",
+        "right_evidence_id": "H1_B0_TEST_ADE"
+      },
+      "unit": "m",
+      "value": -1.1929180920124054,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1 model comparison"
+      ],
+      "evidence_id": "H1_B1_TEST_FDE",
+      "evidence_role": "secondary",
+      "hypothesis": "H1",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "top-1 FDE",
+      "source": {
+        "file": "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/subsets/all/B1/top1_FDE_mean"
+        },
+        "sha256": "670f16ec68d0be209b6d8b6c1663b4ae8601ebbb22c8b17f03c9d28650b917ee"
+      },
+      "unit": "m",
+      "value": 0.12916770577430725,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1 model comparison"
+      ],
+      "evidence_id": "H1_B0_TEST_FDE",
+      "evidence_role": "secondary",
+      "hypothesis": "H1",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "top-1 FDE",
+      "source": {
+        "file": "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/subsets/all/B0/top1_FDE_mean"
+        },
+        "sha256": "670f16ec68d0be209b6d8b6c1663b4ae8601ebbb22c8b17f03c9d28650b917ee"
+      },
+      "unit": "m",
+      "value": 2.6845109462738037,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1 model comparison"
+      ],
+      "evidence_id": "H1_B1_MINUS_B0_TEST_FDE",
+      "evidence_role": "secondary",
+      "hypothesis": "H1",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "B1 minus B0 top-1 FDE",
+      "source": {
+        "kind": "derived_subtraction",
+        "left_evidence_id": "H1_B1_TEST_FDE",
+        "right_evidence_id": "H1_B0_TEST_FDE"
+      },
+      "unit": "m",
+      "value": -2.5553432404994965,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1/H2 model comparison"
+      ],
+      "evidence_id": "H2_B2_M_TEST_NLL",
+      "evidence_role": "primary",
+      "hypothesis": "H2",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "uncalibrated trajectory mixture NLL",
+      "source": {
+        "file": "docs/paper/generated/day8/final_test/day8_frozen_test_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/runs/1/subsets/all/uncalibrated_rollout_macro_NLL"
+        },
+        "sha256": "f66241f08e6ecc783cf72239626b21129fb1c71f5b66679f8a5dc2b407487f2f"
+      },
+      "unit": "nats/step",
+      "value": 2.0244085788726807,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1/H2 model comparison"
+      ],
+      "evidence_id": "H2_T1_TEST_NLL",
+      "evidence_role": "primary",
+      "hypothesis": "H2",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "uncalibrated trajectory mixture NLL",
+      "source": {
+        "file": "docs/paper/generated/day8/final_test/day8_frozen_test_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/runs/3/subsets/all/uncalibrated_rollout_macro_NLL"
+        },
+        "sha256": "f66241f08e6ecc783cf72239626b21129fb1c71f5b66679f8a5dc2b407487f2f"
+      },
+      "unit": "nats/step",
+      "value": 2.003746509552002,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1/H2 model comparison"
+      ],
+      "evidence_id": "H2_B2_D_TEST_NLL",
+      "evidence_role": "primary",
+      "hypothesis": "H2",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "uncalibrated trajectory mixture NLL",
+      "source": {
+        "file": "docs/paper/generated/day8/final_test/day8_frozen_test_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/runs/2/subsets/all/uncalibrated_rollout_macro_NLL"
+        },
+        "sha256": "f66241f08e6ecc783cf72239626b21129fb1c71f5b66679f8a5dc2b407487f2f"
+      },
+      "unit": "nats/step",
+      "value": 1.8727887868881226,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1/H2 model comparison"
+      ],
+      "evidence_id": "H2_T2_TEST_NLL",
+      "evidence_role": "primary",
+      "hypothesis": "H2",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "uncalibrated trajectory mixture NLL",
+      "source": {
+        "file": "docs/paper/generated/day8/final_test/day8_frozen_test_summary.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/runs/4/subsets/all/uncalibrated_rollout_macro_NLL"
+        },
+        "sha256": "f66241f08e6ecc783cf72239626b21129fb1c71f5b66679f8a5dc2b407487f2f"
+      },
+      "unit": "nats/step",
+      "value": 1.878148078918457,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1/H2 model comparison"
+      ],
+      "evidence_id": "H2_T1_MINUS_B2M_TEST_NLL",
+      "evidence_role": "primary",
+      "hypothesis": "H2",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "T1 minus B2-M frozen-test NLL",
+      "source": {
+        "kind": "derived_subtraction",
+        "left_evidence_id": "H2_T1_TEST_NLL",
+        "right_evidence_id": "H2_B2_M_TEST_NLL"
+      },
+      "unit": "nats/step",
+      "value": -0.02066206932067871,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "rollout macro over 20 frozen-test rollouts / 5 init groups",
+      "consumers": [
+        "Results H1/H2 model comparison"
+      ],
+      "evidence_id": "H2_T2_MINUS_B2D_TEST_NLL",
+      "evidence_role": "primary",
+      "hypothesis": "H2",
+      "implementation_tag": "offline_frozen_test_v1",
+      "metric": "T2 minus B2-D frozen-test NLL",
+      "source": {
+        "kind": "derived_subtraction",
+        "left_evidence_id": "H2_T2_TEST_NLL",
+        "right_evidence_id": "H2_B2_D_TEST_NLL"
+      },
+      "unit": "nats/step",
+      "value": 0.005359292030334473,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "five complete model configurations",
+      "consumers": [
+        "Methods limitation and H2 interpretation"
+      ],
+      "evidence_id": "H2_PARAMETER_MATCHED",
+      "evidence_role": "boundary",
+      "hypothesis": "H2",
+      "implementation_tag": "offline_training_audit_v1",
+      "metric": "parameter-matching audit",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/03_training_budget/model_capacity_training_budget_audit.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/fairness_checks/parameter_matched"
+        },
+        "sha256": "cb184b736f2aafe936c7438b8b00c27cc33cbc06564432533d3bbbe642e9afcd"
+      },
+      "unit": "boolean",
+      "value": false,
+      "value_type": "bool"
+    },
+    {
+      "aggregation_unit": "15 training runs",
+      "consumers": [
+        "Methods limitation and H2 interpretation"
+      ],
+      "evidence_id": "H2_RUNS_AT_EPOCH_BOUNDARY",
+      "evidence_role": "boundary",
+      "hypothesis": "H2",
+      "implementation_tag": "offline_training_audit_v1",
+      "metric": "runs selected at epoch ceiling",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/03_training_budget/model_capacity_training_budget_audit.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/fairness_checks/runs_best_at_budget_boundary"
+        },
+        "sha256": "cb184b736f2aafe936c7438b8b00c27cc33cbc06564432533d3bbbe642e9afcd"
+      },
+      "unit": "runs",
+      "value": 10,
+      "value_type": "int"
+    },
+    {
+      "aggregation_unit": "10 paired rollout conditions / 5 init groups",
+      "consumers": [
+        "H1 boundary and Discussion"
+      ],
+      "evidence_id": "H1_TAIL_MINUS_B0_ADE_NEG3",
+      "evidence_role": "diagnostic",
+      "hypothesis": "H1",
+      "implementation_tag": "legacy_timing_diagnostic_only",
+      "metric": "B1 minus B0 response-active ADE at -3 m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/04_in_loop_prediction/formal_inloop_B1_minus_B0_contrasts.csv",
+        "kind": "file",
+        "locator": {
+          "field": "B1_minus_B0_mean",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "metric": "top1_ADE_m",
+            "subset": "response_active",
+            "target_offset_m": "-3.0"
+          }
+        },
+        "sha256": "def980511e4fa2bd8bf7618085ec3a0b677659328a0f8e0bb49aa3a4237a3785"
+      },
+      "unit": "m",
+      "value": 1.0301264233766454,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "8 prespecified predictor-stack policy/style cells",
+      "consumers": [
+        "Results H3 headline"
+      ],
+      "evidence_id": "H3_SUPPORTED_CELLS",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "H3 directionally supported cells",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/h3/directionally_supported_cells"
+        },
+        "sha256": "eac68cab97b30034a59df8430f8d4aedfc7b04b1670c2fdf2f8d0db89207cf70"
+      },
+      "unit": "cells",
+      "value": 2,
+      "value_type": "int"
+    },
+    {
+      "aggregation_unit": "corrected R3 matrix",
+      "consumers": [
+        "Results H3 headline"
+      ],
+      "evidence_id": "H3_PRESPECIFIED_CELLS",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "H3 prespecified cells",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/h3/prespecified_cells"
+        },
+        "sha256": "eac68cab97b30034a59df8430f8d4aedfc7b04b1670c2fdf2f8d0db89207cf70"
+      },
+      "unit": "cells",
+      "value": 8,
+      "value_type": "int"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_ADAPTIVE_ASSERTIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_completion_effect_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_completion_effect_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "adaptive",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "s",
+      "value": 0.2400000000000002,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_ADAPTIVE_ASSERTIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_separation_effect_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_separation_effect_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "adaptive",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "m",
+      "value": -0.006659150169923378,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_ADAPTIVE_ASSERTIVE_SUPPORT",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 cell_support_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "cell_support_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "risk_policy": "adaptive",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "category",
+      "value": "not_supported",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_ADAPTIVE_REACTIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_completion_effect_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_completion_effect_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "adaptive",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "s",
+      "value": -0.17999999999999972,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_ADAPTIVE_REACTIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_separation_effect_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_separation_effect_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "adaptive",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "m",
+      "value": 0.0006363462066558245,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_ADAPTIVE_REACTIVE_SUPPORT",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 cell_support_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "cell_support_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "risk_policy": "adaptive",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "category",
+      "value": "supported_directionally",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_AGGRESSIVE_ASSERTIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_completion_effect_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_completion_effect_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_aggressive",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "s",
+      "value": -0.7899999999999998,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_AGGRESSIVE_ASSERTIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_separation_effect_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_separation_effect_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_aggressive",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "m",
+      "value": 0.005271027037374654,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_AGGRESSIVE_ASSERTIVE_SUPPORT",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 cell_support_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "cell_support_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "risk_policy": "fixed_aggressive",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "category",
+      "value": "supported_directionally",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_AGGRESSIVE_REACTIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_completion_effect_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_completion_effect_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_aggressive",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "s",
+      "value": -0.010000000000000142,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_AGGRESSIVE_REACTIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_separation_effect_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_separation_effect_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_aggressive",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "m",
+      "value": -0.010598150743611302,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_AGGRESSIVE_REACTIVE_SUPPORT",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 cell_support_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "cell_support_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "risk_policy": "fixed_aggressive",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "category",
+      "value": "not_supported",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_CONSERVATIVE_ASSERTIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_completion_effect_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_completion_effect_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_conservative",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "s",
+      "value": -0.5199999999999999,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_CONSERVATIVE_ASSERTIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_separation_effect_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_separation_effect_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_conservative",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "m",
+      "value": -0.026199719719491532,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_CONSERVATIVE_ASSERTIVE_SUPPORT",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 cell_support_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "cell_support_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "risk_policy": "fixed_conservative",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "category",
+      "value": "not_supported",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_CONSERVATIVE_REACTIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_completion_effect_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_completion_effect_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_conservative",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "s",
+      "value": 0.4900000000000002,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_CONSERVATIVE_REACTIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_separation_effect_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_separation_effect_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_conservative",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "m",
+      "value": -0.005596483202402936,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_CONSERVATIVE_REACTIVE_SUPPORT",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 cell_support_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "cell_support_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "risk_policy": "fixed_conservative",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "category",
+      "value": "not_supported",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_MEDIUM_ASSERTIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_completion_effect_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_completion_effect_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_medium",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "s",
+      "value": 0.23000000000000007,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_MEDIUM_ASSERTIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_separation_effect_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_separation_effect_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_medium",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "m",
+      "value": 0.007226885906265324,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_MEDIUM_ASSERTIVE_SUPPORT",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 cell_support_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "cell_support_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "risk_policy": "fixed_medium",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "category",
+      "value": "not_supported",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_MEDIUM_REACTIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_completion_effect_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_completion_effect_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_medium",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "s",
+      "value": -0.21999999999999922,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_MEDIUM_REACTIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 mean_separation_effect_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_separation_effect_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "risk_policy": "fixed_medium",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "m",
+      "value": -0.008402025452295559,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H3 table/figure"
+      ],
+      "evidence_id": "H3_FIXED_MEDIUM_REACTIVE_SUPPORT",
+      "evidence_role": "primary",
+      "hypothesis": "H3",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "B1 minus B0 cell_support_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h3_translation.csv",
+        "kind": "file",
+        "locator": {
+          "field": "cell_support_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "risk_policy": "fixed_medium",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "fdd421b7a6c0cb2bef1d4423a08e791f904d1c29c33c30cbaec8ae80cd3ff8ef"
+      },
+      "unit": "category",
+      "value": "not_supported",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "12 prespecified predictor/style/fixed-comparator contrasts",
+      "consumers": [
+        "Results H4 headline"
+      ],
+      "evidence_id": "H4_DOMINANCE_CELLS",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive-risk dominance cells",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/h4/dominance_cells"
+        },
+        "sha256": "eac68cab97b30034a59df8430f8d4aedfc7b04b1670c2fdf2f8d0db89207cf70"
+      },
+      "unit": "cells",
+      "value": 3,
+      "value_type": "int"
+    },
+    {
+      "aggregation_unit": "corrected R3 matrix",
+      "consumers": [
+        "Results H4 headline"
+      ],
+      "evidence_id": "H4_PRESPECIFIED_CELLS",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "H4 prespecified contrasts",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json",
+        "kind": "file",
+        "locator": {
+          "kind": "json_pointer",
+          "pointer": "/h4/prespecified_cells"
+        },
+        "sha256": "eac68cab97b30034a59df8430f8d4aedfc7b04b1670c2fdf2f8d0db89207cf70"
+      },
+      "unit": "cells",
+      "value": 12,
+      "value_type": "int"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_AGGRESSIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B0",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": -0.5000000000000003,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_AGGRESSIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B0",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": -0.0031561143843151563,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_AGGRESSIVE_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B0",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "does_not_dominate",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_CONSERVATIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B0",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": -0.3200000000000003,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_CONSERVATIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B0",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": -0.022809068549144884,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_CONSERVATIVE_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B0",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "does_not_dominate",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_MEDIUM_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B0",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": -0.45000000000000034,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_MEDIUM_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B0",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": 0.01358945362649846,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_ASSERTIVE_FIXED_MEDIUM_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B0",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "dominates",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_REACTIVE_FIXED_AGGRESSIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B0",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": 0.030000000000000072,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_REACTIVE_FIXED_AGGRESSIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B0",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": -0.010714664959273246,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_REACTIVE_FIXED_AGGRESSIVE_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B0",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "does_not_dominate",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_REACTIVE_FIXED_CONSERVATIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B0",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": 0.25,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_REACTIVE_FIXED_CONSERVATIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B0",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": -0.008088738114868942,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_REACTIVE_FIXED_CONSERVATIVE_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B0",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "does_not_dominate",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_REACTIVE_FIXED_MEDIUM_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B0",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": -0.17999999999999972,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_REACTIVE_FIXED_MEDIUM_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B0",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": -0.008440729720593643,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B0_REACTIVE_FIXED_MEDIUM_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B0",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "does_not_dominate",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_AGGRESSIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B1",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": 0.5299999999999997,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_AGGRESSIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B1",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": -0.015086291591613187,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_AGGRESSIVE_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B1",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "does_not_dominate",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_CONSERVATIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B1",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": 0.43999999999999984,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_CONSERVATIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B1",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": -0.00326849899957673,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_CONSERVATIVE_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B1",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "does_not_dominate",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_MEDIUM_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B1",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": -0.4400000000000002,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_MEDIUM_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B1",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": -0.0002965824496902414,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_ASSERTIVE_FIXED_MEDIUM_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B1",
+            "target_style": "assertive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "does_not_dominate",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_REACTIVE_FIXED_AGGRESSIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B1",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": -0.1399999999999995,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_REACTIVE_FIXED_AGGRESSIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B1",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": 0.0005198319909938797,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_REACTIVE_FIXED_AGGRESSIVE_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_aggressive",
+            "predictor": "B1",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "dominates",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_REACTIVE_FIXED_CONSERVATIVE_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B1",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": -0.41999999999999993,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_REACTIVE_FIXED_CONSERVATIVE_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B1",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": -0.0018559087058101832,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_REACTIVE_FIXED_CONSERVATIVE_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_conservative",
+            "predictor": "B1",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "does_not_dominate",
+      "value_type": "str"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_REACTIVE_FIXED_MEDIUM_TIME",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_completion_s",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_completion_s",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B1",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "s",
+      "value": -0.1400000000000002,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_REACTIVE_FIXED_MEDIUM_SEPARATION",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed mean_adaptive_minus_fixed_separation_m",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "mean_adaptive_minus_fixed_separation_m",
+          "kind": "csv_row",
+          "type": "float",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B1",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "m",
+      "value": 0.0005976419383577402,
+      "value_type": "float"
+    },
+    {
+      "aggregation_unit": "mean paired effect over 5 init groups",
+      "consumers": [
+        "R3 H4 table/figure"
+      ],
+      "evidence_id": "H4_B1_REACTIVE_FIXED_MEDIUM_DOMINANCE",
+      "evidence_role": "primary",
+      "hypothesis": "H4",
+      "implementation_tag": "corrected_r3_v1",
+      "metric": "adaptive minus fixed dominance_status",
+      "source": {
+        "file": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+        "kind": "file",
+        "locator": {
+          "field": "dominance_status",
+          "kind": "csv_row",
+          "type": "string",
+          "where": {
+            "fixed_comparator": "fixed_medium",
+            "predictor": "B1",
+            "target_style": "reactive"
+          }
+        },
+        "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+      },
+      "unit": "category",
+      "value": "dominates",
+      "value_type": "str"
+    }
+  ],
+  "schema_version": "m1_four_hypothesis_evidence_v1",
+  "status": "pass"
+}

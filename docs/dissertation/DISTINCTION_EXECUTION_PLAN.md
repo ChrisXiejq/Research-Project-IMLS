@@ -1,8 +1,8 @@
 # Distinction research execution plan
 
-**版本：** v2（R3 pre-launch hardening freeze），2026-08-08
+**版本：** v3（R3 complete / A2 corrected synthesis），2026-08-08
 **适用范围：** 从 adversarial audit 完成后，到最终 TMLR-format dissertation、可复现实验资产和答辩材料全部完成  
-**当前入口：** S0–G2、R1–R2、M0 v2 已完成；R3 v3 是唯一剩余的大规模 CARLA 实验
+**当前入口：** S0–M1 已完成；大规模 CARLA 已按预注册停止规则关闭，下一步为 W1 TMLR 论文整合
 **配套审计：** [`DISTINCTION_READINESS_AUDIT_2026-08-08.md`](DISTINCTION_READINESS_AUDIT_2026-08-08.md)  
 **进度记录：** [`DISTINCTION_PROGRESS_TRACKER.md`](DISTINCTION_PROGRESS_TRACKER.md)
 

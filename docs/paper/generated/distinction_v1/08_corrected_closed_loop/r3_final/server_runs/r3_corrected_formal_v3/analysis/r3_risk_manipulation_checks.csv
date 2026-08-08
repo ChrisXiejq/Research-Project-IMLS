@@ -1,0 +1,17 @@
+predictor,risk_policy,target_style,rollouts,risk_tightening_mean,risk_tightening_across_init_range,adaptive_risk_solver_fraction,audited_solver_steps,solver_applied_adaptive_steps,rollouts_with_within_rollout_adaptive_variation,expected_adaptive_solver,solver_identity_matches_arm,risk_variation_observed,manipulation_status,scientific_not_analysis_gate
+B0,adaptive,assertive,5,1.3775402169854916,0.012914052629719341,1.0,940,940,5,1,1,1,observed,1
+B0,adaptive,reactive,5,1.3947510274505714,0.018039670257056883,1.0,1014,1014,5,1,1,1,observed,1
+B0,fixed_aggressive,assertive,5,1.2815515655445977,1.9984014443252818e-15,0.0,990,0,0,0,1,0,observed,1
+B0,fixed_aggressive,reactive,5,1.2815515655445981,8.881784197001252e-16,0.0,1011,0,0,0,1,0,observed,1
+B0,fixed_conservative,assertive,5,2.053748910631823,3.9968028886505635e-15,0.0,972,0,0,0,1,0,observed,1
+B0,fixed_conservative,reactive,5,2.0537489106318225,2.220446049250313e-15,0.0,989,0,0,0,1,0,observed,1
+B0,fixed_medium,assertive,5,1.6399999999999946,2.220446049250313e-15,0.0,985,0,0,0,1,0,observed,1
+B0,fixed_medium,reactive,5,1.6399999999999948,1.3322676295501878e-15,0.0,1032,0,0,0,1,0,observed,1
+B1,adaptive,assertive,5,1.375580002847414,0.017804506772832518,1.0,964,964,5,1,1,1,observed,1
+B1,adaptive,reactive,5,1.3967466947219827,0.016598856113092086,1.0,996,996,5,1,1,1,observed,1
+B1,fixed_aggressive,assertive,5,1.2815515655445986,1.3322676295501878e-15,0.0,911,0,0,0,1,0,observed,1
+B1,fixed_aggressive,reactive,5,1.2815515655445981,1.1102230246251565e-15,0.0,1010,0,0,0,1,0,observed,1
+B1,fixed_conservative,assertive,5,2.053748910631822,1.7763568394002505e-15,0.0,920,0,0,0,1,0,observed,1
+B1,fixed_conservative,reactive,5,2.0537489106318234,3.1086244689504383e-15,0.0,1038,0,0,0,1,0,observed,1
+B1,fixed_medium,assertive,5,1.6399999999999946,1.9984014443252818e-15,0.0,1008,0,0,0,1,0,observed,1
+B1,fixed_medium,reactive,5,1.6399999999999952,8.881784197001252e-16,0.0,1010,0,0,0,1,0,observed,1

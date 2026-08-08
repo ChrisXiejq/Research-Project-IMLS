@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="620" viewBox="0 0 1180 620">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<style>text{font-family:Arial,sans-serif;fill:#17212b}.title{font-size:25px;font-weight:700}.sub{font-size:14px;fill:#5b6773}.head{font-size:14px;font-weight:700}.val{font-size:13px}.small{font-size:12px;fill:#5b6773}</style>
+<text x="50" y="42" class="title">H3: prediction gains translate conditionally to closed-loop outcomes</text>
+<text x="50" y="69" class="sub">B1 minus B0; desirable quadrant is faster completion (negative) and no-worse separation (non-negative).</text>
+<text x="402.5" y="108" text-anchor="middle" class="head">fixed aggressive</text>
+<text x="607.5" y="108" text-anchor="middle" class="head">fixed medium</text>
+<text x="812.5" y="108" text-anchor="middle" class="head">fixed conservative</text>
+<text x="1017.5" y="108" text-anchor="middle" class="head">adaptive</text>
+<text x="270" y="177" text-anchor="end" class="head">assertive</text>
+<rect x="305" y="135" width="195" height="82" rx="9" fill="#dff3e8" stroke="#17845b" stroke-width="1.5"/>
+<text x="402.5" y="164" text-anchor="middle" class="val">Δ time -0.79 s</text>
+<text x="402.5" y="186" text-anchor="middle" class="val">Δ separation +0.0053 m</text>
+<text x="402.5" y="206" text-anchor="middle" class="small">supports both</text>
+<rect x="510" y="135" width="195" height="82" rx="9" fill="#f7e4e4" stroke="#c44e52" stroke-width="1.5"/>
+<text x="607.5" y="164" text-anchor="middle" class="val">Δ time +0.23 s</text>
+<text x="607.5" y="186" text-anchor="middle" class="val">Δ separation +0.0072 m</text>
+<text x="607.5" y="206" text-anchor="middle" class="small">does not support both</text>
+<rect x="715" y="135" width="195" height="82" rx="9" fill="#f7e4e4" stroke="#c44e52" stroke-width="1.5"/>
+<text x="812.5" y="164" text-anchor="middle" class="val">Δ time -0.52 s</text>
+<text x="812.5" y="186" text-anchor="middle" class="val">Δ separation -0.0262 m</text>
+<text x="812.5" y="206" text-anchor="middle" class="small">does not support both</text>
+<rect x="920" y="135" width="195" height="82" rx="9" fill="#f7e4e4" stroke="#c44e52" stroke-width="1.5"/>
+<text x="1017.5" y="164" text-anchor="middle" class="val">Δ time +0.24 s</text>
+<text x="1017.5" y="186" text-anchor="middle" class="val">Δ separation -0.0067 m</text>
+<text x="1017.5" y="206" text-anchor="middle" class="small">does not support both</text>
+<text x="270" y="269" text-anchor="end" class="head">reactive</text>
+<rect x="305" y="227" width="195" height="82" rx="9" fill="#f7e4e4" stroke="#c44e52" stroke-width="1.5"/>
+<text x="402.5" y="256" text-anchor="middle" class="val">Δ time -0.01 s</text>
+<text x="402.5" y="278" text-anchor="middle" class="val">Δ separation -0.0106 m</text>
+<text x="402.5" y="298" text-anchor="middle" class="small">does not support both</text>
+<rect x="510" y="227" width="195" height="82" rx="9" fill="#f7e4e4" stroke="#c44e52" stroke-width="1.5"/>
+<text x="607.5" y="256" text-anchor="middle" class="val">Δ time -0.22 s</text>
+<text x="607.5" y="278" text-anchor="middle" class="val">Δ separation -0.0084 m</text>
+<text x="607.5" y="298" text-anchor="middle" class="small">does not support both</text>
+<rect x="715" y="227" width="195" height="82" rx="9" fill="#f7e4e4" stroke="#c44e52" stroke-width="1.5"/>
+<text x="812.5" y="256" text-anchor="middle" class="val">Δ time +0.49 s</text>
+<text x="812.5" y="278" text-anchor="middle" class="val">Δ separation -0.0056 m</text>
+<text x="812.5" y="298" text-anchor="middle" class="small">does not support both</text>
+<rect x="920" y="227" width="195" height="82" rx="9" fill="#dff3e8" stroke="#17845b" stroke-width="1.5"/>
+<text x="1017.5" y="256" text-anchor="middle" class="val">Δ time -0.18 s</text>
+<text x="1017.5" y="278" text-anchor="middle" class="val">Δ separation +0.0006 m</text>
+<text x="1017.5" y="298" text-anchor="middle" class="small">supports both</text>
+<rect x="300" y="355" width="28" height="18" rx="3" fill="#dff3e8" stroke="#17845b"/><text x="338" y="369" class="small">directionally supports H3 cell criterion</text>
+<rect x="620" y="355" width="28" height="18" rx="3" fill="#f7e4e4" stroke="#c44e52"/><text x="658" y="369" class="small">does not jointly support both outcomes</text>
+<text x="50" y="432" class="head">Result: 2/8 cells support the prespecified direction; H3 is not supported as a universal closed-loop claim.</text>
+<text x="50" y="462" class="sub">All cells have five complete paired init groups. Holm-adjusted p-values are non-confirmatory; effects are reported as bounded descriptive evidence.</text>
+<text x="50" y="505" class="sub">Safety guard outcomes cannot discriminate treatments here: 0 native collisions, 0 footprint collisions, 0 yield failures and 0 completion failures in every arm.</text>
+<text x="50" y="558" class="small">Source: frozen R3 corrected formal analysis (80 rollouts, init groups 101–105, Town05 nominal give-way condition).</text>
+</svg>

@@ -1,0 +1,23 @@
+{
+  "additional_large_scale_carla_required": false,
+  "artifacts": {
+    "M1_EVIDENCE_MANIFEST.json": "be074a355d558532509405f4ca6ad460610080ca910e36caab500076e184399e",
+    "M1_EVIDENCE_SUMMARY.md": "a3b03aaf62036598ecd0781f7d4763e25182d25d1209778c2554dee7332d738e",
+    "M1_HYPOTHESIS_VERDICTS.csv": "0910c61e7e7323f04e84ed995ccecc68c812b52cc11c30245bab814b323ef8fc",
+    "M1_VALUE_AUDIT.json": "d6da90c877d1c11a17bd2867ee78a9f83f9630e6abada194bc3247b9d00538a0"
+  },
+  "hypotheses": [
+    "H1",
+    "H2",
+    "H3",
+    "H4"
+  ],
+  "invalid_locators": 0,
+  "legacy_corrected_pooling_violations": [],
+  "orphan_headline_claims": 0,
+  "record_count": 82,
+  "schema_version": "m1_complete_v1",
+  "stage": "M1",
+  "status": "pass",
+  "value_mismatches": 0
+}

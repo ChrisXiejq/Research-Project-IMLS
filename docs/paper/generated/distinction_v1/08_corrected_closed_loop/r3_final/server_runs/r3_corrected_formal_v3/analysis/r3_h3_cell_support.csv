@@ -1,0 +1,9 @@
+contrast_id,target_style,risk_policy,all_five_primary_pairs_complete,all_binary_guards_observed,completion_direction_met,separation_direction_met,no_excess_binary_failures,cell_support_status
+H3_B1_minus_B0_adaptive_assertive,assertive,adaptive,1,1,0,0,1,not_supported
+H3_B1_minus_B0_adaptive_reactive,reactive,adaptive,1,1,1,1,1,supported_directionally
+H3_B1_minus_B0_fixed_aggressive_assertive,assertive,fixed_aggressive,1,1,1,1,1,supported_directionally
+H3_B1_minus_B0_fixed_aggressive_reactive,reactive,fixed_aggressive,1,1,1,0,1,not_supported
+H3_B1_minus_B0_fixed_conservative_assertive,assertive,fixed_conservative,1,1,1,0,1,not_supported
+H3_B1_minus_B0_fixed_conservative_reactive,reactive,fixed_conservative,1,1,0,0,1,not_supported
+H3_B1_minus_B0_fixed_medium_assertive,assertive,fixed_medium,1,1,0,1,1,not_supported
+H3_B1_minus_B0_fixed_medium_reactive,reactive,fixed_medium,1,1,1,0,1,not_supported

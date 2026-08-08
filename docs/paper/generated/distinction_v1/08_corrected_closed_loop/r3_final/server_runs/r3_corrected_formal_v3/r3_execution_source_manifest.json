@@ -1,0 +1,91 @@
+{
+  "captured_at_utc": "2026-08-08T04:15:40.822780+00:00",
+  "critical_sources": {
+    "core/scripts/carla/policies/smpc_agent.py": {
+      "bytes": 191996,
+      "sha256": "35bb7cad859f660ddee0504de0ea6e35b12f03ca96be77bacae63216c55ba263"
+    },
+    "core/scripts/carla/run_all_scenarios.py": {
+      "bytes": 40012,
+      "sha256": "0772ed8fd5666ee991e5d6bf5f41046e2060e0282877252bc1bac08f7cff2c3c"
+    },
+    "core/scripts/carla/run_r3_corrected_formal_matrix.sh": {
+      "bytes": 32948,
+      "sha256": "ac0b4e685510a503e6eb94d083e9a0e3cb46ea6c1af1b5c4d44478796a8421aa"
+    },
+    "core/scripts/carla/scenarios/run_intersection_scenario.py": {
+      "bytes": 104398,
+      "sha256": "7462511165746ca56b1983e8fa96563f629f2810fb4153cd7d0e4f6a30a3a5c3"
+    },
+    "core/scripts/carla/utils/mpc_utils.py": {
+      "bytes": 109067,
+      "sha256": "febbacfb5fcd8edfdec0024bc3c8768473b36a32fd05df4ca04bc0453d2479fb"
+    },
+    "core/scripts/evaluation/closed_loop_metrics.py": {
+      "bytes": 10384,
+      "sha256": "aa4b12c14f558dd164da4ec86e1bbd1d9a006ffac733f23d5c86e23b49bb4f1f"
+    },
+    "core/scripts/models/analyze_r3_corrected_formal.py": {
+      "bytes": 78621,
+      "sha256": "031e245c9d144a4e9bb3200fef8bf641fbbe491472c0c130ea03df633ac97cd1"
+    },
+    "core/scripts/models/audit_r3_corrected_matrix.py": {
+      "bytes": 76576,
+      "sha256": "469e79fd7e73e7e9447ce91584a75f4faa10a59d624fdbcbd9eb9a4bbfd35579"
+    },
+    "core/scripts/models/capture_r3_execution_provenance.py": {
+      "bytes": 8523,
+      "sha256": "75b241d058bee61eefea9c0359cf77e00e285f69f7073f36190ef48be289fc77"
+    },
+    "core/scripts/models/package_closed_loop_snapshot.py": {
+      "bytes": 15014,
+      "sha256": "ec7599b0e2c4e8817292d61f8e8d450e2a2f9ff1a57ae3bf793948506baad31d"
+    },
+    "core/scripts/models/r3_attempt_manager.py": {
+      "bytes": 24760,
+      "sha256": "3334f31fb020a144fd5fb57edeee3115943baa0259d8a24074e361260eb6ed3a"
+    },
+    "core/scripts/models/summarize_r3_progress.py": {
+      "bytes": 6683,
+      "sha256": "6fa7495de53e7b5364d6aa9cdaf6af725ac18845881e07e00589f19c3752530a"
+    },
+    "core/scripts/models/tests/test_distinction_regression_gates.py": {
+      "bytes": 4771,
+      "sha256": "aa979ee208236d7c871b5288b9266bc90d2727c13f47248fdc8ea8cd2a69181e"
+    },
+    "core/scripts/models/tests/test_r3_corrected_gates.py": {
+      "bytes": 24141,
+      "sha256": "f0d871c9b40515e8639cc267310d0178656b40b56b2f5d6b18390701066d5a30"
+    },
+    "core/scripts/models/tests/test_r3_formal_analysis.py": {
+      "bytes": 30086,
+      "sha256": "b5c91d4d6c5bb090240bfc0bda9420f5a295372cf8205888604401fed6aa490b"
+    },
+    "core/scripts/models/tests/test_r3_runner_hardening.py": {
+      "bytes": 14904,
+      "sha256": "b26983330a9a82c2159a0a065cba47074a2ed9b4e9528efe2b5eb352ee03bdcf"
+    },
+    "core/scripts/postcarla_trajectory_gate.py": {
+      "bytes": 38706,
+      "sha256": "98ebc8d4149c4dc49ac72a55066fc685a6ef2494f648abb5edb6a8cee1e9231f"
+    }
+  },
+  "git_commit": "8ccecf848b87b6fa2936e081d9f6943cd7f5a449",
+  "r1_drift_policy": {
+    "allowed_paths": [
+      "core/scripts/carla/scenarios/run_intersection_scenario.py"
+    ],
+    "meaning": "Telemetry/instrumentation additions only; predictor and controller algorithms remain frozen."
+  },
+  "r1_source_contract_sha256": "ea5b068e240f9999c6a382d0037b2020afbb7b111a2ca995c9ce655a3c1ca422",
+  "r1_source_drift": {
+    "core/scripts/carla/scenarios/run_intersection_scenario.py": {
+      "classification": "allowed_instrumentation_only",
+      "r1_sha256": "9c80813b1383798f188f3df308e0f81618dcab4a929f2ef8545da1cc2053e62c",
+      "r3_sha256": "7462511165746ca56b1983e8fa96563f629f2810fb4153cd7d0e4f6a30a3a5c3"
+    }
+  },
+  "schema_version": "r3_execution_source_manifest_v2",
+  "status": "pass",
+  "tracked_worktree_clean": true
+}

@@ -1,0 +1,56 @@
+{
+  "additional_large_scale_carla_required": false,
+  "analysis_complete_sha256": "e12f894cac4b52a6a4a3768f927cfa1a47b0b8d937413ca15d673bd5200ad46d",
+  "collection_git_commit": "8ccecf848b87b6fa2936e081d9f6943cd7f5a449",
+  "contract_sha256": "2db210f1cf2313d6a9d18debe2f95dca24aba49de1fc636f4c5ff97d3a41d11e",
+  "deployment_preflight_sha256": "7986fd1f38f23160053bffd7c48293d1ad6a47abaec52d3809f1c224b76ebdff",
+  "execution_source_manifest_sha256": "f61cffe4e1db60f40a8752d84653aad509fd17061b4fa5e3812899cd28321477",
+  "formal_evidence": true,
+  "implementation_version": "corrected_joint_modes_shared_amin_v1",
+  "integrity_recovery_marker_sha256": "2375135fd4aa86a57e67fec63e50dbce34ec7a5924223a822241042c9dbe8af8",
+  "integrity_recovery_resolution_sha256": "bada616bdcd9dee32228dc2246a833e6fa5d8760c5a4cdff5572aa97088e31c9",
+  "matrix_audit_sha256": "4ce0aefb8ffce490d7b7610d0fb79576b93210cca28e1394f035809f018e1a7c",
+  "observed_rollouts": 80,
+  "offline_finalization_provenance_sha256": "9ff76660da7cbf7c6df36a70fc5eb468f18a85fdbe38b51bc4747c45fd77212a",
+  "offline_finalization_report_sha256": "6889f2bdec342968e1b3fee2c56b5515e488310e0ca7117df57f93322c244c72",
+  "offline_finalizer_git_commit": "7fd0f70c87b19c750b3045dfd828b78c158450ff",
+  "prediction_protocol_id": "r3_corrected_formal_v3",
+  "raw_collection_complete_sha256": "a025627d0b04ecd8309add55640e1cc26ed0095e89910bf52e56ebaaea304f33",
+  "result_generation": "distinction_corrected_v1",
+  "schema_version": "r3_data_complete_v3",
+  "scientific_direction_never_blocks_completion": true,
+  "scientific_outcome_taxonomy": {
+    "adaptive_rollouts_without_tightening_variation": [],
+    "adverse_outcomes_are_retained_not_excluded": true,
+    "adverse_outcomes_do_not_change_integrity_status": true,
+    "completion_failure_rollouts": 0,
+    "completion_outcome_unavailable_rollouts": 0,
+    "fixed_geometry_yield_failure_rollouts": 0,
+    "fixed_geometry_yield_outcome_unavailable_rollouts": 0,
+    "footprint_collision_rollouts": 0,
+    "footprint_outcome_unavailable_rollouts": 0,
+    "learned_mode_collapse_by_predictor": {
+      "B0": {
+        "fraction": 0.0,
+        "learned_mode_collapse_steps": 0,
+        "valid_steps": 7933
+      },
+      "B1": {
+        "fraction": 0.0,
+        "learned_mode_collapse_steps": 0,
+        "valid_steps": 7857
+      }
+    },
+    "native_collision_callback_events": 0,
+    "native_collision_categories": {},
+    "native_collision_contact_episodes": 0,
+    "native_collision_rollouts": 0,
+    "outcome_dependent_reruns_prohibited": true,
+    "reactive_cells_without_active_samples": [],
+    "runtime_gate_exceeded_rollouts": 0
+  },
+  "stage": "R3",
+  "status": "pass",
+  "study_stop_gate_sha256": "9f891b5cf7f03b98fe581426345e39b1f829add65cf28700c789d1d01e5e0e16",
+  "unique_treatment_keys": 80
+}

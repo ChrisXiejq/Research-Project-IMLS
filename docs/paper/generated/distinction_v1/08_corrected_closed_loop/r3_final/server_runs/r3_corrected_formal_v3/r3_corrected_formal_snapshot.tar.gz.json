@@ -1,0 +1,19 @@
+{
+  "archive": "/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v3/r3_corrected_formal_snapshot.tar.gz",
+  "archive_bytes": 149002940,
+  "archive_sha256": "bc36a546f4e33057d496dffd1c04d75eaa8b6672edd60e6ec4a9a8b53d74010e",
+  "archive_verification": {
+    "embedded_manifest_sha256": "e4ea9d258b304f42755c9f1016cb097f01c4f11397b8fdae6064b5f694ef6e67",
+    "status": "pass",
+    "verified_members": 2325
+  },
+  "excludes_model_weights_rasters_and_video": true,
+  "files": 2325,
+  "files_manifest": "/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v3/r3_corrected_formal_snapshot.tar.gz.files.json",
+  "files_manifest_sha256": "e4ea9d258b304f42755c9f1016cb097f01c4f11397b8fdae6064b5f694ef6e67",
+  "includes_raw_scenario_trajectories": true,
+  "profile": "r3-final",
+  "schema_version": "closed_loop_snapshot_v2",
+  "status": "pass",
+  "total_uncompressed_bytes": 823910224
+}
