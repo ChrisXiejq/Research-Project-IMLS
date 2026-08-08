@@ -34,6 +34,19 @@ Point = Tuple[float, float]
 @dataclass(frozen=True)
 class PairSafety:
     target_key: str
+    footprint_margin_m: float
+    ego_length_m: float
+    ego_width_m: float
+    ego_geometry_source: str
+    ego_bbox_center_offset_x_m: float
+    ego_bbox_center_offset_y_rhs_m: float
+    ego_bbox_yaw_offset_rad_rhs: float
+    target_length_m: float
+    target_width_m: float
+    target_geometry_source: str
+    target_bbox_center_offset_x_m: float
+    target_bbox_center_offset_y_rhs_m: float
+    target_bbox_yaw_offset_rad_rhs: float
     min_center_distance_m: float
     min_center_time_s: float
     min_center_step: int
@@ -57,6 +70,7 @@ class YieldRule:
     target_enter_time_s: Optional[float]
     target_exit_time_s: Optional[float]
     target_clears_before_ego_enters: Optional[bool]
+    outcome_reason: str
 
 
 @dataclass(frozen=True)
@@ -79,6 +93,7 @@ class FixedGeometryYieldRule:
     target_enter_time_s: Optional[float]
     target_exit_time_s: Optional[float]
     target_clears_before_ego_enters: Optional[bool]
+    outcome_reason: str
 
 
 @dataclass(frozen=True)
@@ -88,11 +103,14 @@ class PolicySafety:
     status: str
     is_required_policy: bool
     completion_valid: Optional[bool]
+    completion_source: str
+    completion_reason: str
     solver_failure_frac: Optional[float]
     collision_envelope_logged: Optional[bool]
     ego_key: Optional[str]
     target_keys: List[str]
     pair_safety: List[PairSafety]
+    footprint_margin_sensitivity: Dict[str, List[PairSafety]]
     yield_rules: List[YieldRule]
     fixed_geometry_yield_rules: List[FixedGeometryYieldRule]
     errors: List[str]
@@ -131,18 +149,162 @@ def _vehicle_type_for_key(actor_key: str, rollout_config: Optional[Dict[str, Any
     return ""
 
 
-def _completion_valid(scenario_dir: str) -> Optional[bool]:
-    payload = _load_json(os.path.join(scenario_dir, "smpc_completion.json"))
-    if not payload:
+def _positive_dimension(value: Any) -> Optional[float]:
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
         return None
-    comp = payload.get("completion") or {}
-    lateral_ok = bool(comp.get("lateral_ok", False))
-    heading_ok = bool(comp.get("heading_ok", True))
-    by_s = bool(comp.get("completed_by_s_margin", False))
-    by_goal = bool(comp.get("completed_by_goal_dist", False))
-    by_lane_entry = bool(comp.get("completed_by_lane_entry", False))
-    by_exit_alignment = bool(comp.get("completed_by_exit_alignment", False))
-    return bool(by_lane_entry or by_exit_alignment or (lateral_ok and heading_ok and (by_s or by_goal)))
+    return value if math.isfinite(value) and value > 0.0 else None
+
+
+def _actor_geometry(
+    actor_key: str,
+    actor_payload: Dict[str, Any],
+    scenario_summary: Optional[Dict[str, Any]],
+    rollout_config: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Resolve exact CARLA footprint dimensions, with an explicit legacy fallback."""
+
+    candidates: List[Tuple[Optional[Dict[str, Any]], str]] = [
+        (actor_payload.get("actor_geometry"), "scenario_result_carla_bounding_box"),
+    ]
+    summary_actors = (
+        ((scenario_summary or {}).get("extra") or {}).get("spawned_actor_telemetry")
+        or []
+    )
+    candidates.extend(
+        (item, "scenario_summary_carla_bounding_box")
+        for item in summary_actors
+        if isinstance(item, dict) and item.get("actor_key") == actor_key
+    )
+    for telemetry, source in candidates:
+        if not isinstance(telemetry, dict):
+            continue
+        dimensions = ((telemetry.get("bounding_box") or {}).get("dimensions_m") or {})
+        local_center = ((telemetry.get("bounding_box") or {}).get("local_center_m") or {})
+        local_rotation = ((telemetry.get("bounding_box") or {}).get("local_rotation_deg") or {})
+        length = _positive_dimension(dimensions.get("length"))
+        width = _positive_dimension(dimensions.get("width"))
+        try:
+            center_x = float(local_center.get("x", 0.0))
+            # CARLA is left-handed; trajectory replay is right-handed.
+            center_y_rhs = -float(local_center.get("y", 0.0))
+            yaw_offset_rhs = -math.radians(float(local_rotation.get("yaw", 0.0)))
+        except (TypeError, ValueError):
+            continue
+        if (
+            length is not None
+            and width is not None
+            and all(math.isfinite(value) for value in (center_x, center_y_rhs, yaw_offset_rhs))
+        ):
+            return {
+                "length_m": length,
+                "width_m": width,
+                "source": source,
+                "bbox_center_offset_x_m": center_x,
+                "bbox_center_offset_y_rhs_m": center_y_rhs,
+                "bbox_yaw_offset_rad_rhs": yaw_offset_rhs,
+            }
+
+    requested_type = _vehicle_type_for_key(actor_key, rollout_config)
+    length, width = vehicle_dimensions(requested_type)
+    return {
+        "length_m": float(length),
+        "width_m": float(width),
+        "source": "requested_blueprint_hardcoded_fallback",
+        "bbox_center_offset_x_m": 0.0,
+        "bbox_center_offset_y_rhs_m": 0.0,
+        "bbox_yaw_offset_rad_rhs": 0.0,
+    }
+
+
+def _bbox_world_pose(state: np.ndarray, geometry: Dict[str, Any]) -> Tuple[Point, float]:
+    """Transform CARLA's local bounding-box center/yaw into replay world RHS."""
+
+    actor_yaw = float(state[3])
+    local_x = float(geometry["bbox_center_offset_x_m"])
+    local_y = float(geometry["bbox_center_offset_y_rhs_m"])
+    cosine = math.cos(actor_yaw)
+    sine = math.sin(actor_yaw)
+    center = (
+        float(state[1]) + cosine * local_x - sine * local_y,
+        float(state[2]) + sine * local_x + cosine * local_y,
+    )
+    yaw = actor_yaw + float(geometry["bbox_yaw_offset_rad_rhs"])
+    return center, yaw
+
+
+def _completion_outcome(
+    scenario_dir: str, scenario_summary: Optional[Dict[str, Any]]
+) -> Tuple[Optional[bool], str, str]:
+    """Return completion without treating iteration-cap noncompletion as missing data."""
+
+    payload = _load_json(os.path.join(scenario_dir, "smpc_completion.json"))
+    if payload:
+        comp = payload.get("completion") or {}
+        lateral_ok = bool(comp.get("lateral_ok", False))
+        heading_ok = bool(comp.get("heading_ok", True))
+        by_s = bool(comp.get("completed_by_s_margin", False))
+        by_goal = bool(comp.get("completed_by_goal_dist", False))
+        by_lane_entry = bool(comp.get("completed_by_lane_entry", False))
+        by_exit_alignment = bool(comp.get("completed_by_exit_alignment", False))
+        outcome = bool(
+            by_lane_entry
+            or by_exit_alignment
+            or (lateral_ok and heading_ok and (by_s or by_goal))
+        )
+        reason = (
+            "completion_criteria_satisfied"
+            if outcome
+            else "completion_marker_present_but_criteria_not_satisfied"
+        )
+        return outcome, "smpc_completion_json", reason
+
+    summary = scenario_summary or {}
+    stats = summary.get("stats") or {}
+    ego_state_rows = [
+        int(values.get("state_rows", 0) or 0)
+        for key, values in stats.items()
+        if str(key).startswith("ego_") and isinstance(values, dict)
+    ]
+    if (
+        summary.get("ran_successfully") is True
+        and os.path.isfile(os.path.join(scenario_dir, "scenario_result.pkl"))
+        and any(value > 0 for value in ego_state_rows)
+    ):
+        return (
+            False,
+            "successful_rollout_without_completion_marker",
+            "iteration_cap_or_rollout_termination_without_ego_completion",
+        )
+    return (
+        None,
+        "ambiguous_or_unreadable_completion_evidence",
+        "completion_marker_absent_and_successful_trajectory_evidence_unavailable",
+    )
+
+
+def _yield_outcome_reason(
+    ego_enter: Optional[float],
+    target_enter: Optional[float],
+    target_exit: Optional[float],
+    outcome: Optional[bool],
+) -> str:
+    if ego_enter is None and target_enter is None:
+        return "ego_and_target_never_entered_conflict_zones"
+    if ego_enter is None and target_exit is None:
+        return "ego_never_entered_and_target_never_exited_conflict_zones"
+    if ego_enter is None:
+        return "ego_never_entered_conflict_zone"
+    if target_enter is None:
+        return "target_never_entered_conflict_zone"
+    if target_exit is None:
+        return "target_never_exited_conflict_zone"
+    return (
+        "target_cleared_before_ego_entry"
+        if outcome
+        else "ego_entered_before_target_clearance"
+    )
 
 
 def _solver_failure_frac(scenario_dir: str) -> Optional[float]:
@@ -246,6 +408,9 @@ def _yield_rule(
         target_enter_time_s=target_enter,
         target_exit_time_s=target_exit,
         target_clears_before_ego_enters=target_first,
+        outcome_reason=_yield_outcome_reason(
+            ego_enter, target_enter, target_exit, target_first
+        ),
     )
 
 
@@ -306,6 +471,9 @@ def _fixed_geometry_yield_rule(
         target_enter_time_s=target_enter,
         target_exit_time_s=target_exit,
         target_clears_before_ego_enters=target_first,
+        outcome_reason=_yield_outcome_reason(
+            ego_enter, target_enter, target_exit, target_first
+        ),
     )
 
 
@@ -316,6 +484,7 @@ def _pair_safety(
     target_payload: Dict[str, Any],
     rollout_config: Optional[Dict[str, Any]],
     footprint_margin_m: float,
+    scenario_summary: Optional[Dict[str, Any]] = None,
 ) -> PairSafety:
     ego = np.asarray(ego_payload["state_trajectory"], dtype=float)
     target = np.asarray(target_payload["state_trajectory"], dtype=float)
@@ -331,24 +500,30 @@ def _pair_safety(
     center_dist = np.linalg.norm(ego_i[:, 1:3] - target_i[:, 1:3], axis=1)
     min_center_idx = int(np.argmin(center_dist))
 
-    ego_length, ego_width = vehicle_dimensions(_vehicle_type_for_key(ego_key, rollout_config))
-    target_length, target_width = vehicle_dimensions(_vehicle_type_for_key(target_key, rollout_config))
+    ego_geometry = _actor_geometry(
+        ego_key, ego_payload, scenario_summary, rollout_config
+    )
+    target_geometry = _actor_geometry(
+        target_key, target_payload, scenario_summary, rollout_config
+    )
 
     footprint_seps: List[float] = []
     collision_idxs: List[int] = []
     for i, (ego_state, target_state) in enumerate(zip(ego_i, target_i)):
+        ego_center, ego_yaw = _bbox_world_pose(ego_state, ego_geometry)
+        target_center, target_yaw = _bbox_world_pose(target_state, target_geometry)
         ego_poly = rectangle_corners(
-            (float(ego_state[1]), float(ego_state[2])),
-            float(ego_state[3]),
-            ego_length,
-            ego_width,
+            ego_center,
+            ego_yaw,
+            ego_geometry["length_m"],
+            ego_geometry["width_m"],
             footprint_margin_m,
         )
         target_poly = rectangle_corners(
-            (float(target_state[1]), float(target_state[2])),
-            float(target_state[3]),
-            target_length,
-            target_width,
+            target_center,
+            target_yaw,
+            target_geometry["length_m"],
+            target_geometry["width_m"],
             footprint_margin_m,
         )
         sep = float(polygon_distance(ego_poly, target_poly))
@@ -375,6 +550,19 @@ def _pair_safety(
 
     return PairSafety(
         target_key=target_key,
+        footprint_margin_m=float(footprint_margin_m),
+        ego_length_m=float(ego_geometry["length_m"]),
+        ego_width_m=float(ego_geometry["width_m"]),
+        ego_geometry_source=ego_geometry["source"],
+        ego_bbox_center_offset_x_m=float(ego_geometry["bbox_center_offset_x_m"]),
+        ego_bbox_center_offset_y_rhs_m=float(ego_geometry["bbox_center_offset_y_rhs_m"]),
+        ego_bbox_yaw_offset_rad_rhs=float(ego_geometry["bbox_yaw_offset_rad_rhs"]),
+        target_length_m=float(target_geometry["length_m"]),
+        target_width_m=float(target_geometry["width_m"]),
+        target_geometry_source=target_geometry["source"],
+        target_bbox_center_offset_x_m=float(target_geometry["bbox_center_offset_x_m"]),
+        target_bbox_center_offset_y_rhs_m=float(target_geometry["bbox_center_offset_y_rhs_m"]),
+        target_bbox_yaw_offset_rad_rhs=float(target_geometry["bbox_yaw_offset_rad_rhs"]),
         min_center_distance_m=float(center_dist[min_center_idx]),
         min_center_time_s=float(times[min_center_idx]),
         min_center_step=min_center_idx,
@@ -417,6 +605,7 @@ def evaluate_scenario_dir(
     scenario_dir: str,
     required_policies: Sequence[str],
     footprint_margin_m: float,
+    footprint_sensitivity_margins: Sequence[float],
     conflict_radius_m: float,
     clearance_tolerance_s: float,
     require_collision_envelope: bool,
@@ -428,11 +617,15 @@ def evaluate_scenario_dir(
     errors: List[str] = []
     warnings: List[str] = []
     pair_results: List[PairSafety] = []
+    sensitivity_results: Dict[str, List[PairSafety]] = {}
     yield_rules: List[YieldRule] = []
     fixed_geometry_yield_rules: List[FixedGeometryYieldRule] = []
 
     rollout_config = _load_json(os.path.join(scenario_dir, "scenario_rollout_config.json"))
-    completion_valid = _completion_valid(scenario_dir)
+    scenario_summary = _load_json(os.path.join(scenario_dir, "scenario_run_summary.json"))
+    completion_valid, completion_source, completion_reason = _completion_outcome(
+        scenario_dir, scenario_summary
+    )
     solver_failure = _solver_failure_frac(scenario_dir)
     envelope_logged = _collision_envelope_logged(scenario_dir)
     try:
@@ -464,6 +657,7 @@ def evaluate_scenario_dir(
                 result[target_key],
                 rollout_config,
                 footprint_margin_m,
+                scenario_summary,
             )
             pair_results.append(pair)
             if pair.footprint_collision:
@@ -505,6 +699,24 @@ def evaluate_scenario_dir(
                 )
                 fixed_geometry_yield_rules.append(fixed_rule)
 
+        for margin in footprint_sensitivity_margins:
+            margin_key = format(float(margin), ".12g")
+            if math.isclose(float(margin), float(footprint_margin_m), abs_tol=1e-12):
+                sensitivity_results[margin_key] = list(pair_results)
+                continue
+            sensitivity_results[margin_key] = [
+                _pair_safety(
+                    ego_key,
+                    result[ego_key],
+                    target_key,
+                    result[target_key],
+                    rollout_config,
+                    float(margin),
+                    scenario_summary,
+                )
+                for target_key in target_keys
+            ]
+
     if is_required:
         if completion_valid is not True:
             errors.append(f"Required policy did not complete validly: completion_valid={completion_valid}")
@@ -530,11 +742,14 @@ def evaluate_scenario_dir(
         status=status,
         is_required_policy=is_required,
         completion_valid=completion_valid,
+        completion_source=completion_source,
+        completion_reason=completion_reason,
         solver_failure_frac=solver_failure,
         collision_envelope_logged=envelope_logged,
         ego_key=ego_key,
         target_keys=target_keys,
         pair_safety=pair_results,
+        footprint_margin_sensitivity=sensitivity_results,
         yield_rules=yield_rules,
         fixed_geometry_yield_rules=fixed_geometry_yield_rules,
         errors=errors,
@@ -643,6 +858,14 @@ def main() -> int:
     )
     parser.add_argument("--footprint-margin-m", type=float, default=None)
     parser.add_argument(
+        "--footprint-margins-m",
+        default=None,
+        help=(
+            "Comma-separated footprint margins for offline sensitivity replay. "
+            "The primary --footprint-margin-m is always included."
+        ),
+    )
+    parser.add_argument(
         "--conflict-radius-m",
         type=float,
         default=None,
@@ -678,6 +901,26 @@ def main() -> int:
         if args.footprint_margin_m is not None
         else float(gate_config.get("footprint_margin_m", FOOTPRINT_SAFETY_MARGIN_M))
     )
+    sensitivity_value = args.footprint_margins_m
+    if sensitivity_value is None:
+        configured = gate_config.get(
+            "sensitivity_footprint_margins_m", [0.0, 0.25, 0.35, 0.50]
+        )
+        sensitivity_candidates = (
+            [float(value) for value in configured]
+            if isinstance(configured, (list, tuple))
+            else [float(value.strip()) for value in str(configured).split(",") if value.strip()]
+        )
+    else:
+        sensitivity_candidates = [
+            float(value.strip()) for value in sensitivity_value.split(",") if value.strip()
+        ]
+    sensitivity_candidates.append(float(footprint_margin_m))
+    footprint_sensitivity_margins = sorted(
+        {float(value) for value in sensitivity_candidates}
+    )
+    if any(not math.isfinite(value) or value < 0.0 for value in footprint_sensitivity_margins):
+        parser.error("Footprint margins must be finite and non-negative")
     conflict_radius_m = (
         args.conflict_radius_m
         if args.conflict_radius_m is not None
@@ -700,6 +943,7 @@ def main() -> int:
     gate_settings = {
         "required_policies": required_policies,
         "footprint_margin_m": footprint_margin_m,
+        "sensitivity_footprint_margins_m": footprint_sensitivity_margins,
         "conflict_radius_m": conflict_radius_m,
         "clearance_tolerance_s": clearance_tolerance_s,
         "max_solver_failure_frac": max_solver_failure_frac,
@@ -713,6 +957,7 @@ def main() -> int:
             scenario_dir,
             required_policies=required_policies,
             footprint_margin_m=footprint_margin_m,
+            footprint_sensitivity_margins=footprint_sensitivity_margins,
             conflict_radius_m=conflict_radius_m,
             clearance_tolerance_s=clearance_tolerance_s,
             require_collision_envelope=require_collision_envelope,

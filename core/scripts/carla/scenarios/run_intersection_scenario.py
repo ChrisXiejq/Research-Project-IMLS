@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
 
 import carla
@@ -1055,11 +1055,16 @@ class RunIntersectionScenario:
 
         # Data Logging Setup
         self.results_dict = {}
+        actor_telemetry_by_key = {
+            item["actor_key"]: item
+            for item in getattr(self, "spawned_actor_telemetry", [])
+        }
         for ind_vehicle, vehicle in enumerate(self.vehicle_actors):
             key = f"{vehicle.attributes['role_name']}_{ind_vehicle}"
             l_f, l_r = vehicle_name_to_lf_lr(vehicle.type_id) # e.g. "vehicle.audi.tt"
             self.results_dict[key] = {"l_f"              : l_f,
                                       "l_r"              : l_r,
+                                      "actor_geometry"   : actor_telemetry_by_key.get(key),
                                       "state_trajectory" : [],
                                       "input_trajectory" : [],
                                       "feasibility"      : [],
@@ -1277,8 +1282,19 @@ class RunIntersectionScenario:
             raise
         finally:
             exp_log.flush_step_csv(self.savedir, rows_buffer)
+            # Freeze native collision telemetry before copying it into the
+            # immutable summary. No world ticks occur after this point.
+            for sensor in getattr(self, "collision_sensors", []):
+                if sensor is not None and sensor.is_alive:
+                    sensor.stop()
             extra: Dict[str, Any] = {
                 "policy_types": policy_types,
+                "spawned_actor_telemetry": list(
+                    getattr(self, "spawned_actor_telemetry", [])
+                ),
+                "collision_telemetry_schema_version": (
+                    "carla_collision_identity_v2"
+                ),
                 "collision_event_count": len(getattr(self, "collision_events", [])),
                 "collision_events": list(getattr(self, "collision_events", [])),
             }
@@ -1314,7 +1330,6 @@ class RunIntersectionScenario:
                 writer.release()
             for sensor in getattr(self, "collision_sensors", []):
                 if sensor is not None and sensor.is_alive:
-                    sensor.stop()
                     sensor.destroy()
             for actor in self.vehicle_actors:
                 actor.destroy()
@@ -1435,14 +1450,82 @@ class RunIntersectionScenario:
         self.collision_events = []
         blueprint = self.world.get_blueprint_library().find("sensor.other.collision")
 
-        def record_event(monitored_role, event):
+        def semantic_role(role_name, actor_type, experiment_role=None):
+            if experiment_role in {"ego", "target"}:
+                return experiment_role
+            if experiment_role == "static":
+                return "static_vehicle"
+            normalized_role = str(role_name or "").lower()
+            for value in ("ego", "target"):
+                if normalized_role == value or normalized_role.startswith(value + "_"):
+                    return value
+            if normalized_role == "static" or normalized_role.startswith("static_"):
+                return "static_vehicle"
+            normalized_type = str(actor_type or "").lower()
+            if normalized_type.startswith("vehicle."):
+                return "static_vehicle"
+            if normalized_type.startswith(("traffic.", "static.", "spectator.")):
+                return "infrastructure"
+            if normalized_type.startswith("walker."):
+                return "walker"
+            return "unknown"
+
+        def collision_category(role_a, role_b):
+            roles = {role_a, role_b}
+            if roles == {"ego", "target"}:
+                return "ego_target"
+            if "target" in roles and "infrastructure" in roles:
+                return "target_infrastructure"
+            if "target" in roles and "static_vehicle" in roles:
+                return "target_static_vehicle"
+            if "ego" in roles and "infrastructure" in roles:
+                return "ego_infrastructure"
+            if "ego" in roles and "static_vehicle" in roles:
+                return "ego_static_vehicle"
+            return "other"
+
+        def record_event(monitored_actor, monitored_actor_key, experiment_role, event):
             impulse = event.normal_impulse
+            other_actor = event.other_actor
+            monitored_role_name = monitored_actor.attributes.get("role_name", "")
+            counterpart_role_name = other_actor.attributes.get("role_name", "")
+            monitored_semantic_role = semantic_role(
+                monitored_role_name,
+                monitored_actor.type_id,
+                experiment_role,
+            )
+            counterpart_semantic_role = semantic_role(
+                counterpart_role_name,
+                other_actor.type_id,
+            )
+            actor_ids = sorted([int(monitored_actor.id), int(other_actor.id)])
+            semantic_roles = sorted(
+                [monitored_semantic_role, counterpart_semantic_role]
+            )
             self.collision_events.append(
                 {
                     "frame": int(event.frame),
-                    "monitored_role": monitored_role,
-                    "other_actor_id": int(event.other_actor.id),
-                    "other_actor_type": str(event.other_actor.type_id),
+                    "simulation_time_s": float(event.timestamp),
+                    "monitored_role": monitored_actor_key,
+                    "monitored_actor_id": int(monitored_actor.id),
+                    "monitored_actor_type": str(monitored_actor.type_id),
+                    "monitored_actor_role_name": str(monitored_role_name),
+                    "monitored_experiment_role": str(experiment_role),
+                    "monitored_semantic_role": monitored_semantic_role,
+                    "counterpart_actor_id": int(other_actor.id),
+                    "counterpart_actor_type": str(other_actor.type_id),
+                    "counterpart_actor_role_name": str(counterpart_role_name),
+                    "counterpart_semantic_role": counterpart_semantic_role,
+                    # Retain the legacy names for old downstream readers.
+                    "other_actor_id": int(other_actor.id),
+                    "other_actor_type": str(other_actor.type_id),
+                    "canonical_actor_id_pair": actor_ids,
+                    "canonical_actor_pair_key": ":".join(str(value) for value in actor_ids),
+                    "canonical_semantic_role_pair": semantic_roles,
+                    "canonical_semantic_role_pair_key": ":".join(semantic_roles),
+                    "collision_category": collision_category(
+                        monitored_semantic_role, counterpart_semantic_role
+                    ),
                     "normal_impulse_magnitude": float(
                         np.linalg.norm([impulse.x, impulse.y, impulse.z])
                     ),
@@ -1460,9 +1543,57 @@ class RunIntersectionScenario:
                 attach_to=actor,
                 attachment_type=carla.AttachmentType.Rigid,
             )
-            monitored_role = f"{params.role}_{idx}"
-            sensor.listen(lambda event, role=monitored_role: record_event(role, event))
+            monitored_actor_key = f"{params.role}_{idx}"
+            sensor.listen(
+                lambda event, actor=actor, actor_key=monitored_actor_key,
+                experiment_role=params.role: record_event(
+                    actor, actor_key, experiment_role, event
+                )
+            )
             self.collision_sensors.append(sensor)
+
+    @staticmethod
+    def _actor_telemetry(actor, params, actor_index):
+        """Capture the exact CARLA actor identity and local bounding box used."""
+
+        bbox = actor.bounding_box
+        extent = bbox.extent
+        bbox_location = bbox.location
+        bbox_rotation = bbox.rotation
+        role_name = actor.attributes.get("role_name", "")
+        return {
+            "schema_version": "carla_spawned_actor_geometry_v1",
+            "actor_key": f"{role_name}_{actor_index}",
+            "actor_index": int(actor_index),
+            "actor_id": int(actor.id),
+            "actor_type": str(actor.type_id),
+            "actor_role_name": str(role_name),
+            "experiment_role": str(params.role),
+            "requested_blueprint": str(params.vehicle_type),
+            "effective_vehicle_params": asdict(params),
+            "bounding_box": {
+                "extent_m": {
+                    "x": float(extent.x),
+                    "y": float(extent.y),
+                    "z": float(extent.z),
+                },
+                "dimensions_m": {
+                    "length": float(2.0 * extent.x),
+                    "width": float(2.0 * extent.y),
+                    "height": float(2.0 * extent.z),
+                },
+                "local_center_m": {
+                    "x": float(bbox_location.x),
+                    "y": float(bbox_location.y),
+                    "z": float(bbox_location.z),
+                },
+                "local_rotation_deg": {
+                    "roll": float(bbox_rotation.roll),
+                    "pitch": float(bbox_rotation.pitch),
+                    "yaw": float(bbox_rotation.yaw),
+                },
+            },
+        }
 
     def _setup_camera(self, drone_viz_params):
         bp_library = self.world.get_blueprint_library()
@@ -1520,6 +1651,7 @@ class RunIntersectionScenario:
         self.vehicle_params_list = list(vehicle_params_list)
         self.vehicle_colors   = []
         self.vehicle_init_speeds = []
+        self.spawned_actor_telemetry = []
         ego_vehicle_idxs  = []
         tv_vehicle_idxs   = []
         # Must match _make_predictions: one GMM stack per ``role == "target"`` vehicle.
@@ -1548,6 +1680,9 @@ class RunIntersectionScenario:
             route_transforms.append((start_transform, goal_transform))
             self.vehicle_actors.append(veh_actor)
             self.vehicle_init_speeds.append(vp.init_speed)
+            self.spawned_actor_telemetry.append(
+                self._actor_telemetry(veh_actor, vp, idx)
+            )
 
         if len(ego_vehicle_idxs) != 1:
             raise RuntimeError(f"Invalid number of ego vehicles spawned: {len(ego_vehicle_idxs)}")

@@ -3,9 +3,11 @@ import sys
 import glob
 import json
 import argparse
+import hashlib
 import time
 import traceback
 import subprocess
+from dataclasses import asdict, is_dataclass
 from datetime import datetime
 
 from utils import experiment_logging as exp_log
@@ -49,7 +51,43 @@ def _write_fine_tune_config_snapshot(savedir: str, scenario_dict: dict) -> None:
     )
 
 
-def _write_scenario_rollout_config(savedir: str, scenario_dict: dict) -> None:
+def _sha256_file(path: str) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _source_file_provenance(path: str) -> dict:
+    """Allowlisted local source provenance; never serialises environment/credentials."""
+
+    resolved = os.path.realpath(path)
+    if not os.path.isfile(resolved):
+        raise FileNotFoundError(f"Provenance source file missing: {path}")
+    return {
+        "path": os.path.abspath(path),
+        "resolved_path": resolved,
+        "sha256": _sha256_file(resolved),
+    }
+
+
+def _safe_prediction_asset_argument(value):
+    if value is None:
+        return None
+    value = str(value)
+    if "://" in value:
+        raise ValueError("Remote URLs are prohibited in rollout provenance")
+    return value
+
+
+def _write_scenario_rollout_config(
+    savedir: str,
+    scenario_dict: dict,
+    *,
+    effective_vehicle_params=None,
+    execution_provenance=None,
+) -> None:
     """Snapshot carla + top-down viz params next to ``scenario_result.pkl`` for reproducible rendering."""
     default_viz = {
         "road_half_width_m": 4.0,
@@ -62,17 +100,23 @@ def _write_scenario_rollout_config(savedir: str, scenario_dict: dict) -> None:
     for k in ("road_half_width_m", "dash_len_m", "dash_gap_m", "road_arm_extend_m"):
         if k in user_viz:
             merged_viz[k] = float(user_viz[k])
-    exp_log.write_json(
-        os.path.join(savedir, "scenario_rollout_config.json"),
-        {
-            "scenario_description": scenario_dict.get("scenario_description", {}),
-            "carla_params": scenario_dict.get("carla_params", {}),
-            "prediction_params": scenario_dict.get("prediction_params", {}),
-            "viz_topdown": merged_viz,
-            "vehicle_params": scenario_dict.get("vehicle_params", []),
-            "fine_tune_config": tuning_snapshot_payload(scenario_dict),
-        },
-    )
+    payload = {
+        "schema_version": "scenario_rollout_config_v2",
+        "scenario_description": scenario_dict.get("scenario_description", {}),
+        "carla_params": scenario_dict.get("carla_params", {}),
+        "prediction_params": scenario_dict.get("prediction_params", {}),
+        "viz_topdown": merged_viz,
+        "vehicle_params": scenario_dict.get("vehicle_params", []),
+        "fine_tune_config": tuning_snapshot_payload(scenario_dict),
+    }
+    if effective_vehicle_params is not None:
+        payload["effective_runtime_vehicle_params"] = [
+            asdict(value) if is_dataclass(value) else dict(value)
+            for value in effective_vehicle_params
+        ]
+    if execution_provenance is not None:
+        payload["execution_provenance"] = dict(execution_provenance)
+    exp_log.write_json(os.path.join(savedir, "scenario_rollout_config.json"), payload)
 
 
 def _savedir_completed_successfully(savedir: str) -> bool:
@@ -272,7 +316,9 @@ def run_without_tvs(scene, scenario_dict, ego_init_dict, savedir, get_cl=False, 
 
 def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir,
                  enable_camera_viz=True, risk_profile="upstream_code",
-                 adaptive_risk_config=None, args=None, prediction_dataset_metadata=None):
+                 adaptive_risk_config=None, args=None, prediction_dataset_metadata=None,
+                 scenario_source_path=None, ego_init_source_path=None,
+                 tuning_metadata=None):
     if scene != "intersection":
         raise ValueError(f"Unsupported scene type after cleanup: {scene}")
     from scenarios.run_intersection_scenario import CarlaParams, DroneVizParams, VehicleParams, PredictionParams, RunIntersectionScenario
@@ -339,7 +385,67 @@ def run_with_tvs(scene, scenario_dict, ego_init_dict, ego_policy_config, savedir
                                     vehicles_params_list,
                                     pred_params,
                                     savedir)
-    return runner.run_scenario()
+    scenario_outcome = runner.run_scenario()
+    if scenario_outcome:
+        if not scenario_source_path or not ego_init_source_path:
+            raise RuntimeError(
+                "Formal rollout provenance requires scenario and ego-init source paths"
+            )
+        tuning_source = (tuning_metadata or {}).get("source_path")
+        execution_provenance = {
+            "schema_version": "carla_rollout_execution_provenance_v1",
+            "scenario_source": _source_file_provenance(scenario_source_path),
+            "ego_init_source": {
+                **_source_file_provenance(ego_init_source_path),
+                "parsed_values": dict(ego_init_dict),
+            },
+            "effective_scenario_sha256": hashlib.sha256(
+                json.dumps(
+                    scenario_dict, sort_keys=True, separators=(",", ":")
+                ).encode("utf-8")
+            ).hexdigest(),
+            "tuning_source": (
+                _source_file_provenance(tuning_source) if tuning_source else None
+            ),
+            "tuning_applied": bool((tuning_metadata or {}).get("applied")),
+            "ego_policy_config": str(ego_policy_config),
+            "risk_profile": str(risk_profile),
+            "adaptive_risk_config": dict(adaptive_risk_config or {}),
+            "target_style": str(getattr(args, "target_style", "")),
+            "reactive_config": dict(reactive_config),
+            "prediction": {
+                "model_weights_argument": _safe_prediction_asset_argument(
+                    getattr(args, "prediction_model_weights", None)
+                ),
+                "model_anchors_argument": _safe_prediction_asset_argument(
+                    getattr(args, "prediction_model_anchors", None)
+                ),
+                "model_calibration_argument": _safe_prediction_asset_argument(
+                    getattr(args, "prediction_model_calibration", None)
+                ),
+                "protocol_id": getattr(args, "prediction_protocol_id", None),
+                "feature_schema_id": getattr(
+                    args, "prediction_feature_schema_id", None
+                ),
+                "cell_id": getattr(args, "prediction_cell_id", None),
+                "ego_policy_label": getattr(
+                    args, "prediction_ego_policy_label", None
+                ),
+                "git_commit": getattr(args, "prediction_git_commit", None),
+                "logging_enabled": bool(
+                    getattr(args, "enable_prediction_logging", False)
+                ),
+                "logging_stride": getattr(args, "prediction_logging_stride", None),
+                "logging_horizon": getattr(args, "prediction_logging_horizon", None),
+            },
+        }
+        _write_scenario_rollout_config(
+            savedir,
+            scenario_dict,
+            effective_vehicle_params=vehicles_params_list,
+            execution_provenance=execution_provenance,
+        )
+    return scenario_outcome
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run SMPC experiments in CARLA.")
@@ -722,7 +828,10 @@ if __name__ == '__main__':
                                                risk_profile=args.risk_profile,
                                                adaptive_risk_config=adaptive_risk_config,
                                                args=args,
-                                               prediction_dataset_metadata=prediction_dataset_metadata)
+                                               prediction_dataset_metadata=prediction_dataset_metadata,
+                                               scenario_source_path=scenario,
+                                               ego_init_source_path=ego_init,
+                                               tuning_metadata=tuning_metadata)
                     ok = bool(scenario_ok)
                 except Exception:
                     err = traceback.format_exc()
@@ -751,8 +860,8 @@ if __name__ == '__main__':
                             "metrics": metrics,
                         }
                     )
-                    if ok and scenario_ok:
-                        _write_scenario_rollout_config(savedir, scenario_dict)
+                    # run_with_tvs writes the v2 rollout config from the exact
+                    # effective dataclasses plus source-file provenance.
 
     exp_log.append_jsonl(
         results_folder,

@@ -1,8 +1,8 @@
 # Distinction research execution plan
 
-**版本：** v1，2026-08-08  
+**版本：** v2（R3 pre-launch hardening freeze），2026-08-08
 **适用范围：** 从 adversarial audit 完成后，到最终 TMLR-format dissertation、可复现实验资产和答辩材料全部完成  
-**当前入口：** G1 已完成；下一决策点为 G2（是否启动 corrected-control route）  
+**当前入口：** S0–G2、R1–R2、M0 v2 已完成；R3 v2 是唯一剩余的大规模 CARLA 实验
 **配套审计：** [`DISTINCTION_READINESS_AUDIT_2026-08-08.md`](DISTINCTION_READINESS_AUDIT_2026-08-08.md)  
 **进度记录：** [`DISTINCTION_PROGRESS_TRACKER.md`](DISTINCTION_PROGRESS_TRACKER.md)
 
@@ -15,7 +15,7 @@
 1. 一个明确、聚焦、以机器学习为中心但不过度因果化的中心论点；
 2. 四个定义稳定、证据边界清楚的核心假设；
 3. 从 frozen data/model 到表图和正文数字均可追溯的证据链；
-4. 对 physical baselines、model fairness、interaction tail、calibration 和 closed-loop coupling 的完整实验回答；
+4. 对 physical baselines、model fairness、interaction tail、deployed calibration scope 和 closed-loop coupling 的完整、边界清楚的实验回答；
 5. 对 mode mapping、policy-stack confounding、native collisions 和统计功效的透明处理；
 6. 一份无 TODO、文献充分、TMLR 格式正确的英文 dissertation；
 7. 一套 examiner 可访问的代码、配置、模型/数据说明、结果、图表、审计和复现指令；
@@ -44,7 +44,7 @@
 | H3 | B1 predictor-stack 的离线优势跨 policy/style/timing 稳定转化为闭环收益 | 未获一致支持；-3 m response-active ADE 明确反向 |
 | H4 | 冻结 adaptive policy stack 支配三个预设 fixed policy stacks | 未获支持；排除 init50 后多个小效应翻转，纯 risk attribution 不成立 |
 
-除非出现数据或代码错误，后续不增加第五个 headline hypothesis。Physical baselines、input ablations、active-tail analysis、collision sensitivity 和 calibration factorial 都是 mechanism/robustness analyses。
+除非出现数据或代码错误，后续不增加第五个 headline hypothesis。Physical baselines、input ablations、active-tail analysis、collision sensitivity 和 calibration diagnostics 都是 mechanism/robustness analyses；未执行的 full calibration factorial 只列为 future work。
 
 ---
 
@@ -182,7 +182,7 @@ flowchart TD
     R2 --> G2
     G2 -->|"Route S"| A1["A1 Legacy disclosure synthesis"]
     G2 -->|"Route R"| R3["R3 Corrected 80-rollout matrix"]
-    R3 --> A2["A2 Corrected synthesis"]
+    R3 --> A2["A2 Corrected synthesis（仅离线）"]
     A1 --> M1["M1 Four-hypothesis evidence package"]
     A2 --> M1
     G1 --> M1
@@ -515,27 +515,38 @@ G1 之后不再根据写作偏好改变模型结论。
 - primary analysis 使用五个 init paired clusters；
 - timing shifts 不自动重跑，旧 timing 只作 legacy exploratory evidence。
 
-**Primary outcomes：**fixed-geometry adjusted delay、raw completion time、minimum footprint separation、native collision taxonomy、yield/completion failures。
+**Primary outcomes：**ego route-completion duration（`smpc_completion.step / 20 Hz`，越低越好）与实际 CARLA bounding-box 的 minimum footprint separation（每车 0.25 m margin，越高越好）。Native collision、footprint collision、fixed-geometry yield failure 与 completion failure 是 rollout-level ITT failure guards。Target-exit elapsed time、post-clearance completion lag 与 fixed-geometry yield gap 只作 secondary decomposition；不得把 treatment-responsive target exit 当作主效率指标的调整项。
 
 **Mechanisms：**solver failure, supervisor activity, mode/risk allocation telemetry。
 
-**Gate R3：**80 unique treatment keys、无缺 cell、无重复、主指标 finite、native collision 分类完成、hash/provenance 完整。
+**执行与恢复 hardening：**
+
+- 使用全新的 `r3_corrected_formal_v2` 目录和 protocol；不得混入任何 v1 partial output；
+- 每个 treatment–init rollout 写入独立 attempt 目录，只有 raw JSON/JSONL/pickle/CSV 完整可解析后才原子提升为 canonical rollout；
+- receipt 同时绑定 raw-evidence hash、accepted attempt record、immutable attempt ledger 与关键文件 hashes；
+- 最多 10 次、只对 allowlisted infrastructure failure 自动续跑；unknown failure 必须停下审计；
+- collision、yield/completion failure、runtime exceedance、zero reactive activity、adaptive 无 variation、mode collapse、null/negative effects 都是科学结果，不得触发重跑；
+- native collision 使用 canonical unordered actor-ID pair，将 mirrored callback 与连续 frame 合并为 contact episode；callback/episode 均不增加独立样本数；
+- footprint replay 使用实际 spawned actor bbox、local centre 与 local yaw，并预冻结 0/0.25/0.35/0.50 m 四个 margins；
+- 先写 analysis/stop gate，再写 data marker，再生成逐文件 hash 的可复算 archive，最后才原子写 `R3_COMPLETE.json`。
+
+**Gate R3：**80/80 unique treatment keys 均通过 integrity audit；每个 outcome 必须已观测或因预先规定的科学原因被明确分类为 undefined/censored；native collision taxonomy、actual geometry、risk solver identity、control variables、receipt/raw hashes 与 provenance 完整；formal tables 行数和 hashes 通过；archive 逐成员回读通过。科学失败导致 primary continuous outcome 非 finite 时，不构成 integrity failure，也不要求增加 CARLA 样本。
+
+**R3 后的冻结停止规则：**只要 `R3_COMPLETE.json.status=pass`、`additional_large_scale_carla_required=false`，本课题的大规模 CARLA 数据采集即关闭。H3/H4 无论 positive、negative、null、mixed 或 adverse，均直接进入离线证据整理和论文写作；不得为追求更好方向追加 timing、seed、margin、policy 或 model runs。若 marker 未生成，只允许修复完整性缺陷并续跑同一 R3 key，不得启动新实验设计。
 
 ---
 
-## R4 — Optional calibration factorial
+## R4 — Calibration factorial（冻结为 `not_run`）
 
-只有 R3 完成且仍有时间时考虑。
+R4 不再属于 dissertation 的必需实验。当前 H3 的 estimand 明确是 **deployed predictor-stack effect**（B1 weights + frozen validation calibration 相对 B0 identity stack），而不是 model-weight-only causal effect。论文必须按这一边界措辞，不能把 stack effect 单独归因于权重或 Transformer。完整 calibration factorial 会回答一个不同、更窄的机制分解问题，但不影响四个核心假设的可判定性，也不值得在提交前重新开启大规模 CARLA。
 
-新增 B0+validation calibration 和 B1+identity，运行 fixed-medium/adaptive × assertive/reactive × init46–50。若四种 model×calibration stacks 都在同一 corrected implementation 下执行，总计应形成完整 matched factorial；不得用旧 legacy cells 拼接。
-
-该步骤优先级低于完整论文、references 和 evidence audit。
+因此，R3 integrity-valid 完成后 R4 保持 `not_run`。未来工作可以在独立、预注册且参数匹配的研究中执行 B0/B1 × identity/calibrated factorial；不得把它描述为本论文遗漏的必要对照。
 
 ---
 
 ## M0 — Statistical analysis contract
 
-所有新增分析在读取对应 outcome table 前先写入并 hash 一个 analysis contract。
+所有新增分析在读取对应 outcome table 前先写入并 hash 一个 analysis contract。R3 使用保留原始 M0、不覆盖地追加的 `M0_R3_ANALYSIS_CONTRACT_v2`；v2 在任何 R3 outcome 被读取前冻结主 estimand、删失规则、collision episode、footprint margins、multiplicity families、bootstrap seed 和停止规则。
 
 ### M0.1 Independent unit and summaries
 

@@ -2,8 +2,8 @@
 
 **Plan:** [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)  
 **Started:** 2026-08-08  
-**Current step:** R3 in progress — code frozen and awaiting user-launched corrected 80-rollout matrix
-**Overall status:** S0–G2, R1–R2 and M0 complete; R3 server execution is next
+**Current step:** R3 v2 ready for execution — all pre-launch hardening and analysis contracts complete; awaiting user-launched corrected 80-rollout matrix
+**Overall status:** S0–G2, R1–R2 and M0 v2 complete; R3 is the only remaining large-scale CARLA experiment
 **Closed-loop route:** Route R frozen prospectively at G2
 
 ## Status legend
@@ -31,9 +31,9 @@
 | R1 | Correct mode/A_MIN implementation | complete | No initially | `08_corrected_closed_loop/r1/R1_COMPLETE.json` | 10 tests PASS; corrected-v1 default; legacy explicit only |
 | R2 | Corrected 10-rollout pilot | complete | Yes | `08_corrected_closed_loop/r2/local_verification/r2_corrected_pilot_v4/R2_LOCAL_VERIFICATION.json` | 10/10 pass; non-statistical deployment gate only |
 | G2 | Freeze Route S or Route R | complete | No | `08_corrected_closed_loop/g2/G2_COMPLETE.json` | Route R frozen before R3 outcomes |
-| R3 | Corrected 80-rollout nominal matrix | in_progress | Yes | 80-arm audit | code/contract/init generation ready; user launch pending |
-| R4 | Calibration factorial | pending | Yes | matched factorial audit | optional, lowest experiment priority |
-| M0 | Freeze statistical analysis contract | complete | No | `09_analysis_contract/M0_COMPLETE.json` | H3/H4 directions, outcomes, families and dominance rule frozen before R3 |
+| R3 | Corrected 80-rollout nominal matrix v2 | in_progress | Yes | `R3_COMPLETE.json` + verified archive | preflight hardening complete; user launch pending; this is the final large-scale CARLA run |
+| R4 | Calibration factorial | not_run | Yes | frozen scope decision | not required after stack-level estimand was fixed; future work only |
+| M0 | Freeze statistical analysis contract | complete | No | `09_analysis_contract/M0_AMENDMENT_COMPLETE.json` | v1 preserved; v2 primary outcomes, censoring, families, margins and study-stop rule frozen before R3 |
 | M1 | Four-hypothesis evidence package | pending | No | 0 locator/value mismatch | replaces old H1–H8 |
 | W1 | Full TMLR manuscript | pending | No | complete source/PDF | 0 TODO |
 | Q1 | Final scientific/rubric/PDF audit | pending | No | all gates PASS | no claim patching by hand |
@@ -54,6 +54,9 @@
 | 2026-08-08 | Select Route R before formal corrected outcomes | R2 passed all deployment/numerical/runtime gates and the 80-run cost is feasible | G2 |
 | 2026-08-08 | Use five newly generated R3 init groups 101–105 | Continue the original seeded in-distribution sampling stream without reusing opened test init46–50 | R3 init manifest |
 | 2026-08-08 | Retain adverse formal outcomes | Collision, yield and completion failures are scientific outcomes, not retry/exclusion triggers | M0/R3 contract |
+| 2026-08-08 | Use event-clock completion and actual-bbox separation as R3 primaries | Target exit is treatment-responsive and cannot define the primary efficiency adjustment; hard-coded vehicle geometry is avoidable | M0 v2/R3 audit v2 |
+| 2026-08-08 | Close large-scale CARLA after integrity-valid R3 | H3/H4 direction cannot be used to decide whether to collect more data; all required formal cells and evidence will already exist | M0 v2 study-stop rule |
+| 2026-08-08 | Do not run R4 in this dissertation | H3 is explicitly a deployed predictor-stack contrast, not a weight-only causal contrast | scope freeze before R3 outcomes |
 
 ## Open blockers and risks
 
@@ -61,7 +64,7 @@
 | --- | --- | --- | --- |
 | Formal SMPC repeats top mode spatially | closed for corrected-v1 | R2 consumed distinct modes 0/1/2 in 1,874 valid steps; legacy remains labelled | R3 repeats the hard audit |
 | Fixed/adaptive reference A_MIN differs | closed for corrected-v1 | R2 observed only reference/solver pair [−3,−3] | R3 repeats the hard audit |
-| Day11 target–traffic-light collision | critical | raw event confirmed | full taxonomy + cluster sensitivity/rerun |
+| Legacy Day11 target–traffic-light collision | bounded historical limitation | raw event retained; R3 captures actor-identified canonical collision episodes and treats target–infrastructure contact as a scenario-context warning plus scientific outcome | R3 taxonomy and separate legacy disclosure; no outcome-dependent rerun |
 | 42/66 JSON locators invalid | critical | old 14/14 claim superseded | M1 value-resolving audit |
 | Missing physical baselines | closed | E1 complete | B1 wins 5/5 init against CV/CA/train-mean |
 | B1/T fairness | controlled limitation | E3 complete; claim narrowed | report full-configuration comparison, not architecture causality |
@@ -90,3 +93,5 @@
 | 2026-08-08 | G2 | Froze corrected prospective Route R | Decision is independent of future R3 outcome direction | `08_corrected_closed_loop/g2/G2_COMPLETE.json` |
 | 2026-08-08 | M0 | Froze R3 estimands, outcomes, inference and dominance rules | Five init clusters; exact sign-flip and Holm families declared | `09_analysis_contract/M0_COMPLETE.json` |
 | 2026-08-08 | R3 | Prepared resumable block-randomised corrected matrix | 80 unique keys on five new in-distribution init groups; user server launch pending | `core/scripts/carla/run_r3_corrected_formal_matrix.sh` |
+| 2026-08-08 | M0 v2 | Prospectively hardened the R3 outcome contract without overwriting v1 | Completion event clock + actual-bbox separation primary; scientific censoring and four footprint margins frozen | `09_analysis_contract/M0_AMENDMENT_COMPLETE.json` |
+| 2026-08-08 | R3 hardening | Completed transactional runner, telemetry, integrity audit, analyzer and final stop/archive gates | 37 local preflight tests; 80 raw receipts and all derived tables will be hash-bound; adverse outcomes cannot trigger extra collection | `docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_prelaunch/R3_HARDENING_ACCEPTANCE.json` |
