@@ -1,6 +1,6 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import List, Optional
+from dataclasses import dataclass, field, fields
+from typing import Any, List, Mapping, Optional
 import numpy as np
 import pickle
 import os
@@ -221,7 +221,8 @@ class ScenarioResult:
 		return t_self, np.array(s_self), np.array(ey_self), np.array(epsi_self)
 
 def load_scenario_result(pkl_path):
-    scenario_dict = pickle.load(open(pkl_path, "rb"))
+    with open(pkl_path, "rb") as handle:
+        scenario_dict = pickle.load(handle)
 
     ego_entry   = [v for (k, v) in scenario_dict.items() if "ego" in k]
     # The intersection paper metric d_min is EV-to-moving-TV distance; parked
@@ -229,6 +230,26 @@ def load_scenario_result(pkl_path):
     tv_entries  = [v for (k, v) in scenario_dict.items() if "target" in k]
     assert len(ego_entry) == 1
 
-    sc = ScenarioResult( ego_closed_loop_trajectory = ClosedLoopTrajectory(**ego_entry[0]),
-                         tv_closed_loop_trajectories = [ClosedLoopTrajectory(**v) for v in tv_entries])
+    # Scenario result dictionaries are also the immutable raw telemetry
+    # container.  Newer collectors may append metadata such as
+    # ``actor_geometry`` that is intentionally not a trajectory metric input.
+    # Restrict construction to dataclass init fields so old metric code remains
+    # forward-compatible without mutating or discarding the raw pickle.
+    init_fields = {item.name for item in fields(ClosedLoopTrajectory) if item.init}
+    allowed_telemetry_fields = {"actor_geometry"}
+
+    def trajectory_kwargs(value: Mapping[str, Any]) -> dict[str, Any]:
+        if not isinstance(value, Mapping):
+            raise TypeError(f"Expected trajectory mapping, got {type(value).__name__}")
+        unexpected = set(value) - init_fields - allowed_telemetry_fields
+        if unexpected:
+            raise TypeError(f"Unexpected trajectory fields: {sorted(unexpected)}")
+        return {key: item for key, item in value.items() if key in init_fields}
+
+    sc = ScenarioResult(
+        ego_closed_loop_trajectory=ClosedLoopTrajectory(**trajectory_kwargs(ego_entry[0])),
+        tv_closed_loop_trajectories=[
+            ClosedLoopTrajectory(**trajectory_kwargs(value)) for value in tv_entries
+        ],
+    )
     return sc

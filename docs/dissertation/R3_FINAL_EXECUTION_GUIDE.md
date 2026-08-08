@@ -1,6 +1,6 @@
 # R3 v3 最终执行与恢复指南
 
-**状态：**pre-launch hardening 完成；等待用户在服务器执行
+**状态：**80/80 raw collection 已完成；等待执行无需 CARLA 的 offline finalization
 
 **唯一正式结果目录：**`/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v3`
 
@@ -233,5 +233,23 @@ sha256sum \
 "$PYTHON_BIN" "$R3_REPO/core/scripts/models/summarize_r3_progress.py" \
   --results-dir "$R3_RESULTS" --json
 ```
+
+## 10. 80/80 后处理兼容修复
+
+正式采集 commit `8ccecf848b87b6fa2936e081d9f6943cd7f5a449` 已产生 80/80 accepted receipts，但旧 metric loader 把后来追加的 `actor_geometry` telemetry 作为 dataclass constructor 参数，导致 CARLA 全部结束后在第一个 cell 的 `compute_scenario_results.py` 停止。原始 pickle、receipt、attempt ledger 和 treatment key 均完整，不允许重新启动 rollout runner。
+
+修复必须使用 `core/scripts/models/finalize_r3_offline.py`：
+
+- 不连接或启动 CARLA；
+- 要求 80 accepted、0 pending、0 interrupted；
+- 从原始 Git commit 逐项验证 frozen execution-source manifest；
+- 只允许 `closed_loop_metrics.py` 的 derived-only schema compatibility drift；
+- 在写任何 derived evidence 前后验证全部 raw receipt hashes；
+- 重新生成16个 trajectory gates、metrics 和 risk diagnostics；
+- 运行 matrix integrity audit、冻结统计分析和 study-stop gate；
+- 保存 collection commit 与 finalizer commit 的双重 provenance；
+- 最后生成并回读验证 archive，再写 `R3_COMPLETE.json`。
+
+最终命令以 Codex 推送修复 commit 后给出的 exact SHA 为准。不得在原采集 checkout 中 `git pull`，应使用新的 detached finalizer clone 读取同一个 v3 结果目录。
 
 完成后只需告诉 Codex“R3_COMPLETE 已生成并且 verify-only pass”。Codex 再拉取正式 archive/sidecars，离线复算论文表图和 H3/H4 结论。R3 marker 通过后，不再启动 R4 或其他大规模 CARLA 实验。

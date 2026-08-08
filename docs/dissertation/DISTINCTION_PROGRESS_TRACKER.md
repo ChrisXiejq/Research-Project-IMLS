@@ -2,8 +2,8 @@
 
 **Plan:** [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)  
 **Started:** 2026-08-08  
-**Current step:** R3 v3 ready for execution — v2 preflight passed but exposed a pre-rollout shell binding defect; corrected before any scientific rollout and awaiting user-launched 80-rollout matrix
-**Overall status:** S0–G2, R1–R2 and M0 v2 complete; R3 is the only remaining large-scale CARLA experiment
+**Current step:** R3 v3 raw collection complete at 80/80; offline derived-evidence finalization pending after a forward-compatibility loader failure
+**Overall status:** S0–G2, R1–R2 and M0 v2 complete; the large-scale CARLA collection is complete and no additional rollout is required
 **Closed-loop route:** Route R frozen prospectively at G2
 
 ## Status legend
@@ -95,3 +95,5 @@
 | 2026-08-08 | R3 | Prepared resumable block-randomised corrected matrix | 80 unique keys on five new in-distribution init groups; user server launch pending | `core/scripts/carla/run_r3_corrected_formal_matrix.sh` |
 | 2026-08-08 | M0 v2 | Prospectively hardened the R3 outcome contract without overwriting v1 | Completion event clock + actual-bbox separation primary; scientific censoring and four footprint margins frozen | `09_analysis_contract/M0_AMENDMENT_COMPLETE.json` |
 | 2026-08-08 | R3 hardening | Completed transactional runner, telemetry, integrity audit, analyzer and final stop/archive gates | 38 local preflight tests; 80 raw receipts and all derived tables will be hash-bound; adverse outcomes cannot trigger extra collection | `docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_prelaunch/R3_HARDENING_ACCEPTANCE.json` |
+| 2026-08-08 | R3 raw collection | Completed all prespecified treatment keys despite one CARLA restart | 80/80 accepted receipts; 7 infrastructure failures retained; zero pending or interrupted attempts | Server `r3_corrected_formal_v3/R3_ROLLOUT_*_COMPLETE.json` |
+| 2026-08-08 | R3 offline repair | Added a no-CARLA finalizer for the derived-only `actor_geometry` loader incompatibility | Original Git/source manifest and all raw hashes remain frozen; only declared deserialization drift is allowed | `core/scripts/models/finalize_r3_offline.py` |
