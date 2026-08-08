@@ -3,13 +3,36 @@
 
 \subsection{CARLA scenario and system architecture}
 
-Experiments use a controlled give-way junction in CARLA's Town05
-\citep{dosovitskiy2017carla}. The ego follows a fixed route and encounters an
-assertive or reactive target vehicle. Fixed-risk and adaptive-risk policies
-share the trajectory solver and safety supervisor, making the executed motion
-a coupled system outcome. \TODO{Insert CARLA version, synchronous step,
-vehicle blueprints, route coordinates, weather, solver settings, supervisor
-thresholds and A3 authority-regime definition from the frozen configuration.}
+Experiments use CARLA 0.9.14 in synchronous Town05 at 20~Hz with ClearNoon
+weather \citep{dosovitskiy2017carla}. A Mercedes-Benz coupe ego follows the
+left-turn route from intersection node 0 to node 3 at a nominal 6~m/s. A
+matching target coupe travels straight from node 2 to node 2 at 9~m/s and is
+either assertive or reactive. Each rollout is capped at 600 simulator steps
+(30~s). In the A3 risk-owned-yield authority regime, fixed and adaptive
+policies share the corrected three-mode SMPC, $-3$~m/s$^2$ reference
+acceleration lower bound and safety supervisor. The ego optimisation horizon
+is ten 0.2-s steps. The route-defined conflict radius is 4.0~m, while the
+primary post-CARLA footprint replay adds 0.25~m per actor using the actual
+CARLA bounding boxes. Table~\ref{tab:risk-contract} records the risk settings;
+the full yield-state thresholds remain hash-bound in the frozen tuning file.
+
+\begin{table}[t]
+  \caption{Corrected R3 risk and control contract}
+  \label{tab:risk-contract}
+  \centering
+  \small
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Treatment & Tightening/floor & Interpretation \\
+    \midrule
+    Fixed aggressive & 1.2816 & fixed Gaussian tightening \\
+    Fixed medium & 1.6400 & fixed Gaussian tightening \\
+    Fixed conservative & 2.0537 & fixed Gaussian tightening \\
+    Adaptive & 1.66/1.72/1.78 & approach/critical/near pre-clearance floors \\
+    Shared dynamics & $a_{\min}=-3$~m/s$^2$ & fixed/adaptive reference and solver \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \subsection{Data collection and representation}
 
@@ -56,22 +79,55 @@ future label are excluded; partial-horizon samples use a masked loss.
 final MultiPath dense prediction head. \BtwoM{} and \BtwoD{} add flattened-
 sequence MLP adapters; the former updates trajectory means and the latter
 updates means, covariance/orientation and mixture logits. \Tone{} and \Ttwo{}
-replace the corresponding MLP adapter with a masked Transformer. The
-\BtwoM{}/\Tone{} and \BtwoD{}/\Ttwo{} parameter gaps are 10.48\% and 5.89\%,
-below the preregistered 20\% matched-capacity ceiling.
+replace the corresponding MLP adapter with a masked Transformer. Within each
+residual-output scope the MLP/Transformer adapter sizes are approximately
+matched, but the full comparison is not parameter matched to \Bone{}:
+\Bone{} has approximately 1.034 million trainable parameters, whereas the
+adapter variants have approximately 77--176 thousand. H2 therefore compares
+frozen training configurations, not architecture in isolation.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.98\linewidth]{figure02_model_architecture.png}
-  \caption{Matched architecture and capacity controls. \Bone{} is the simple
-  adaptation control; the MLP/Transformer pairs isolate attention from
-  approximate adapter capacity while sharing the base prediction contract.}
+  \caption{Architecture and adapter-capacity controls. \Bone{} is the simple
+  adaptation control; the two MLP/Transformer pairs share residual-output
+  scopes and approximate adapter capacity, but are not parameter matched to
+  \Bone{}.}
   \label{fig:architecture}
 \end{figure}
 
-\TODO{Add an exact hyperparameter table: layer widths, heads, embedding size,
-dropout, optimiser, learning rate, batch size, loss terms, epoch/early-stopping
-rule, anchor count, frozen/trainable parameters and software versions.}
+Table~\ref{tab:model-training} gives the frozen training contract. All models
+use 16 MultiPath anchors and ten future steps. The masked loss assigns the
+nearest valid anchor, combines mixture classification with bivariate Gaussian
+regression, and averages only over valid future steps. B1 freezes every layer
+except the final dense prediction head. The residual adapters freeze the base;
+B2 variants flatten the six 12-feature tokens and validity mask into two
+80-unit GELU layers, while T variants use one width-64 Transformer block with
+four heads, a 128-unit feed-forward layer, masked mean pooling and dropout
+0.1. Mean-only variants update trajectory means; distributional variants also
+update scale, orientation and mixture logits.
+
+\begin{table}[t]
+  \caption{Frozen model-training configuration}
+  \label{tab:model-training}
+  \centering
+  \small
+  \begin{tabular}{@{}L{0.28\linewidth}L{0.62\linewidth}@{}}
+    \toprule
+    Item & Value \\
+    \midrule
+    Seeds & 11, 23 and 37 \\
+    Optimiser & Adam, learning rate $10^{-4}$, gradient clip norm 10 \\
+    Batch/shuffle & batch 16; shuffle buffer 1,024 \\
+    Budget & maximum 20 epochs; validation-loss patience 5 \\
+    Sequence & six tokens $\times$ 12 features; train-only z-score; validity mask \\
+    MLP adapter & two width-80 GELU layers; dropout 0.1 \\
+    Transformer & one width-64 block; four heads; FFN 128; dropout 0.1 \\
+    Trainable parameters & B1 1,034,208; B2-M 77,600; T1 86,688; B2-D 176,096; T2 165,728 \\
+    Selection & minimum median validation rollout-macro NLL; one-shot frozen test \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \subsection{Training, selection and calibration}
 

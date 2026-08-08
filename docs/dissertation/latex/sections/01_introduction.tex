@@ -29,12 +29,20 @@ an improvement uncertain. Second, architectural complexity and attention are
 frequently compared without a simple task-adaptation baseline and an
 approximately capacity-matched non-attention control. Third, a claim that an
 adaptive risk rule is superior can be an artefact of comparing it with a
-single fixed setting rather than a fixed-risk frontier and of omitting
-moderators such as target behaviour and arrival timing.
+single fixed setting rather than multiple prespecified fixed operating points
+and of omitting moderators such as predictor and target behaviour.
 
 \TODO{Support each gap with a critical synthesis of primary literature. State
 what each cited paper evaluates, what it leaves unresolved, and why the three
 gaps intersect in this system.}
+
+\paragraph{Central thesis.}
+In this controlled give-way setting, task adaptation rather than additional
+interaction-model complexity provides the reliable offline prediction gain;
+after that gain passes through calibration, risk allocation, optimisation and
+supervision, its closed-loop value becomes context dependent. Consequently,
+neither better offline prediction nor adaptive risk alone establishes uniform
+system-level superiority.
 
 \subsection{Research questions and hypotheses}
 
@@ -46,35 +54,36 @@ The study asks:
   \item[RQ2] Do explicit interaction sequences and Transformer encoders add
   benefit beyond simple adaptation and approximately matched MLP capacity?
   \item[RQ3] Do offline prediction gains translate consistently into
-  closed-loop benefit across risk policies, target styles and arrival timing?
+  closed-loop benefit across risk policies and target styles?
   \item[RQ4] Does adaptive risk allocation dominate the fixed-risk
   safety--efficiency frontier?
 \end{description}
 
-These questions are evaluated through eight hypotheses: task adaptation
-improves prediction (H1); sequence models use their added input (H2);
-Transformers outperform simple adaptation (H3); offline improvement produces
-a uniform closed-loop gain (H4); adaptive risk universally dominates the
-fixed frontier (H5); predictor effects are moderated by policy and timing
-(H6); collision-containing training rollouts determine the architecture
-ranking (H7); and the frozen deployment chain passes its reliability gates
-(H8). Table~\ref{tab:hypotheses} reports the final, evidence-bounded verdicts.
+Each research question maps to one core hypothesis: task adaptation improves
+prediction relative to the pretrained control (H1); explicit-sequence
+Transformer adaptation adds benefit beyond simple task adaptation that is not
+explained by matched non-attention capacity (H2);
+the offline gain transfers consistently to closed-loop safety--efficiency
+outcomes (H3); and adaptive risk dominates the fixed-risk frontier (H4).
+Sequence ablation, calibration-tail analysis, deployment gates and
+collision-filtered retraining are mechanism or robustness checks, not
+additional headline hypotheses. Table~\ref{tab:hypotheses} reports the four
+evidence-bounded verdicts.
 
 \subsection{Contributions}
 
-The dissertation makes five contributions:
+The dissertation makes four focused contributions:
 
 \begin{enumerate}
-  \item a rollout-disjoint, deployment-equivalent data protocol for a
-  controlled CARLA give-way interaction;
-  \item a leakage-controlled comparison of pretrained, simply adapted,
-  capacity-matched MLP and Transformer predictors across three seeds;
-  \item sequence-input ablations and calibration-tail diagnostics that
-  separate model ranking from mechanism evidence;
-  \item a frozen closed-loop factorial evaluation spanning predictor, risk
-  policy, target style and arrival-timing conditions; and
-  \item a reproducible claim-to-evidence package, including a conservative
-  collision-data sensitivity analysis and explicit limits on inference.
+  \item evidence that simple task adaptation, rather than the tested increase
+  in interaction-model complexity, is the reliable source of offline gain;
+  \item mechanism diagnostics showing that sequence use and aggregate
+  calibration quality are insufficient to establish model superiority;
+  \item a frozen closed-loop factorial evaluation demonstrating that predictor
+  value is conditional on risk policy and target style; and
+  \item a frontier-based re-evaluation of the original adaptive-risk claim,
+  supported by rollout-disjoint data, frozen selection and auditable
+  robustness checks.
 \end{enumerate}
 
 The contribution is not a claim of general Transformer superiority or
@@ -90,4 +99,3 @@ Sections~\ref{sec:methods} and~\ref{sec:experiments} specify the reproducible
 protocol, Section~\ref{sec:results} reports the evidence, and
 Sections~\ref{sec:discussion}--\ref{sec:conclusion} interpret the findings and
 their boundaries.
-

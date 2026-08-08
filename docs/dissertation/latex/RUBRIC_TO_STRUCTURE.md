@@ -13,6 +13,9 @@ evidence obligations. It is not a substitute for the programme handbook.
 
 ## Rubric-specific safeguards
 
+- The single thesis claim is that task adaptation provides the reliable
+  offline gain, whereas added model complexity does not, and that the gain's
+  closed-loop value is conditional on the downstream risk--control context.
 - The research gap is not “the supervisor is the cause.” The thesis tests the
   non-obvious relationship between task adaptation, explicit sequence use,
   offline metrics and predictor–risk coupling.
@@ -28,4 +31,3 @@ evidence obligations. It is not a substitute for the programme handbook.
 - External validity is a limitation, not a missing result to fabricate. The
   Discussion must distinguish current evidence from future cross-map,
   cross-junction and real-world validation.
-

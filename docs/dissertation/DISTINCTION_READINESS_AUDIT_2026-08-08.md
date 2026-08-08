@@ -1,8 +1,17 @@
 # Dissertation distinction readiness audit
 
+> **Historical audit notice (2026-08-08):** this document records the
+> adversarial review that triggered S0--M1 remediation. Its four critical
+> implementation/evidence gaps have since been addressed by corrected R1--R3,
+> A2 and the value-resolving M1 package. It is retained for provenance, not as
+> the current status report. Use
+> [`FINAL_TO_SUBMISSION_PLAN.md`](FINAL_TO_SUBMISSION_PLAN.md) and
+> [`DISTINCTION_PROGRESS_TRACKER.md`](DISTINCTION_PROGRESS_TRACKER.md) for the
+> active route and present status.
+
 **审计日期：** 2026-08-08  
 **项目：** Research-Project-IMLS  
-**状态：** 独立复核结论；优先级高于此前“14/14 PASS、无需新增实验”的表述  
+**状态：** 历史独立复核结论；所列 remediation 已由 S0--M1 收口
 **目标：** 在不把项目扩展成另一个课题的前提下，确定论文能够安全主张什么、必须修复什么，以及怎样把现有工作提升到 distinction 水平。
 
 ---

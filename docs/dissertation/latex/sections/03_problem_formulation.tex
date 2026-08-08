@@ -34,19 +34,19 @@ incorrect treatment of overlapping windows as independent experiments.
 
 \subsection{Closed-loop objectives}
 
-Closed-loop performance is multi-objective. Efficiency is measured by
-target-clearance-adjusted completion delay. Safety-related outcomes include
-minimum vehicle-footprint separation and observed collision, yield-order and
-completion failures. Solver failure fraction and supervisor active fraction
+Closed-loop performance is multi-objective. The corrected primary efficiency
+outcome is event-clock completion time. The primary continuous safety-margin
+outcome is minimum vehicle-footprint separation computed from actual actor
+bounding boxes. Native/footprint collision, fixed-geometry yield failure and
+completion failure are binary guards. Solver failure and supervisor activity
 are mechanism measurements, not interchangeable safety outcomes. A policy
-dominates another only if it improves the relevant safety and efficiency
-objectives without a countervailing loss under the declared comparison scope.
+dominates another only if completion and separation are no worse and no excess
+binary scientific failure occurs within the declared comparison scope.
 
 \subsection{Scope of inference}
 
 The target population is the controlled Town05 give-way geometry under the
-specified routes, target styles and timing perturbations. It excludes other
-maps, junctions, weather, traffic populations and real vehicles. The five held-
-out ego initialisation groups are the independent clusters for confirmatory
-uncertainty calculations.
-
+specified routes and target styles. It excludes other maps, junctions,
+weather, traffic populations and real vehicles. Corrected R3 uses five newly
+generated paired initialisation groups (101--105) as the independent clusters
+for uncertainty calculations.

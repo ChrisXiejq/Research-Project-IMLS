@@ -1,134 +1,137 @@
 \section{Results}
 \label{sec:results}
 
-This section reports observations in the order of the research questions. It
-does not explain mechanisms beyond what the measured diagnostics support.
+Results follow H1--H4 and separate corrected primary evidence from legacy
+mechanism diagnostics.
 
-\subsection{Dataset integrity and coverage}
+\subsection{Data and protocol integrity}
 
-All 200 planned collection rollouts completed. Day6 and merged Day7 manifests
-agree on 11,230 raw samples; rollout groups are disjoint across splits and all
-normalisation/leakage gates pass. Table~\ref{tab:dataset} gives the usable
-counts. \TODO{Report factorial balance and response-active coverage from the
-canonical evidence package.}
+All 200 planned prediction-data rollouts completed. Raw and merged manifests
+agree on 11,230 samples, rollout groups are disjoint across the 160/20/20
+train/validation/test split, no duplicate keys or normalisation leakage are
+detected, and the largest descriptive split-covariate standardised mean
+difference is 0.208. The corrected R3 matrix subsequently completed all 80/80
+prespecified rollouts and passed its analysis, integrity, stop and archive
+gates.
 
-\subsection{Offline selection favours simple task adaptation}
+\subsection{H1: simple task adaptation produces the reliable offline gain}
 
-Across three validation seeds, median macro NLL ranks \Bone{} (1.86055),
-\BtwoD{} (1.87274), \Ttwo{} (1.87789), \Tone{} (2.00883) and \BtwoM{}
-(2.02553). The frozen-test order is consistent. Relative to pretrained
-\Bzero{}, \Bone{} reduces test top-1 ADE from 1.299 to 0.106~m, FDE from 2.685
-to 0.129~m and uncalibrated macro NLL from 2.171 to 1.857~nats/step. Thus H1 is
-supported in distribution, while H3 is refuted for the architectures and
-budget tested.
+Across the three validation seeds, median macro NLL ranks \Bone{} first,
+followed by \BtwoD{}, \Ttwo{}, \Tone{} and \BtwoM{}. Relative to pretrained
+\Bzero{} on the frozen test, \Bone{} reduces top-1 ADE by 1.193~m, FDE by
+2.555~m and uncalibrated rollout-macro NLL by 0.314~nats/step. It also improves
+ADE and FDE relative to constant velocity, clipped constant acceleration and
+the train-mean prior in all five test initialisation groups. H1 is therefore
+supported within the frozen Town05 distribution.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.98\linewidth]{figure03_offline_model_comparison.png}
-  \caption{Offline model comparison. Points show validation seeds and
-  horizontal segments their medians; frozen-test ADE/FDE include the pretrained
-  \Bzero{} control. \Bone{} is best under the registered selection metric and
-  displacement errors.}
+  \caption{Frozen offline model comparison. Points show validation seeds and
+  horizontal segments their medians; test ADE/FDE include the pretrained
+  \Bzero{} control. The figure is generated from the frozen offline package.}
   \label{fig:offline}
 \end{figure}
 
-\subsection{Sequence-use evidence and calibration-tail failure}
+\subsection{H2: tested Transformer adapters add no consistent benefit}
 
-Shuffling the interaction sequence worsens \Tone{} and \Ttwo{} NLL by 0.0848
-and 0.1494; zeroing \Ttwo{} worsens NLL by 0.0908. H2 is therefore supported as
-an input-sensitivity mechanism, but the result is not evidence of causal
-understanding. For \Bone{}, frozen global calibration improves aggregate NLL
-from 1.8571 to $-2.0686$, while worsening the response-active subset from
-2.0763 to 8.5728. Negative continuous-density NLL is valid. The tail diagnostic
-contains only 15 windows from six rollouts and three init groups.
+The paired-head comparisons point in opposite directions. \Tone{} attains a
+test NLL of 2.003746 versus 2.024409 for \BtwoM{}, whereas \Ttwo{} attains
+1.878148 versus 1.872789 for \BtwoD{}. Neither configuration exceeds the
+simple \Bone{} adaptation. Sequence shuffling nevertheless worsens \Tone{} and
+\Ttwo{} NLL, so the result is not explained by complete sequence neglect.
+H2 is not supported under the tested protocol. Because the configurations are
+not parameter matched and 10/15 selections occur at the epoch ceiling, this is
+not evidence that Transformers are generally ineffective.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.82\linewidth]{figure04_calibration_tail.png}
-  \caption{Aggregate and response-active calibration. Global calibration
-  improves aggregate \Bone{} NLL but fails in the small response-active tail.}
-  \label{fig:calibration}
-\end{figure}
+\subsection{R3 manipulation and nominal reliability}
 
-\subsection{Nominal safety--efficiency frontier}
+The deployed prediction manipulation is strong: all 40/40
+metric--policy--style checks favour \Bone{} over \Bzero{} in every paired
+initialisation group. Across these checks, \Bone{}--\Bzero{} top-1 ADE effects
+range from $-1.352$ to $-1.125$~m and FDE effects from $-3.152$ to
+$-2.315$~m. These checks verify that the predictor stacks remain distinct
+inside R3; they are not an independent offline benchmark.
 
-All 80 Day10 rollouts completed, with zero observed footprint collision,
-yield-order failure or completion failure. These zero counts are reliability
-observations, not estimates of zero population risk. No predictor--risk
-combination uniformly occupies the preferred high-separation/low-delay region.
-For reactive targets with \Bone{}, adaptive risk has 8.59~s delay and 1.200~m
-margin, versus 8.34~s and 1.186~m for fixed aggressive: a trade-off rather than
-dominance. H5 is refuted.
+The adaptive solver is used on every audited step in all four adaptive cells,
+all 20 adaptive rollouts vary within rollout, and fixed settings are stable
+across initialisations. No native collision, footprint collision,
+fixed-geometry yield failure or completion failure is observed. These zero
+counts establish nominal feasibility for the observed matrix but cannot prove
+zero population risk or treatment equivalence.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.92\linewidth]{figure05_day10_frontier.png}
-  \caption{Nominal closed-loop safety--efficiency frontier. Each mark is a
-  five-rollout cell mean; no policy uniformly dominates across target styles.}
-  \label{fig:frontier}
-\end{figure}
+\subsection{H3: prediction gain does not transfer uniformly}
 
-\subsection{Predictor effects depend on policy and arrival timing}
-
-The 120-rollout synthesis does not support a uniform transfer from offline
-accuracy to closed-loop benefit. Pooled across offsets, \Bone{} minus \Bzero{}
-adjusted delay is $-0.370$~s under fixed medium (cluster interval
-$[-0.717,-0.023]$) and $-0.337$~s under adaptive risk
-($[-0.665,0.015]$), but Holm-adjusted exact tests do not provide confirmatory
-significance. Under fixed medium the effect changes direction, from
-$-0.755$~s at $-3$~m to $+0.295$~s at 0~m. H4 is refuted and H6 receives only
-descriptive support.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.98\linewidth]{figure06_predictor_effect_moderation.png}
-  \caption{Predictor-effect moderation. \Bone{}--\Bzero{} effects and
-  five-init cluster intervals vary with risk policy and arrival offset.}
-  \label{fig:moderation}
-\end{figure}
-
-\subsection{Timing changes multiple downstream mechanisms}
-
-For \Bone{}, shifting arrival from $-3$ to $+3$~m increases footprint
-separation by 0.519~m under fixed medium and 0.896~m under adaptive risk,
-increases solver failure by 2.05 and 2.38 percentage points, and decreases
-supervisor activity by 7.07 and 6.94 percentage points. The mechanisms move
-simultaneously, so the supervisor cannot be identified as the single cause of
-the outcome.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.94\linewidth]{figure07_arrival_timing_mechanisms.png}
-  \caption{Arrival-timing mechanisms. Separation, solver feasibility and
-  supervisor intervention change together as target timing is shifted.}
-  \label{fig:timing}
-\end{figure}
-
-\subsection{Sensitivity and hypothesis synthesis}
-
-Removing the conservative upper bound of 162 potentially affected training
-windows and repeating all 15 validation runs leaves the architecture order
-unchanged; \Bone{} median NLL changes by only $+0.00132$. H7 is refuted and the
-original experiment remains primary. All frozen deployment reliability gates
-pass, supporting H8 only for the observed runs.
+Only two of eight policy--style cells jointly have faster mean completion and
+no-worse mean footprint separation for \Bone{} relative to \Bzero{}:
+adaptive/reactive and fixed-aggressive/assertive. The remaining six cells fail
+at least one registered direction. For example, adaptive/assertive is
+0.240~s slower with 0.0067~m lower separation, whereas
+fixed-aggressive/assertive is 0.790~s faster with 0.0053~m higher separation.
+All Holm-adjusted exact tests are non-confirmatory. H3 is therefore not
+supported as a universal translation claim; the data do not imply that the
+predictor stack has no closed-loop value.
 
 \begin{table}[t]
-  \caption{Hypothesis verdicts and inferential boundaries}
-  \label{tab:hypotheses}
+  \caption{Corrected R3 predictor-stack translation. A supported direction
+  requires lower mean completion and no-worse mean separation for
+  \Bone{}--\Bzero{}. Each cell contains five paired initialisation groups.}
+  \label{tab:r3-h3}
   \centering
   \small
-  \begin{tabular}{@{}L{0.05\linewidth}L{0.42\linewidth}L{0.16\linewidth}L{0.25\linewidth}@{}}
+  \begin{tabular}{@{}llrrl@{}}
     \toprule
-    ID & Hypothesis & Verdict & Boundary \\
+    Policy & Style & Completion (s) & Separation (m) & Direction \\
     \midrule
-    H1 & Task adaptation improves in-distribution prediction & Supported & Same Town05 distribution \\
-    H2 & Sequence models use the added input & Mechanistically supported & Sensitivity is not causal understanding \\
-    H3 & Transformers outperform simple adaptation & Refuted & Tested models and budget \\
-    H4 & Offline gains yield uniform closed-loop gains & Refuted & Coupled stack \\
-    H5 & Adaptive risk universally dominates fixed risk & Refuted & Frontier trade-off \\
-    H6 & Policy and timing moderate predictor effects & Descriptive support & Five independent clusters \\
-    H7 & Callback rollouts determine architecture ranking & Refuted & Conservative whole-rollout filter \\
-    H8 & Frozen chain passes reliability gates & Observed-run support & Zero events is not zero risk \\
+    Adaptive & Assertive &  0.240 & $-0.0067$ & Not supported \\
+    Adaptive & Reactive & $-0.180$ &  0.0006 & Supported \\
+    Fixed aggressive & Assertive & $-0.790$ &  0.0053 & Supported \\
+    Fixed aggressive & Reactive & $-0.010$ & $-0.0106$ & Not supported \\
+    Fixed conservative & Assertive & $-0.520$ & $-0.0262$ & Not supported \\
+    Fixed conservative & Reactive &  0.490 & $-0.0056$ & Not supported \\
+    Fixed medium & Assertive &  0.230 &  0.0072 & Not supported \\
+    Fixed medium & Reactive & $-0.220$ & $-0.0084$ & Not supported \\
     \bottomrule
   \end{tabular}
 \end{table}
+
+\subsection{H4: adaptive risk is conditional, not dominant}
+
+Adaptive risk dominates its fixed comparator in only 3/12 prespecified
+predictor--style--comparator contrasts: \Bzero{}/assertive versus fixed medium,
+and \Bone{}/reactive versus fixed aggressive and fixed medium. It does not
+dominate in the other 9/12 contrasts. H4 is therefore not supported as a
+universal dominance claim. The result retains a useful role for adaptive risk
+as a context-dependent operating point rather than a universal replacement.
+
+\begin{table}[t]
+  \caption{Corrected R3 hypothesis synthesis. Counts are prespecified cells or
+  comparisons, not simulation steps.}
+  \label{tab:hypotheses}
+  \centering
+  \small
+  \begin{tabular}{@{}L{0.06\linewidth}L{0.46\linewidth}L{0.20\linewidth}L{0.18\linewidth}@{}}
+    \toprule
+    ID & Hypothesis & Verdict & Boundary \\
+    \midrule
+    H1 & Task adaptation improves in-distribution prediction & Supported & Frozen Town05 distribution \\
+    H2 & Transformer adapters add consistent value & Not supported & Tested configurations/budget \\
+    H3 & Offline gain transfers consistently to closed loop & 2/8 cells & Universal claim not supported \\
+    H4 & Adaptive risk dominates fixed controls & 3/12 comparisons & Universal dominance not supported \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Secondary mechanism and sensitivity evidence}
+
+Input diagnostics characterise \Bone{} as raster-dominant: raster shuffling
+increases ADE by approximately 0.270--0.293~m across seeds, whereas target
+history shuffling changes aggregate ADE by only about 0.00008~m on average.
+Legacy response-active analysis also shows that global calibration can improve
+aggregate NLL while worsening a very small shifted active tail (15 windows,
+six rollouts and three initialisation groups). Earlier arrival-timing logs show
+that separation, solver feasibility and supervisor activity change together,
+so the supervisor cannot be identified as the single cause. Finally, a
+collision-filtered 15-run validation sensitivity preserves the architecture
+ranking. These analyses explain boundaries and alternative explanations; they
+are not pooled with corrected R3 and do not create additional hypotheses.

@@ -1,37 +1,26 @@
 # Generated evidence
 
-本目录只保存机器生成或从服务器拉取的可复现证据，不保存人工写作草稿。
+Generated files are reproducible research evidence, not a scratch directory.
+Do not edit numerical values by hand.
 
-## Thesis-ready package
+## Canonical dissertation sources
 
-```text
-paper_assets_v1/
-```
+1. `distinction_v1/10_four_hypothesis_evidence/` — M1 claim-to-value manifest,
+   hypothesis verdicts and value audit;
+2. `distinction_v1/08_corrected_closed_loop/r3_final/synthesis/` — A2 corrected
+   R3 tables, figures and synthesis;
+3. remaining `distinction_v1/` stages — provenance, controls, diagnostics,
+   prospective contracts and completion gates.
 
-这是论文数字、8 张表、8 张 SVG/PNG、captions、claim matrix 和 checksums 的唯一入口。
+R3 is complete at 80/80 and the frozen study-stop decision requires no further
+large-scale CARLA collection. R4 is intentionally `not_run`.
 
-## Final cross-stage audit
+## Legacy and secondary sources
 
-```text
-final_audit/FINAL_THESIS_EVIDENCE_AUDIT.json
-```
+`paper_assets_v1/` and `day10/`--`day13/` remain available for provenance and
+secondary diagnostics. They reflect the earlier implementation and must not be
+pooled with corrected R3 or described as the primary closed-loop result.
 
-该审计交叉检查 Day6–Day14 的关键 completion/count/split/selection/integrity invariants。
-
-## Stage evidence
-
-- `day2/`：legacy dataset/input problems；
-- `day3/`：GMM evaluator、raster contract 与 calibration；
-- `day4/`–`day5/`：V2 pipeline 和 collection freeze；
-- `day6/`：200-rollout collection evidence；
-- `day7/`：merge/split/normalization/model implementation gates；
-- `day8/`：15-run validation、frozen selection 与 one-shot test；
-- `day9/`：deployment smoke，仅作 implementation gate；
-- `day10/`：nominal closed-loop matrix、B0 offline bridge、context ablation；
-- `day11/`：timing-shift matrix；
-- `day12/`：three-offset synthesis、collision audit 和 backup verification；
-- `day13/`：collision-filtered validation sensitivity。
-
-大型 tar snapshots、partial Day8 reports 和旧 preliminary figures/tables 已从活跃目录移除；它们可由 Git 历史或 Day12 offsite backup 恢复。
-
-解释规则以顶层四份 canonical documents 为准，禁止根据单个 CSV 扩大结论。
+Large offsite bundles are represented by verified hashes/manifests rather than
+duplicated here. Never delete a raw receipt, completion marker, source manifest
+or hash record solely to make the directory look smaller.

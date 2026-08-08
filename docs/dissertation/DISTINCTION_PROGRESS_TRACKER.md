@@ -2,7 +2,7 @@
 
 **Plan:** [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)  
 **Started:** 2026-08-08  
-**Current step:** M1 four-hypothesis evidence package complete; W1 manuscript integration is next
+**Current step:** W1.2 Results tables, figures and evidence-ID integration
 **Overall status:** S0–M1 complete; R3 passed at 80/80 and large-scale CARLA collection is permanently closed for this dissertation
 **Closed-loop route:** Route R frozen prospectively at G2
 
@@ -36,7 +36,8 @@
 | A2 | Corrected post-R3 synthesis | complete | No | `08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json` | H3 2/8 directional cells; H4 3/12 dominance cells; paper tables/figures hash-bound |
 | M0 | Freeze statistical analysis contract | complete | No | `09_analysis_contract/M0_AMENDMENT_COMPLETE.json` | v1 preserved; v2 primary outcomes, censoring, families, margins and study-stop rule frozen before R3 |
 | M1 | Four-hypothesis evidence package | complete | No | `10_four_hypothesis_evidence/M1_COMPLETE.json` | 82 records; 0 invalid locator, value mismatch, orphan claim or legacy/corrected pooling violation |
-| W1 | Full TMLR manuscript | pending | No | complete source/PDF | 0 TODO |
+| W0 | Migrate active documents to R3/M1 and retire stale entry points | complete | No | documentation/link/LaTeX audit | corrected R3 is sole primary closed-loop source; obsolete guides removed; PDF builds |
+| W1 | Full TMLR manuscript | in_progress | No | complete source/PDF | W1.1 Methods/design complete; W1.2 Results is active; remaining TODOs are literature, appendices and final prose |
 | Q1 | Final scientific/rubric/PDF audit | pending | No | all gates PASS | no claim patching by hand |
 | V1 | Viva and submission package | pending | No | archive + viva documents | final deliverable |
 
@@ -66,7 +67,7 @@
 | Formal SMPC repeats top mode spatially | closed for corrected-v1 | R2 consumed distinct modes 0/1/2 in 1,874 valid steps; legacy remains labelled | R3 repeats the hard audit |
 | Fixed/adaptive reference A_MIN differs | closed for corrected-v1 | R2 observed only reference/solver pair [−3,−3] | R3 repeats the hard audit |
 | Legacy Day11 target–traffic-light collision | bounded historical limitation | raw event retained; R3 captures actor-identified canonical collision episodes and treats target–infrastructure contact as a scenario-context warning plus scientific outcome | R3 taxonomy and separate legacy disclosure; no outcome-dependent rerun |
-| 42/66 JSON locators invalid | critical | old 14/14 claim superseded | M1 value-resolving audit |
+| 42/66 legacy JSON locators invalid | closed | old 14/14 claim superseded | M1 resolves and reproduces 82/82 records |
 | Missing physical baselines | closed | E1 complete | B1 wins 5/5 init against CV/CA/train-mean |
 | B1/T fairness | controlled limitation | E3 complete; claim narrowed | report full-configuration comparison, not architecture causality |
 | Only five independent test inits | high | exact/descriptive inference | transparent statistics; no fake n |
@@ -101,3 +102,5 @@
 | 2026-08-08 | R3 finalization | Verified corrected formal data, analysis, stop gate and archive | 80/80 rollouts; all formal tables and integrity gates pass; `additional_large_scale_carla_required=false` | `08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_COMPLETE.json` |
 | 2026-08-08 | A2 | Generated deterministic corrected synthesis, four verdicts, two figures and four tables | B1 manipulation 40/40; H3 2/8; H4 3/12; universal claims rejected without reopening collection | `08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json` |
 | 2026-08-08 | M1 | Replaced the old non-resolving evidence index with a four-hypothesis value-audited package | 82/82 records resolve and reproduce; no orphan headline claim or legacy/corrected pooling | `10_four_hypothesis_evidence/M1_COMPLETE.json` |
+| 2026-08-08 | W0 | Migrated all active paper/dissertation guidance and the English design/results skeleton to corrected R3/M1 | Legacy timing evidence demoted; two obsolete guides removed; A2/M1 pass, 66 tests pass and TMLR PDF builds | `FINAL_TO_SUBMISSION_PLAN.md` |
+| 2026-08-08 | W1.1 | Completed the corrected Methods and Experimental Design draft from frozen configs/contracts | CARLA scenario, six models, exact training budget, risk settings, R3 factorial, estimands and statistics now explicit; PDF builds | `latex/sections/04_methodology.tex` |

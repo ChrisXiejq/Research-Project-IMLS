@@ -1,8 +1,10 @@
-# Distinction research execution plan
+# Distinction research execution plan — completed research record
 
 **版本：** v3（R3 complete / A2 corrected synthesis），2026-08-08
 **适用范围：** 从 adversarial audit 完成后，到最终 TMLR-format dissertation、可复现实验资产和答辩材料全部完成  
-**当前入口：** S0–M1 已完成；大规模 CARLA 已按预注册停止规则关闭，下一步为 W1 TMLR 论文整合
+**状态：** S0–M1 已完成；大规模 CARLA 已按预注册停止规则关闭
+**当前唯一推进路线：** [`FINAL_TO_SUBMISSION_PLAN.md`](FINAL_TO_SUBMISSION_PLAN.md)
+**说明：** 本文件保留为历史研究执行记录，不再用于开启 R4、改写假设或选择新实验
 **配套审计：** [`DISTINCTION_READINESS_AUDIT_2026-08-08.md`](DISTINCTION_READINESS_AUDIT_2026-08-08.md)  
 **进度记录：** [`DISTINCTION_PROGRESS_TRACKER.md`](DISTINCTION_PROGRESS_TRACKER.md)
 

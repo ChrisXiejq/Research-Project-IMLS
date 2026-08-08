@@ -1,36 +1,53 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\subsection{Why simple adaptation beat the tested Transformers}
+\subsection{Why simple adaptation wins in this setting}
 
-The result favours task adaptation, not a general rejection of Transformers.
-The controlled distribution is narrow, training contains 160 rollouts and
-4,036 usable windows, the pretrained MultiPath representation is strong, and
-the explicit history covers only one second. A low-capacity head can therefore
-correct a substantial domain mismatch without learning a new interaction
-representation. The ablations show that \Tone{} and \Ttwo{} do use sequence
-information; their lower rank is not explained by total input neglect. A
-critical discussion should contrast representation sufficiency, sample
-efficiency, optimisation and the scarcity of response-active cases.
+The evidence favours task adaptation, not a general rejection of
+Transformers. The controlled distribution is narrow, the training split
+contains 160 rollouts and 4,036 usable windows, the pretrained MultiPath
+representation is strong, and the explicit history covers only one second. A
+retrained output head can therefore correct substantial domain mismatch
+without learning a new interaction representation. The sequence ablations
+show that \Tone{} and \Ttwo{} do use their added input; their lower rank is not
+explained by complete input neglect. Conversely, the B1 shuffles indicate that
+its aggregate gain is raster-dominant rather than evidence of effective target
+history modelling.
 
-\subsection{Why offline gain did not imply uniform closed-loop gain}
+The comparison also has an important fairness boundary. The MLP/Transformer
+pairs approximately match adapter capacity within two output scopes, but B1
+has substantially more trainable parameters and 10/15 runs select a checkpoint
+at the epoch ceiling. The result therefore supports simple adaptation as the
+best tested configuration under the frozen budget, not an architecture-level
+causal claim.
 
-The planner consumes a calibrated distribution rather than ADE alone. Risk
-allocation transforms it into constraints, solver feasibility limits candidate
-motion, and the supervisor changes execution. The response-tail calibration
-failure supplies a concrete mechanism by which excellent aggregate prediction
-can coexist with conditional downstream effects. Because \Bone{} also differs
-from \Bzero{} in frozen calibration, the correct conclusion concerns the
-predictor stack, not neural weights in isolation.
+\subsection{Why offline gain does not imply uniform closed-loop gain}
 
-\subsection{Adaptive risk as a frontier point}
+R3 first establishes that the deployed manipulation is real: B1 improves all
+40/40 in-loop prediction checks. The failure of uniform H3 translation cannot
+therefore be dismissed as a missing predictor difference. The planner consumes
+a calibrated distribution rather than ADE alone; risk allocation transforms
+that distribution into constraints, solver feasibility limits candidate
+motion, and the supervisor can change execution. Because B1 and B0 also use
+different frozen calibration, the valid estimand is the deployed predictor
+stack rather than neural weights alone.
 
-Adaptive risk remains useful even though universal dominance is refuted. It can
-move the safety--efficiency operating point, but its value depends on predictor,
-target style and timing. Comparing it against aggressive, medium and
-conservative fixed controls prevents a favourable single-baseline comparison
-from being mistaken for general superiority. This negative result directly
-refines the project's original planning hypothesis.
+The corrected result is deliberately modest: two of eight cells move both
+completion and separation in the preferred direction, and the pattern depends
+on policy and target style. Legacy response-tail and timing analyses supply
+plausible mechanisms---calibration failure and simultaneous changes in solver,
+supervisor and physical margin---but are not pooled with R3 and do not identify
+a single causal component.
+
+\subsection{Adaptive risk remains useful without dominance}
+
+H4's negative universal result does not make adaptive risk valueless. It
+dominates a fixed comparator in three prespecified contexts and fails to do so
+in nine. Its defensible interpretation is therefore a context-dependent
+operating point. Comparing it with aggressive, medium and conservative fixed
+settings prevents a favourable single comparator from being presented as
+general superiority. The result directly refines the project's original
+planning hypothesis while retaining a substantive role for adaptive policy.
 
 \subsection{Threats to validity}
 
@@ -43,42 +60,37 @@ refines the project's original planning hypothesis.
     \toprule
     Threat & Mitigation & Remaining boundary \\
     \midrule
-    Five independent init groups & Macro metrics, cluster intervals and exact tests & Minimum two-sided exact $p=0.0625$ \\
-    Single map/geometry & Style, risk and timing factorials & No cross-map or real-road claim \\
-    Callback alignment unavailable & Whole-rollout removal and 15-run sensitivity & Exact affected-window fraction unknown \\
-    Coupled solver/supervisor & Mechanism metrics and shared stack & No single-component causal attribution \\
-    Zero observed collisions & Report margins and counts separately & Population collision risk not zero \\
-    Tail calibration failure & Separate aggregate/tail reporting & Tail sample is very small \\
-    Timing batches run separately & Frozen contracts/hashes and paired inits & Residual batch effect possible \\
-    Post-hoc filtered validation & Primary experiment unchanged; no filtered test & Robustness evidence, not reselection \\
+    Five independent init groups & Paired effects, cluster intervals and exact tests & Minimum two-sided exact $p=0.0625$ \\
+    Single map and junction & Predictor, policy and target-style factorial & No cross-map or real-road claim \\
+    Configuration fairness & Two matched adapter scopes and full parameter/epoch audit & No pure architecture causality \\
+    Predictor calibration differs & Stack-level estimand declared before R3 & No weight-only B1 effect \\
+    Coupled solver/supervisor & Corrected contracts and mechanism telemetry & No single-component attribution \\
+    Zero observed binary failures & Continuous actual-bbox separation reported & No zero-risk or equivalence claim \\
+    Very small active tail & Separate labelled legacy diagnostic & No stable tail-population estimate \\
+    Legacy implementation differs & Corrected R3 is primary; no pooling & Legacy evidence is mechanism-only \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Two additional boundaries require explicit wording. Offline test and closed
-loop share initialisation IDs 46--50; closed loop was not used for model
-selection but is not an externally independent population replication. Also,
-the implementation diagram describes information flow and must not be presented
-as a causal graph.
+The fixed policies are three prespecified operating points rather than a dense
+continuous Pareto frontier. The implementation diagram represents information
+flow, not a causal graph. These boundaries prevent overclaiming but do not
+invalidate the frozen in-distribution and corrected R3 comparisons.
 
 \subsection{Implications and future work}
 
-For research practice, simple adaptation should be a mandatory baseline before
-claiming an interaction architecture improvement, and closed-loop evaluation
-should expose policy and timing moderators rather than collapse them into one
-score. For system design, calibration should be evaluated on response-active
-subsets, and solver/supervisor telemetry should accompany safety--efficiency
-metrics.
+For research practice, a simple task-adaptation control and training-budget
+audit should precede claims for a more elaborate interaction architecture.
+Closed-loop evaluation should verify that the prediction manipulation persists
+in deployment and should retain policy/context cells rather than collapse them
+into one score. For system design, continuous geometry margins and mechanism
+telemetry remain informative when nominal binary failure counts are zero.
 
 Future work should replicate across maps and junctions, increase independent
-initialisation clusters, enrich response-active data, test subgroup-aware
-calibration, run a matched calibration factorial, extend the interaction
-history, and evaluate graph/attention architectures at a scale commensurate
-with their capacity. Joint training of predictive uncertainty and risk
-allocation is a further direction, but requires new controls to preserve causal
-interpretability.
+initialisation clusters, enrich response-active data, compare calibration-
+matched predictor stacks, and evaluate larger graph/attention models with
+training budgets commensurate with their capacity. These are external-validity
+extensions, not missing experiments required to support the present claims.
 
-\TODO{Tie each interpretive claim to related work and state where the result
-agrees, conflicts, or adds a boundary. Include practical scale/production
-implications without implying that the current single-map experiment itself is
-production evidence.}
+\TODO{Tie each interpretive claim to checked primary literature and state
+where the result agrees, conflicts, or adds a boundary.}

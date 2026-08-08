@@ -20,7 +20,10 @@
 - [ ] “Significant” appears only when the declared exact/Holm test supports it.
 - [ ] Zero observed events are not interpreted as zero risk.
 - [ ] Primary, post-selection diagnostic and sensitivity results are separated.
-- [ ] Negative H3/H4/H5/H7 verdicts remain visible.
+- [ ] The four core verdicts remain visible: H1 supported with boundary;
+  H2 not supported; H3/H4 universal claims not supported.
+- [ ] Sequence use, calibration tail, deployment reliability and callback
+  filtering are labelled diagnostics/robustness checks, not extra hypotheses.
 - [ ] No claim generalises beyond the Town05 give-way scope.
 
 ## Literature review
@@ -53,4 +56,3 @@
   unreadable labels, isolated captions and broken references.
 - [ ] If submitting to TMLR rather than UCL, switch to anonymous mode and audit
   the PDF/source/supplement for identity and repository links.
-

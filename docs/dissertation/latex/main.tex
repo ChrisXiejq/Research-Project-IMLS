@@ -14,7 +14,10 @@
 \usepackage{hyperref}
 \usepackage{url}
 
-\graphicspath{{../../paper/generated/paper_assets_v1/figures/}}
+\graphicspath{%
+  {../../paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/}%
+  {../../paper/generated/paper_assets_v1/figures/}%
+}
 \hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
@@ -49,14 +52,15 @@ under a validation-frozen, one-shot test protocol. Simple task adaptation
 reduces held-out ADE by 1.193~m, FDE by 2.555~m and rollout-macro NLL by
 0.314~nats/step relative to the pretrained control, while the tested
 Transformer variants use their sequence input but do not outperform the
-simple adapter. In 160 nominal and shifted-timing closed-loop rollouts, the
-effect of the frozen predictor stack varies with risk policy, target behaviour
-and arrival timing; adaptive risk occupies a safety--efficiency frontier but
-does not universally dominate fixed-risk controls. These findings show that
-strong in-distribution prediction gains do not imply uniform closed-loop
-benefit and motivate joint, mechanism-aware evaluation of prediction and
-planning components. \TODO{Recheck every number and reduce to the programme's
-abstract word limit after the final prose is complete.}
+simple adapter. A prospectively frozen corrected closed-loop matrix contains
+80 rollouts spanning two predictor stacks, four risk policies, two target
+styles and five new paired initialisation groups. The prediction manipulation
+favours the adapted stack in all 40/40 metric--policy--style checks, yet only
+2/8 closed-loop cells jointly improve completion and separation. Adaptive
+risk dominates a fixed comparator in only 3/12 prespecified comparisons.
+Thus task adaptation, rather than added interaction-model complexity, provides
+the reliable offline gain in this setting, while its downstream value is
+conditional on the risk--control context.
 \end{abstract}
 
 \input{sections/01_introduction.tex}

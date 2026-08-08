@@ -1,31 +1,33 @@
 \section{Claim-to-evidence audit}
 \label{app:evidence}
 
-The final evidence audit reports 14/14 hard checks passed, no unresolved result
-identifiers and no source-hash mismatch. The canonical evidence package
-contains 210 stable result IDs, eight tables and eight figures in both SVG and
-PNG form. \TODO{Add the final Git commit and SHA-256 of the audit JSON used for
-the submitted PDF.}
+The M1 evidence package contains 82 value-resolving records for the four
+headline hypotheses. Its audit reports zero invalid locators, value mismatches,
+orphan headline claims and legacy/corrected pooling violations. Corrected R3
+also binds all 80 raw receipts, derived tables, synthesis assets and the
+study-stop decision to their manifests. \TODO{Add the final Git commit and
+SHA-256 values of M1 and A2 used for the submitted PDF.}
 
 \subsection{Primary and secondary evidence boundary}
 
-Primary evidence comprises the rollout-disjoint collection, three-seed
-validation selection, frozen test, and the nominal/shifted formal closed-loop
-matrices. Context ablations, calibration subsets, collision reconstruction and
-Day13 filtered validation are diagnostic or sensitivity evidence. They support
-mechanism and robustness claims but do not reopen model selection.
+Primary evidence comprises the rollout-disjoint prediction protocol, frozen
+offline test and corrected 80-rollout R3 matrix. Physical baselines,
+input/capacity audits and in-loop manipulation checks support interpretation.
+Legacy Day10--13 timing, calibration-tail, collision reconstruction and
+filtered validation analyses are diagnostic or sensitivity evidence. They do
+not reopen model selection and are never pooled with corrected R3.
 
 \subsection{Result provenance}
 
-Every numerical sentence in the final paper should have an adjacent source
-comment of the form:
+Every headline numerical sentence in the final source should have an adjacent
+comment containing an M1 evidence identifier, for example:
 
 \begin{verbatim}
-% EVIDENCE: R_TEST_B1_MINUS_B0_ADE
-% SOURCE: docs/paper/generated/paper_assets_v1/paper_key_results.csv
+% EVIDENCE: H1_B1_MINUS_B0_TEST_NLL
+% SOURCE: docs/paper/generated/distinction_v1/
+%         10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
 \end{verbatim}
 
 The submitted archive should include the LaTeX source, bibliography, official
-style assets, figures and a machine-readable claim-to-evidence table, while
-excluding secrets, raw credentials and non-anonymised supplementary metadata.
-
+style assets, generated figures and the machine-readable evidence package,
+while excluding secrets, credentials and non-anonymised metadata.

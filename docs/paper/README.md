@@ -1,30 +1,35 @@
-# Dissertation paper workspace
+# Paper evidence and writing guide
 
-The canonical TMLR-format dissertation source is maintained in
-[`../dissertation/latex/`](../dissertation/latex/). This directory remains the
-source of frozen methods, evidence, figures and audit records used by that
-manuscript.
+The experiment phase is complete. Corrected R3 finished all 80 prespecified
+rollouts, A2 produced the closed-loop synthesis, and M1 value-audited the four
+headline hypotheses. Large-scale CARLA collection is closed for this
+dissertation; R4 is frozen as `not_run`.
 
-> 当前阶段：**Day14 已完成，实验与证据冻结结束，进入正式论文写作。**
->
-> 最后审计：14/14 hard checks PASS；无需新增正式实验；8 项方法边界必须在论文中明确。
+## Read in this order
 
-## Canonical documents
+1. [`01_研究问题与实验方法.md`](01_研究问题与实验方法.md) — final thesis,
+   hypotheses, estimands and design;
+2. [`02_最终结果与审计结论.md`](02_最终结果与审计结论.md) — final numerical
+   verdicts and claim boundaries;
+3. [`03_论文写作路线与章节大纲.md`](03_论文写作路线与章节大纲.md) — chapter
+   structure and writing order;
+4. [`04_复现与证据资产索引.md`](04_复现与证据资产索引.md) — canonical
+   artifacts and reproduction commands;
+5. [`../dissertation/FINAL_TO_SUBMISSION_PLAN.md`](../dissertation/FINAL_TO_SUBMISSION_PLAN.md)
+   — the sole active route to submission.
 
-本目录只保留四份人工维护的论文文档：
+## Canonical evidence
 
-1. [`01_研究问题与实验方法.md`](01_研究问题与实验方法.md)：最终标题、研究问题、假设、数据、模型、闭环矩阵与统计方法；
-2. [`02_最终结果与审计结论.md`](02_最终结果与审计结论.md)：最终结果、假设判定、方法审计、缺陷与结论边界；
-3. [`03_论文写作路线与章节大纲.md`](03_论文写作路线与章节大纲.md)：按证据链组织的详细章节结构和写作顺序；
-4. [`04_复现与证据资产索引.md`](04_复现与证据资产索引.md)：机器证据、表格、图片、生成命令与引用规则。
+- `generated/distinction_v1/10_four_hypothesis_evidence/`: primary
+  claim-to-value entry point;
+- `generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/`:
+  corrected R3 tables, figures and synthesis;
+- other `generated/distinction_v1/` stages: provenance, controls, audits and
+  prospective contracts.
 
-机器生成内容统一位于 [`generated/`](generated/README.md)，其中论文写作唯一数字入口是 [`generated/paper_assets_v1/`](generated/paper_assets_v1/README.md)。
+`generated/paper_assets_v1/` and Day10--13 artifacts are retained for
+provenance and secondary diagnostics. They are not the primary corrected
+closed-loop evidence and must never be pooled with R3.
 
-## Frozen rules
-
-- 不再根据 test 或 closed-loop 结果重新选模型；
-- 不再寻找能让 adaptive risk “获胜”的特定场景；
-- 不把 simulator steps 或 prediction windows 当作独立实验样本；
-- 不声称 Transformer、adaptive risk 或 B1 在场景外普遍最优；
-- 每个定量主张必须来自 `paper_results_manifest.json` 的 result ID 或 canonical table；
-- 原 Day1–Day14 运行日志式文档已从活跃目录移除，可从 Git 历史提交 `558b9e8` 恢复。
+Generated evidence is immutable. Change the generating script and rerun its
+audit instead of editing a table, figure, JSON or result value by hand.

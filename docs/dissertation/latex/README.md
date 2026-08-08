@@ -1,7 +1,12 @@
 # TMLR-format dissertation LaTeX framework
 
 This directory is the canonical dissertation writing workspace. It uses the
-official TMLR style and the project's frozen Day14 evidence package.
+official TMLR style and the project's frozen R3/A2/M1 evidence package.
+
+Companion reading material is available one directory above:
+[`论文骨架中文版.md`](../论文骨架中文版.md) and
+[`论文带读版_零基础.md`](../论文带读版_零基础.md). These help with understanding
+and oral explanation; they do not replace the English submission source.
 
 ## Build
 
@@ -43,10 +48,11 @@ month, year and OpenReview URL. Do not edit `tmlr.sty`, `tmlr.bst` or
 - `WRITING_CHECKLIST.md`: recommended drafting and finalisation order.
 - `vendor/`: unmodified official TMLR style assets and their provenance.
 
-Figures are read directly from
-`../../paper/generated/paper_assets_v1/figures/`; no duplicate figure copies
-are maintained here. Numerical claims must be copied from the canonical
-tables/evidence package, not retyped from memory.
+Corrected closed-loop assets are read from
+`../../paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/`;
+legacy offline/diagnostic figures remain in `paper_assets_v1/`. Headline
+numbers must resolve through the M1 evidence package, not be retyped from
+memory.
 
 ## Official TMLR constraints reflected here
 
@@ -77,8 +83,12 @@ Reference pages: [Author Guidelines](https://jmlr.org/tmlr/author-guide.html),
 3. Do not claim conventional `p < 0.05` significance: there are five
    independent init clusters and the minimum two-sided exact p-value is
    0.0625.
-4. Distinguish primary experiments from post-selection diagnostics and Day13
-   sensitivity analysis.
-5. Keep appendices after the references, as required by the TMLR format.
-6. Delete every `\TODO{...}` before final submission; comments beginning with
+4. Keep exactly four headline hypotheses: task adaptation, Transformer added
+   value, offline-to-closed-loop transfer, and adaptive-risk dominance.
+   Sequence/calibration/deployment/callback analyses are supporting checks.
+5. Treat corrected R3 as the sole primary closed-loop effect matrix. Keep
+   Day10--13 timing/callback material explicitly secondary and never pool it
+   with R3.
+6. Keep appendices after the references, as required by the TMLR format.
+7. Delete every `\TODO{...}` before final submission; comments beginning with
    `% EVIDENCE:` are provenance notes and may remain in source.
