@@ -1,6 +1,6 @@
 # R3 pre-launch hardening acceptance
 
-R3 v2 is ready to execute. It is the only remaining large-scale CARLA experiment in the dissertation plan. After 80/80 integrity-valid rollouts produce a passing `R3_COMPLETE.json` and verified evidence archive, the large-scale CARLA programme is closed regardless of whether H3 or H4 is supported.
+R3 v3 is ready to execute. The v2 preflight passed, but its first rollout exposed a shell local-variable binding defect before any scientific rollout was launched; v3 corrects that execution-only defect and uses a fresh prospective result directory. It is the only remaining large-scale CARLA experiment in the dissertation plan. After 80/80 integrity-valid rollouts produce a passing `R3_COMPLETE.json` and verified evidence archive, the large-scale CARLA programme is closed regardless of whether H3 or H4 is supported.
 
 ## Accepted design
 
@@ -27,8 +27,8 @@ The analyzer emits all prespecified raw, contrast, binary, collision, margin-sen
 
 ## Verification performed
 
-- 37/37 server-preflight-equivalent tests passed.
-- 56/56 tests in the complete local `core/scripts/models/tests` suite passed.
+- 38/38 server-preflight-equivalent tests passed.
+- 57/57 tests in the complete local `core/scripts/models/tests` suite passed.
 - Shell syntax, Python compilation, CLI smoke, M0 cross-hash binding, credential scan and `git diff --check` passed.
 - The R1 controller and MPC source hashes remain unchanged; the scenario-runner drift is telemetry-only.
 

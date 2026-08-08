@@ -1,10 +1,10 @@
-# R3 v2 最终执行与恢复指南
+# R3 v3 最终执行与恢复指南
 
 **状态：**pre-launch hardening 完成；等待用户在服务器执行
 
-**唯一正式结果目录：**`/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v2`
+**唯一正式结果目录：**`/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v3`
 
-**唯一正式 protocol：**`r3_corrected_formal_v2`
+**唯一正式 protocol：**`r3_corrected_formal_v3`
 
 **正式规模：**2 predictor stacks × 4 risk policies × 2 target styles × 5 frozen inits = 80 rollouts
 
@@ -65,7 +65,7 @@ export PYTHON_BIN=/root/miniconda3/envs/carla_modern/bin/python
 export DAY7_RESULTS=/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1
 export DAY8_RESULTS=/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1
 export R2_RESULTS=/root/autodl-tmp/results/give_way_transformer/distinction_v1/r2_corrected_pilot_v4
-export R3_RESULTS=/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v2
+export R3_RESULTS=/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v3
 export GUROBI_BUNDLE_ROOT=/root/autodl-tmp/Research-Project-IMLS/gurobi
 export R3_MAX_ATTEMPTS=10
 export CUDA_VISIBLE_DEVICES=0
@@ -96,8 +96,8 @@ if ((${#R3_REMAINING_CARLA_PIDS[@]})); then
   exit 4
 fi
 
-nohup "$CARLA_ROOT/CarlaUE4.sh" Town05 \
-  -RenderOffScreen -quality-level=Low -nosound \
+cd /root/autodl-tmp
+nohup bash ./start_carla_3d.sh \
   > /root/autodl-tmp/logs/carla_r3_town05.log 2>&1 &
 export R3_CARLA_PID=$!
 echo "$R3_CARLA_PID" > /root/autodl-tmp/logs/carla_r3_town05.pid
@@ -107,13 +107,23 @@ for _ in $(seq 1 90); do
 import carla
 c = carla.Client('127.0.0.1', 2000)
 c.set_timeout(3.0)
-raise SystemExit(0 if c.get_world().get_map().name.endswith('Town05') else 2)
+c.get_world()
 PY
   then
     break
   fi
   sleep 2
 done
+
+# 用服务器上已验证的启动脚本建立进程后，由客户端显式加载 Town05。
+"$PYTHON_BIN" - <<'PY'
+import carla
+c = carla.Client('127.0.0.1', 2000)
+c.set_timeout(60.0)
+if not c.get_world().get_map().name.endswith('Town05'):
+    c.load_world('Town05')
+print('Loaded:', c.get_world().get_map().name)
+PY
 
 "$PYTHON_BIN" - <<'PY'
 import carla
@@ -127,7 +137,7 @@ PY
 
 ## 5. 先执行零 rollout preflight
 
-Preflight 会检查 exact Git SHA、clean tracked worktree、Town05、TensorFlow GPU、Gurobi、Day7/Day8/R2 assets、model/calibration hashes、M0 v1/v2 binding、80-key contract、init/scenario/tuning hashes，以及 37 项 regression/hardening/formal-analysis tests。它不会启动科学 rollout。
+Preflight 会检查 exact Git SHA、clean tracked worktree、Town05、TensorFlow GPU、Gurobi、Day7/Day8/R2 assets、model/calibration hashes、M0 v1/v2 binding、80-key contract、init/scenario/tuning hashes，以及 38 项 regression/hardening/formal-analysis tests。它不会启动科学 rollout。
 
 ```bash
 cd "$R3_REPO"

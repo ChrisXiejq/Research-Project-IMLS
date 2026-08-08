@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# Prospective corrected R3 v2 matrix:
+# Prospective corrected R3 v3 matrix:
 # B0/B1 x 3 fixed + adaptive x assertive/reactive x 5 new init groups = 80.
 # Scientific adverse outcomes are retained; only infrastructure/integrity
 # failures stop the final R3 completion gate.
@@ -14,7 +14,7 @@ PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/envs/carla_modern/bin/python}"
 DAY7_RESULTS="${DAY7_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1}"
 DAY8_RESULTS="${DAY8_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1}"
 R2_RESULTS="${R2_RESULTS:-/root/autodl-tmp/results/give_way_transformer/distinction_v1/r2_corrected_pilot_v4}"
-R3_RESULTS="${R3_RESULTS:-/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v2}"
+R3_RESULTS="${R3_RESULTS:-/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v3}"
 # The server has a history of transient termination.  Ten is a prospective,
 # bounded infrastructure-only ceiling; scientific outcomes are never retried.
 R3_MAX_ATTEMPTS="${R3_MAX_ATTEMPTS:-10}"
@@ -296,7 +296,7 @@ payload={
  "environment_sha256":h(environment),"execution_source_manifest_sha256":h(source_manifest),
  "frozen_source_files":{"tuning":{"scope":"results","path":"tuning_r3_frozen.json","sha256":h(tuning_path)},"scenario":{"scope":"results","path":"_frozen_contracts/scenario_uk_give_way.json","sha256":h(scenario_source)},"environment":{"scope":"results","path":"r3_environment.json","sha256":h(environment)},"execution_sources":{"scope":"results","path":"r3_execution_source_manifest.json","sha256":h(source_manifest)}},
  "deployment_preflight_filename":"r3_deployment_preflight.json",
- "prediction_protocol_id":"r3_corrected_formal_v2","git_commit":subprocess.check_output(["git","-C",str(repo),"rev-parse","HEAD"],text=True).strip(),
+ "prediction_protocol_id":"r3_corrected_formal_v3","git_commit":subprocess.check_output(["git","-C",str(repo),"rev-parse","HEAD"],text=True).strip(),
  "dedicated_carla_instance":{"host":"127.0.0.1","port":2000,"concurrent_jobs_prohibited":True,"pre_attempt_stale_actor_types":["vehicle.*","sensor.*"]},
  "analysis_unit":"ego_init_cluster","fixed_geometry_metric_required":True,"pilot_rollouts_excluded":True,"legacy_corrected_pooling_prohibited":True,"no_post_result_tuning":True,
 }
@@ -336,14 +336,17 @@ else:
 PY
 
 if ((R3_PREFLIGHT_ONLY)); then
-  echo "[$(date --iso-8601=seconds)] R3 v2 preflight PASS; no scientific rollout was launched"
+  echo "[$(date --iso-8601=seconds)] R3 v3 preflight PASS; no scientific rollout was launched"
   "${PYTHON_BIN}" "${PROGRESS_SUMMARIZER}" --results-dir "${R3_RESULTS}" --contract-json "${CONTRACT}"
   exit 0
 fi
 
 run_rollout() {
   local predictor="$1" policy="$2" style="$3" init_id="$4"
-  local cell_id="${predictor}_${policy}_${style}" cell_dir="${R3_RESULTS}/${cell_id}"
+  # Keep dependent assignments separate: with `set -u`, Bash expands every RHS
+  # in a single `local` command before the earlier name is bound.
+  local cell_id="${predictor}_${policy}_${style}"
+  local cell_dir="${R3_RESULTS}/${cell_id}"
   local model policy_name risk_profile target_style attempt_dir attempt_log prepare_json prepare_status
   local finalize_json finalize_status scenario_status=1 attempt=0 retry_allowed=0
   local calibration_arg=() adaptive_arg=()
@@ -385,7 +388,7 @@ run_rollout() {
         --tuning_config "${TUNING_CONFIG}" --prediction_model_weights "${model}" --prediction_model_anchors "${ANCHORS}" \
         "${calibration_arg[@]}" --target_style "${target_style}" --reactive_config_json "${REACTIVE_CONFIG_JSON}" \
         --enable_prediction_logging --prediction_logging_stride 1 --prediction_logging_horizon 10 \
-        --prediction_protocol_id r3_corrected_formal_v2 --prediction_cell_id "${cell_id}" \
+        --prediction_protocol_id r3_corrected_formal_v3 --prediction_cell_id "${cell_id}" \
         --prediction_ego_policy_label "${policy}" --prediction_git_commit "$(git -C "${REPO_DIR}" rev-parse HEAD)" \
         --disable_camera_viz --postprocess_no_plots "${adaptive_arg[@]}"
     ) 2>&1 | tee "${attempt_log}"; then
@@ -465,7 +468,7 @@ if stop.get("status")!="pass" or stop.get("additional_large_scale_carla_required
 def h(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 p={"schema_version":"r3_data_complete_v2","status":"pass","stage":"R3","formal_evidence":True,
  "result_generation":"distinction_corrected_v1","implementation_version":"corrected_joint_modes_shared_amin_v1",
- "prediction_protocol_id":"r3_corrected_formal_v2","observed_rollouts":80,"unique_treatment_keys":80,
+ "prediction_protocol_id":"r3_corrected_formal_v3","observed_rollouts":80,"unique_treatment_keys":80,
  "scientific_outcome_taxonomy":audit["scientific_outcome_taxonomy"],"scientific_direction_never_blocks_completion":True,
  "additional_large_scale_carla_required":False,"deployment_preflight_sha256":h(preflight_path),
  "contract_sha256":h(contract_path),"matrix_audit_sha256":h(audit_path),"analysis_complete_sha256":h(analysis_path),
@@ -492,7 +495,7 @@ d,g,s=(json.loads(path.read_text()) for path in (data,stop,snapshot))
 if d.get("status")!="pass" or g.get("additional_large_scale_carla_required") is not False or s.get("status")!="pass": raise SystemExit("R3 final evidence is incomplete")
 def h(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 p={"schema_version":"r3_complete_v2","status":"pass","stage":"R3","formal_evidence":True,
- "observed_rollouts":80,"prediction_protocol_id":"r3_corrected_formal_v2",
+ "observed_rollouts":80,"prediction_protocol_id":"r3_corrected_formal_v3",
  "additional_large_scale_carla_required":False,"carla_experiment_program_closed":True,
  "scientific_direction_never_blocks_completion":True,"data_complete_sha256":h(data),
  "study_stop_gate_sha256":h(stop),"archive_sha256":s["archive_sha256"],

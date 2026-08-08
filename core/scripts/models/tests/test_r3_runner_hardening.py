@@ -288,5 +288,17 @@ class ProvenanceSecurityTest(unittest.TestCase):
             assert_no_sensitive_text({"password": "do-not-record"})
 
 
+class RunnerShellRegressionTest(unittest.TestCase):
+    def test_cell_directory_does_not_reference_an_unbound_local(self) -> None:
+        runner = MODELS_DIR.parent / "carla" / "run_r3_corrected_formal_matrix.sh"
+        source = runner.read_text(encoding="utf-8")
+        self.assertNotIn(
+            'local cell_id="${predictor}_${policy}_${style}" cell_dir="${R3_RESULTS}/${cell_id}"',
+            source,
+        )
+        self.assertIn('local cell_id="${predictor}_${policy}_${style}"\n', source)
+        self.assertIn('local cell_dir="${R3_RESULTS}/${cell_id}"\n', source)
+
+
 if __name__ == "__main__":
     unittest.main()

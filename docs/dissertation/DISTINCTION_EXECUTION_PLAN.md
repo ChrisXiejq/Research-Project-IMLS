@@ -2,7 +2,7 @@
 
 **版本：** v2（R3 pre-launch hardening freeze），2026-08-08
 **适用范围：** 从 adversarial audit 完成后，到最终 TMLR-format dissertation、可复现实验资产和答辩材料全部完成  
-**当前入口：** S0–G2、R1–R2、M0 v2 已完成；R3 v2 是唯一剩余的大规模 CARLA 实验
+**当前入口：** S0–G2、R1–R2、M0 v2 已完成；R3 v3 是唯一剩余的大规模 CARLA 实验
 **配套审计：** [`DISTINCTION_READINESS_AUDIT_2026-08-08.md`](DISTINCTION_READINESS_AUDIT_2026-08-08.md)  
 **进度记录：** [`DISTINCTION_PROGRESS_TRACKER.md`](DISTINCTION_PROGRESS_TRACKER.md)
 
@@ -521,7 +521,7 @@ G1 之后不再根据写作偏好改变模型结论。
 
 **执行与恢复 hardening：**
 
-- 使用全新的 `r3_corrected_formal_v2` 目录和 protocol；不得混入任何 v1 partial output；
+- 使用全新的 `r3_corrected_formal_v3` 目录和 protocol；不得混入 v1 partial output 或只完成 preflight 的 v2 目录；
 - 每个 treatment–init rollout 写入独立 attempt 目录，只有 raw JSON/JSONL/pickle/CSV 完整可解析后才原子提升为 canonical rollout；
 - receipt 同时绑定 raw-evidence hash、accepted attempt record、immutable attempt ledger 与关键文件 hashes；
 - 最多 10 次、只对 allowlisted infrastructure failure 自动续跑；unknown failure 必须停下审计；

@@ -7,8 +7,8 @@
   "ready_for_user_launched_r3": true,
   "result_generation": "distinction_corrected_v1",
   "implementation_version": "corrected_joint_modes_shared_amin_v1",
-  "prediction_protocol_id": "r3_corrected_formal_v2",
-  "result_directory_name": "r3_corrected_formal_v2",
+  "prediction_protocol_id": "r3_corrected_formal_v3",
+  "result_directory_name": "r3_corrected_formal_v3",
   "formal_matrix": {
     "predictor_stacks": 2,
     "risk_policies": 4,
@@ -76,9 +76,9 @@
     "prespecified_scientific_censoring_is_valid_evidence": true
   },
   "local_verification": {
-    "server_preflight_equivalent_unittest_count": 37,
+    "server_preflight_equivalent_unittest_count": 38,
     "server_preflight_equivalent_unittest_status": "pass",
-    "full_models_unittest_count": 56,
+    "full_models_unittest_count": 57,
     "full_models_unittest_status": "pass",
     "bash_syntax_status": "pass",
     "python_compile_status": "pass",
@@ -94,7 +94,7 @@
     "classification": "unchanged_from_R1; run_intersection_scenario changes are telemetry_only"
   },
   "r3_source_sha256": {
-    "core/scripts/carla/run_r3_corrected_formal_matrix.sh": "aa8956cb88c404d903db3a1d2928f99ce00698a80b64c9159234ed0d98ed528a",
+    "core/scripts/carla/run_r3_corrected_formal_matrix.sh": "ac0b4e685510a503e6eb94d083e9a0e3cb46ea6c1af1b5c4d44478796a8421aa",
     "core/scripts/carla/run_all_scenarios.py": "0772ed8fd5666ee991e5d6bf5f41046e2060e0282877252bc1bac08f7cff2c3c",
     "core/scripts/carla/scenarios/run_intersection_scenario.py": "7462511165746ca56b1983e8fa96563f629f2810fb4153cd7d0e4f6a30a3a5c3",
     "core/scripts/postcarla_trajectory_gate.py": "98ebc8d4149c4dc49ac72a55066fc685a6ef2494f648abb5edb6a8cee1e9231f",
@@ -105,7 +105,7 @@
     "core/scripts/models/summarize_r3_progress.py": "6fa7495de53e7b5364d6aa9cdaf6af725ac18845881e07e00589f19c3752530a",
     "core/scripts/models/package_closed_loop_snapshot.py": "ec7599b0e2c4e8817292d61f8e8d450e2a2f9ff1a57ae3bf793948506baad31d",
     "core/scripts/models/tests/test_r3_corrected_gates.py": "f0d871c9b40515e8639cc267310d0178656b40b56b2f5d6b18390701066d5a30",
-    "core/scripts/models/tests/test_r3_runner_hardening.py": "fe4c2c6e0c869d7708e9d1cfde00ccdef74c01137326c0ed394ff17d5d00c349",
+    "core/scripts/models/tests/test_r3_runner_hardening.py": "b26983330a9a82c2159a0a065cba47074a2ed9b4e9528efe2b5eb352ee03bdcf",
     "core/scripts/models/tests/test_r3_formal_analysis.py": "b5c91d4d6c5bb090240bfc0bda9420f5a295372cf8205888604401fed6aa490b"
   },
   "known_scope_limits_not_blocking_execution": [
