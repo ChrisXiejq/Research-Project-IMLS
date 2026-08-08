@@ -334,6 +334,110 @@ def main() -> None:
     raw_marker = raw_collection_marker(root, contract, progress)
     freeze_json(raw_marker_path, raw_marker, volatile={"created_at_utc"})
 
+    recovery_marker_path = root / "R3_INTEGRITY_RECOVERY_PREPARED.json"
+    recovery_marker = None
+    recovery_resolution_path = root / "R3_INTEGRITY_RECOVERY_RESOLVED.json"
+    if recovery_marker_path.is_file():
+        recovery_marker = read_json(recovery_marker_path)
+        if (
+            recovery_marker.get("status") != "prepared"
+            or recovery_marker.get("classification")
+            != "same_treatment_key_integrity_recovery"
+            or recovery_marker.get("cell_id") != "B0_fixed_conservative_assertive"
+            or int(recovery_marker.get("ego_init_id", -1)) != 103
+            or recovery_marker.get("scientific_outcomes_used_to_select_recovery")
+            is not False
+            or recovery_marker.get("outcome_dependent_rerun_prohibited") is not True
+        ):
+            raise RuntimeError("R3 integrity-recovery provenance marker is invalid")
+        quarantine_relative = Path(str(recovery_marker.get("quarantine") or ""))
+        if quarantine_relative.is_absolute() or ".." in quarantine_relative.parts:
+            raise RuntimeError("R3 integrity-recovery quarantine path is unsafe")
+        previous_raw_marker_path = (
+            root
+            / quarantine_relative
+            / "root_derived_before_recovery"
+            / "R3_RAW_COLLECTION_COMPLETE.json"
+        )
+        if (
+            not previous_raw_marker_path.is_file()
+            or sha256(previous_raw_marker_path)
+            != recovery_marker.get("previous_raw_collection_marker_sha256")
+        ):
+            raise RuntimeError("Pre-recovery raw collection marker was not preserved")
+        previous_raw_marker = read_json(previous_raw_marker_path)
+        previous_entries = {
+            (str(item["cell_id"]), int(item["ego_init_id"])): item
+            for item in previous_raw_marker.get("entries") or []
+        }
+        replacement_entries = {
+            (str(item["cell_id"]), int(item["ego_init_id"])): item
+            for item in raw_marker.get("entries") or []
+        }
+        if len(previous_entries) != EXPECTED_ROLLOUTS or set(previous_entries) != set(
+            replacement_entries
+        ):
+            raise RuntimeError("Pre/post recovery treatment-key coverage differs")
+        replacement_key = ("B0_fixed_conservative_assertive", 103)
+        changed_keys = sorted(
+            key
+            for key in previous_entries
+            if (
+                previous_entries[key].get("receipt_sha256"),
+                previous_entries[key].get("raw_evidence_sha256"),
+            )
+            != (
+                replacement_entries[key].get("receipt_sha256"),
+                replacement_entries[key].get("raw_evidence_sha256"),
+            )
+        )
+        if changed_keys != [replacement_key]:
+            raise RuntimeError(
+                f"Integrity recovery changed keys outside the authorized scope: {changed_keys}"
+            )
+        previous_candidate = previous_entries[replacement_key]
+        replacement_candidate = replacement_entries[replacement_key]
+        if (
+            previous_candidate.get("receipt_sha256")
+            != recovery_marker.get("candidate_receipt_sha256")
+            or previous_candidate.get("raw_evidence_sha256")
+            != recovery_marker.get("candidate_raw_evidence_sha256")
+        ):
+            raise RuntimeError("Quarantined candidate hashes do not match recovery provenance")
+        recovery_resolution = {
+            "schema_version": "r3_integrity_recovery_resolved_v1",
+            "status": "pass",
+            "classification": "same_treatment_key_integrity_recovery",
+            "cell_id": replacement_key[0],
+            "ego_init_id": replacement_key[1],
+            "scientific_outcomes_used_to_select_recovery": False,
+            "preserved_treatment_keys": EXPECTED_ROLLOUTS - 1,
+            "replaced_treatment_keys": 1,
+            "changed_keys": [
+                {"cell_id": replacement_key[0], "ego_init_id": replacement_key[1]}
+            ],
+            "previous_raw_collection_marker_sha256": sha256(
+                previous_raw_marker_path
+            ),
+            "replacement_raw_collection_marker_sha256": sha256(raw_marker_path),
+            "previous_receipt_sha256": previous_candidate.get("receipt_sha256"),
+            "previous_raw_evidence_sha256": previous_candidate.get(
+                "raw_evidence_sha256"
+            ),
+            "replacement_receipt_sha256": replacement_candidate.get(
+                "receipt_sha256"
+            ),
+            "replacement_raw_evidence_sha256": replacement_candidate.get(
+                "raw_evidence_sha256"
+            ),
+            "resolved_at_utc": now_utc(),
+        }
+        freeze_json(
+            recovery_resolution_path,
+            recovery_resolution,
+            volatile={"resolved_at_utc"},
+        )
+
     frozen_finalizer_source = root / "r3_offline_finalizer_source.py"
     frozen_loader_source = root / "r3_closed_loop_metrics_compat_source.py"
     atomic_copy(Path(__file__).resolve(), frozen_finalizer_source)
@@ -347,6 +451,9 @@ def main() -> None:
         "status": "pass",
         "classification": "authorized_derived_only_repair",
         "repair_reason": "legacy_metric_loader_rejected_appended_actor_geometry_metadata",
+        # This statement is scoped to the offline finalizer itself.  If the
+        # matrix gate previously authorized a same-key CARLA recovery, its
+        # immutable provenance marker is bound separately below.
         "raw_collection_mutation_permitted": False,
         "carla_or_scientific_rollouts_permitted": False,
         "collection_git_commit": contract["git_commit"],
@@ -355,6 +462,17 @@ def main() -> None:
         "collection_source_manifest_sha256": sha256(source_manifest_path),
         "raw_collection_marker": raw_marker_path.name,
         "raw_collection_marker_sha256": sha256(raw_marker_path),
+        "same_key_integrity_recovery_applied_before_finalization": recovery_marker
+        is not None,
+        "integrity_recovery_marker": (
+            recovery_marker_path.name if recovery_marker is not None else None
+        ),
+        "integrity_recovery_marker_sha256": (
+            sha256(recovery_marker_path) if recovery_marker is not None else None
+        ),
+        "integrity_recovery_resolution_sha256": (
+            sha256(recovery_resolution_path) if recovery_marker is not None else None
+        ),
         "critical_source_drift": source_drift,
         "frozen_repair_sources": {
             frozen_finalizer_source.name: sha256(frozen_finalizer_source),
@@ -489,6 +607,14 @@ def main() -> None:
         "cells_postprocessed": len(outcomes),
         "scientific_rollouts_launched": 0,
         "raw_receipt_manifest_unchanged": True,
+        "same_key_integrity_recovery_applied_before_finalization": recovery_marker
+        is not None,
+        "integrity_recovery_marker_sha256": (
+            sha256(recovery_marker_path) if recovery_marker is not None else None
+        ),
+        "integrity_recovery_resolution_sha256": (
+            sha256(recovery_resolution_path) if recovery_marker is not None else None
+        ),
         "postcarla_nonzero_is_scientific_not_integrity": True,
         "cell_outputs": outcomes,
         "matrix_audit_sha256": sha256(audit_path),
@@ -517,6 +643,12 @@ def main() -> None:
         "scientific_direction_never_blocks_completion": True,
         "additional_large_scale_carla_required": False,
         "raw_collection_complete_sha256": sha256(raw_marker_path),
+        "integrity_recovery_marker_sha256": (
+            sha256(recovery_marker_path) if recovery_marker is not None else None
+        ),
+        "integrity_recovery_resolution_sha256": (
+            sha256(recovery_resolution_path) if recovery_marker is not None else None
+        ),
         "offline_finalization_provenance_sha256": sha256(provenance_path),
         "offline_finalization_report_sha256": sha256(report_path),
         "deployment_preflight_sha256": sha256(root / "r3_deployment_preflight.json"),
@@ -537,6 +669,9 @@ def main() -> None:
         frozen_loader_source,
         root / "r3_offline_finalizer_frozen.log",
     ]
+    if recovery_marker is not None:
+        evidence.append(recovery_marker_path)
+        evidence.append(recovery_resolution_path)
     package_command = [
         args.python_bin,
         str(MODELS_DIR / "package_closed_loop_snapshot.py"),
@@ -582,6 +717,12 @@ def main() -> None:
         "carla_experiment_program_closed": True,
         "scientific_direction_never_blocks_completion": True,
         "raw_collection_complete_sha256": sha256(raw_marker_path),
+        "integrity_recovery_marker_sha256": (
+            sha256(recovery_marker_path) if recovery_marker is not None else None
+        ),
+        "integrity_recovery_resolution_sha256": (
+            sha256(recovery_resolution_path) if recovery_marker is not None else None
+        ),
         "offline_finalization_provenance_sha256": sha256(provenance_path),
         "offline_finalization_report_sha256": sha256(report_path),
         "data_complete_sha256": sha256(data_complete_path),
