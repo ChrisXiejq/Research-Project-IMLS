@@ -6,6 +6,7 @@ mechanism diagnostics.
 
 \subsection{Data and protocol integrity}
 
+% SOURCE: distinction_v1/05_dataset_audit and 06_split_balance
 All 200 planned prediction-data rollouts completed. Raw and merged manifests
 agree on 11,230 samples, rollout groups are disjoint across the 160/20/20
 train/validation/test split, no duplicate keys or normalisation leakage are
@@ -16,6 +17,9 @@ gates.
 
 \subsection{H1: simple task adaptation produces the reliable offline gain}
 
+% EVIDENCE: H1_B1_MINUS_B0_TEST_NLL, H1_B1_MINUS_B0_TEST_ADE,
+% H1_B1_MINUS_B0_TEST_FDE
+% SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
 Across the three validation seeds, median macro NLL ranks \Bone{} first,
 followed by \BtwoD{}, \Ttwo{}, \Tone{} and \BtwoM{}. Relative to pretrained
 \Bzero{} on the frozen test, \Bone{} reduces top-1 ADE by 1.193~m, FDE by
@@ -35,6 +39,9 @@ supported within the frozen Town05 distribution.
 
 \subsection{H2: tested Transformer adapters add no consistent benefit}
 
+% EVIDENCE: H2_T1_TEST_NLL, H2_B2_M_TEST_NLL,
+% H2_T2_TEST_NLL, H2_B2_D_TEST_NLL
+% SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
 The paired-head comparisons point in opposite directions. \Tone{} attains a
 test NLL of 2.003746 versus 2.024409 for \BtwoM{}, whereas \Ttwo{} attains
 1.878148 versus 1.872789 for \BtwoD{}. Neither configuration exceeds the
@@ -46,6 +53,7 @@ not evidence that Transformers are generally ineffective.
 
 \subsection{R3 manipulation and nominal reliability}
 
+% SOURCE: corrected R3 r3_predictor_manipulation_checks.csv
 The deployed prediction manipulation is strong: all 40/40
 metric--policy--style checks favour \Bone{} over \Bzero{} in every paired
 initialisation group. Across these checks, \Bone{}--\Bzero{} top-1 ADE effects
@@ -62,6 +70,8 @@ zero population risk or treatment equivalence.
 
 \subsection{H3: prediction gain does not transfer uniformly}
 
+% EVIDENCE: H3_SUPPORTED_CELLS, H3_PRESPECIFIED_CELLS
+% SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
 Only two of eight policy--style cells jointly have faster mean completion and
 no-worse mean footprint separation for \Bone{} relative to \Bzero{}:
 adaptive/reactive and fixed-aggressive/assertive. The remaining six cells fail
@@ -95,14 +105,38 @@ predictor stack has no closed-loop value.
   \end{tabular}
 \end{table}
 
+Figure~\ref{fig:r3-h3} makes the registered joint-direction criterion explicit:
+green cells require both faster completion and no-worse physical separation,
+not improvement on either outcome alone.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.99\linewidth]{figure_r3_h3_translation.png}
+  \caption{Corrected R3 predictor-stack translation. The presentation asset is
+  a hash-tracked PNG conversion of the canonical A2 SVG; all values resolve to
+  the 80-rollout formal analysis.}
+  \label{fig:r3-h3}
+\end{figure}
+
 \subsection{H4: adaptive risk is conditional, not dominant}
 
+% EVIDENCE: H4_DOMINANCE_CELLS, H4_PRESPECIFIED_CELLS
+% SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
 Adaptive risk dominates its fixed comparator in only 3/12 prespecified
 predictor--style--comparator contrasts: \Bzero{}/assertive versus fixed medium,
 and \Bone{}/reactive versus fixed aggressive and fixed medium. It does not
 dominate in the other 9/12 contrasts. H4 is therefore not supported as a
 universal dominance claim. The result retains a useful role for adaptive risk
 as a context-dependent operating point rather than a universal replacement.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.99\linewidth]{figure_r3_h4_dominance.png}
+  \caption{Adaptive-risk dominance across predictor, target style and fixed
+  comparator. Dominance is the prespecified empirical Pareto rule with binary
+  guards, not an equivalence test.}
+  \label{fig:r3-h4}
+\end{figure}
 
 \begin{table}[t]
   \caption{Corrected R3 hypothesis synthesis. Counts are prespecified cells or

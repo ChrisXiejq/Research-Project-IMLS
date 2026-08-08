@@ -9,7 +9,9 @@ Do not edit numerical values by hand.
    hypothesis verdicts and value audit;
 2. `distinction_v1/08_corrected_closed_loop/r3_final/synthesis/` — A2 corrected
    R3 tables, figures and synthesis;
-3. remaining `distinction_v1/` stages — provenance, controls, diagnostics,
+3. `distinction_v1/11_w1_manuscript/` — manuscript presentation assets and W1
+   completion audit;
+4. remaining `distinction_v1/` stages — provenance, controls, diagnostics,
    prospective contracts and completion gates.
 
 R3 is complete at 80/80 and the frozen study-stop decision requires no further

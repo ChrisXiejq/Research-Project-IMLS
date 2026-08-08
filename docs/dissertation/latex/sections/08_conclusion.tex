@@ -1,22 +1,15 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-This dissertation tested a progression from task adaptation to explicit
-interaction modelling and finally to closed-loop predictor--risk coupling in a
-controlled CARLA give-way scenario. Task adaptation strongly improved held-out
-in-distribution prediction and was the best of the tested models. The
-Transformer adapters demonstrably used their temporal input but did not surpass
-the simple adapted head. More accurate offline prediction did not create a
-uniform closed-loop gain: its effect changed with risk policy and target
-behaviour. Adaptive risk consequently remained one context-dependent point on a
-safety--efficiency frontier rather than a universal replacement for fixed risk.
-
-The central conclusion is methodological as well as empirical: prediction
-quality, calibration, risk allocation, solver feasibility and supervisor
-activity must be evaluated together before an offline machine-learning gain is
-interpreted as a driving benefit. The result is bounded to the declared CARLA
-scenario and does not constitute a real-world safety claim.
-
-\TODO{After the Introduction and Discussion are final, reduce this to one
-paragraph that answers RQ1--RQ4 in order, gives no new numbers, and ends with
-the single strongest contribution.}
+In the controlled Town05 give-way distribution, task adaptation improved
+prediction relative to the pretrained MultiPath control (RQ1), while the tested
+Transformer adapters used their temporal inputs but added no consistent benefit
+beyond simple adaptation and matched-scope MLP controls (RQ2). The verified
+offline improvement did not transfer uniformly: its effect on completion and
+physical separation changed with risk policy and target style (RQ3). Adaptive
+risk likewise occupied useful context-dependent operating points but did not
+dominate the three fixed-risk controls (RQ4). These findings are bounded to the
+frozen simulator contract and do not establish real-world safety. The strongest
+contribution is therefore the coupled evidence chain: a machine-learning gain is
+not interpreted as a driving gain until calibration, risk allocation, solver
+feasibility, supervision and executed geometry have been evaluated together.

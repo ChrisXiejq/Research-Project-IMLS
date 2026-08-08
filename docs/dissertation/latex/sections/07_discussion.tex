@@ -14,6 +14,16 @@ explained by complete input neglect. Conversely, the B1 shuffles indicate that
 its aggregate gain is raster-dominant rather than evidence of effective target
 history modelling.
 
+This interpretation is compatible with two strands of prior evidence. Large
+interaction Transformers obtain their gains with richer multi-agent/map inputs
+and much larger benchmark distributions
+\citep{yuan2021agentformer,ngiam2022scene,nayakanti2023wayformer,shi2022mtr},
+whereas cross-dataset analysis shows that domain transfer itself can cause a
+large accuracy loss \citep{feng2024unitraj}. The present result adds the
+boundary that, for a narrow in-distribution adaptation with a fixed MultiPath
+interface, correcting the final head can be more valuable than adding a small
+sequence adapter.
+
 The comparison also has an important fairness boundary. The MLP/Transformer
 pairs approximately match adapter capacity within two output scopes, but B1
 has substantially more trainable parameters and 10/15 runs select a checkpoint
@@ -32,6 +42,16 @@ motion, and the supervisor can change execution. Because B1 and B0 also use
 different frozen calibration, the valid estimand is the deployed predictor
 stack rather than neural weights alone.
 
+The result agrees with the task-relevance argument that only some forecast
+errors alter downstream cost \citep{farid2023task,nakamura2025regret} and with
+closed-loop benchmarks that reject open-loop distance as a sufficient planning
+metric \citep{caesar2021nuplan}. It also independently reproduces the direction
+of the recent, broader open-loop/closed-loop mismatch reported by
+\citet{bouzidi2025closing}. Unlike integrated end-to-end training such as DIPP
+\citep{huang2023dipp}, however, this experiment preserves the modular predictor
+interface and attributes the observed effect only to the frozen stack-level
+treatment.
+
 The corrected result is deliberately modest: two of eight cells move both
 completion and separation in the preferred direction, and the pattern depends
 on policy and target style. Legacy response-tail and timing analyses supply
@@ -48,6 +68,13 @@ operating point. Comparing it with aggressive, medium and conservative fixed
 settings prevents a favourable single comparator from being presented as
 general superiority. The result directly refines the project's original
 planning hypothesis while retaining a substantive role for adaptive policy.
+
+This is consistent with risk allocation as a mechanism for reducing unnecessary
+conservatism rather than a theorem of universal empirical dominance
+\citep{ono2008risk,nair2025predictive}. Formal SMPC safety and feasibility
+results depend on their modelling assumptions \citep{ren2025recursively}; the
+finite CARLA comparison instead asks which executed operating point is preferred
+under the shared corrected controller and supervisor.
 
 \subsection{Threats to validity}
 
@@ -92,5 +119,9 @@ matched predictor stacks, and evaluate larger graph/attention models with
 training budgets commensurate with their capacity. These are external-validity
 extensions, not missing experiments required to support the present claims.
 
-\TODO{Tie each interpretive claim to checked primary literature and state
-where the result agrees, conflicts, or adds a boundary.}
+For production-oriented evaluation, the immediate implication is procedural:
+retain a cheap task-adapted control, audit probabilistic calibration by
+interaction subgroup, verify that a model difference survives in-loop, and
+report a policy frontier with execution mechanisms. The present sample cannot
+set deployment thresholds, but this sequence reduces the risk of promoting a
+larger model or an adaptive policy on an offline score alone.

@@ -23,18 +23,25 @@ frontier.
 
 \subsection{Research gap}
 
-The dissertation addresses three linked gaps. First, motion-prediction studies
-often stop at open-loop ADE, FDE or likelihood, leaving the downstream value of
-an improvement uncertain. Second, architectural complexity and attention are
-frequently compared without a simple task-adaptation baseline and an
-approximately capacity-matched non-attention control. Third, a claim that an
-adaptive risk rule is superior can be an artefact of comparing it with a
-single fixed setting rather than multiple prespecified fixed operating points
-and of omitting moderators such as predictor and target behaviour.
-
-\TODO{Support each gap with a critical synthesis of primary literature. State
-what each cited paper evaluates, what it leaves unresolved, and why the three
-gaps intersect in this system.}
+The dissertation addresses three linked gaps. First, modern multimodal
+predictors are commonly selected by displacement or probabilistic forecasting
+metrics \citep{chai2020multipath,shi2022mtr,nayakanti2023wayformer}, even though
+planning-aware studies show that prediction errors differ in downstream cost
+\citep{farid2023task,nakamura2025regret}. Closed-loop benchmarks and integrated
+prediction--planning methods narrow this gap
+\citep{caesar2021nuplan,huang2023dipp}, but they do not make an open-loop gain a
+general safety claim. Second, attention architectures demonstrate strong
+interaction modelling at large benchmark scale
+\citep{yuan2021agentformer,ngiam2022scene}; a small-data task-adaptation study
+still needs a simple adapted baseline, output-scope controls and a disclosed
+training budget before attributing a gain to attention. Third, stochastic and
+branch MPC methods incorporate multimodal forecasts and tune risk--performance
+trade-offs \citep{nair2022smpc,chen2022branch,nair2025predictive}, but the
+studies reviewed here do not jointly cross a frozen predictor-stack treatment,
+several fixed-risk operating points, target behaviour and paired execution
+conditions. These gaps intersect because the predictor distribution becomes a
+constraint through risk allocation and is then modified by optimisation and
+supervision before any physical outcome is observed.
 
 \paragraph{Central thesis.}
 In this controlled give-way setting, task adaptation rather than additional

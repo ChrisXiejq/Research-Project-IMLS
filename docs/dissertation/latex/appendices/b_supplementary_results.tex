@@ -1,25 +1,70 @@
 \section{Supplementary results}
 \label{app:supplementary}
 
+The tables in this appendix are generated directly from canonical JSON/CSV
+evidence by \texttt{build\_w1\_latex\_evidence.py}. Their source and output
+hashes are recorded in \texttt{W1\_EVIDENCE\_TABLES\_COMPLETE.json}; displayed
+precision does not replace the machine-readable values.
+
 \subsection{All validation seeds and frozen-test checkpoints}
 
-\TODO{Convert canonical Tables 2--3 to compact LaTeX, including best epoch,
-macro NLL, ADE, reactive ADE and latency for all 15 runs.}
+Table~\ref{tab:app-validation} exposes seed variability, capacity and selected
+epoch for all 15 candidates. Ten runs select the last permitted epoch, so the
+common budget may censor convergence even though it is equal across variants.
 
-\subsection{Complete closed-loop cells and contrasts}
+\input{../../paper/generated/distinction_v1/11_w1_manuscript/w1_validation_runs.tex}
 
-\TODO{Include all corrected R3 H3 and H4 contrasts, with effect, cluster
-interval, exact p, Holm-adjusted p and five-cluster count. Keep legacy
-Day10--13 diagnostics in a separately labelled table and never pool them with
-R3.}
+Table~\ref{tab:app-test} reports the one-shot test after model and representative
+seed were frozen on validation. B0 was evaluated as a post-selection reporting
+bridge and did not alter the selected B1 stack.
+
+\input{../../paper/generated/distinction_v1/11_w1_manuscript/w1_frozen_test.tex}
+
+\subsection{Complete corrected closed-loop contrasts}
+
+Tables~\ref{tab:app-h3-contrasts} and~\ref{tab:app-h4-contrasts} contain every
+primary metric contrast, including descriptive cluster intervals, exact
+sign-flip p-values and Holm-adjusted values. No adjusted value is confirmatory;
+this is consistent with five paired clusters and is not evidence of
+equivalence.
+
+\input{../../paper/generated/distinction_v1/11_w1_manuscript/w1_r3_h3_contrasts.tex}
+
+\input{../../paper/generated/distinction_v1/11_w1_manuscript/w1_r3_h4_contrasts.tex}
+
+Table~\ref{tab:app-h4-dominance} applies the registered joint dominance rule to
+the same contrasts. It is the source of the 3/12 H4 count and does not search
+over comparators or geometry margins.
+
+\input{../../paper/generated/distinction_v1/11_w1_manuscript/w1_r3_h4_dominance.tex}
 
 \subsection{Calibration and context ablations}
 
-\TODO{Include aggregate/assertive/reactive/response-active sample counts and
-metrics, plus zero/shuffle sequence ablations for both Transformer variants.}
+The following generated tables separate three distinct mechanism questions:
+whether the Transformer uses its sequence, which B1 input drives aggregate
+accuracy, and whether aggregate calibration represents the response-active
+tail. An ablation delta establishes sensitivity to an input transformation,
+not semantic understanding or closed-loop causality.
+
+\input{../../paper/generated/distinction_v1/11_w1_manuscript/w1_diagnostics.tex}
 
 \subsection{Collision-filtered sensitivity}
 
-State the callback-to-episode reconstruction, the conservative 162-window
-removal, the unchanged five-model ordering across 15 runs and the rule that the
-filtered analysis did not access test data.
+Six reactive training rollouts contained 253 raw callbacks. Canonical actor-pair
+deduplication and contiguous-frame reconstruction produced 16 contact episodes
+over 62 unique frames, primarily target--infrastructure contact. Exact sample-
+clock alignment could not be recovered, so the sensitivity conservatively
+removed all 162 usable windows from those six rollouts, regenerated train-only
+normalisation and reran all 15 validation configurations. The five-model order
+remained B1, B2-D, T2, T1, B2-M. This analysis never accessed test labels,
+did not change the frozen primary dataset or selected checkpoint, and is
+therefore a robustness check rather than a second selection experiment.
+
+\subsection{Evidence not pooled with R3}
+
+Day10--13 analyses use earlier control or geometry implementations and support
+diagnostic mechanism statements only. They are absent from
+Tables~\ref{tab:app-h3-contrasts}--\ref{tab:app-h4-dominance}, never enlarge
+the five-cluster sample and never enter H3/H4 estimates.
+
+\clearpage

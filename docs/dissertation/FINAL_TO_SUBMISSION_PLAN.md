@@ -3,7 +3,7 @@
 **Status:** active and canonical  
 **Evidence cut:** R3/A2/M1, 2026-08-08  
 **Experiment decision:** large-scale CARLA collection is closed; R4 is `not_run`  
-**Current gate:** W1.2 Results tables, figures and evidence-ID integration
+**Current gate:** Q1 scientific, rubric and release audit; W1 accepted
 
 This is the sole active route from the completed experiments to the final
 dissertation. [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)
@@ -208,7 +208,7 @@ auditable.
 
 ## 5. Immediate next action
 
-W0 and W1.1 are accepted. The current task is W1.2: finish the English Results
-tables/figures and adjacent M1 evidence identifiers, then move to W1.3 related
-work. This order prevents later prose from silently changing the research
-question or importing legacy estimates into the corrected analysis.
+W0 and W1 are accepted. Q1 now adversarially checks scientific consistency,
+rubric coverage, clean-checkout rebuilding and release hygiene. It is not
+permission to reopen CARLA, select new outcomes or alter a verdict because its
+direction is inconvenient.

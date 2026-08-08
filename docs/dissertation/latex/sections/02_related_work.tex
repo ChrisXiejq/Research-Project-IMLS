@@ -1,65 +1,138 @@
 \section{Related work}
 \label{sec:related}
 
-This section should be organised by the argument, not as a sequence of paper
-summaries. The final version must cover sufficiently broad and current primary
-literature, then end each subsection with a critical synthesis tied to an RQ.
-
 \subsection{Risk-aware autonomous intersection planning}
 
-Review chance-constrained and stochastic model-predictive planning, fixed risk
-budgets, adaptive or state-dependent risk allocation, and the role of a safety
-filter or supervisor. Distinguish a probabilistic planning constraint from
-observed physical separation and collision events.
+Chance-constrained planning converts a probabilistic forecast into a bound on
+constraint violation, but the interpretation of that bound depends on the
+uncertainty model and on whether the mathematical assumptions remain valid in
+deployment. Iterative risk allocation was introduced to redistribute a joint
+chance budget toward active constraints rather than impose an equally
+conservative allocation everywhere \citep{ono2008risk}. In driving, robust
+scenario MPC represents uncertain multimodal obstacles with multiple scenarios
+\citep{batkovic2021scenario}; Branch MPC instead plans a trajectory tree over
+reactive modes and uses a coherent risk measure to trade performance against
+robustness \citep{chen2022branch}. Both illustrate that ``risk'' is an
+optimisation design variable, not the same quantity as measured collision or
+physical clearance.
 
-\TODO{Compare at least: assumptions about prediction uncertainty; how risk is
-allocated; whether a full fixed-risk frontier is evaluated; and whether the
-executed trajectory or only the planned trajectory is measured.}
+The closest control lineage to this dissertation is the SMPC formulation of
+\citet{nair2022smpc}, which embeds Gaussian-mixture predictions in multimodal
+chance constraints and evaluates feedback-policy variants at a CARLA
+intersection. Its later extension jointly optimises feedback policies and
+mode-wise risk allocation and demonstrates real-time closed-loop operation in
+several scenarios \citep{nair2025predictive}. Complementary work establishes
+recursive-feasibility and safety properties for nominal, robust and
+contingency chance-constrained planners under explicit Gaussian-mixture
+assumptions \citep{ren2025recursively}. These are stronger formal and
+cross-scenario contributions than the empirical study here; however, a formal
+property of the planned policy does not by itself quantify executed
+bounding-box separation after solver failure handling and safety supervision.
 
-\subsection{Multimodal motion prediction for autonomous driving}
+The present work therefore asks a narrower empirical question. Adaptive risk
+is compared with aggressive, medium and conservative fixed operating points,
+not with a single convenient baseline. Predictor stack and target style are
+crossed with policy, and executed completion, physical separation, binary
+failures, solver identity and supervisor activity are retained. This design
+addresses RQ4 while avoiding the stronger claim that a finite simulator matrix
+validates a chance constraint or proves real-world safety.
 
-Anchor-based multimodal prediction such as MultiPath represents multiple
-future modes and their uncertainty rather than a single deterministic path
-\citep{chai2019multipath}. Related work should compare raster-based and
-vector/agent-centric representations, transfer or task adaptation, and
-metrics including ADE, FDE, likelihood and calibration.
+\subsection{Multimodal prediction, scoring and adaptation}
 
-\TODO{Critically explain why ADE/FDE can ignore multimodal probability quality,
-why likelihood can improve through covariance, and why aggregate calibration
-can conceal an interaction-response tail.}
+MultiPath represents future motion by a discrete distribution over trajectory
+anchors with regressed offsets and uncertainty \citep{chai2020multipath}. This
+compact Gaussian-mixture output is particularly suitable for an optimisation
+consumer. MultiPath++ subsequently replaced dense raster-only fusion with
+sparse scene elements, learned anchors and output aggregation
+\citep{varadarajan2022multipathpp}. The dissertation retains the original
+MultiPath decoder and frozen anchors so that adaptation changes a deployed
+component without replacing the planner interface.
 
-\subsection{Interaction-aware and Transformer predictors}
+Displacement and probabilistic scores answer different questions. Top-1 ADE
+and FDE assess one selected trajectory and can ignore whether probability mass
+is distributed appropriately across plausible modes. Negative log likelihood
+uses the full predictive density and is a proper score under the relevant
+distributional conditions \citep{gneiting2007scoring}, but a low value can
+arise through both better means and changed covariance. Calibration is again
+distinct: neural-network confidence can be systematically miscalibrated
+\citep{guo2017calibration}, and post-hoc calibrated regression can improve
+coverage without changing the underlying point predictor
+\citep{kuleshov2018calibrated}. Subgroup calibration matters because an
+aggregate guarantee need not hold on identifiable subpopulations
+\citep{hebertjohnson2018multicalibration}; trajectory-specific work likewise
+finds that uncertainty estimates require calibration before planning
+\citep{cao2024cctr}. These distinctions motivate reporting ADE, FDE,
+uncalibrated NLL, coverage and calibrated NLL, with the response-active tail
+kept separate from the aggregate.
 
-Transformers provide content-dependent attention over a sequence
-\citep{vaswani2017attention}, and interaction-prediction methods can model
-temporal and inter-agent context. However, a better architecture claim needs a
-matched task, data split, optimisation budget and non-attention capacity
-control. The present comparison therefore pairs \BtwoM{} with \Tone{} and
-\BtwoD{} with \Ttwo{}, while retaining the simpler \Bone{} adaptation.
+Adaptation is also a distribution question rather than merely an architecture
+choice. UniTraj reports substantial cross-dataset degradation and improvement
+from greater data diversity \citep{feng2024unitraj}. Here, the intended claim
+is deliberately in-distribution: rollouts are disjoint by initialisation but
+come from one Town05 give-way process. Retraining the final prediction head is
+therefore a task-adaptation control for domain mismatch, not evidence of
+cross-map generalisation.
 
-\TODO{Add recent interaction-aware driving predictors. Compare their dataset
-scale, history/horizon, agent representation, closed-loop evaluation and
-ablation quality. Avoid implying that the small adapters tested here represent
-all Transformer methods.}
+\subsection{Interaction-aware and Transformer prediction}
+
+Self-attention provides content-dependent interaction across a sequence
+\citep{vaswani2017attention}. Driving predictors have used it at substantially
+greater scale and with richer representations than this dissertation.
+AgentFormer jointly attends across time and agents
+\citep{yuan2021agentformer}; Scene Transformer supports marginal, joint and
+ego-conditioned multi-agent prediction in a unified architecture
+\citep{ngiam2022scene}; AutoBots models socially consistent joint futures as a
+sequence of agent sets \citep{girgis2022autobots}. Wayformer studies early,
+late and hierarchical fusion of heterogeneous scene modalities
+\citep{nayakanti2023wayformer}, while MTR couples global intention queries with
+local motion refinement \citep{shi2022mtr}. These results establish attention
+as a strong design family, not a default optimum for every data regime.
+
+Architecture comparisons are confounded when representation, residual output,
+parameter count or optimisation budget changes simultaneously. The current
+study therefore uses two MLP/Transformer pairs with the same input and
+residual-output scope and approximately similar adapter capacity. It also
+retains a simpler, larger task-adapted head and reports every trainable count
+and boundary-epoch selection. Frozen-input zeroing and shuffling test whether
+the Transformer actually uses its six-token history, but cannot prove semantic
+interaction reasoning. RQ2 is consequently about the tested adapters under a
+fixed small-data budget; it is not a referendum on the larger models above.
 
 \subsection{Prediction-aware planning and closed-loop evaluation}
 
-Open-loop accuracy is not equivalent to downstream driving utility because a
-planner reacts to the full predictive distribution and because solver and
-supervisor logic can attenuate, amplify or reverse a predictor change. Review
-work that trains or evaluates prediction through planning objectives, and work
-that contrasts open-loop with closed-loop metrics.
+Prediction and planning can be coupled during training or evaluation.
+Topological multimodal prediction has been demonstrated with an
+optimisation-based navigator at uncontrolled CARLA intersections
+\citep{roh2021topological}. DIPP back-propagates through a differentiable
+planner and reports both open- and closed-loop gains
+\citep{huang2023dipp}. The nuPlan benchmark similarly argues that open-loop
+distance metrics are insufficient for long-horizon planning and supplies
+reactive closed-loop evaluation \citep{caesar2021nuplan}. These systems cover
+broader planning tasks than the controlled junction here, but they also change
+more of the stack; they do not isolate how a frozen probabilistic predictor
+interacts with a risk-policy frontier.
 
-\TODO{Identify the precise remaining gap: few studies jointly vary a frozen
-predictor, a risk-policy frontier, target behaviour and timing while reporting
-solver and supervisor mechanisms.}
+Task relevance provides the key evaluation principle. \citet{farid2023task}
+propagate prediction failures to planning cost rather than treating every
+forecast error as equally harmful. \citet{nakamura2025regret} use closed-loop
+regret to identify prediction failures that degrade the robot, and find that a
+small high-regret subset can be informative for fine-tuning. Most directly,
+the recent preprint by \citet{bouzidi2025closing} reports that open-loop model
+ranking need not predict closed-loop performance and that smaller predictors
+can match larger ones in its tested stack. The present dissertation agrees with
+that broad warning, but contributes a different controlled contrast: it first
+verifies that B1 remains better than B0 in-loop, then tests translation within
+each predictor--risk--target cell and records solver/supervisor mechanisms.
 
 \subsection{Synthesis and study positioning}
 
-The study does not propose a universal new prediction architecture. It uses a
-strictly controlled setting to test a chain of increasingly demanding claims:
-task adaptation, sequence use, architecture superiority, closed-loop transfer
-and risk-policy dominance. This positioning connects the machine-learning
-contribution to the original planning question without attributing all
-closed-loop behaviour to the supervisor.
-
+Across the reviewed literature, four claims form a hierarchy rather than a
+single model leaderboard: adaptation can improve a forecast; an interaction
+architecture can add value beyond matched controls; an offline improvement can
+benefit closed-loop execution; and adaptive risk can dominate fixed operating
+points. Prior work supplies strong methods for each layer, but the directly
+comparable studies reviewed above do not evaluate all four with a frozen
+predictor interface, rollout-disjoint selection, several fixed-risk controls,
+paired target styles and executed mechanism telemetry. This dissertation fills
+that bounded empirical gap. Its contribution is a controlled claim audit in a
+single give-way system, not a new universal predictor or a formal safety proof.

@@ -28,22 +28,25 @@ to `tectonic` when available.
 ```
 
 This is the appropriate default for an identifiable UCL dissertation written
-in TMLR layout. Replace the placeholder name, candidate number, programme,
-email and supervisor before submission.
+in TMLR layout. The W1 review copy intentionally contains neutral candidate
+metadata because the repository does not contain the student's verified UCL
+submission details. Insert those details only during the later submission
+metadata pass; do not guess them in the scientific manuscript.
 
 For an actual double-blind TMLR submission, change the line to
 `\usepackage{tmlr}`. The style will hide the author block automatically. For a
 camera-ready TMLR article, use `\usepackage[accepted]{tmlr}` and complete the
-month, year and OpenReview URL. Do not edit `tmlr.sty`, `tmlr.bst` or
+month, year and OpenReview URL required by the official template. Do not edit
+`tmlr.sty`, `tmlr.bst` or
 `fancyhdr.sty`.
 
 ## Directory map
 
 - `main.tex`: document order, metadata and TMLR mode.
-- `macros.tex`: project notation and visible drafting markers.
-- `sections/`: complete section-level writing skeleton.
+- `macros.tex`: stable project notation.
+- `sections/`: complete W1 manuscript sections.
 - `appendices/`: reproducibility, supplementary results and audit material.
-- `references.bib`: verified starter references plus a literature-review TODO.
+- `references.bib`: checked primary and official references used in W1.
 - `RUBRIC_TO_STRUCTURE.md`: marking-rubric compliance map.
 - `WRITING_CHECKLIST.md`: recommended drafting and finalisation order.
 - `vendor/`: unmodified official TMLR style assets and their provenance.
@@ -90,5 +93,32 @@ Reference pages: [Author Guidelines](https://jmlr.org/tmlr/author-guide.html),
    Day10--13 timing/callback material explicitly secondary and never pool it
    with R3.
 6. Keep appendices after the references, as required by the TMLR format.
-7. Delete every `\TODO{...}` before final submission; comments beginning with
+7. Keep source free of visible drafting markers; comments beginning with
    `% EVIDENCE:` are provenance notes and may remain in source.
+
+## Generated W1 evidence
+
+Run the deterministic evidence exporter before building the manuscript:
+
+```bash
+python3 ../../../core/scripts/models/build_w1_latex_evidence.py
+```
+
+The generated tables and manuscript figures live under
+`../../paper/generated/distinction_v1/11_w1_manuscript/`. Their completion
+markers bind every input and output by SHA-256. The renderer converts the two
+canonical A2 SVGs and creates a declared corrected-R3 rendering of the preserved
+historical workflow figure. It requires Node.js with `sharp`; the checked PNGs
+are committed so a normal LaTeX build does not depend on Node.
+
+After compiling and manually inspecting every colour page plus the key figures
+in greyscale, record the W1 gate with:
+
+```bash
+.venv-precarla/bin/python \
+  core/scripts/models/audit_w1_manuscript.py \
+  --visual-review-complete
+```
+
+The explicit flag prevents a later rebuild from silently claiming a visual
+inspection that nobody performed.

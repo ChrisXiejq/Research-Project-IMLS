@@ -3,28 +3,159 @@
 
 \subsection{Environment and frozen artefacts}
 
-\TODO{Insert a table containing CARLA, Python, TensorFlow, CUDA/cuDNN, solver
-and operating-system versions; hardware; Git commit; dataset manifest hash;
-model-package hashes; calibration hash; random seeds; and execution commands.}
+Table~\ref{tab:app-environment} transcribes the allowlisted R3 environment
+receipt. CUDA, cuDNN and Gurobi version strings were not independently captured;
+the audit therefore reports the GPU driver, TensorFlow/CasADi versions and
+solver backend without inferring missing versions from the host image.
+
+\begin{table}[h]
+  \centering\small
+  \caption{Corrected R3 execution environment captured before formal outcomes.}
+  \label{tab:app-environment}
+  \begin{tabular}{@{}L{0.30\linewidth}L{0.60\linewidth}@{}}
+    \toprule
+    Item & Frozen value \\
+    \midrule
+    Simulator & CARLA server/client 0.9.14; Town05; ClearNoon; synchronous 20~Hz \\
+    Python/ML & CPython 3.8.20; TensorFlow 2.13.1; NumPy 1.24.3 \\
+    Optimisation & CasADi 3.7.2; Gurobi backend (version not captured) \\
+    Platform & Linux 5.15.0-160-generic, x86\_64 \\
+    Accelerator & NVIDIA GeForce RTX 4090, 24,564~MiB; driver 580.76.05 \\
+    R3 source commit & \texttt{8ccecf848b87b6fa2936e081d9f6943cd7f5a449} \\
+    Execution seed & 20260808; complete treatment block independently shuffled within init \\
+    Prediction seeds & 11, 23 and 37 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The prediction dataset completion receipt records 200 rollouts, 5,037 usable
+windows and 3,237 full-horizon windows. Table~\ref{tab:app-hashes} binds the
+dataset, normalisation and deployed stacks used by the manuscript. B0
+deployment uses identity calibration.
+
+\begin{table}[h]
+  \centering\small
+  \caption{Frozen dataset and deployment SHA-256 digests. Each digest is
+  line-wrapped only for presentation.}
+  \label{tab:app-hashes}
+  \begin{tabular}{@{}L{0.28\linewidth}L{0.62\linewidth}@{}}
+    \toprule
+    Artefact & SHA-256 digest \\
+    \midrule
+    Dataset manifest &
+    \texttt{52a1ed4c817ab5dbb160515fb581ff3a8}\newline
+    \texttt{59866230267c21cd79b92bee2a3233d} \\
+    Train normalisation &
+    \texttt{2dd054698e0ba0ca204ecc480078603fe}\newline
+    \texttt{8b958cfd3feca201f9c7ed9ffe28b9b} \\
+    B0 model tree &
+    \texttt{369c09a7aab28a721983f0baa50e7611}\newline
+    \texttt{b3cfc93803b73e600a0b44188d06f8bb} \\
+    B1 model tree &
+    \texttt{860e2c4513273982e26cb7ea36177029}\newline
+    \texttt{c1620a3761e631eee64818fb85ec2231} \\
+    B1 calibration &
+    \texttt{fcfb203384f900ea43d53651934979c6}\newline
+    \texttt{60d85be5827944e34a63d2338b2da301} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \subsection{Model and optimisation hyperparameters}
 
-\TODO{Transcribe the exact frozen hyperparameters and trainable-parameter
-counts. Do not infer missing values from memory; cite the configuration and
-manifest paths in source comments.}
+All trainable variants use 16 fixed MultiPath anchors, a ten-step 2-s future,
+the rollout-disjoint split in Table~\ref{tab:dataset}, batch size 16 and shuffle
+buffer 1,024. Adam uses learning rate $10^{-4}$ and gradient clip norm 10. The
+maximum is 20 epochs with patience 5 on validation loss. B1 exposes only the
+final dense prediction head (1,034,208 trainable parameters). B2-M and T1
+update means only (77,600 and 86,688 parameters); B2-D and T2 update means,
+scale/orientation and mixture logits (176,096 and 165,728 parameters). MLPs use
+two width-80 GELU layers and dropout 0.1. Transformers use one width-64 block,
+four attention heads, width-128 feed-forward layer, masked mean pooling and
+dropout 0.1. The complete 15-run table is generated in
+Table~\ref{tab:app-validation}.
+
+The masked MultiPath loss assigns the closest anchor over valid target steps,
+then combines mixture classification with bivariate Gaussian regression and
+normalises only by the valid-step count. Architecture ranking uses median
+validation rollout-macro uncalibrated trajectory NLL per step. Calibration is
+fitted after training on validation, reported for every run, and excluded from
+architecture ranking. No retraining or retuning is permitted after the frozen
+test is opened.
 
 \subsection{Closed-loop contract}
 
-The corrected contract contains 16 treatment cells and five paired
-initialisation groups (101--105), for 80 formal rollouts. The final appendix
-must list each cell identifier, fixed-risk value, adaptive-risk rule,
-termination condition, infrastructure-retry policy, event-clock completion
-formula and actual-bounding-box separation formula from the frozen R3/M0
-artifacts. Earlier arrival-offset experiments are documented separately as
-legacy diagnostics and are not part of this contract.
+The corrected contract contains the following 16 cell identifiers, each
+executed for init groups 101--105:
+
+\begin{table}[h]
+  \centering\small
+  \caption{Corrected R3 treatment cells.}
+  \label{tab:app-r3-cells}
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    B0 stack & B1 stack \\
+    \midrule
+    \texttt{B0\_fixed\_aggressive\_assertive} & \texttt{B1\_fixed\_aggressive\_assertive} \\
+    \texttt{B0\_fixed\_aggressive\_reactive} & \texttt{B1\_fixed\_aggressive\_reactive} \\
+    \texttt{B0\_fixed\_medium\_assertive} & \texttt{B1\_fixed\_medium\_assertive} \\
+    \texttt{B0\_fixed\_medium\_reactive} & \texttt{B1\_fixed\_medium\_reactive} \\
+    \texttt{B0\_fixed\_conservative\_assertive} & \texttt{B1\_fixed\_conservative\_assertive} \\
+    \texttt{B0\_fixed\_conservative\_reactive} & \texttt{B1\_fixed\_conservative\_reactive} \\
+    \texttt{B0\_adaptive\_assertive} & \texttt{B1\_adaptive\_assertive} \\
+    \texttt{B0\_adaptive\_reactive} & \texttt{B1\_adaptive\_reactive} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Fixed Gaussian tightenings are 1.2816, 1.6400 and 2.0537. The adaptive rule
+uses approach/critical/near pre-clearance floors 1.66/1.72/1.78; every arm
+shares three modes, $a_{\min}=-3$~m/s$^2$, the same route/controller and a
+ten-step planning horizon. Rollouts stop at valid route completion or the
+600-step/30-s cap. The primary completion clock is
+\texttt{smpc\_completion.step}/\texttt{carla\_fps}; it includes the simulator
+step that sets \texttt{goal\_reached}. Minimum footprint separation is the
+minimum oriented-rectangle distance from the actual CARLA actor bounding boxes
+with 0.25~m inflation per actor. Frozen sensitivity margins are 0, 0.25, 0.35
+and 0.50~m; 0.25~m is always primary.
+
+Infrastructure failures may be retried up to ten isolated attempts with
+$5k$-second backoff after failed attempt $k$. Allowed classes are spawn/setup,
+CARLA connection or timeout, process-resource, external-interruption and world-
+hygiene failures. Completed rollouts and scientific outcomes are never retried
+or excluded; unknown classes stop automation. Thus retry logic cannot select a
+favourable scientific trajectory.
 
 \subsection{Statistical algorithms}
 
-Specify rollout macro-aggregation, construction of paired init-cluster means,
-deterministic cluster bootstrap, exhaustive sign-flip enumeration and Holm
-family boundaries in sufficient detail to reproduce each interval and p-value.
+Prediction NLL is first averaged across valid future steps and then within each
+rollout; rollouts, not windows, form the macro-average. For R3, every contrast
+is calculated within init group and the five paired effects are the independent
+units. The reported effect is their arithmetic mean. A descriptive 95\%
+percentile cluster-bootstrap interval resamples the five effects with
+replacement 20,000 times. Its global seed is 20260808; each contrast seed is
+the integer encoded by the first 16 hexadecimal characters of
+SHA-256(\texttt{global-seed|contrast-id|metric}).
+
+The exact test enumerates all $2^n$ sign assignments for the $n$ complete
+paired effects and reports the two-sided fraction whose absolute mean is at
+least the observed absolute mean. H3 has two eight-contrast Holm families, one
+per primary outcome. H4 has one three-comparator Holm family per
+predictor--style--outcome stratum. Missing continuous pairs are listed and are
+not imputed; unresolved binary guards block universal support. Timing and
+distance dominance tolerances (0.05~s and $10^{-6}$~m) represent sampling and
+floating-point resolution, not equivalence margins.
+
+\subsection{Executable audit trail}
+
+The formal collection entry point is
+\texttt{core/scripts/carla/run\_r3\_corrected\_formal\_matrix.sh}; the analysis
+entry point is
+\texttt{core/scripts/models/analyze\_r3\_corrected\_formal.py}. W1 presentation
+tables are regenerated with
+\texttt{python3 core/scripts/models/build\_w1\_latex\_evidence.py}; the two R3
+PNGs are deterministic format conversions by
+\texttt{render\_w1\_r3\_figures\_png.cjs}. Finally, \texttt{make pdf} in
+\texttt{docs/dissertation/latex} builds the TMLR-layout manuscript. These paths
+are audit identifiers; the submitted evidence package, rather than this prose,
+is authoritative for hashes and values.

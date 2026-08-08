@@ -1,0 +1,65 @@
+{
+  "bibliography_entry_count": 27,
+  "build_failures": [],
+  "checks": {
+    "checked_source_count_in_range": true,
+    "citation_keys_resolved": true,
+    "drafting_markers_absent": true,
+    "generated_asset_hashes_resolve": true,
+    "latex_has_no_blocking_warning": true,
+    "manuscript_sources_present": true,
+    "pdf_page_count_recorded": true,
+    "pdf_present": true,
+    "regression_suite_passes": true,
+    "visual_review_recorded": true
+  },
+  "citation_count": 27,
+  "drafting_markers": [],
+  "generated_asset_failures": [],
+  "missing_citations": [],
+  "pdf": {
+    "pages": 24,
+    "path": "docs/dissertation/latex/build/main.pdf",
+    "sha256": "da54e48626dab23682d89e456affe219da89d2c3f57ac6b904488aae8df75d04"
+  },
+  "regression_test_count": 66,
+  "release_only_pending": [
+    "verified UCL candidate and supervisor metadata",
+    "programme-approved AI-use disclosure wording",
+    "final release Git commit and submitted-PDF digest"
+  ],
+  "schema_version": "w1_manuscript_complete_v1",
+  "scope": {
+    "additional_carla_required": false,
+    "next_gate": "Q1_scientific_rubric_and_release_audit",
+    "r4_status": "not_run_by_frozen_design"
+  },
+  "source_sha256": {
+    "docs/dissertation/latex/appendices/a_reproducibility.tex": "bf4dcc5437c4df51c5fc53c2916fe8430e5f86746a1ebbe7aa7c0bc9d7dcf16d",
+    "docs/dissertation/latex/appendices/b_supplementary_results.tex": "0edbb0c96e30b4f3f191fefc8f040765b5adc9bd00da64045621e81add9e6325",
+    "docs/dissertation/latex/appendices/c_evidence_audit.tex": "b0519583e1ba6a260ea47e552abdf034200705b9238ed65a5dc5e1804be8db24",
+    "docs/dissertation/latex/macros.tex": "69bcedf4ac27e967ba82f15615b0ef7fe8356195d7768bd8e3480f63c925fd4b",
+    "docs/dissertation/latex/main.tex": "645181b3b1621fb87e5ad01daa8929b453e9cae9d91318916767b5a414692691",
+    "docs/dissertation/latex/references.bib": "e3c1a7a29ff0245b5e3df080c97f3add08432f41c741768c721ba188a61705e0",
+    "docs/dissertation/latex/sections/01_introduction.tex": "7ec9ca830f848367d5ba1c1dfa3a88f074080398c9cf45edebf6d0ad72c5b385",
+    "docs/dissertation/latex/sections/02_related_work.tex": "e4f092be72b2804a0f8cd0dd73e3cc6f079ed788caaf13dc82c8a187581468a7",
+    "docs/dissertation/latex/sections/03_problem_formulation.tex": "321765e1d37687bfdb4f7d5de4b150724e0291d3eb53749b3063b9a791f15e31",
+    "docs/dissertation/latex/sections/04_methodology.tex": "21b065209a39a738b93b9b64121a014131e628435735c5911ed09b0323479b8b",
+    "docs/dissertation/latex/sections/05_experimental_setup.tex": "bfd8c8f9596695362919ee33109829378ce797bf9ad61fc3a1683000f3cb8ef5",
+    "docs/dissertation/latex/sections/06_results.tex": "6704b88a4a0372d8fc7e9b7cf86446229c84277f4cdfe2536b7d2c339dc9f977",
+    "docs/dissertation/latex/sections/07_discussion.tex": "9db5ce95bb5b6aa3b1f71d900f906546dc95bdc6f5d8c2bbb11a08a1dd1c54c2",
+    "docs/dissertation/latex/sections/08_conclusion.tex": "3fb50e94569eb5b5e1044f985c9e0d8e70ea4c2b31fe63fb04862c1026326718",
+    "docs/dissertation/latex/vendor/fancyhdr.sty": "3d2922548e0e5f1a6c5676eda6ebb6dc20d7d305b4d8c2be5f1c833fb1084e6d",
+    "docs/dissertation/latex/vendor/tmlr.bst": "306fd454cf40771bee01293eeb98d2c1cd5f4e11ed0cd7296b335f354fc45206",
+    "docs/dissertation/latex/vendor/tmlr.sty": "816214ff5919aa457b6b443bee52b15d9561421417b7f8a50cc84651519f0002"
+  },
+  "stage": "W1",
+  "status": "pass",
+  "uncited_entries": [],
+  "visual_review": {
+    "all_pages_colour": "pass",
+    "figure_and_appendix_order": "pass",
+    "horizontal_overflow": "none_observed",
+    "key_figures_greyscale": "pass"
+  }
+}

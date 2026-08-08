@@ -1,7 +1,9 @@
 # Dissertation workspace
 
-The experiment phase is frozen at corrected R3/A2/M1. The active task is now
-manuscript production; no further large-scale CARLA experiment is required.
+The experiment phase is frozen at corrected R3/A2/M1 and the W1 manuscript has
+passed its source, citation, regression, build and visual gates. The active task
+is Q1 final scientific/rubric/release audit; no further large-scale CARLA
+experiment is required.
 
 ## Start here
 

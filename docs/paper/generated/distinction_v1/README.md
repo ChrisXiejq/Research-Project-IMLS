@@ -30,6 +30,8 @@ Completed packages:
   synthesis;
 - `09_analysis_contract/`: prospective M0 analysis and study-stop contract;
 - `10_four_hypothesis_evidence/`: final M1 value-resolving evidence package.
+- `11_w1_manuscript/`: deterministic LaTeX tables, corrected manuscript
+  figures and the W1 source/build/visual completion gate.
 
 Use `10_four_hypothesis_evidence/` for headline claims and
 `08_corrected_closed_loop/r3_final/synthesis/` for corrected closed-loop

@@ -2,7 +2,7 @@
 
 **Plan:** [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)  
 **Started:** 2026-08-08  
-**Current step:** W1.2 Results tables, figures and evidence-ID integration
+**Current step:** Q1 scientific, rubric and release audit
 **Overall status:** S0–M1 complete; R3 passed at 80/80 and large-scale CARLA collection is permanently closed for this dissertation
 **Closed-loop route:** Route R frozen prospectively at G2
 
@@ -37,8 +37,8 @@
 | M0 | Freeze statistical analysis contract | complete | No | `09_analysis_contract/M0_AMENDMENT_COMPLETE.json` | v1 preserved; v2 primary outcomes, censoring, families, margins and study-stop rule frozen before R3 |
 | M1 | Four-hypothesis evidence package | complete | No | `10_four_hypothesis_evidence/M1_COMPLETE.json` | 82 records; 0 invalid locator, value mismatch, orphan claim or legacy/corrected pooling violation |
 | W0 | Migrate active documents to R3/M1 and retire stale entry points | complete | No | documentation/link/LaTeX audit | corrected R3 is sole primary closed-loop source; obsolete guides removed; PDF builds |
-| W1 | Full TMLR manuscript | in_progress | No | complete source/PDF | W1.1 Methods/design complete; W1.2 Results is active; remaining TODOs are literature, appendices and final prose |
-| Q1 | Final scientific/rubric/PDF audit | pending | No | all gates PASS | no claim patching by hand |
+| W1 | Full TMLR manuscript | complete | No | `11_w1_manuscript/W1_MANUSCRIPT_COMPLETE.json` | 24-page W1 PDF; 27/27 citations; deterministic assets; 66 tests; colour/greyscale visual pass |
+| Q1 | Final scientific/rubric/PDF audit | in_progress | No | all gates PASS | no claim patching by hand; release metadata remains separate |
 | V1 | Viva and submission package | pending | No | archive + viva documents | final deliverable |
 
 ## Immutable decisions
@@ -71,7 +71,7 @@
 | Missing physical baselines | closed | E1 complete | B1 wins 5/5 init against CV/CA/train-mean |
 | B1/T fairness | controlled limitation | E3 complete; claim narrowed | report full-configuration comparison, not architecture causality |
 | Only five independent test inits | high | exact/descriptive inference | transparent statistics; no fake n |
-| Manuscript has TODOs and 3 references | critical | W1 planned | 0 TODO + 25–35 checked sources |
+| Manuscript source/build integrity | medium | W1 verification in progress | 0 drafting markers, resolved citations/references, checked PDF |
 
 ## Execution log
 
@@ -104,3 +104,4 @@
 | 2026-08-08 | M1 | Replaced the old non-resolving evidence index with a four-hypothesis value-audited package | 82/82 records resolve and reproduce; no orphan headline claim or legacy/corrected pooling | `10_four_hypothesis_evidence/M1_COMPLETE.json` |
 | 2026-08-08 | W0 | Migrated all active paper/dissertation guidance and the English design/results skeleton to corrected R3/M1 | Legacy timing evidence demoted; two obsolete guides removed; A2/M1 pass, 66 tests pass and TMLR PDF builds | `FINAL_TO_SUBMISSION_PLAN.md` |
 | 2026-08-08 | W1.1 | Completed the corrected Methods and Experimental Design draft from frozen configs/contracts | CARLA scenario, six models, exact training budget, risk settings, R3 factorial, estimands and statistics now explicit; PDF builds | `latex/sections/04_methodology.tex` |
+| 2026-08-08 | W1 | Completed and audited the full TMLR-layout scientific manuscript | 24 pages; 27 cited sources; 0 unresolved citations/drafting markers/overfull boxes; 66 tests; corrected 80-rollout workflow; colour and greyscale figures pass | `11_w1_manuscript/W1_MANUSCRIPT_COMPLETE.json` |
