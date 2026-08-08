@@ -1,0 +1,27 @@
+{
+  "archive_files": 153,
+  "archive_sha256": "e730200d8afb7e333ca708aaeebb5b832794ca420cbcb6d301d46271c167682c",
+  "cell_summary_csv": "r2_pilot_cell_summary.csv",
+  "claim_boundary": "R2 supports corrected deployment validity and runtime feasibility only. Its per-cell values must not be used to claim predictor or policy effects.",
+  "effect_estimation_allowed": false,
+  "failures": [],
+  "implementation_version": "corrected_joint_modes_shared_amin_v1",
+  "launch_provenance": {
+    "initial_failed_cells_before_carla_restart": 1,
+    "initial_failure_class": "CARLA spawn collision / persistent simulator state",
+    "interpretation": "The failed launch occurred before the clean CARLA restart and produced no accepted rollout. All ten audited rollouts then started on attempt 1. This is retained as infrastructure provenance and is not counted as scientific outcome data.",
+    "successful_phase_cells_started_at_first_attempt": 10,
+    "successful_phase_expected_cells": 10
+  },
+  "max_p95_solve_time_s": 0.10380073279999999,
+  "native_collisions": 0,
+  "observed_rollouts": 10,
+  "passing_rollouts": 10,
+  "runner_log_sha256": "a05e9a9bf05ed46a4298dd86f7150f3b6665950c54d9bca974f17601fa5b5371",
+  "schema_version": "r2_local_verification_v1",
+  "scientific_role": "non_statistical_deployment_gate",
+  "source_git_commit": "4c98d464e0097989dd8ea5549c5dfb0c1f53dc1b",
+  "stage": "R2",
+  "status": "pass",
+  "total_valid_prediction_steps": 1874
+}

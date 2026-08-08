@@ -60,6 +60,28 @@ class YieldRule:
 
 
 @dataclass(frozen=True)
+class FixedGeometryYieldRule:
+    """Yield timing against treatment-invariant route geometry.
+
+    The ego and target centre lines need not intersect at exactly the same
+    sampled point, so each trajectory is tested around its own route-projected
+    conflict point.  Both points are fixed by the scenario routes, not by the
+    realised closed-loop trajectories.
+    """
+
+    target_key: str
+    geometry_source: str
+    ego_conflict_point_xy: Point
+    target_conflict_point_xy: Point
+    conflict_radius_m: float
+    ego_enter_time_s: Optional[float]
+    ego_exit_time_s: Optional[float]
+    target_enter_time_s: Optional[float]
+    target_exit_time_s: Optional[float]
+    target_clears_before_ego_enters: Optional[bool]
+
+
+@dataclass(frozen=True)
 class PolicySafety:
     scenario_dir: str
     policy: str
@@ -72,6 +94,7 @@ class PolicySafety:
     target_keys: List[str]
     pair_safety: List[PairSafety]
     yield_rules: List[YieldRule]
+    fixed_geometry_yield_rules: List[FixedGeometryYieldRule]
     errors: List[str]
     warnings: List[str]
 
@@ -226,6 +249,66 @@ def _yield_rule(
     )
 
 
+def _fixed_conflict_points_from_debug(scenario_dir: str) -> Optional[Tuple[Point, Point]]:
+    """Return the unique route-defined conflict geometry logged by the controller."""
+
+    path = os.path.join(scenario_dir, "smpc_debug_steps.jsonl")
+    if not os.path.isfile(path):
+        return None
+    observed: List[Tuple[Point, Point]] = []
+    with open(path, "r", encoding="utf-8") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            supervisor = (json.loads(line).get("yield_stop_supervisor") or {})
+            ego_point = supervisor.get("conflict_point")
+            target_point = supervisor.get("target_conflict_point")
+            if ego_point is None or target_point is None:
+                continue
+            observed.append(
+                (
+                    (float(ego_point[0]), float(ego_point[1])),
+                    (float(target_point[0]), float(target_point[1])),
+                )
+            )
+    if not observed:
+        return None
+    reference = np.asarray(observed[0], dtype=float)
+    if any(not np.allclose(np.asarray(value, dtype=float), reference, atol=1e-6) for value in observed[1:]):
+        raise ValueError(f"Route-defined conflict geometry drifted within rollout: {scenario_dir}")
+    return observed[0]
+
+
+def _fixed_geometry_yield_rule(
+    target_key: str,
+    ego_payload: Dict[str, Any],
+    target_payload: Dict[str, Any],
+    conflict_points: Tuple[Point, Point],
+    conflict_radius_m: float,
+    clearance_tolerance_s: float,
+) -> FixedGeometryYieldRule:
+    ego = np.asarray(ego_payload["state_trajectory"], dtype=float)
+    target = np.asarray(target_payload["state_trajectory"], dtype=float)
+    ego_point, target_point = conflict_points
+    ego_enter, ego_exit = _zone_interval(ego, ego_point, conflict_radius_m)
+    target_enter, target_exit = _zone_interval(target, target_point, conflict_radius_m)
+    target_first = None if ego_enter is None or target_exit is None else bool(
+        target_exit <= ego_enter + clearance_tolerance_s
+    )
+    return FixedGeometryYieldRule(
+        target_key=target_key,
+        geometry_source="controller_route_projection",
+        ego_conflict_point_xy=ego_point,
+        target_conflict_point_xy=target_point,
+        conflict_radius_m=float(conflict_radius_m),
+        ego_enter_time_s=ego_enter,
+        ego_exit_time_s=ego_exit,
+        target_enter_time_s=target_enter,
+        target_exit_time_s=target_exit,
+        target_clears_before_ego_enters=target_first,
+    )
+
+
 def _pair_safety(
     ego_key: str,
     ego_payload: Dict[str, Any],
@@ -337,6 +420,7 @@ def evaluate_scenario_dir(
     conflict_radius_m: float,
     clearance_tolerance_s: float,
     require_collision_envelope: bool,
+    require_fixed_geometry_yield: bool,
     max_solver_failure_frac: float,
 ) -> PolicySafety:
     policy = _parse_policy(scenario_dir)
@@ -345,11 +429,19 @@ def evaluate_scenario_dir(
     warnings: List[str] = []
     pair_results: List[PairSafety] = []
     yield_rules: List[YieldRule] = []
+    fixed_geometry_yield_rules: List[FixedGeometryYieldRule] = []
 
     rollout_config = _load_json(os.path.join(scenario_dir, "scenario_rollout_config.json"))
     completion_valid = _completion_valid(scenario_dir)
     solver_failure = _solver_failure_frac(scenario_dir)
     envelope_logged = _collision_envelope_logged(scenario_dir)
+    try:
+        fixed_conflict_points = _fixed_conflict_points_from_debug(scenario_dir)
+    except ValueError as exc:
+        fixed_conflict_points = None
+        errors.append(str(exc))
+    if is_required and require_fixed_geometry_yield and fixed_conflict_points is None:
+        errors.append("Required policy did not log stable route-defined conflict geometry.")
 
     with open(os.path.join(scenario_dir, "scenario_result.pkl"), "rb") as f:
         result = pickle.load(f)
@@ -402,6 +494,16 @@ def evaluate_scenario_dir(
                     errors.append(message)
                 else:
                     warnings.append(message)
+            if fixed_conflict_points is not None:
+                fixed_rule = _fixed_geometry_yield_rule(
+                    target_key,
+                    result[ego_key],
+                    result[target_key],
+                    fixed_conflict_points,
+                    conflict_radius_m,
+                    clearance_tolerance_s,
+                )
+                fixed_geometry_yield_rules.append(fixed_rule)
 
     if is_required:
         if completion_valid is not True:
@@ -434,6 +536,7 @@ def evaluate_scenario_dir(
         target_keys=target_keys,
         pair_safety=pair_results,
         yield_rules=yield_rules,
+        fixed_geometry_yield_rules=fixed_geometry_yield_rules,
         errors=errors,
         warnings=warnings,
     )
@@ -514,6 +617,12 @@ def print_summary(evaluations: List[PolicySafety], report_paths: Tuple[str, str]
                 f"target_exit={rule.target_exit_time_s} ego_enter={rule.ego_enter_time_s} "
                 f"target_first={rule.target_clears_before_ego_enters}"
             )
+        for rule in evaluation.fixed_geometry_yield_rules:
+            print(
+                f"  fixed-geometry yield target={rule.target_key} "
+                f"target_exit={rule.target_exit_time_s} ego_enter={rule.ego_enter_time_s} "
+                f"target_first={rule.target_clears_before_ego_enters}"
+            )
         for error in evaluation.errors:
             print(f"  ERROR: {error}")
         for warning in evaluation.warnings:
@@ -550,6 +659,11 @@ def main() -> int:
         "--allow-missing-collision-envelope",
         action="store_true",
         help="Do not fail required policies when smpc_debug_setup.json lacks collision_envelope.",
+    )
+    parser.add_argument(
+        "--require-fixed-geometry-yield",
+        action="store_true",
+        help="Fail required policies unless route-defined conflict geometry is logged and replayed.",
     )
     args = parser.parse_args()
 
@@ -590,6 +704,7 @@ def main() -> int:
         "clearance_tolerance_s": clearance_tolerance_s,
         "max_solver_failure_frac": max_solver_failure_frac,
         "require_collision_envelope_log": require_collision_envelope,
+        "require_fixed_geometry_yield": bool(args.require_fixed_geometry_yield),
         "source": "fine_tune_config" if gate_config else "script_defaults",
     }
     scenario_dirs = _list_scenario_dirs(results_dir)
@@ -601,6 +716,7 @@ def main() -> int:
             conflict_radius_m=conflict_radius_m,
             clearance_tolerance_s=clearance_tolerance_s,
             require_collision_envelope=require_collision_envelope,
+            require_fixed_geometry_yield=bool(args.require_fixed_geometry_yield),
             max_solver_failure_frac=max_solver_failure_frac,
         )
         for scenario_dir in scenario_dirs

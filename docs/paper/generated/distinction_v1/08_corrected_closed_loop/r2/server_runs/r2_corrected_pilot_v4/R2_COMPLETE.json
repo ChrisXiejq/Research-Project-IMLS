@@ -1,0 +1,14 @@
+{
+  "deployment_preflight_sha256": "f972f0328412b5c915ca91520a252e60e871b057b9dd177eae75b9c07c44385b",
+  "formal_evidence": false,
+  "implementation_version": "corrected_joint_modes_shared_amin_v1",
+  "native_collisions": 0,
+  "non_statistical_pilot": true,
+  "observed_rollouts": 10,
+  "passing_rollouts": 10,
+  "pilot_audit_sha256": "16013d34e6110994f010189f3b8a34ef364292e2b89504eef90724b475636c70",
+  "schema_version": "r2_complete_v1",
+  "stage": "R2",
+  "status": "pass",
+  "valid_prediction_steps": 1874
+}

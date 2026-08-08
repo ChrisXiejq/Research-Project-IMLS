@@ -1,0 +1,44 @@
+{
+  "continuation_after_original_init_count": 50,
+  "generated_before_formal_outcomes": true,
+  "generation_order": "discard original 50 speeds, discard original 50 offsets, draw 5 speeds, draw 5 offsets",
+  "independent_of_training_validation_test_ids": true,
+  "numpy_generator": "default_rng/PCG64",
+  "original_offset_distribution": "Uniform(-2.5, 2.5) m",
+  "original_speed_distribution": "Uniform(8.0, 10.0) m/s",
+  "records": [
+    {
+      "ego_init_id": 101,
+      "init_speed": 9.118499354267332,
+      "sha256": "0ce13b46d9b8321966deefea59512741b79a2293f55dd31461aa8c5400e6f1c8",
+      "start_longitudinal_offset": 0.702549684162902
+    },
+    {
+      "ego_init_id": 102,
+      "init_speed": 8.857612506704038,
+      "sha256": "cfb1b082fcfb98f182ad7904535097b6f1002187b6e4c1b298d479f6d60af50b",
+      "start_longitudinal_offset": 2.1553967480588003
+    },
+    {
+      "ego_init_id": 103,
+      "init_speed": 9.717194843118708,
+      "sha256": "22cc823927538aafc4789c88ad78419deed75a35200fba9b478254ff7b88a87f",
+      "start_longitudinal_offset": -1.1909948895478344
+    },
+    {
+      "ego_init_id": 104,
+      "init_speed": 8.321662751057989,
+      "sha256": "b86ac3118cec6b67d40a8fdb8fea34422b5459ca98525e3ec759d99dbaed12d3",
+      "start_longitudinal_offset": 0.9404920679092349
+    },
+    {
+      "ego_init_id": 105,
+      "init_speed": 8.720707398783615,
+      "sha256": "6cd3e37b3fa88f53661874ee64288628e63e18152f0d9130ab1289e76400f1f2",
+      "start_longitudinal_offset": -1.754736738223187
+    }
+  ],
+  "schema_version": "r3_confirmatory_init_generation_v1",
+  "seed": 123,
+  "status": "frozen"
+}

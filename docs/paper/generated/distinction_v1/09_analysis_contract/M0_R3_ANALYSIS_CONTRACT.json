@@ -1,0 +1,109 @@
+{
+  "schema_version": "m0_r3_statistical_analysis_contract_v1",
+  "status": "frozen_before_r3_outcomes",
+  "result_generation": "distinction_corrected_v1",
+  "independent_unit": "ego initialisation group",
+  "independent_init_ids": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "treatment_design": "complete paired 2 predictor-stack x 4 risk-policy x 2 target-style block within every init",
+  "sample_size_boundary": {
+    "independent_clusters": 5,
+    "smallest_nonzero_two_sided_exact_p": 0.0625,
+    "simulator_steps_are_not_independent": true,
+    "prediction_windows_are_not_independent_for_closed_loop_inference": true
+  },
+  "outcome_definitions": {
+    "fixed_geometry_adjusted_delay_s": "ego completion time minus target exit time from the route-projected conflict zone; ego and target route points are logged by the controller, required to agree across treatments within 0.001 m for each init, and use a frozen 4.0 m radius",
+    "raw_completion_time_s": "scenario completion duration from the rollout metric pipeline",
+    "minimum_footprint_separation_m": "minimum oriented-rectangle separation with the frozen logged 0.25 m per-actor inflation",
+    "native_collision": "CARLA collision-sensor event taxonomy, reported separately from footprint overlap",
+    "yield_failure": "target does not clear the fixed route-geometry conflict zone before ego entry under the frozen 0.2 s tolerance",
+    "completion_failure": "the frozen post-CARLA completion rule is false"
+  },
+  "headline_hypotheses": [
+    {
+      "id": "H1",
+      "statement": "B1 task adaptation improves held-out in-distribution give-way prediction relative to frozen B0 and simple physical/route-prior baselines.",
+      "r3_role": "not retested; use frozen E1/E4 offline and in-loop prediction evidence",
+      "primary_metric": "rollout/init-macro trajectory NLL per step",
+      "secondary_metrics": [
+        "top1 ADE",
+        "top1 FDE"
+      ]
+    },
+    {
+      "id": "H2",
+      "statement": "Replacing the matched MLP residual adapter with the lightweight Transformer residual adapter yields consistent gains in both output-parameterisation pairs.",
+      "r3_role": "not retested; use frozen E3 model-fairness evidence",
+      "primary_contrasts": [
+        "T1 minus B2-M test macro NLL",
+        "T2 minus B2-D test macro NLL"
+      ]
+    },
+    {
+      "id": "H3",
+      "statement": "The offline advantage of the B1 predictor stack translates into a stable closed-loop benefit across all prespecified risk-policy and target-style cells.",
+      "r3_role": "primary corrected closed-loop test",
+      "treatment_minus_control": "B1 minus B0 within each risk-policy x target-style x init block",
+      "primary_outcomes": [
+        "fixed_geometry_adjusted_delay_s",
+        "minimum_footprint_separation_m"
+      ],
+      "support_rule": "stable translation requires non-positive mean delay and non-negative mean separation in every one of the eight policy-style cells, with no excess native collision, yield failure or completion failure; otherwise universal stability is not supported",
+      "secondary_outcomes": [
+        "raw_completion_time_s",
+        "solver failure fraction",
+        "supervisor active fraction"
+      ]
+    },
+    {
+      "id": "H4",
+      "statement": "The frozen adaptive policy stack empirically dominates each of the three prespecified fixed policy stacks.",
+      "r3_role": "primary corrected safety-efficiency frontier test",
+      "treatment_minus_control": "adaptive minus each fixed comparator, evaluated separately within predictor stack and target style",
+      "primary_outcomes": [
+        "fixed_geometry_adjusted_delay_s",
+        "minimum_footprint_separation_m"
+      ],
+      "dominance_rule": "adaptive dominates a fixed comparator only if mean delay is no greater and mean separation is no smaller, at least one inequality is strict, and adaptive has no excess native collision, yield failure or completion failure",
+      "universal_support_rule": "H4 requires dominance over all three fixed comparators in every predictor-stack x target-style stratum",
+      "sensitivity": [
+        "raw completion time",
+        "outcome-dependent conflict-point delay retained only as sensitivity",
+        "footprint inflation margins 0.0, 0.25, 0.35 and 0.50 m"
+      ]
+    }
+  ],
+  "inference": {
+    "raw_display": "all five init-level paired effects plus arithmetic mean and median",
+    "exact_test": "two-sided sign-flip test over five init-cluster effects",
+    "interval": "cluster bootstrap, explicitly descriptive",
+    "multiplicity": "Holm adjustment within each declared contrast family",
+    "missingness": "report missing/excluded clusters; complete-case n=4 has minimum nonzero two-sided exact p=0.125; never silently impute or drop",
+    "equivalence_rule": "p greater than 0.05 is not evidence of equivalence"
+  },
+  "families": {
+    "H3": "eight policy-style B1-minus-B0 contrasts per primary outcome",
+    "H4": "three adaptive-minus-fixed contrasts within each predictor-style stratum per primary outcome"
+  },
+  "mechanism_only_not_independent_outcomes": [
+    "solver failure",
+    "supervisor activity",
+    "risk allocation",
+    "mode probabilities",
+    "response-active status"
+  ],
+  "prohibitions": [
+    "Do not pool legacy and corrected rollouts.",
+    "Do not use R2 pilot values for effect estimation.",
+    "Do not change primary outcomes, directions, dominance rule or families after R3 outcomes are read.",
+    "Do not call zero observed collision proof of safety.",
+    "Do not attribute B1 versus B0 solely to model weights because calibration also differs.",
+    "Do not call three fixed settings a complete theoretical frontier."
+  ]
+}

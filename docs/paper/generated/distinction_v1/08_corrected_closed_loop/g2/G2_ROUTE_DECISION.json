@@ -1,0 +1,50 @@
+{
+  "schema_version": "g2_closed_loop_route_decision_v1",
+  "status": "frozen",
+  "gate": "G2",
+  "decision": "Route_R_corrected_prospective_core",
+  "decision_time_local": "2026-08-08",
+  "decision_independent_of_r3_outcome_direction": true,
+  "reasons": [
+    "R2 passed all 10 corrected-v1 deployment rollouts with no native collision and no numerical/control gate failure.",
+    "R2 audited 1874 valid prediction/control steps and consumed spatial modes 0, 1 and 2 under the corrected joint-mode mapping.",
+    "The maximum per-rollout P95 solver time was 0.1038007328 s, below the frozen 0.5 s runtime gate.",
+    "After a clean CARLA restart, all 10 accepted R2 rollouts began on attempt 1 and completed in approximately 16 minutes, making an 80-rollout matrix operationally feasible.",
+    "The user instructed continuation of the planned task and retained manual authority over server launch and monitoring."
+  ],
+  "r3_design": {
+    "predictor_stacks": [
+      "B0_identity_calibration",
+      "B1_validation_fitted_calibration"
+    ],
+    "risk_policies": [
+      "fixed_aggressive",
+      "fixed_medium",
+      "fixed_conservative",
+      "adaptive"
+    ],
+    "target_styles": [
+      "assertive",
+      "reactive"
+    ],
+    "ego_init_ids": [
+      101,
+      102,
+      103,
+      104,
+      105
+    ],
+    "expected_rollouts": 80,
+    "run_order": "deterministic block randomisation within each init",
+    "formal_result_generation": "distinction_corrected_v1",
+    "pilot_rollouts_excluded": true,
+    "legacy_corrected_pooling_prohibited": true
+  },
+  "claim_boundary": "R3 is a prospective corrected evaluation on five newly generated in-distribution init groups. Five clusters provide strong directional/descriptive evidence but limited exact-inference resolution; zero observed collision cannot establish zero collision risk.",
+  "server_execution_policy": "Code is committed and pushed locally; the user alone launches and monitors server jobs. No assistant-side upload, launch, stop or polling is authorised.",
+  "sources": {
+    "r2_complete_sha256": "223c197d90adca88c55f64f1a789b5786b02fe3053b793167f4db2df4033d7e8",
+    "r2_local_verification_sha256": "a06c813872fd349194c9fdfda4a5c127ba418211de619c929713f5e19415068a",
+    "r3_init_manifest_sha256": "85ec9738373f986347668a6495c8eb717883d70a3a8383174b0066f770a631d4"
+  }
+}

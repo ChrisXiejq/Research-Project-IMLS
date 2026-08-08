@@ -2,9 +2,9 @@
 
 **Plan:** [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)  
 **Started:** 2026-08-08  
-**Current step:** R2 in progress — corrected 10-rollout pilot  
-**Overall status:** S0–G1 and R1 complete; corrected pilot pending  
-**Closed-loop route:** undecided; choose only at Gate G2
+**Current step:** R3 in progress — code frozen and awaiting user-launched corrected 80-rollout matrix
+**Overall status:** S0–G2, R1–R2 and M0 complete; R3 server execution is next
+**Closed-loop route:** Route R frozen prospectively at G2
 
 ## Status legend
 
@@ -28,12 +28,12 @@
 | E5 | Collision/geometry/metric audit | complete | No | `05_collision_and_geometry/E5_COMPLETE.json` | taxonomy + margin/init50 sensitivity; fixed-zone raw replay remains G2 boundary |
 | E6 | Split/covariate-balance audit | complete | No | `06_split_balance/E6_COMPLETE.json` | disjoint init split; max descriptive SMD 0.208 |
 | G1 | Freeze final ML contribution | complete | No | `07_ml_claim_gate/G1_ML_CONTRIBUTION_FROZEN.json` | final ML thesis and prohibited wording frozen |
-| R1 | Correct mode/A_MIN implementation | complete | No initially | `08_corrected_closed_loop/r1/R1_COMPLETE.json` | 9 tests PASS; corrected-v1 default; legacy explicit only |
-| R2 | Corrected 10-rollout pilot | in_progress | Yes | pilot completion JSON | 8 nominal arms + 2 collision probes |
-| G2 | Freeze Route S or Route R | pending | No | decision record | cannot depend on result direction |
-| R3 | Corrected 80-rollout nominal matrix | pending | Yes | 80-arm audit | only Route R |
+| R1 | Correct mode/A_MIN implementation | complete | No initially | `08_corrected_closed_loop/r1/R1_COMPLETE.json` | 10 tests PASS; corrected-v1 default; legacy explicit only |
+| R2 | Corrected 10-rollout pilot | complete | Yes | `08_corrected_closed_loop/r2/local_verification/r2_corrected_pilot_v4/R2_LOCAL_VERIFICATION.json` | 10/10 pass; non-statistical deployment gate only |
+| G2 | Freeze Route S or Route R | complete | No | `08_corrected_closed_loop/g2/G2_COMPLETE.json` | Route R frozen before R3 outcomes |
+| R3 | Corrected 80-rollout nominal matrix | in_progress | Yes | 80-arm audit | code/contract/init generation ready; user launch pending |
 | R4 | Calibration factorial | pending | Yes | matched factorial audit | optional, lowest experiment priority |
-| M0 | Freeze statistical analysis contract | pending | No | hashed estimands/families | before reading new formal outcomes |
+| M0 | Freeze statistical analysis contract | complete | No | `09_analysis_contract/M0_COMPLETE.json` | H3/H4 directions, outcomes, families and dominance rule frozen before R3 |
 | M1 | Four-hypothesis evidence package | pending | No | 0 locator/value mismatch | replaces old H1–H8 |
 | W1 | Full TMLR manuscript | pending | No | complete source/PDF | 0 TODO |
 | Q1 | Final scientific/rubric/PDF audit | pending | No | all gates PASS | no claim patching by hand |
@@ -51,13 +51,16 @@
 | 2026-08-08 | Describe B1 as raster-dominant, not effective target-history modelling | Three cross-init raster shuffles increase ADE by 0.270–0.293 m; past shuffles change ADE by about 0.00008 m on average | E2 |
 | 2026-08-08 | Keep aggregate B1 gain but explicitly reject universal tail transfer | At -3 m response-active windows, B1-minus-B0 ADE is +1.03 m | E4 |
 | 2026-08-08 | Reject universal adaptive-policy superiority | Excluding collision-affected init50 flips several small adaptive-minus-fixed effects | E5 |
+| 2026-08-08 | Select Route R before formal corrected outcomes | R2 passed all deployment/numerical/runtime gates and the 80-run cost is feasible | G2 |
+| 2026-08-08 | Use five newly generated R3 init groups 101–105 | Continue the original seeded in-distribution sampling stream without reusing opened test init46–50 | R3 init manifest |
+| 2026-08-08 | Retain adverse formal outcomes | Collision, yield and completion failures are scientific outcomes, not retry/exclusion triggers | M0/R3 contract |
 
 ## Open blockers and risks
 
 | Risk | Severity | Current treatment | Closure condition |
 | --- | --- | --- | --- |
-| Formal SMPC repeats top mode spatially | remediated in corrected-v1 | legacy evidence remains affected | R2/G2 decision + corrected evidence |
-| Fixed/adaptive reference A_MIN differs | remediated in corrected-v1 | legacy evidence remains affected | R2/G2 decision + corrected evidence |
+| Formal SMPC repeats top mode spatially | closed for corrected-v1 | R2 consumed distinct modes 0/1/2 in 1,874 valid steps; legacy remains labelled | R3 repeats the hard audit |
+| Fixed/adaptive reference A_MIN differs | closed for corrected-v1 | R2 observed only reference/solver pair [−3,−3] | R3 repeats the hard audit |
 | Day11 target–traffic-light collision | critical | raw event confirmed | full taxonomy + cluster sensitivity/rerun |
 | 42/66 JSON locators invalid | critical | old 14/14 claim superseded | M1 value-resolving audit |
 | Missing physical baselines | closed | E1 complete | B1 wins 5/5 init against CV/CA/train-mean |
@@ -82,4 +85,8 @@
 | 2026-08-08 | E5 | Attributed collisions and ran sensitivity checks | 0 ego-target collisions; 2 target-light episodes; policy effects fragile | `05_collision_and_geometry/formal_safety_metric_sensitivity_audit.json` |
 | 2026-08-08 | E6 | Reconstructed split and covariate balance | 200 rollouts, disjoint inits, no duplicate keys | `06_split_balance/split_balance_audit.json` |
 | 2026-08-08 | G1 | Froze final ML contribution | ML-C1 supported; ML-C2 unsupported; ML-C3 refuted in tail | `07_ml_claim_gate/G1_ML_CONTRIBUTION_FROZEN.json` |
-| 2026-08-08 | R1 | Corrected joint-mode indexing and unified A_MIN contract | 9 tests PASS; one-TV map `[0,1,2]`; fixed/adaptive solver/reference A_MIN −3 m/s² | `08_corrected_closed_loop/r1/R1_COMPLETE.json` |
+| 2026-08-08 | R1 | Corrected joint-mode indexing and unified A_MIN contract | 10 tests PASS; one-TV map `[0,1,2]`; fixed/adaptive solver/reference A_MIN −3 m/s² | `08_corrected_closed_loop/r1/R1_COMPLETE.json` |
+| 2026-08-08 | R2 | Pulled, hashed and locally re-audited corrected pilot | 10/10 pass; 0 native collisions; 1,874 valid steps; max P95 solve 0.1038 s | `08_corrected_closed_loop/r2/local_verification/r2_corrected_pilot_v4/R2_LOCAL_VERIFICATION.json` |
+| 2026-08-08 | G2 | Froze corrected prospective Route R | Decision is independent of future R3 outcome direction | `08_corrected_closed_loop/g2/G2_COMPLETE.json` |
+| 2026-08-08 | M0 | Froze R3 estimands, outcomes, inference and dominance rules | Five init clusters; exact sign-flip and Holm families declared | `09_analysis_contract/M0_COMPLETE.json` |
+| 2026-08-08 | R3 | Prepared resumable block-randomised corrected matrix | 80 unique keys on five new in-distribution init groups; user server launch pending | `core/scripts/carla/run_r3_corrected_formal_matrix.sh` |

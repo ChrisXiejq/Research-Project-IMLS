@@ -1,0 +1,8 @@
+{
+  "schema_version": "g2_complete_v1",
+  "status": "pass",
+  "stage": "G2",
+  "decision": "Route_R_corrected_prospective_core",
+  "decision_record": "G2_ROUTE_DECISION.json",
+  "decision_record_sha256": "d201127093164d23dea096a88d800bc270ed02ce0dcc921749a7b1f559dc3fe2"
+}
