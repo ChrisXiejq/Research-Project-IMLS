@@ -529,7 +529,6 @@ def main() -> None:
     manuscript = manuscript_audit(
         repo, visual_review_complete=args.visual_review_complete
     )
-    atomic_json(output / "Q1_SCIENTIFIC_MANUSCRIPT_AUDIT.json", manuscript)
 
     clean: dict[str, Any] = {
         "schema_version": "q1_clean_checkout_v1",
@@ -542,6 +541,10 @@ def main() -> None:
             node=args.node,
             expected_tests=args.expected_tests,
         )
+    # Write receipts only after the detached worktree gate. Creating them
+    # earlier would make the source repository dirty and defeat the purpose of
+    # the clean-checkout precondition.
+    atomic_json(output / "Q1_SCIENTIFIC_MANUSCRIPT_AUDIT.json", manuscript)
     atomic_json(output / "Q1_CLEAN_CHECKOUT_AUDIT.json", clean)
 
     scientific_pass = manuscript["status"] == "pass" and clean["status"] == "pass"
