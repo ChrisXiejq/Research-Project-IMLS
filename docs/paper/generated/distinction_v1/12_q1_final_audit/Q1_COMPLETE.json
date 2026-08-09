@@ -1,6 +1,6 @@
 {
   "additional_large_scale_carla_required": false,
-  "clean_checkout_audit_sha256": "e8a197c214d9e8dff19f35cdf52fcc5bd63c246020c47082273a848057f934af",
+  "clean_checkout_audit_sha256": "cdee6aebdad81f825bbeab026d46ce015539c5fde8e98159f8da67b89a6a201d",
   "human_release_inputs_required": [
     "candidate number or verified name, as required by the ELEC0054 brief",
     "exact programme/degree title and any required supervisor field",

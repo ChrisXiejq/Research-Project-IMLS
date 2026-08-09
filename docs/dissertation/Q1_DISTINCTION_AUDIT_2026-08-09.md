@@ -6,7 +6,7 @@
 inputs. No additional CARLA experiment is required or authorised.**
 
 The detached clean-checkout gate at commit
-`d1647d97a3275a90eb5ef68a2b152ef06ce70af9` regenerated the corrected A2
+`2f80639d56289253149a40fa08f1b2c44f0dc00a` regenerated the corrected A2
 synthesis, all 82 M1 value-resolving records and every W1 evidence table;
 regenerated artefacts matched the committed scientific outputs. It also ran
 66/66 analysis tests and built a 25-page TMLR-layout PDF. The Q1 audit found no
