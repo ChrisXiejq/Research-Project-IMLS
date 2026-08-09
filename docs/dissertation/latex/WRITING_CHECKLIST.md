@@ -50,8 +50,8 @@ checks, not invitations to alter the frozen experiments or hypotheses.
   authority.
 - [x] Give the frozen collection, training, evaluation and analysis entry
   points; no new CARLA execution is required.
-- [ ] Verify that the final source archive contains no credentials or identity
-  leaks at V1.
+- [x] Verify that the Q1 manuscript/evidence source contains no credentials;
+  repeat on the exact final V1 archive after inserting submission metadata.
 
 ## Final TMLR-format pass
 
@@ -65,6 +65,7 @@ checks, not invitations to alter the frozen experiments or hypotheses.
   outcome labels remain readable without colour.
 - [x] Compile and inspect all 24 W1 pages for overflow, unreadable labels,
   isolated captions and broken references.
-- [ ] Rebuild from a clean checkout during Q1 release verification.
+- [ ] Rebuild from a clean checkout during Q1 release verification (performed
+  by `audit_q1_dissertation.py` only after the Q1 source commit).
 - [ ] If submitting to TMLR rather than UCL, switch to anonymous mode and audit
   the PDF/source/supplement for identity and repository links.

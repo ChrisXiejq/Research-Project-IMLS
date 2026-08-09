@@ -73,9 +73,10 @@ Reference pages: [Author Guidelines](https://jmlr.org/tmlr/author-guide.html),
   anonymised. Supplementary files may be PDF or ZIP and total at most 100 MB.
 - A broader-impact statement is included because autonomous-driving claims can
   create safety risk if overstated.
-- TMLR currently requires first-page disclosure of LLM writing assistance.
-  For the UCL dissertation, follow the programme's own academic-integrity and
-  AI-use disclosure rules even if they differ.
+- TMLR requires first-page disclosure of LLM writing assistance. The current
+  source now contains a transparent first-page Codex-use footnote. UCL's
+  module-specific assessment brief remains authoritative, so the candidate
+  must confirm the ELEC0054 GenAI category before submission.
 
 ## Drafting rules
 
@@ -122,3 +123,22 @@ in greyscale, record the W1 gate with:
 
 The explicit flag prevents a later rebuild from silently claiming a visual
 inspection that nobody performed.
+
+## Q1 audit
+
+After committing the intended scientific source, run the final detached
+clean-checkout gate:
+
+```bash
+python3 core/scripts/models/audit_q1_dissertation.py \
+  --clean-checkout \
+  --visual-review-complete
+```
+
+Q1 deliberately reports scientific readiness separately from submission
+readiness. Neutral candidate metadata, an unconfirmed module GenAI category or
+an unknown module word/page rule cannot be converted into a pass by guessing.
+The ordinary Git archive contains the analysis evidence and selected deployed
+weights, while the large raster dataset is held in the separate project
+archive and must be shared through institution-approved storage if an examiner
+requests full retraining.

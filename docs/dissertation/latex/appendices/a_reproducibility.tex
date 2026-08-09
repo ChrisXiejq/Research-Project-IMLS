@@ -159,3 +159,18 @@ PNGs are deterministic format conversions by
 \texttt{docs/dissertation/latex} builds the TMLR-layout manuscript. These paths
 are audit identifiers; the submitted evidence package, rather than this prose,
 is authoritative for hashes and values.
+
+\subsection{Data and artefact availability}
+
+The version-controlled research package contains the source code, frozen
+configurations, pretrained B0 and selected B1 deployment weights, corrected R3
+raw receipts, derived tables, figures, completion manifests and SHA-256
+digests needed to rerun the primary analyses and rebuild this manuscript.
+The 200-rollout raster dataset and non-selected training checkpoints are not
+distributed in the ordinary Git archive because of their size; the dataset is
+retained in the separate project archive and is available from the candidate
+to examiners through institution-approved storage on request. Consequently, a
+clean checkout can reproduce the reported analysis and document without CARLA,
+whereas model retraining requires that separately retained dataset and the
+software environment reported above. CARLA itself remains subject to its own
+distribution terms.

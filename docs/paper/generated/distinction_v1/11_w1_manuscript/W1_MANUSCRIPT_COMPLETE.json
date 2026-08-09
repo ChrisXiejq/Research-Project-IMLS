@@ -18,14 +18,15 @@
   "generated_asset_failures": [],
   "missing_citations": [],
   "pdf": {
-    "pages": 24,
+    "pages": 25,
     "path": "docs/dissertation/latex/build/main.pdf",
-    "sha256": "da54e48626dab23682d89e456affe219da89d2c3f57ac6b904488aae8df75d04"
+    "sha256": "5b251cf0659a8987e11a2547168c286c2e52f2d805ab6dd55999ed973327cd52"
   },
   "regression_test_count": 66,
   "release_only_pending": [
     "verified UCL candidate and supervisor metadata",
-    "programme-approved AI-use disclosure wording",
+    "programme confirmation of the inserted AI-use disclosure",
+    "programme word/page limit and word-count presentation",
     "final release Git commit and submitted-PDF digest"
   ],
   "schema_version": "w1_manuscript_complete_v1",
@@ -35,11 +36,11 @@
     "r4_status": "not_run_by_frozen_design"
   },
   "source_sha256": {
-    "docs/dissertation/latex/appendices/a_reproducibility.tex": "bf4dcc5437c4df51c5fc53c2916fe8430e5f86746a1ebbe7aa7c0bc9d7dcf16d",
+    "docs/dissertation/latex/appendices/a_reproducibility.tex": "1cdbba619f98bed9a1c13719b981334de8a6fd0df82b7a7c3b4bc98adf7ec83a",
     "docs/dissertation/latex/appendices/b_supplementary_results.tex": "0edbb0c96e30b4f3f191fefc8f040765b5adc9bd00da64045621e81add9e6325",
     "docs/dissertation/latex/appendices/c_evidence_audit.tex": "b0519583e1ba6a260ea47e552abdf034200705b9238ed65a5dc5e1804be8db24",
     "docs/dissertation/latex/macros.tex": "69bcedf4ac27e967ba82f15615b0ef7fe8356195d7768bd8e3480f63c925fd4b",
-    "docs/dissertation/latex/main.tex": "645181b3b1621fb87e5ad01daa8929b453e9cae9d91318916767b5a414692691",
+    "docs/dissertation/latex/main.tex": "7ce57a20619bd69698bbedcf46a63f705d8495d87edfbbbc64c20bdd41c3a368",
     "docs/dissertation/latex/references.bib": "e3c1a7a29ff0245b5e3df080c97f3add08432f41c741768c721ba188a61705e0",
     "docs/dissertation/latex/sections/01_introduction.tex": "7ec9ca830f848367d5ba1c1dfa3a88f074080398c9cf45edebf6d0ad72c5b385",
     "docs/dissertation/latex/sections/02_related_work.tex": "e4f092be72b2804a0f8cd0dd73e3cc6f079ed788caaf13dc82c8a187581468a7",

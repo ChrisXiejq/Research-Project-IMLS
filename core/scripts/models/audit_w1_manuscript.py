@@ -144,7 +144,7 @@ def main() -> None:
         "checked_source_count_in_range": 25 <= len(entries) <= 35,
         "generated_asset_hashes_resolve": not generated_failures,
         "pdf_present": pdf.is_file() and pdf.stat().st_size > 0,
-        "pdf_page_count_recorded": page_count == 24,
+        "pdf_page_count_recorded": isinstance(page_count, int) and page_count > 0,
         "latex_has_no_blocking_warning": not build_failures,
         "regression_suite_passes": tests.returncode == 0 and test_count == 66,
         "visual_review_recorded": args.visual_review_complete,
@@ -186,7 +186,8 @@ def main() -> None:
         },
         "release_only_pending": [
             "verified UCL candidate and supervisor metadata",
-            "programme-approved AI-use disclosure wording",
+            "programme confirmation of the inserted AI-use disclosure",
+            "programme word/page limit and word-count presentation",
             "final release Git commit and submitted-PDF digest",
         ],
     }

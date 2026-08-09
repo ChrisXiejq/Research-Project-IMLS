@@ -7,6 +7,7 @@ outputs and deliberately refuses incomplete/malformed evidence packages.
 
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
@@ -284,6 +285,51 @@ def diagnostic_tables(context: Dict[str, Any], b1_rows: List[Dict[str, str]], b0
 
 
 def main() -> None:
+    global REPO_ROOT, OUT_DIR, SOURCES
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Regenerate the W1 LaTeX evidence tables from the canonical frozen "
+            "offline and corrected-R3 evidence. This is presentation-only and "
+            "does not rerun an experiment."
+        )
+    )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=REPO_ROOT,
+        help="Repository root (default: inferred from this script).",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        help=(
+            "Output directory (default: "
+            "docs/paper/generated/distinction_v1/11_w1_manuscript under repo root)."
+        ),
+    )
+    args = parser.parse_args()
+
+    REPO_ROOT = args.repo_root.resolve()
+    OUT_DIR = (
+        args.output.resolve()
+        if args.output
+        else REPO_ROOT / "docs/paper/generated/distinction_v1/11_w1_manuscript"
+    )
+    SOURCES = {
+        "validation": REPO_ROOT / "docs/paper/generated/day8/final_validation/day8_validation_summary.json",
+        "test": REPO_ROOT / "docs/paper/generated/day8/final_test/day8_frozen_test_summary.json",
+        "b0": REPO_ROOT / "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "capacity": REPO_ROOT / "docs/paper/generated/distinction_v1/03_training_budget/model_capacity_training_budget_audit.json",
+        "context": REPO_ROOT / "docs/paper/generated/day10/gaps/context_ablation/interaction_context_ablation_summary.json",
+        "b1_inputs": REPO_ROOT / "docs/paper/generated/distinction_v1/02_input_ablations/b1_input_condition_summary.csv",
+        "h3": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h3_contrasts.csv",
+        "h4": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_contrasts.csv",
+        "h4_dominance": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_dominance.csv",
+        "m1": REPO_ROOT / "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_COMPLETE.json",
+        "a2": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json",
+    }
+
     missing = [str(path) for path in SOURCES.values() if not path.is_file()]
     if missing:
         raise FileNotFoundError("Missing canonical sources:\n" + "\n".join(missing))

@@ -4,7 +4,36 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const sharp = require("sharp");
+
+function usage() {
+  return [
+    "Usage: render_w1_r3_figures_png.cjs [--repo-root PATH] [--output PATH]",
+    "",
+    "Render the two canonical corrected-R3 SVGs and the declared W1 workflow",
+    "correction as hash-bound PNG presentation assets. No experiment is rerun.",
+  ].join("\n");
+}
+
+function parseArgs(argv) {
+  const options = { repoRoot: null, output: null };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--help" || arg === "-h") {
+      process.stdout.write(`${usage()}\n`);
+      process.exit(0);
+    }
+    if (arg === "--repo-root" || arg === "--output") {
+      if (index + 1 >= argv.length) throw new Error(`Missing value for ${arg}`);
+      const value = path.resolve(argv[index + 1]);
+      if (arg === "--repo-root") options.repoRoot = value;
+      else options.output = value;
+      index += 1;
+      continue;
+    }
+    throw new Error(`Unknown argument: ${arg}\n${usage()}`);
+  }
+  return options;
+}
 
 function digest(file) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
@@ -18,15 +47,17 @@ function replaceRequired(text, oldValue, newValue) {
 }
 
 async function main() {
-  const repo = path.resolve(__dirname, "../../..");
+  const options = parseArgs(process.argv.slice(2));
+  const sharp = require("sharp");
+  const repo = options.repoRoot || path.resolve(__dirname, "../../..");
   const sourceDir = path.join(
     repo,
     "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis"
   );
-  const outputDir = path.join(
-    repo,
-    "docs/paper/generated/distinction_v1/11_w1_manuscript"
-  );
+  const outputDir = options.output || path.join(
+      repo,
+      "docs/paper/generated/distinction_v1/11_w1_manuscript"
+    );
   const names = ["figure_r3_h3_translation", "figure_r3_h4_dominance"];
   fs.mkdirSync(outputDir, { recursive: true });
 
