@@ -2,8 +2,8 @@
 
 The experiment phase is complete. Corrected R3 finished all 80 prespecified
 rollouts, A2 produced the closed-loop synthesis, and M1 value-audited the four
-headline hypotheses. W1 has now frozen the full 24-page TMLR-layout scientific
-manuscript and its deterministic presentation assets. Large-scale CARLA
+headline hypotheses. W1/Q1 have now frozen and audited the full 25-page
+TMLR-layout scientific manuscript and its deterministic presentation assets. Large-scale CARLA
 collection is closed for this dissertation; R4 is frozen as `not_run`.
 
 ## Read in this order
@@ -29,6 +29,9 @@ collection is closed for this dissertation; R4 is frozen as `not_run`.
   prospective contracts.
 - `generated/distinction_v1/11_w1_manuscript/`: W1 tables, corrected figures
   and the manuscript completion gate.
+- `generated/distinction_v1/12_q1_final_audit/`: clean-checkout and final
+  scientific/rubric release audit; only verified human submission metadata is
+  pending.
 
 `generated/paper_assets_v1/` and Day10--13 artifacts are retained for
 provenance and secondary diagnostics. They are not the primary corrected

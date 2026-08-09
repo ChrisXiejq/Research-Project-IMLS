@@ -3,7 +3,8 @@
 **Status:** active and canonical  
 **Evidence cut:** R3/A2/M1, 2026-08-08  
 **Experiment decision:** large-scale CARLA collection is closed; R4 is `not_run`  
-**Current gate:** Q1 scientific, rubric and release audit; W1 accepted
+**Current gate:** Q1 scientific/rubric/PDF gate passed; verified human release
+metadata pending before Q1 can close
 
 This is the sole active route from the completed experiments to the final
 dissertation. [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)
@@ -208,7 +209,8 @@ auditable.
 
 ## 5. Immediate next action
 
-W0 and W1 are accepted. Q1 now adversarially checks scientific consistency,
-rubric coverage, clean-checkout rebuilding and release hygiene. It is not
-permission to reopen CARLA, select new outcomes or alter a verdict because its
-direction is inconvenient.
+W0 and W1 are accepted. Q1's scientific, rubric, clean-checkout and PDF gates
+passed on 2026-08-09. The upload-ready release gate remains open only for
+verified candidate/programme metadata, the ELEC0054 GenAI category and the
+module word/page rule. This is not permission to reopen CARLA, select new
+outcomes or alter a verdict because its direction is inconvenient.

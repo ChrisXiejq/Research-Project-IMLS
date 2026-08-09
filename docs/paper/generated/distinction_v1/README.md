@@ -32,6 +32,9 @@ Completed packages:
 - `10_four_hypothesis_evidence/`: final M1 value-resolving evidence package.
 - `11_w1_manuscript/`: deterministic LaTeX tables, corrected manuscript
   figures and the W1 source/build/visual completion gate.
+- `12_q1_final_audit/`: detached clean-checkout, scientific manuscript and
+  submission-release readiness receipts. Scientific Q1 passes; human metadata
+  remains pending.
 
 Use `10_four_hypothesis_evidence/` for headline claims and
 `08_corrected_closed_loop/r3_final/synthesis/` for corrected closed-loop

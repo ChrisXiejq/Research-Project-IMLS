@@ -2,8 +2,8 @@
 
 **Plan:** [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)  
 **Started:** 2026-08-08  
-**Current step:** Q1 scientific, rubric and release audit
-**Overall status:** S0–M1 complete; R3 passed at 80/80 and large-scale CARLA collection is permanently closed for this dissertation
+**Current step:** Q1 submission metadata closure after scientific PASS
+**Overall status:** S0–W1 complete; Q1 scientific/rubric/PDF/clean-checkout gates pass; large-scale CARLA is permanently closed
 **Closed-loop route:** Route R frozen prospectively at G2
 
 ## Status legend
@@ -37,8 +37,8 @@
 | M0 | Freeze statistical analysis contract | complete | No | `09_analysis_contract/M0_AMENDMENT_COMPLETE.json` | v1 preserved; v2 primary outcomes, censoring, families, margins and study-stop rule frozen before R3 |
 | M1 | Four-hypothesis evidence package | complete | No | `10_four_hypothesis_evidence/M1_COMPLETE.json` | 82 records; 0 invalid locator, value mismatch, orphan claim or legacy/corrected pooling violation |
 | W0 | Migrate active documents to R3/M1 and retire stale entry points | complete | No | documentation/link/LaTeX audit | corrected R3 is sole primary closed-loop source; obsolete guides removed; PDF builds |
-| W1 | Full TMLR manuscript | complete | No | `11_w1_manuscript/W1_MANUSCRIPT_COMPLETE.json` | 24-page W1 PDF; 27/27 citations; deterministic assets; 66 tests; colour/greyscale visual pass |
-| Q1 | Final scientific/rubric/PDF audit | in_progress | No | all gates PASS | no claim patching by hand; release metadata remains separate |
+| W1 | Full TMLR manuscript | complete | No | `11_w1_manuscript/W1_MANUSCRIPT_COMPLETE.json` | 25-page Q1-hardened PDF; 27/27 citations; deterministic assets; 66 tests; colour/greyscale visual pass |
+| Q1 | Final scientific/rubric/PDF audit | blocked | No | `12_q1_final_audit/Q1_COMPLETE.json` | scientific gate PASS; candidate/programme, GenAI-category and word/page metadata require verified user input |
 | V1 | Viva and submission package | pending | No | archive + viva documents | final deliverable |
 
 ## Immutable decisions
@@ -71,7 +71,8 @@
 | Missing physical baselines | closed | E1 complete | B1 wins 5/5 init against CV/CA/train-mean |
 | B1/T fairness | controlled limitation | E3 complete; claim narrowed | report full-configuration comparison, not architecture causality |
 | Only five independent test inits | high | exact/descriptive inference | transparent statistics; no fake n |
-| Manuscript source/build integrity | medium | W1 verification in progress | 0 drafting markers, resolved citations/references, checked PDF |
+| Manuscript source/build integrity | closed scientifically | Q1 clean-checkout and 25-page visual audit pass | repeat after verified release metadata insertion |
+| Submission identity/AI/length metadata | high release-only | never infer from Git or central generic guidance | candidate supplies current ELEC0054 requirements |
 
 ## Execution log
 
@@ -105,3 +106,4 @@
 | 2026-08-08 | W0 | Migrated all active paper/dissertation guidance and the English design/results skeleton to corrected R3/M1 | Legacy timing evidence demoted; two obsolete guides removed; A2/M1 pass, 66 tests pass and TMLR PDF builds | `FINAL_TO_SUBMISSION_PLAN.md` |
 | 2026-08-08 | W1.1 | Completed the corrected Methods and Experimental Design draft from frozen configs/contracts | CARLA scenario, six models, exact training budget, risk settings, R3 factorial, estimands and statistics now explicit; PDF builds | `latex/sections/04_methodology.tex` |
 | 2026-08-08 | W1 | Completed and audited the full TMLR-layout scientific manuscript | 24 pages; 27 cited sources; 0 unresolved citations/drafting markers/overfull boxes; 66 tests; corrected 80-rollout workflow; colour and greyscale figures pass | `11_w1_manuscript/W1_MANUSCRIPT_COMPLETE.json` |
+| 2026-08-09 | Q1 | Adversarial scientific, rubric, release and PDF audit from a detached clean checkout | A2/M1/W1 regenerate exactly; 66 tests; 27/27 citations; 25 pages visually pass; scientific PASS, four human release inputs pending | `12_q1_final_audit/Q1_COMPLETE.json` |

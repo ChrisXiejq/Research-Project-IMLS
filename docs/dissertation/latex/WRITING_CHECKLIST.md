@@ -65,7 +65,7 @@ checks, not invitations to alter the frozen experiments or hypotheses.
   outcome labels remain readable without colour.
 - [x] Compile and inspect all 24 W1 pages for overflow, unreadable labels,
   isolated captions and broken references.
-- [ ] Rebuild from a clean checkout during Q1 release verification (performed
-  by `audit_q1_dissertation.py` only after the Q1 source commit).
+- [x] Rebuild from a clean checkout during Q1 scientific release verification;
+  repeat after inserting the four verified submission-only values.
 - [ ] If submitting to TMLR rather than UCL, switch to anonymous mode and audit
   the PDF/source/supplement for identity and repository links.

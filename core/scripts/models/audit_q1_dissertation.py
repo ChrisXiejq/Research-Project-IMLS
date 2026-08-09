@@ -287,7 +287,13 @@ def clean_checkout_audit(
         shutil.rmtree(temporary_root, ignore_errors=True)
 
 
-def manuscript_audit(repo: Path, *, visual_review_complete: bool) -> dict[str, Any]:
+def manuscript_audit(
+    repo: Path,
+    *,
+    visual_review_complete: bool,
+    programme_ai_confirmed: bool,
+    module_length_rule_confirmed: bool,
+) -> dict[str, Any]:
     latex = repo / LATEX_RELATIVE
     tex_files = sorted(latex.rglob("*.tex"))
     tex = "\n".join(path.read_text(encoding="utf-8") for path in tex_files)
@@ -456,8 +462,8 @@ def manuscript_audit(repo: Path, *, visual_review_complete: bool) -> dict[str, A
     )
     release_checks = {
         "candidate_and_programme_metadata_verified": not neutral_metadata,
-        "programme_ai_category_confirmed_by_candidate": False,
-        "module_word_or_page_rule_confirmed_by_candidate": False,
+        "programme_ai_category_confirmed_by_candidate": programme_ai_confirmed,
+        "module_word_or_page_rule_confirmed_by_candidate": module_length_rule_confirmed,
         "central_ucl_ai_disclosure_present": scientific_checks[
             "first_page_ai_disclosure_in_source"
         ],
@@ -522,12 +528,25 @@ def main() -> None:
         action="store_true",
         help="Confirm that every final PDF page and the key figures were visually inspected.",
     )
+    parser.add_argument(
+        "--programme-ai-confirmed",
+        action="store_true",
+        help="Confirm that the inserted AI disclosure complies with the ELEC0054 brief.",
+    )
+    parser.add_argument(
+        "--module-length-rule-confirmed",
+        action="store_true",
+        help="Confirm that the current manuscript and word-count presentation comply with ELEC0054.",
+    )
     args = parser.parse_args()
 
     repo = args.repo_root.resolve()
     output = (args.output or repo / Q1_RELATIVE).resolve()
     manuscript = manuscript_audit(
-        repo, visual_review_complete=args.visual_review_complete
+        repo,
+        visual_review_complete=args.visual_review_complete,
+        programme_ai_confirmed=args.programme_ai_confirmed,
+        module_length_rule_confirmed=args.module_length_rule_confirmed,
     )
 
     clean: dict[str, Any] = {
