@@ -32,6 +32,10 @@ def load(name: str, path: Path):
 attempts = load("r3_attempt_manager", MODELS / "r3_attempt_manager.py")
 analysis = load("sf4_analysis_tested", MODELS / "analyze_sf4_supervisor_behavioural_authority.py")
 prepare = load("sf4_prepare_tested", MODELS / "prepare_sf4_supervisor_behavioural_authority.py")
+init_generator = load(
+    "sf4_init_generator_tested",
+    MODELS / "generate_sf4_supervisor_authority_inits.py",
+)
 action_filter = load("sf4_filter_tested", CARLA_POLICIES / "supervisor_action_filter.py")
 packager = load("sf4_packager_tested", MODELS / "package_sf4_compact_evidence.py")
 full_packager = load("sf4_full_packager_tested", MODELS / "package_sf4_full_raw_snapshot.py")
@@ -303,6 +307,42 @@ class ActionBoundaryTests(unittest.TestCase):
 
 
 class FrozenDesignTests(unittest.TestCase):
+    def test_frozen_init_accepts_cross_numpy_final_ulp_without_rewrite(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "ego_init_106.json"
+            frozen = {
+                "init_speed": 9.480309946842153,
+                "start_longitudinal_offset": 2.302768641875152,
+            }
+            original = json.dumps(frozen, sort_keys=True) + "\n"
+            path.write_text(original, encoding="utf-8")
+
+            reproduced = dict(frozen)
+            reproduced["start_longitudinal_offset"] = 2.3027686418751516
+            payload, rendered = init_generator.freeze_or_validate_candidate(
+                path, reproduced
+            )
+
+            self.assertEqual(payload, frozen)
+            self.assertEqual(rendered, original)
+            self.assertEqual(path.read_text(encoding="utf-8"), original)
+
+    def test_frozen_init_rejects_material_numeric_drift(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "ego_init_106.json"
+            frozen = {
+                "init_speed": 9.480309946842153,
+                "start_longitudinal_offset": 2.302768641875152,
+            }
+            path.write_text(
+                json.dumps(frozen, sort_keys=True) + "\n", encoding="utf-8"
+            )
+
+            reproduced = dict(frozen)
+            reproduced["start_longitudinal_offset"] += 1.0e-6
+            with self.assertRaisesRegex(SystemExit, "numeric drift"):
+                init_generator.freeze_or_validate_candidate(path, reproduced)
+
     def test_config_arms_have_one_behavioral_difference(self):
         base_path = (
             ROOT / "core" / "scripts" / "carla" / "scenarios"

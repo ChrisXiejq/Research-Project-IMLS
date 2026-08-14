@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 
@@ -24,6 +25,7 @@ SEED = 123
 ORIGINAL_COUNT = 50
 R3_COUNT = 5
 SF4_IDS = tuple(range(106, 116))
+STREAM_REPRODUCTION_ABS_TOL = 1.0e-12
 
 
 def sha256(path: Path) -> str:
@@ -35,6 +37,59 @@ def atomic_text(path: Path, value: str) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(value, encoding="utf-8")
     os.replace(temporary, path)
+
+
+def freeze_or_validate_candidate(
+    path: Path, generated: dict[str, float]
+) -> tuple[dict[str, float], str]:
+    """Create a candidate once, then validate it semantically without rewriting it.
+
+    NumPy guarantees the PCG64 bit stream, but historical ``uniform`` floating
+    conversion/formatting can differ by a final binary/decimal ULP across the
+    server and authoring environments.  The committed candidate is therefore
+    the frozen authority.  Runtime reproduction must agree to a strict numeric
+    tolerance, retain canonical JSON and remain hash-bound to the manifest.
+    """
+
+    if not path.exists():
+        rendered = json.dumps(generated, sort_keys=True) + "\n"
+        atomic_text(path, rendered)
+        return generated, rendered
+
+    original = path.read_text(encoding="utf-8")
+    try:
+        frozen_raw = json.loads(original)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(
+            f"Invalid frozen SF4 init candidate JSON: {path}: {exc}"
+        ) from exc
+    if set(frozen_raw) != set(generated):
+        raise SystemExit(f"SF4 init candidate schema drift: {path}")
+
+    frozen: dict[str, float] = {}
+    for key, generated_value in generated.items():
+        try:
+            frozen_value = float(frozen_raw[key])
+        except (TypeError, ValueError) as exc:
+            raise SystemExit(
+                f"Invalid frozen SF4 init candidate value: {path}:{key}"
+            ) from exc
+        if not math.isfinite(frozen_value) or not math.isclose(
+            frozen_value,
+            generated_value,
+            rel_tol=0.0,
+            abs_tol=STREAM_REPRODUCTION_ABS_TOL,
+        ):
+            raise SystemExit(
+                f"SF4 init candidate numeric drift: {path}:{key}; "
+                f"frozen={frozen_value!r}, reproduced={generated_value!r}"
+            )
+        frozen[key] = frozen_value
+
+    canonical = json.dumps(frozen, sort_keys=True) + "\n"
+    if original != canonical:
+        raise SystemExit(f"SF4 init candidate serialization drift: {path}")
+    return frozen, original
 
 
 def main() -> None:
@@ -70,15 +125,12 @@ def main() -> None:
     offsets = rng.uniform(-2.5, 2.5, len(SF4_IDS))
     records = []
     for init_id, offset, speed in zip(SF4_IDS, offsets, speeds):
-        payload = {
+        reproduced_payload = {
             "start_longitudinal_offset": float(offset),
             "init_speed": float(speed),
         }
-        rendered = json.dumps(payload, sort_keys=True) + "\n"
         path = root / f"ego_init_{init_id}.json"
-        if path.exists() and path.read_text(encoding="utf-8") != rendered:
-            raise SystemExit(f"SF4 init candidate drift: {path}")
-        atomic_text(path, rendered)
+        payload, rendered = freeze_or_validate_candidate(path, reproduced_payload)
         records.append(
             {
                 "ego_init_id": init_id,

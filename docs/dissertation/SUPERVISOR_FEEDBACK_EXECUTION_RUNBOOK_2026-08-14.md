@@ -152,6 +152,13 @@ env \
 Proceed only if `SF4_PREFLIGHT_COMPLETE.json` reports `status=pass` and
 `formal_rollouts_launched=0`.
 
+The committed init106--115 JSON files are the frozen candidate authority.
+Preflight independently reproduces their declared PCG64 continuation, accepts
+only sub-`1e-12` numeric differences caused by historical NumPy uniform
+conversion/float formatting, verifies canonical JSON and manifest SHA-256
+binding, and never rewrites an existing frozen candidate. Material numeric,
+schema, serialization or hash drift still fails closed before any rollout.
+
 ## 4. Run the excluded full-stack smoke gate
 
 Before any formal receipt exists, execute the complete fixed-init105/assertive
