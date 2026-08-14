@@ -217,6 +217,35 @@ only predefined infrastructure failures may consume a new attempt. Collision,
 yield failure, fallback/nonaccepted solving, non-completion and an unfavourable effect
 direction are retained as scientific results.
 
+### Infrastructure-cap exhaustion recovery
+
+Do not delete attempts or merely raise `SF4_MAX_ATTEMPTS` if a key exhausts
+all ten attempts. The dedicated recovery runner is admissible only when its
+fail-closed audit finds exactly one exhausted pending key, every prior attempt
+is classified as retryable CARLA infrastructure failure, every attempt includes
+`carla_timeout`, and zero scenario summaries or successful scientific outputs
+exist. It freezes an immutable amendment inside that key's attempt tree,
+revalidates all original contract execution-source hashes, preserves the
+contract Git identity in subsequent raw configs, extends the cap to twenty for
+that key alone, leaves every other key at ten, and retains all prior failures.
+The amendment is included in both compact and full-raw evidence packages.
+
+```bash
+nohup env \
+  CARLA_ROOT="$CARLA_ROOT" \
+  PYTHON_BIN="$PYTHON_BIN" \
+  SF4_RESULTS="$SF4_RESULTS" \
+  bash "$COLLECTION_REPO/core/scripts/carla/run_sf4_infrastructure_recovery.sh" \
+  > "$SF4_RESULTS/sf4_recovery_launcher.log" 2>&1 &
+
+echo $! | tee "$SF4_RESULTS/sf4_recovery_runner.pid"
+```
+
+This is an administrative missing-observation recovery, not a change to the
+scientific stopping rule. Any observed scenario summary, non-infrastructure
+failure, source drift, multiple exhausted keys or existing completion marker
+blocks the recovery.
+
 ## 6. Completion artifacts
 
 The run is complete only when all of the following pass:
