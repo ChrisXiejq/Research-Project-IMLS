@@ -68,6 +68,40 @@ def stable_value_sha256(value: object) -> str:
     return digest.hexdigest()
 
 
+def canonical_scalar_channel(value: object, *, name: str) -> float:
+    """Canonicalise one numeric solver parameter without hiding vector drift.
+
+    CasADi accepts a Python/NumPy scalar and a singleton NumPy view as the same
+    scalar parameter.  Their representations and hashes differ, so authority
+    audits must compare their numeric value rather than report a false
+    behavioural leak.  More than one value, non-numeric input and non-finite
+    values remain hard failures.
+    """
+
+    if hasattr(value, "reshape") and hasattr(value, "tolist"):
+        flattened = value.reshape(-1).tolist()
+    elif isinstance(value, (list, tuple)):
+        flattened = []
+        pending = list(value)
+        while pending:
+            item = pending.pop(0)
+            if isinstance(item, (list, tuple)):
+                pending[0:0] = list(item)
+            else:
+                flattened.append(item)
+    else:
+        flattened = [value]
+    if len(flattened) != 1:
+        raise ValueError(f"{name} must contain exactly one scalar value")
+    try:
+        result = float(flattened[0])
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be numeric") from exc
+    if not math.isfinite(result):
+        raise ValueError(f"{name} must be finite")
+    return 0.0 if result == 0.0 else result
+
+
 def verify_authority_channels(
     *,
     mode: object,

@@ -32,6 +32,7 @@ from policies.supervisor_action_filter import (
     ACTION_FILTER_APPLY,
     ACTION_FILTER_MONITOR_ONLY,
     integrate_post_solver_action_filter,
+    canonical_scalar_channel,
     normalize_action_filter_mode,
     normalize_supervisor_authority_mode,
     run_isolated_supervisor_shadow,
@@ -3847,6 +3848,7 @@ class SMPCAgent(object):
                     shadow_state={},
                     shadow_fields=(),
                     protected_fields=(
+                        "control_prev",
                         "feas_ref_states_new",
                         "feas_ref_inputs_new",
                     ),
@@ -3878,8 +3880,14 @@ class SMPCAgent(object):
                     "linearization_states": nominal_l_states,
                     "linearization_inputs": nominal_l_inputs,
                     "heading_cost_weights": np.zeros_like(heading_cost_weights),
-                    "acc_prev": np.asarray(self.control_prev).reshape(-1)[0],
-                    "df_prev": np.asarray(self.control_prev).reshape(-1)[1],
+                    "acc_prev": canonical_scalar_channel(
+                        np.asarray(self.control_prev).reshape(-1)[0],
+                        name="nominal_acc_prev",
+                    ),
+                    "df_prev": canonical_scalar_channel(
+                        np.asarray(self.control_prev).reshape(-1)[1],
+                        name="nominal_df_prev",
+                    ),
                     "yield_reference_active": False,
                     "recovery_reference_active": False,
                     "supervisor_forced_reference_linearization": False,
@@ -3896,8 +3904,12 @@ class SMPCAgent(object):
                     "heading_cost_weights": np.asarray(
                         heading_cost_weights, dtype=float
                     ),
-                    "acc_prev": update_dict["acc_prev"],
-                    "df_prev": update_dict["df_prev"],
+                    "acc_prev": canonical_scalar_channel(
+                        update_dict["acc_prev"], name="actual_acc_prev"
+                    ),
+                    "df_prev": canonical_scalar_channel(
+                        update_dict["df_prev"], name="actual_df_prev"
+                    ),
                     "yield_reference_active": yield_active_for_reference,
                     "recovery_reference_active": recovery_active_for_reference,
                     "supervisor_forced_reference_linearization": (

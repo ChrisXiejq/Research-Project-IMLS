@@ -13,6 +13,8 @@ import unittest
 from argparse import Namespace
 from pathlib import Path
 
+import numpy as np
+
 
 ROOT = Path(__file__).resolve().parents[4]
 MODELS = ROOT / "core" / "scripts" / "models"
@@ -46,6 +48,27 @@ smoke_validator = load(
 
 
 class ActionBoundaryTests(unittest.TestCase):
+    def test_solver_scalar_channels_normalise_singleton_representation_only(self):
+        values = (
+            0.25,
+            [0.25],
+            [[0.25]],
+            np.asarray([0.25]),
+            np.asarray([[0.25]]),
+        )
+        canonical = [
+            action_filter.canonical_scalar_channel(value, name="acc_prev")
+            for value in values
+        ]
+        self.assertEqual(canonical, [0.25] * len(values))
+        self.assertEqual(
+            len({action_filter.stable_value_sha256(value) for value in canonical}),
+            1,
+        )
+        for invalid in ([0.25, 0.5], [], float("nan"), float("inf")):
+            with self.assertRaises(ValueError):
+                action_filter.canonical_scalar_channel(invalid, name="acc_prev")
+
     def test_apply_and_monitor_only_differ_only_at_factual_command(self):
         common = dict(
             nominal_u=(1.0, 0.1), nominal_v_des=4.0,
