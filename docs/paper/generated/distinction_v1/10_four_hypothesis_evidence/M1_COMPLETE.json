@@ -1,23 +1,56 @@
 {
-  "additional_large_scale_carla_required": false,
+  "additional_large_scale_carla_required": true,
+  "aggregation_semantic_violations": [],
   "artifacts": {
-    "M1_EVIDENCE_MANIFEST.json": "be074a355d558532509405f4ca6ad460610080ca910e36caab500076e184399e",
-    "M1_EVIDENCE_SUMMARY.md": "a3b03aaf62036598ecd0781f7d4763e25182d25d1209778c2554dee7332d738e",
-    "M1_HYPOTHESIS_VERDICTS.csv": "0910c61e7e7323f04e84ed995ccecc68c812b52cc11c30245bab814b323ef8fc",
-    "M1_VALUE_AUDIT.json": "d6da90c877d1c11a17bd2867ee78a9f83f9630e6abada194bc3247b9d00538a0"
+    "M1_EVIDENCE_MANIFEST.json": "a3271b7331c194cf949be825663ae43f42f5d181960adda26fa18e9a7c19dffb",
+    "M1_EVIDENCE_SUMMARY.md": "c00eb552268969cd6c4b7de7507b2944660bddf36f51bf30be278fd4e8f53720",
+    "M1_HYPOTHESIS_VERDICTS.csv": "7dc992d5af94bc4f0e2ad157e6fdcf138ca2bfc56d7d54f320da413a40a7a392",
+    "M1_SUPERVISOR_FEEDBACK_CLOSURE_AUDIT.json": "990926901662c4e560985c7d4c5c362fe5dba81c90f12a28589bcc3135d44beb",
+    "M1_VALUE_AUDIT.json": "edfb361322518d3e018e0714c8315167157027532dac306c331aee6850111d7d"
   },
+  "closure_mode": "pre-sf4",
+  "final_release_eligible": false,
+  "headline_aggregation": "rollout_macro",
   "hypotheses": [
     "H1",
     "H2",
     "H3",
     "H4"
   ],
+  "independent_paired_init_groups": 5,
+  "independent_unit": "held_out_ego_initialisation",
   "invalid_locators": 0,
   "legacy_corrected_pooling_violations": [],
   "orphan_headline_claims": 0,
+  "overlapping_windows_treated_as_independent": false,
   "record_count": 82,
   "schema_version": "m1_complete_v1",
+  "source_gates": {
+    "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/SUPERVISOR_COMMENT_3_COMPLETE.json": "59ff0e3f99dd903b9ba95f5f2e7bef13e4a5697df120739ad7805befd5509784"
+  },
   "stage": "M1",
-  "status": "pass",
+  "status": "partial_pre_sf4",
+  "supervisor_feedback_closure_checks": {
+    "sf1_behaviour_80_raw_hash_bound": false,
+    "sf1_sf2_source_r3_snapshot_hash_bound": false,
+    "sf2_raw_taxonomy_and_deadlines_final": false,
+    "sf3_finetune_receipt_and_hashes": true,
+    "sf4_80_rollouts_10_clusters_analysis": false,
+    "sf4_full_raw_snapshot_and_hash_manifest": false
+  },
+  "supervisor_feedback_closure_failures": [
+    "sf1_behaviour_exception:FileNotFoundError",
+    "sf1_behaviour_80_raw_hash_bound:docs/paper/generated/supervisor_feedback_v1/01_behaviour/SUPERVISOR_FEEDBACK_BEHAVIOUR_COMPLETE.json",
+    "sf2_cost_exception:FileNotFoundError",
+    "sf2_raw_taxonomy_and_deadlines_final:docs/paper/generated/supervisor_feedback_v1/02_cost_feasibility/SUPERVISOR_FEEDBACK_02_COMPLETE.json",
+    "sf1_sf2_r3_snapshot_binding_exception:FileNotFoundError",
+    "sf1_sf2_source_r3_snapshot_hash_bound:docs/paper/generated/supervisor_feedback_v1/SUPERVISOR_FEEDBACK_R3_OFFLINE_COMPLETE.json",
+    "sf4_core_exception:FileNotFoundError",
+    "sf4_80_rollouts_10_clusters_analysis:docs/paper/generated/distinction_sf4_supervisor_authority_ablation/server_runs/sf4_supervisor_behavioural_authority_v1/SF4_COMPLETE.json",
+    "sf4_full_snapshot_exception:FileNotFoundError",
+    "sf4_full_raw_snapshot_and_hash_manifest:docs/paper/generated/distinction_sf4_supervisor_authority_ablation/server_runs/sf4_supervisor_behavioural_authority_v1/SF4_FULL_RAW_SNAPSHOT_COMPLETE.json"
+  ],
+  "supervisor_feedback_closure_status": "incomplete",
+  "value_audit_status": "pass",
   "value_mismatches": 0
 }

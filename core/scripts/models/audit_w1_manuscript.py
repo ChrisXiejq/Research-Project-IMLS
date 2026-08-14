@@ -17,6 +17,23 @@ import sys
 from pathlib import Path
 from typing import Any
 
+try:
+    from .build_m1_evidence_package import (
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        audit_supervisor_feedback_closure,
+        audit_supervisor_feedback_content_integration,
+        stage_aware_status,
+    )
+except ImportError:  # direct script execution
+    from build_m1_evidence_package import (
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        audit_supervisor_feedback_closure,
+        audit_supervisor_feedback_content_integration,
+        stage_aware_status,
+    )
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LATEX_DIR = REPO_ROOT / "docs/dissertation/latex"
@@ -39,10 +56,12 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
-def verify_generated_manifest(path: Path) -> list[str]:
+def verify_generated_manifest(
+    path: Path, *, accepted_statuses: tuple[str, ...] = ("pass",)
+) -> list[str]:
     payload = load_json(path)
     failures: list[str] = []
-    if payload.get("status") != "pass":
+    if payload.get("status") not in accepted_statuses:
         failures.append(f"status_not_pass:{path.name}")
     for relative, expected in payload.get("source_sha256", {}).items():
         source = REPO_ROOT / relative
@@ -55,6 +74,39 @@ def verify_generated_manifest(path: Path) -> list[str]:
     return failures
 
 
+def discover_regression_test_count(repo: Path) -> int:
+    """Count the tests discoverable by the exact suite invoked below.
+
+    Binding execution to discovery is stricter and less brittle than a stale
+    hard-coded count: deleting, adding, or silently skipping a test changes the
+    expected count in the same checkout and is recorded in the receipt. Use a
+    clean interpreter because this audit is executed as a script from inside
+    ``core/scripts/models``; its already-imported module namespace otherwise
+    changes unittest discovery and can collapse an import failure to one
+    ``_FailedTest`` record.
+    """
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import pathlib,sys,unittest; "
+                "start=pathlib.Path(sys.argv[1]); "
+                "suite=unittest.defaultTestLoader.discover("
+                "str(start),pattern='test_*.py'); "
+                "print(suite.countTestCases())"
+            ),
+            str(repo / "core/scripts/models/tests"),
+        ],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return int(completed.stdout.strip())
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -62,6 +114,17 @@ def main() -> None:
         action="store_true",
         help="Confirm that all colour pages and key greyscale figures were manually inspected.",
     )
+    parser.add_argument(
+        "--closure-mode",
+        choices=CLOSURE_MODES,
+        default=CLOSURE_FINAL,
+        help=(
+            "Default final mode fails closed until SF1--SF4 are hash-verified. "
+            "pre-sf4 emits an explicitly partial receipt and can never emit pass."
+        ),
+    )
+    parser.add_argument("--supervisor-feedback-root", type=Path)
+    parser.add_argument("--sf4-results-root", type=Path)
     args = parser.parse_args()
 
     tex_files = sorted(LATEX_DIR.rglob("*.tex"))
@@ -87,11 +150,21 @@ def main() -> None:
     entries = set(re.findall(r"^@\w+\{([^,]+),", bibliography, flags=re.MULTILINE))
 
     generated_failures: list[str] = []
+    accepted_generated_statuses = (
+        ("pass", "partial_pre_sf4")
+        if args.closure_mode != CLOSURE_FINAL
+        else ("pass",)
+    )
     for completion_name in (
         "W1_EVIDENCE_TABLES_COMPLETE.json",
         "W1_R3_FIGURES_COMPLETE.json",
     ):
-        generated_failures.extend(verify_generated_manifest(W1_DIR / completion_name))
+        generated_failures.extend(
+            verify_generated_manifest(
+                W1_DIR / completion_name,
+                accepted_statuses=accepted_generated_statuses,
+            )
+        )
 
     pdf = LATEX_DIR / "build/main.pdf"
     log = LATEX_DIR / "build/main.log"
@@ -119,6 +192,10 @@ def main() -> None:
         match = re.search(r"^Pages:\s+(\d+)$", info, flags=re.MULTILINE)
         page_count = int(match.group(1)) if match else None
 
+    # Freeze discovery before executing the suite. Some regression tests
+    # intentionally rebuild generated receipts; counting after the subprocess
+    # can observe a transient fixture state and produce a false mismatch.
+    discovered_test_count = discover_regression_test_count(REPO_ROOT)
     tests = subprocess.run(
         [
             sys.executable,
@@ -136,8 +213,17 @@ def main() -> None:
     )
     match = re.search(r"Ran (\d+) tests", tests.stderr + tests.stdout)
     test_count = int(match.group(1)) if match else None
-
-    checks = {
+    closure = audit_supervisor_feedback_closure(
+        REPO_ROOT,
+        supervisor_feedback_root=args.supervisor_feedback_root,
+        sf4_results_root=args.sf4_results_root,
+    )
+    content_integration = audit_supervisor_feedback_content_integration(
+        REPO_ROOT,
+        closure_mode=args.closure_mode,
+        closure_payload=closure,
+    )
+    base_checks = {
         "manuscript_sources_present": not missing_sources,
         "drafting_markers_absent": not drafting_markers,
         "citation_keys_resolved": cited == entries,
@@ -146,14 +232,38 @@ def main() -> None:
         "pdf_present": pdf.is_file() and pdf.stat().st_size > 0,
         "pdf_page_count_recorded": isinstance(page_count, int) and page_count > 0,
         "latex_has_no_blocking_warning": not build_failures,
-        "regression_suite_passes": tests.returncode == 0 and test_count == 66,
+        "regression_suite_passes": (
+            tests.returncode == 0 and test_count == discovered_test_count
+        ),
         "visual_review_recorded": args.visual_review_complete,
     }
-    status = "pass" if all(checks.values()) else "fail"
+    checks = {
+        **base_checks,
+        "supervisor_feedback_final_closure": closure["status"] == "pass",
+        "supervisor_feedback_results_integrated_into_paper": content_integration[
+            "status"
+        ]
+        == "pass",
+    }
+    status = stage_aware_status(
+        base_ready=(
+            all(base_checks.values())
+            and (
+                args.closure_mode != CLOSURE_FINAL
+                or content_integration["status"] == "pass"
+            )
+        ),
+        closure_status=str(closure["status"]),
+        closure_mode=args.closure_mode,
+    )
     payload = {
         "schema_version": "w1_manuscript_complete_v1",
         "status": status,
         "stage": "W1",
+        "closure_mode": args.closure_mode,
+        "final_release_eligible": status == "pass",
+        "supervisor_feedback_final_closure": closure,
+        "supervisor_feedback_paper_content_integration": content_integration,
         "checks": checks,
         "citation_count": len(cited),
         "bibliography_entry_count": len(entries),
@@ -163,6 +273,7 @@ def main() -> None:
         "generated_asset_failures": generated_failures,
         "build_failures": build_failures,
         "regression_test_count": test_count,
+        "discovered_regression_test_count": discovered_test_count,
         "pdf": {
             "path": str(pdf.relative_to(REPO_ROOT)),
             "pages": page_count,
@@ -180,9 +291,13 @@ def main() -> None:
             "figure_and_appendix_order": "pass" if args.visual_review_complete else "not_recorded",
         },
         "scope": {
-            "additional_carla_required": False,
+            "additional_carla_required": closure["status"] != "pass",
             "r4_status": "not_run_by_frozen_design",
-            "next_gate": "Q1_scientific_rubric_and_release_audit",
+            "next_gate": (
+                "Q1_scientific_rubric_and_release_audit"
+                if status == "pass"
+                else "complete_SF1_SF2_SF4_then_rerun_W1_final"
+            ),
         },
         "release_only_pending": [
             "verified UCL candidate and supervisor metadata",
@@ -196,7 +311,7 @@ def main() -> None:
     temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     temporary.replace(OUTPUT)
     print(json.dumps({"status": status, "checks": checks}, indent=2, sort_keys=True))
-    if status != "pass":
+    if status == "fail":
         raise SystemExit(1)
 
 

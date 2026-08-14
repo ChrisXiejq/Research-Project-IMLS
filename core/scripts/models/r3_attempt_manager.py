@@ -31,6 +31,17 @@ INFRASTRUCTURE_PATTERNS: tuple[tuple[str, str], ...] = (
     ("process_resource", r"(?:CUDA out of memory|std::bad_alloc|Killed\s*$|Segmentation fault)"),
 )
 SIGNAL_EXIT_CODES = set(range(128 + 1, 128 + 16))
+INFRASTRUCTURE_CLASSIFIER_NAMES = frozenset(
+    {name for name, _ in INFRASTRUCTURE_PATTERNS}
+    | {"external_signal", "missing_terminal_record"}
+)
+ACCEPTED_CLASSIFICATIONS = frozenset(
+    {
+        "accepted",
+        "accepted_recovered_before_promotion",
+        "accepted_recovered_after_promotion",
+    }
+)
 
 
 def now_utc() -> str:
@@ -71,8 +82,10 @@ def attempt_root(cell_dir: Path, init_id: int) -> Path:
     return cell_dir / "_attempts" / f"init_{init_id}"
 
 
-def receipt_path(cell_dir: Path, init_id: int) -> Path:
-    return cell_dir / f"R3_ROLLOUT_{init_id}_COMPLETE.json"
+def receipt_path(cell_dir: Path, init_id: int, receipt_prefix: str = "R3") -> Path:
+    if not re.fullmatch(r"[A-Z][A-Z0-9_]{0,31}", str(receipt_prefix)):
+        raise ValueError(f"Invalid receipt prefix: {receipt_prefix!r}")
+    return cell_dir / f"{receipt_prefix}_ROLLOUT_{init_id}_COMPLETE.json"
 
 
 def scenario_summaries(root: Path, init_id: int) -> list[Path]:
@@ -172,6 +185,150 @@ def raw_evidence_sha256(scenario_dir: Path) -> str:
     return digest.hexdigest()
 
 
+def _resolve_cell_relative(cell_dir: Path, relative: object, label: str) -> Path:
+    """Resolve an untrusted receipt/ledger path and keep it inside its cell."""
+
+    if not isinstance(relative, str) or not relative:
+        raise ValueError(f"Missing {label} path")
+    root = cell_dir.resolve()
+    path = (root / relative).resolve()
+    if root not in path.parents:
+        raise ValueError(f"{label} escapes rollout cell: {relative!r}")
+    return path
+
+
+def validate_receipt_attempt_provenance(
+    *,
+    cell_dir: Path,
+    cell_id: str,
+    init_id: int,
+    receipt: dict[str, Any],
+) -> dict[str, Any]:
+    """Validate the immutable retry ledger bound by a rollout receipt.
+
+    A formal rollout may be retried only after a classified infrastructure
+    failure.  The unique accepted attempt must be the final attempt.  This
+    makes collision, yield failure, solver infeasibility and noncompletion
+    scientific observations inside the accepted rollout rather than reasons
+    to rerun it.
+    """
+
+    accepted_attempt = int(receipt.get("accepted_attempt", -1))
+    if accepted_attempt < 1:
+        raise ValueError("Receipt lacks a positive accepted_attempt")
+    record_path = _resolve_cell_relative(
+        cell_dir, receipt.get("attempt_record"), "attempt record"
+    )
+    ledger_path = _resolve_cell_relative(
+        cell_dir, receipt.get("attempt_ledger"), "attempt ledger"
+    )
+    if not record_path.is_file() or not ledger_path.is_file():
+        raise ValueError("Receipt-bound attempt record/ledger is missing")
+    if sha256(record_path) != receipt.get("attempt_record_sha256"):
+        raise ValueError("Receipt-bound accepted attempt record hash drift")
+    if sha256(ledger_path) != receipt.get("attempt_ledger_sha256_at_receipt"):
+        raise ValueError("Receipt-bound attempt ledger hash drift")
+
+    root = attempt_root(cell_dir, init_id).resolve()
+    expected_record = root / f"attempt_{accepted_attempt:03d}" / "attempt_record.json"
+    if record_path != expected_record:
+        raise ValueError("Receipt accepted attempt does not match its record path")
+    ledger = read_json(ledger_path)
+    if not isinstance(ledger, dict):
+        raise ValueError("Attempt ledger is not a JSON object")
+    if (
+        ledger.get("schema_version") != "r3_attempt_ledger_v2"
+        or ledger.get("status") != "accepted"
+        or ledger.get("cell_id") != cell_id
+        or int(ledger.get("ego_init_id", -1)) != init_id
+    ):
+        raise ValueError("Attempt ledger identity/status mismatch")
+    entries = ledger.get("attempts")
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("Attempt ledger has no attempts")
+    if int(ledger.get("attempts_started", -1)) != len(entries):
+        raise ValueError("Attempt ledger attempt count mismatch")
+    if int(ledger.get("accepted_attempts", -1)) != 1:
+        raise ValueError("Attempt ledger must contain exactly one accepted attempt")
+
+    disk_attempts = sorted(root.glob("attempt_[0-9][0-9][0-9]"))
+    if [path.name for path in disk_attempts] != [
+        f"attempt_{number:03d}" for number in range(1, len(entries) + 1)
+    ]:
+        raise ValueError("Attempt directories are non-contiguous or differ from ledger")
+    accepted_numbers: list[int] = []
+    for number, entry in enumerate(entries, 1):
+        if not isinstance(entry, dict) or int(entry.get("attempt", -1)) != number:
+            raise ValueError("Attempt ledger ordering/identity mismatch")
+        expected_dir = root / f"attempt_{number:03d}"
+        directory = _resolve_cell_relative(
+            cell_dir, entry.get("directory"), "attempt directory"
+        )
+        if directory != expected_dir:
+            raise ValueError("Attempt ledger directory mismatch")
+        started_path = expected_dir / "attempt_started.json"
+        terminal_path = expected_dir / "attempt_record.json"
+        if not started_path.is_file() or not terminal_path.is_file():
+            raise ValueError("Attempt ledger references a non-terminal attempt")
+        if sha256(started_path) != entry.get("started_sha256"):
+            raise ValueError("Attempt started-record hash drift")
+        if sha256(terminal_path) != entry.get("record_sha256"):
+            raise ValueError("Attempt terminal-record hash drift")
+        started = read_json(started_path)
+        terminal = read_json(terminal_path)
+        if not isinstance(started, dict) or not isinstance(terminal, dict):
+            raise ValueError("Attempt provenance record is not a JSON object")
+        if entry.get("started") != started or entry.get("record") != terminal:
+            raise ValueError("Attempt ledger embedded record drift")
+        if (
+            int(started.get("attempt", -1)) != number
+            or started.get("cell_id") != cell_id
+            or int(started.get("ego_init_id", -1)) != init_id
+            or int(terminal.get("attempt", -1)) != number
+            or terminal.get("cell_id") != cell_id
+            or int(terminal.get("ego_init_id", -1)) != init_id
+        ):
+            raise ValueError("Attempt record identity mismatch")
+
+        if terminal.get("accepted") is True:
+            accepted_numbers.append(number)
+            if (
+                entry.get("state") != "accepted"
+                or terminal.get("classification") not in ACCEPTED_CLASSIFICATIONS
+                or terminal.get("retry_allowed") is not False
+            ):
+                raise ValueError("Accepted attempt has invalid terminal semantics")
+        else:
+            matches = terminal.get("classifier_matches")
+            if (
+                number >= accepted_attempt
+                or entry.get("state") != "failed"
+                or terminal.get("retry_allowed") is not True
+                or terminal.get("classification")
+                not in {"infrastructure_failure", "infrastructure_external_interruption"}
+                or not isinstance(matches, list)
+                or not matches
+                or not set(matches).issubset(INFRASTRUCTURE_CLASSIFIER_NAMES)
+            ):
+                raise ValueError(
+                    "Only predefined retryable infrastructure failures may precede acceptance"
+                )
+
+    if accepted_numbers != [accepted_attempt] or accepted_attempt != len(entries):
+        raise ValueError("Accepted attempt must be unique and final; later retries are forbidden")
+    accepted_record = read_json(record_path)
+    before_promotion = accepted_record.get("raw_evidence_sha256_before_promotion")
+    if before_promotion is not None and before_promotion != receipt.get("raw_evidence_sha256"):
+        raise ValueError("Accepted attempt raw-evidence hash differs from receipt")
+    return {
+        "accepted_attempt": accepted_attempt,
+        "attempts_started": len(entries),
+        "infrastructure_retries": accepted_attempt - 1,
+        "attempt_record": record_path,
+        "attempt_ledger": ledger_path,
+    }
+
+
 def is_experiment_actor_type(type_id: object) -> bool:
     value = str(type_id or "")
     return value.startswith("vehicle.") or value.startswith("sensor.")
@@ -267,10 +424,16 @@ def write_receipt(
     record_path: Path,
     ledger_path: Path,
     recovery: bool,
+    receipt_prefix: str = "R3",
 ) -> Path:
     summary_path = scenario_dir / "scenario_run_summary.json"
     payload = {
-        "schema_version": "r3_rollout_complete_v2",
+        "schema_version": (
+            "r3_rollout_complete_v2"
+            if receipt_prefix == "R3"
+            else "formal_rollout_complete_v1"
+        ),
+        "stage": receipt_prefix,
         "status": "pass",
         "cell_id": cell_id,
         "ego_init_id": init_id,
@@ -289,36 +452,69 @@ def write_receipt(
         },
         "accepted_at_utc": now_utc(),
     }
-    output = receipt_path(cell_dir, init_id)
+    output = receipt_path(cell_dir, init_id, receipt_prefix)
     atomic_json(output, payload)
     return output
 
 
-def valid_receipt(cell_dir: Path, cell_id: str, init_id: int) -> bool:
-    path = receipt_path(cell_dir, init_id)
+def valid_receipt(
+    cell_dir: Path, cell_id: str, init_id: int, receipt_prefix: str = "R3"
+) -> bool:
+    path = receipt_path(cell_dir, init_id, receipt_prefix)
     try:
         payload = read_json(path)
-        scenario_dir = cell_dir / payload["scenario_dir"]
+        if not isinstance(payload, dict):
+            return False
+        resolved_cell = cell_dir.resolve()
+        scenario_dir = (resolved_cell / payload["scenario_dir"]).resolve()
+        if resolved_cell not in scenario_dir.parents:
+            return False
         summary_path = scenario_dir / "scenario_run_summary.json"
-        return (
+        valid = (
             payload.get("status") == "pass"
+            and payload.get("stage") == receipt_prefix
+            and payload.get("schema_version")
+            == (
+                "r3_rollout_complete_v2"
+                if receipt_prefix == "R3"
+                else "formal_rollout_complete_v1"
+            )
             and payload.get("cell_id") == cell_id
             and int(payload.get("ego_init_id", -1)) == init_id
             and valid_scenario(summary_path)
             and sha256(summary_path) == payload.get("scenario_summary_sha256")
             and raw_evidence_sha256(scenario_dir) == payload.get("raw_evidence_sha256")
         )
+        if not valid:
+            return False
+        validate_receipt_attempt_provenance(
+            cell_dir=cell_dir,
+            cell_id=cell_id,
+            init_id=init_id,
+            receipt=payload,
+        )
+        return True
     except (OSError, KeyError, TypeError, ValueError):
         return False
 
 
-def reconcile(cell_dir: Path, cell_id: str, init_id: int, max_attempts: int) -> None:
+def reconcile(
+    cell_dir: Path,
+    cell_id: str,
+    init_id: int,
+    max_attempts: int,
+    receipt_prefix: str = "R3",
+) -> None:
     root = attempt_root(cell_dir, init_id)
     root.mkdir(parents=True, exist_ok=True)
     canonical = scenario_summaries(cell_dir, init_id)
     if len(canonical) > 1:
         raise RuntimeError(f"Multiple canonical scenarios for {cell_id}/init{init_id}")
 
+    accepted_record_exists = any(
+        read_json(path).get("accepted") is True
+        for path in root.glob("attempt_[0-9][0-9][0-9]/attempt_record.json")
+    )
     for directory in sorted(root.glob("attempt_[0-9][0-9][0-9]")):
         record_path = directory / "attempt_record.json"
         if record_path.is_file():
@@ -333,7 +529,11 @@ def reconcile(cell_dir: Path, cell_id: str, init_id: int, max_attempts: int) -> 
             canonical = [destination / "scenario_run_summary.json"]
             classification = "accepted_recovered_before_promotion"
             accepted = True
-        elif len(successful) == 0 and len(canonical) == 1:
+        elif (
+            len(successful) == 0
+            and len(canonical) == 1
+            and not accepted_record_exists
+        ):
             # Power may have failed after the atomic promotion but before the
             # terminal record/receipt was committed.
             classification = "accepted_recovered_after_promotion"
@@ -341,6 +541,9 @@ def reconcile(cell_dir: Path, cell_id: str, init_id: int, max_attempts: int) -> 
         else:
             classification = "infrastructure_external_interruption"
             accepted = False
+        source_tree = (
+            raw_evidence_sha256(canonical[0].parent) if accepted and canonical else None
+        )
         record = {
             "schema_version": "r3_attempt_record_v2",
             "attempt": attempt_number,
@@ -351,15 +554,19 @@ def reconcile(cell_dir: Path, cell_id: str, init_id: int, max_attempts: int) -> 
             "retry_allowed": not accepted,
             "exit_code": None,
             "classifier_matches": ["missing_terminal_record"],
+            "raw_evidence_sha256_before_promotion": source_tree,
             "recovered_at_utc": now_utc(),
         }
         atomic_json(record_path, record)
+        accepted_record_exists = accepted_record_exists or accepted
 
     ledger = refresh_ledger(cell_dir, cell_id, init_id, max_attempts)
     if canonical and not valid_scenario(canonical[0]):
         raise RuntimeError(f"Invalid canonical scenario for {cell_id}/init{init_id}")
-    receipt = receipt_path(cell_dir, init_id)
-    if canonical and receipt.exists() and not valid_receipt(cell_dir, cell_id, init_id):
+    receipt = receipt_path(cell_dir, init_id, receipt_prefix)
+    if canonical and receipt.exists() and not valid_receipt(
+        cell_dir, cell_id, init_id, receipt_prefix
+    ):
         raise RuntimeError(f"Existing rollout receipt or immutable raw evidence drifted: {receipt}")
     if canonical and not receipt.exists():
         accepted_records = []
@@ -379,15 +586,21 @@ def reconcile(cell_dir: Path, cell_id: str, init_id: int, max_attempts: int) -> 
             record_path=record_path,
             ledger_path=ledger,
             recovery=True,
+            receipt_prefix=receipt_prefix,
         )
+        if not valid_receipt(cell_dir, cell_id, init_id, receipt_prefix):
+            raise RuntimeError(
+                f"Recovered receipt failed attempt-provenance validation for {cell_id}/init{init_id}"
+            )
 
 
 def command_prepare(args: argparse.Namespace) -> int:
     cell_dir = args.cell_dir.resolve()
     cell_dir.mkdir(parents=True, exist_ok=True)
-    reconcile(cell_dir, args.cell_id, args.init_id, args.max_attempts)
-    if valid_receipt(cell_dir, args.cell_id, args.init_id):
-        print(json.dumps({"status": "complete", "receipt": str(receipt_path(cell_dir, args.init_id))}))
+    prefix = getattr(args, "receipt_prefix", "R3")
+    reconcile(cell_dir, args.cell_id, args.init_id, args.max_attempts, prefix)
+    if valid_receipt(cell_dir, args.cell_id, args.init_id, prefix):
+        print(json.dumps({"status": "complete", "receipt": str(receipt_path(cell_dir, args.init_id, prefix))}))
         return 0
     root = attempt_root(cell_dir, args.init_id)
     attempts = sorted(root.glob("attempt_[0-9][0-9][0-9]"))
@@ -452,7 +665,11 @@ def command_finalize(args: argparse.Namespace) -> int:
     log_path = directory / "runner_attempt.log"
     hygiene_path = directory / "world_hygiene.json"
     log_text = log_path.read_text(encoding="utf-8", errors="replace") if log_path.is_file() else ""
-    accepted = args.exit_code == 0 and len(summaries) == 1 and len(successful) == 1
+    # Acceptance is an evidence-integrity decision, not a scientific-outcome
+    # decision.  A complete, successful scenario remains the one observation
+    # even if the wrapper exits non-zero after CARLA (for example because a
+    # collision/yield/completion gate reports an adverse outcome).
+    accepted = len(summaries) == 1 and len(successful) == 1
     if accepted:
         existing = scenario_summaries(cell_dir, args.init_id)
         if existing:
@@ -499,7 +716,17 @@ def command_finalize(args: argparse.Namespace) -> int:
             record_path=record_path,
             ledger_path=ledger,
             recovery=False,
+            receipt_prefix=getattr(args, "receipt_prefix", "R3"),
         )
+        if not valid_receipt(
+            cell_dir,
+            args.cell_id,
+            args.init_id,
+            getattr(args, "receipt_prefix", "R3"),
+        ):
+            raise RuntimeError(
+                f"Accepted receipt failed attempt-provenance validation for {args.cell_id}/init{args.init_id}"
+            )
     result = {
         "status": "accepted" if accepted else "failed",
         "attempt": attempt_number,
@@ -514,8 +741,9 @@ def command_finalize(args: argparse.Namespace) -> int:
 
 def command_verify(args: argparse.Namespace) -> int:
     cell_dir = args.cell_dir.resolve()
-    reconcile(cell_dir, args.cell_id, args.init_id, args.max_attempts)
-    valid = valid_receipt(cell_dir, args.cell_id, args.init_id)
+    prefix = getattr(args, "receipt_prefix", "R3")
+    reconcile(cell_dir, args.cell_id, args.init_id, args.max_attempts, prefix)
+    valid = valid_receipt(cell_dir, args.cell_id, args.init_id, prefix)
     print(json.dumps({"status": "pass" if valid else "fail", "cell_id": args.cell_id, "ego_init_id": args.init_id}))
     return 0 if valid else 1
 
@@ -585,6 +813,7 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--cell-id", required=True)
         sub.add_argument("--init-id", required=True, type=int)
         sub.add_argument("--max-attempts", required=True, type=int)
+        sub.add_argument("--receipt-prefix", default="R3")
         if name == "finalize":
             sub.add_argument("--attempt-dir", required=True, type=Path)
             sub.add_argument("--exit-code", required=True, type=int)

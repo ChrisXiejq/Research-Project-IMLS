@@ -14,8 +14,11 @@ Do not edit numerical values by hand.
 4. remaining `distinction_v1/` stages — provenance, controls, diagnostics,
    prospective contracts and completion gates.
 
-R3 is complete at 80/80 and the frozen study-stop decision requires no further
-large-scale CARLA collection. R4 is intentionally `not_run`.
+R3 is complete at 80/80 and its frozen stop decision prohibits
+outcome-selected H3/H4 expansion. R4 is intentionally `not_run`. External
+supervisor feedback subsequently authorised one separately preregistered SF4
+corrected-supervisor application-authority matrix; its assets live under
+`distinction_sf4_supervisor_authority_ablation/` and do not alter the four hypotheses.
 
 ## Legacy and secondary sources
 

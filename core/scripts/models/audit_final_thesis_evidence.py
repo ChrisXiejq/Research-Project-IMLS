@@ -9,6 +9,21 @@ import json
 from pathlib import Path
 from typing import Any
 
+try:
+    from .build_m1_evidence_package import (
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        CLOSURE_PRE_SF4,
+        stage_aware_status,
+    )
+except ImportError:  # pragma: no cover - direct script execution
+    from build_m1_evidence_package import (  # type: ignore
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        CLOSURE_PRE_SF4,
+        stage_aware_status,
+    )
+
 
 def load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -18,7 +33,14 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def build(repo: Path, output: Path) -> dict[str, Any]:
+def build(
+    repo: Path,
+    output: Path,
+    *,
+    closure_mode: str = CLOSURE_FINAL,
+) -> dict[str, Any]:
+    if closure_mode not in CLOSURE_MODES:
+        raise ValueError(f"Unknown supervisor-feedback closure mode: {closure_mode}")
     generated = repo / "docs/paper/generated"
     paths = {
         "day6": generated / "day6/day6_collection_audit.json",
@@ -56,7 +78,17 @@ def build(repo: Path, output: Path) -> dict[str, Any]:
     collision_totals = data["collision"].get("totals", {})
     check("collision_callbacks_test_clean", data["collision"].get("status") == "pass" and collision_totals.get("affected_usable_by_split") == {"train": 162, "val": 0, "test": 0}, collision_totals.get("affected_usable_by_split"))
     check("day13_filtered_sensitivity", data["day13"].get("status") == "pass" and data["day13"].get("matched_runs") == 15 and data["day13"].get("selected_architecture_stable") is True and data["day13"].get("test_accessed") is False, {"matched_runs": data["day13"].get("matched_runs"), "stable": data["day13"].get("selected_architecture_stable"), "test_accessed": data["day13"].get("test_accessed")})
-    check("paper_package_integrity", data["paper"].get("status") == "pass" and data["paper"].get("source_integrity_failures") == 0 and data["paper"].get("unresolved_evidence_ids") == 0, data["paper"])
+    expected_paper_status = (
+        "partial_pre_sf4" if closure_mode == CLOSURE_PRE_SF4 else "pass"
+    )
+    check(
+        "paper_package_integrity",
+        data["paper"].get("status") == expected_paper_status
+        and data["paper"].get("closure_mode") == closure_mode
+        and data["paper"].get("source_integrity_failures") == 0
+        and data["paper"].get("unresolved_evidence_ids") == 0,
+        data["paper"],
+    )
 
     test_inits = data["day7"].get("split_init_ids", {}).get("test")
     day10_inits = data["day10_contract"].get("ego_init_ids")
@@ -119,16 +151,28 @@ def build(repo: Path, output: Path) -> dict[str, Any]:
     ]
 
     failures = [item for item in checks if item["status"] != "pass"]
+    base_ready = not failures
+    package_status = stage_aware_status(
+        base_ready=base_ready,
+        closure_status=(
+            "pass" if data["paper"].get("status") == "pass" else "incomplete"
+        ),
+        closure_mode=closure_mode,
+    )
     payload = {
         "schema_version": "final_thesis_evidence_audit_v1",
-        "status": "pass" if not failures else "fail",
+        "status": package_status,
+        "closure_mode": closure_mode,
+        "final_release_eligible": package_status == "pass",
         "completed_stage": "Day14 evidence package and Results draft",
         "checks": checks,
         "check_count": len(checks),
         "failure_count": len(failures),
         "warnings": warnings,
         "warning_count": len(warnings),
-        "new_formal_experiment_required": False,
+        "new_formal_experiment_required": (
+            data["paper"].get("supervisor_feedback_closure_status") != "pass"
+        ),
         "writing_blockers": [
             "Complete literature review with current primary sources.",
             "Write full Methods with sufficient implementation detail and frozen protocol references.",
@@ -146,11 +190,22 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[3])
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--closure-mode",
+        choices=CLOSURE_MODES,
+        default=CLOSURE_FINAL,
+        help=(
+            "Use pre-sf4 only for an explicitly partial working snapshot; "
+            "the default final mode fails closed."
+        ),
+    )
     args = parser.parse_args()
     repo = args.repo_root.resolve()
     output = (args.output or repo / "docs/paper/generated/final_audit/FINAL_THESIS_EVIDENCE_AUDIT.json").resolve()
-    result = build(repo, output)
+    result = build(repo, output, closure_mode=args.closure_mode)
     print(json.dumps({"status": result["status"], "check_count": result["check_count"], "failure_count": result["failure_count"], "warning_count": result["warning_count"]}, indent=2))
+    if result["status"] == "fail":
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

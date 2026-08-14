@@ -53,9 +53,10 @@ capacity-matched multilayer perceptron controls and two Transformer adapters
 under a validation-frozen, one-shot test protocol. Simple task adaptation
 % EVIDENCE: H1_B1_MINUS_B0_TEST_ADE, H1_B1_MINUS_B0_TEST_FDE,
 % H1_B1_MINUS_B0_TEST_NLL
-% SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
-reduces held-out ADE by 1.193~m, FDE by 2.555~m and rollout-macro NLL by
-0.314~nats/step relative to the pretrained control, while the tested
+% SOURCE: supervisor_feedback_v1/03_finetune_audit/FINETUNE_AUDIT_MANIFEST.json
+reduces held-out rollout-macro uncalibrated NLL from 2.171 to
+1.857~nats/step, ADE from 1.283 to 0.100~m and FDE from 2.644 to 0.121~m
+relative to the pretrained control, while the tested
 Transformer variants use their sequence input but do not outperform the
 simple adapter. A prospectively frozen corrected closed-loop matrix contains
 80 rollouts spanning two predictor stacks, four risk policies, two target
@@ -68,8 +69,8 @@ favours the adapted stack in all 40/40 metric--policy--style checks, yet only
 % SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
 risk dominates a fixed comparator in only 3/12 prespecified comparisons.
 Thus task adaptation, rather than added interaction-model complexity, provides
-the reliable offline gain in this setting, while its downstream value is
-conditional on the risk--control context.
+the directionally consistent in-distribution offline gain in this setting,
+while its downstream value is conditional on the risk--control context.
 \end{abstract}
 
 \input{sections/01_introduction.tex}

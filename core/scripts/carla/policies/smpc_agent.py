@@ -1,4 +1,5 @@
 import carla
+import copy
 import csv
 import hashlib
 import json
@@ -27,6 +28,19 @@ from utils import frenet_trajectory_handler as fth
 from utils import mpc_utils as smpc
 from utils.low_level_control import LowLevelControl
 from utils.vehicle_geometry_utils import vehicle_name_to_lf_lr
+from policies.supervisor_action_filter import (
+    ACTION_FILTER_APPLY,
+    ACTION_FILTER_MONITOR_ONLY,
+    integrate_post_solver_action_filter,
+    normalize_action_filter_mode,
+    normalize_supervisor_authority_mode,
+    run_isolated_supervisor_shadow,
+    stable_value_sha256,
+    supervisor_authority_enabled,
+    verify_authority_channels,
+    verify_complete_behavioural_authority_manifest,
+    verify_supervisor_candidate_application,
+)
 
 class SMPCAgent(object):
     """ Implementation of an agent using multimodal predictions and stochastic MPC for control. """
@@ -102,6 +116,9 @@ class SMPCAgent(object):
                  yield_recovery_speed=5.5,
                  yield_recovery_accel=1.8,
                  yield_supervisor_mode="full",
+                 yield_rule_smpc_bypass_enabled=True,
+                 yield_post_solver_action_filter_mode="apply",
+                 yield_supervisor_behavioural_authority_mode="on",
                  completion_s_margin=6.0,
                  completion_goal_dist=8.0,
                  completion_lateral_error=4.0,
@@ -212,6 +229,22 @@ class SMPCAgent(object):
                 "yield_supervisor_mode must be 'full' or 'reduced_intervention', "
                 f"got {yield_supervisor_mode!r}"
             )
+        self.yield_rule_smpc_bypass_enabled = bool(yield_rule_smpc_bypass_enabled)
+        self.yield_post_solver_action_filter_configured_mode = normalize_action_filter_mode(
+            yield_post_solver_action_filter_mode
+        )
+        self.yield_supervisor_behavioural_authority_mode = (
+            normalize_supervisor_authority_mode(
+                yield_supervisor_behavioural_authority_mode
+            )
+        )
+        self.yield_post_solver_action_filter_mode = (
+            self.yield_post_solver_action_filter_configured_mode
+            if supervisor_authority_enabled(
+                self.yield_supervisor_behavioural_authority_mode
+            )
+            else ACTION_FILTER_MONITOR_ONLY
+        )
         self.completion_s_margin = float(completion_s_margin)
         self.completion_goal_dist = float(completion_goal_dist)
         self.completion_lateral_error = float(completion_lateral_error)
@@ -555,6 +588,13 @@ class SMPCAgent(object):
         self._rule_yield_phase = "idle"
         self._yield_last_applied_accel = None
         self._yield_geometry = None
+        self._yield_shadow_behavior_state = {
+            "_yield_stop_seen": False,
+            "_yield_stop_active_prev": False,
+            "_yield_recovery_steps_remaining": 0,
+            "_yield_last_applied_accel": None,
+            "_rule_yield_phase": "idle",
+        }
         self._observed_target_tracks = {}
         self.reference_regeneration()
 
@@ -908,12 +948,41 @@ class SMPCAgent(object):
                 "oracle_guard": "full priority yielding requires a valid multimodal prediction; before prediction is valid, only an observed moving target track may trigger cautious approach",
                 "activation_rule": "priority yield uses distance_to_stop <= v^2/(2*abs(decel)) + brake_distance_margin; observed-track cautious approach also activates on this braking-distance trigger before MultiPath is valid",
                 "pre_solve_reference_profile": "yield reference uses v_ref <= sqrt(v_ref_min^2 + 2*abs(reference_decel)*remaining_distance_to_stop); final near-stop control is handled by the yield controller, not by an instantaneous near-stop optimisation reference",
-                "solver_bypass": "adaptive profile bypasses deterministic approach/hold and the first low-speed released_recovery handoff frames after the priority target has cleared",
+                "solver_bypass": (
+                    "configured as a supervisor candidate channel; effective only "
+                    "when behavioural authority is on" if self.yield_rule_smpc_bypass_enabled
+                    else "disabled by common configuration"
+                ),
                 "release_clearance_buffer": "released_recovery starts only after the priority target has moved beyond conflict_radius + release_clearance_margin, so rule-order clearance also respects vehicle footprint clearance",
             },
             "yield_stop_supervisor": {
                 "enabled": self.yield_stop_enabled,
                 "mode": self.yield_supervisor_mode,
+                "behavioural_authority": {
+                    "mode": self.yield_supervisor_behavioural_authority_mode,
+                    "authority_enabled": supervisor_authority_enabled(
+                        self.yield_supervisor_behavioural_authority_mode
+                    ),
+                    "off_semantics": (
+                        "interaction/yield estimation remains available to the "
+                        "adaptive-risk treatment and isolated shadow telemetry; "
+                        "reference, linearization, solver-cost, post-solver action, "
+                        "release/recovery and next-step control authority are disabled"
+                    ),
+                },
+                "rule_smpc_bypass_enabled": self.yield_rule_smpc_bypass_enabled,
+                "post_solver_action_filter": {
+                    "mode": self.yield_post_solver_action_filter_mode,
+                    "configured_mode": self.yield_post_solver_action_filter_configured_mode,
+                    "authority_enabled": (
+                        self.yield_post_solver_action_filter_mode
+                        != ACTION_FILTER_MONITOR_ONLY
+                    ),
+                    "monitor_only_semantics": (
+                        "compute the same supervisor candidate and state transitions, "
+                        "but apply the nominal solver command"
+                    ),
+                },
                 "stop_speed": self.yield_stop_speed,
                 "caution_speed": self.yield_caution_speed,
                 "creep_speed": self.yield_creep_speed,
@@ -1935,6 +2004,8 @@ class SMPCAgent(object):
 
     def _rule_yield_smpc_bypass_reason(self, yield_status, speed):
         """Return why the rule supervisor should replace an SMPC solve, if any."""
+        if not self.yield_rule_smpc_bypass_enabled:
+            return None
         if (self.risk_profile or "").lower() not in {
             "adaptive_interaction_severity",
             "adaptive_interaction_severity_no_floor",
@@ -3419,6 +3490,9 @@ class SMPCAgent(object):
 
         else:
             # Run SMPC Preds.
+            supervisor_authority_on = supervisor_authority_enabled(
+                self.yield_supervisor_behavioural_authority_mode
+            )
             reference_status = {
                 "regenerated": False,
                 "restored_global_reference": False,
@@ -3426,14 +3500,26 @@ class SMPCAgent(object):
                 "skip_reason": None,
                 "reference_regen_max_lateral_error": self.reference_regen_max_lateral_error,
                 "post_yield_recovery": {
-                    "active": bool(self.yield_recovery_enabled and self._yield_recovery_steps_remaining > 0),
-                    "steps_remaining": int(self._yield_recovery_steps_remaining),
+                    "active": bool(
+                        supervisor_authority_on
+                        and self.yield_recovery_enabled
+                        and self._yield_recovery_steps_remaining > 0
+                    ),
+                    "steps_remaining": int(
+                        self._yield_recovery_steps_remaining
+                        if supervisor_authority_on else 0
+                    ),
                     "max_lateral_error": self.yield_recovery_max_lateral_error,
                     "regen_period": self.yield_recovery_regen_period,
                 },
+                "supervisor_behavioural_authority_mode": (
+                    self.yield_supervisor_behavioural_authority_mode
+                ),
             }
             recovery_active_for_reference = bool(
-                self.yield_recovery_enabled and self._yield_recovery_steps_remaining > 0
+                supervisor_authority_on
+                and self.yield_recovery_enabled
+                and self._yield_recovery_steps_remaining > 0
             )
             active_reference_guard = (
                 self.yield_recovery_max_lateral_error
@@ -3464,6 +3550,15 @@ class SMPCAgent(object):
 
 
             t_ref_new=np.argmin(np.linalg.norm(self.feas_ref_states_new[:,:2]-np.hstack((x,y)), axis=1))
+            nominal_reference_states = np.asarray(
+                self.feas_ref_states_new, dtype=float
+            ).copy()
+            nominal_reference_inputs = np.asarray(
+                self.feas_ref_inputs_new, dtype=float
+            ).copy()
+            nominal_forced_reference_linearization = bool(
+                reference_status["forced_reference_linearization"]
+            )
             pre_solve_yield_status = self._rule_aware_yield_decision(
                 x,
                 y,
@@ -3475,15 +3570,141 @@ class SMPCAgent(object):
                 target_vehicle_valid_pred,
                 N_TV,
             )
-            yield_active_for_reference = bool(pre_solve_yield_status.get("active"))
-            reference_status["rule_aware_reference"] = self._apply_rule_aware_reference_profile(
-                t_ref_new,
-                pre_solve_yield_status,
-                recovery_active_for_reference,
-                lateral_error=ey,
-                heading_error=epsi,
-                completion_metrics=completion_metrics,
+            # Reconstruct the solver/reference inputs that would exist without
+            # *any* behavioural supervisor authority.  This is deliberately
+            # computed before reference shaping so that the authority-off arm
+            # can fail closed against an independently constructed baseline.
+            if (
+                self.prev_opt
+                and self.time % 1 == 0
+                and not nominal_forced_reference_linearization
+            ):
+                nominal_l_states, nominal_l_inputs = self.linearization_traj(
+                    x, y, psi, speed
+                )
+            else:
+                nominal_l_states = self._horizon_slice_with_tail_padding(
+                    nominal_reference_states, t_ref_new, self.N + 1
+                )
+                nominal_l_inputs = self._horizon_slice_with_tail_padding(
+                    nominal_reference_inputs, t_ref_new, self.N + 1
+                )
+            shadow_reference_status = None
+            shadow_reference_states = nominal_reference_states.copy()
+            shadow_reference_inputs = nominal_reference_inputs.copy()
+            if supervisor_authority_on:
+                reference_status["rule_aware_reference"] = self._apply_rule_aware_reference_profile(
+                    t_ref_new,
+                    pre_solve_yield_status,
+                    recovery_active_for_reference,
+                    lateral_error=ey,
+                    heading_error=epsi,
+                    completion_metrics=completion_metrics,
+                )
+                shadow_reference_status = dict(
+                    reference_status["rule_aware_reference"]
+                )
+                shadow_reference_states = np.asarray(
+                    self.feas_ref_states_new, dtype=float
+                ).copy()
+                shadow_reference_inputs = np.asarray(
+                    self.feas_ref_inputs_new, dtype=float
+                ).copy()
+            else:
+                def _shadow_reference_candidate():
+                    status = self._apply_rule_aware_reference_profile(
+                        t_ref_new,
+                        dict(pre_solve_yield_status),
+                        bool(
+                            self.yield_recovery_enabled
+                            and self._yield_recovery_steps_remaining > 0
+                        ),
+                        lateral_error=ey,
+                        heading_error=epsi,
+                        completion_metrics=completion_metrics,
+                    )
+                    return (
+                        status,
+                        np.asarray(self.feas_ref_states_new, dtype=float).copy(),
+                        np.asarray(self.feas_ref_inputs_new, dtype=float).copy(),
+                    )
+
+                isolated_reference = run_isolated_supervisor_shadow(
+                    owner=self,
+                    shadow_state=self._yield_shadow_behavior_state,
+                    shadow_fields=(
+                        "_yield_stop_seen",
+                        "_yield_stop_active_prev",
+                        "_yield_recovery_steps_remaining",
+                        "_yield_last_applied_accel",
+                        "_rule_yield_phase",
+                    ),
+                    protected_fields=(
+                        "control_prev",
+                        "feas_ref_states_new",
+                        "feas_ref_inputs_new",
+                    ),
+                    callback=_shadow_reference_candidate,
+                )
+                self._yield_shadow_behavior_state = (
+                    isolated_reference.next_shadow_state
+                )
+                (
+                    shadow_reference_status,
+                    shadow_reference_states,
+                    shadow_reference_inputs,
+                ) = isolated_reference.result
+                reference_status["rule_aware_reference"] = {
+                    "mode": "behavioural_authority_off_nominal_reference",
+                    "yield_active": False,
+                    "recovery_active": False,
+                    "speed_cap": None,
+                    "accel_upper_bound": None,
+                    "profile": None,
+                    "authority_applied": False,
+                }
+                reference_status["shadow_rule_aware_reference"] = (
+                    shadow_reference_status
+                )
+            yield_active_for_reference = bool(
+                supervisor_authority_on
+                and pre_solve_yield_status.get("active")
             )
+            reference_authority_audit = verify_authority_channels(
+                mode=self.yield_supervisor_behavioural_authority_mode,
+                nominal={
+                    "reference_states": nominal_reference_states,
+                    "reference_inputs": nominal_reference_inputs,
+                    "recovery_reference_active": False,
+                    "yield_reference_active": False,
+                    "reference_forced_linearization": (
+                        nominal_forced_reference_linearization
+                    ),
+                },
+                actual={
+                    "reference_states": np.asarray(
+                        self.feas_ref_states_new, dtype=float
+                    ),
+                    "reference_inputs": np.asarray(
+                        self.feas_ref_inputs_new, dtype=float
+                    ),
+                    "recovery_reference_active": recovery_active_for_reference,
+                    "yield_reference_active": yield_active_for_reference,
+                    "reference_forced_linearization": bool(
+                        reference_status["forced_reference_linearization"]
+                    ),
+                },
+            )
+            reference_authority_audit.update({
+                "shadow_reference_states_sha256": stable_value_sha256(
+                    shadow_reference_states
+                ),
+                "shadow_reference_inputs_sha256": stable_value_sha256(
+                    shadow_reference_inputs
+                ),
+                "shadow_reference_status": shadow_reference_status,
+                "shadow_state_isolated": not supervisor_authority_on,
+            })
             if bool(reference_status["rule_aware_reference"].get("force_reference_linearization", False)):
                 reference_status["forced_reference_linearization"] = 1
                 reference_status["forced_reference_linearization_reason"] = (
@@ -3497,6 +3718,7 @@ class SMPCAgent(object):
                 and not recovery_active_for_reference
             ):
                 l_states, l_inputs = self.linearization_traj(x,y,psi,speed)
+                supervisor_forced_reference_linearization = False
 
             else:
                 l_states = self._horizon_slice_with_tail_padding(
@@ -3505,6 +3727,45 @@ class SMPCAgent(object):
                 l_inputs = self._horizon_slice_with_tail_padding(
                     self.feas_ref_inputs_new, t_ref_new, self.N + 1
                 )
+                supervisor_forced_reference_linearization = bool(
+                    yield_active_for_reference
+                    or recovery_active_for_reference
+                    or (
+                        reference_status["forced_reference_linearization"]
+                        and not nominal_forced_reference_linearization
+                    )
+                )
+
+            shadow_recovery_active_for_reference = bool(
+                shadow_reference_status
+                and shadow_reference_status.get("recovery_active", False)
+            )
+            shadow_yield_active_for_reference = bool(
+                shadow_reference_status
+                and shadow_reference_status.get("yield_active", False)
+            )
+            shadow_supervisor_forced_reference_linearization = bool(
+                shadow_yield_active_for_reference
+                or shadow_recovery_active_for_reference
+                or (
+                    bool(
+                        (shadow_reference_status or {}).get(
+                            "force_reference_linearization", False
+                        )
+                    )
+                    and not nominal_forced_reference_linearization
+                )
+            )
+            if shadow_supervisor_forced_reference_linearization:
+                shadow_l_states = self._horizon_slice_with_tail_padding(
+                    shadow_reference_states, t_ref_new, self.N + 1
+                )
+                shadow_l_inputs = self._horizon_slice_with_tail_padding(
+                    shadow_reference_inputs, t_ref_new, self.N + 1
+                )
+            else:
+                shadow_l_states = np.asarray(nominal_l_states, dtype=float).copy()
+                shadow_l_inputs = np.asarray(nominal_l_inputs, dtype=float).copy()
 
 
             ## TV shapes estimate along prediction horizon
@@ -3554,12 +3815,172 @@ class SMPCAgent(object):
                          'df_lin': l_inputs[:,1].T,
                          'mus'  : [target_vehicle_gmm_preds[0][k] for k in range(N_TV)],     'sigmas' : [target_vehicle_gmm_preds[1][k] for k in range(N_TV)], 'acc_prev' : self.control_prev[0], 'df_prev' : self.control_prev[1],       'tv_shapes': tv_shape_matrices, 'Rs_ev': Rs_ev }
 
-            heading_cost_weights, heading_cost_status = self._lane_entry_heading_cost_profile(
-                t_ref_new,
-                pre_solve_yield_status,
-                epsi,
-            )
+            if supervisor_authority_on:
+                shadow_heading_cost_weights, shadow_heading_cost_status = (
+                    self._lane_entry_heading_cost_profile(
+                        t_ref_new,
+                        pre_solve_yield_status,
+                        epsi,
+                    )
+                )
+                heading_cost_weights = np.asarray(
+                    shadow_heading_cost_weights, dtype=float
+                ).copy()
+                heading_cost_status = dict(shadow_heading_cost_status)
+                heading_cost_status["authority_applied"] = True
+            else:
+                def _shadow_heading_candidate():
+                    self.feas_ref_states_new = np.asarray(
+                        shadow_reference_states, dtype=float
+                    ).copy()
+                    self.feas_ref_inputs_new = np.asarray(
+                        shadow_reference_inputs, dtype=float
+                    ).copy()
+                    return self._lane_entry_heading_cost_profile(
+                        t_ref_new,
+                        dict(pre_solve_yield_status),
+                        epsi,
+                    )
+
+                isolated_heading = run_isolated_supervisor_shadow(
+                    owner=self,
+                    shadow_state={},
+                    shadow_fields=(),
+                    protected_fields=(
+                        "feas_ref_states_new",
+                        "feas_ref_inputs_new",
+                    ),
+                    callback=_shadow_heading_candidate,
+                )
+                (
+                    shadow_heading_cost_weights,
+                    shadow_heading_cost_status,
+                ) = isolated_heading.result
+                heading_cost_weights = np.zeros_like(
+                    np.asarray(shadow_heading_cost_weights, dtype=float)
+                )
+                heading_cost_status = {
+                    "enabled": bool(self.lane_entry_heading_cost_enabled),
+                    "active": False,
+                    "reason": "supervisor_behavioural_authority_off",
+                    "authority_applied": False,
+                    "active_count": 0,
+                    "max_weight": 0.0,
+                    "shadow_candidate": shadow_heading_cost_status,
+                }
             update_dict["heading_cost_weights"] = heading_cost_weights
+
+            solver_input_authority_audit = verify_authority_channels(
+                mode=self.yield_supervisor_behavioural_authority_mode,
+                nominal={
+                    "reference_states": nominal_reference_states,
+                    "reference_inputs": nominal_reference_inputs,
+                    "linearization_states": nominal_l_states,
+                    "linearization_inputs": nominal_l_inputs,
+                    "heading_cost_weights": np.zeros_like(heading_cost_weights),
+                    "acc_prev": np.asarray(self.control_prev).reshape(-1)[0],
+                    "df_prev": np.asarray(self.control_prev).reshape(-1)[1],
+                    "yield_reference_active": False,
+                    "recovery_reference_active": False,
+                    "supervisor_forced_reference_linearization": False,
+                },
+                actual={
+                    "reference_states": np.asarray(
+                        self.feas_ref_states_new, dtype=float
+                    ),
+                    "reference_inputs": np.asarray(
+                        self.feas_ref_inputs_new, dtype=float
+                    ),
+                    "linearization_states": np.asarray(l_states, dtype=float),
+                    "linearization_inputs": np.asarray(l_inputs, dtype=float),
+                    "heading_cost_weights": np.asarray(
+                        heading_cost_weights, dtype=float
+                    ),
+                    "acc_prev": update_dict["acc_prev"],
+                    "df_prev": update_dict["df_prev"],
+                    "yield_reference_active": yield_active_for_reference,
+                    "recovery_reference_active": recovery_active_for_reference,
+                    "supervisor_forced_reference_linearization": (
+                        supervisor_forced_reference_linearization
+                    ),
+                },
+            )
+            candidate_application_audit = verify_supervisor_candidate_application(
+                mode=self.yield_supervisor_behavioural_authority_mode,
+                expected_channels=(
+                    "reference_states",
+                    "reference_inputs",
+                    "linearization_states",
+                    "linearization_inputs",
+                    "heading_cost_weights",
+                    "yield_reference_active",
+                    "recovery_reference_active",
+                    "supervisor_forced_reference_linearization",
+                ),
+                candidate={
+                    "reference_states": np.asarray(
+                        shadow_reference_states, dtype=float
+                    ),
+                    "reference_inputs": np.asarray(
+                        shadow_reference_inputs, dtype=float
+                    ),
+                    "linearization_states": np.asarray(
+                        shadow_l_states, dtype=float
+                    ),
+                    "linearization_inputs": np.asarray(
+                        shadow_l_inputs, dtype=float
+                    ),
+                    "heading_cost_weights": np.asarray(
+                        shadow_heading_cost_weights, dtype=float
+                    ),
+                    "yield_reference_active": shadow_yield_active_for_reference,
+                    "recovery_reference_active": (
+                        shadow_recovery_active_for_reference
+                    ),
+                    "supervisor_forced_reference_linearization": (
+                        shadow_supervisor_forced_reference_linearization
+                    ),
+                },
+                actual={
+                    "reference_states": np.asarray(
+                        self.feas_ref_states_new, dtype=float
+                    ),
+                    "reference_inputs": np.asarray(
+                        self.feas_ref_inputs_new, dtype=float
+                    ),
+                    "linearization_states": np.asarray(l_states, dtype=float),
+                    "linearization_inputs": np.asarray(l_inputs, dtype=float),
+                    "heading_cost_weights": np.asarray(
+                        heading_cost_weights, dtype=float
+                    ),
+                    "yield_reference_active": yield_active_for_reference,
+                    "recovery_reference_active": recovery_active_for_reference,
+                    "supervisor_forced_reference_linearization": (
+                        supervisor_forced_reference_linearization
+                    ),
+                },
+            )
+            reference_authority_audit["solver_input_authority"] = (
+                solver_input_authority_audit
+            )
+            reference_authority_audit["candidate_application_authority"] = (
+                candidate_application_audit
+            )
+            reference_authority_audit["shadow_linearization_states_sha256"] = (
+                stable_value_sha256(shadow_l_states)
+            )
+            reference_authority_audit["shadow_linearization_inputs_sha256"] = (
+                stable_value_sha256(shadow_l_inputs)
+            )
+            reference_authority_audit[
+                "shadow_supervisor_forced_reference_linearization"
+            ] = shadow_supervisor_forced_reference_linearization
+            reference_authority_audit["shadow_heading_cost_weights_sha256"] = (
+                stable_value_sha256(shadow_heading_cost_weights)
+            )
+            reference_authority_audit["shadow_heading_cost_status"] = (
+                shadow_heading_cost_status
+            )
 
             if target_vehicle_mode_probs is not None:
                 probs = np.asarray(target_vehicle_mode_probs[:N_TV], dtype=float)
@@ -3598,6 +4019,181 @@ class SMPCAgent(object):
                 update_dict["adaptive_risk_allocation"] = solver_risk_allocation
 
 
+
+            factual_behaviour_state_before_solve = {
+                "yield_stop_seen": bool(self._yield_stop_seen),
+                "yield_stop_active_prev": bool(self._yield_stop_active_prev),
+                "yield_recovery_steps_remaining": int(
+                    self._yield_recovery_steps_remaining
+                ),
+                "yield_last_applied_accel": (
+                    None
+                    if self._yield_last_applied_accel is None
+                    else float(self._yield_last_applied_accel)
+                ),
+            }
+            neutral_behaviour_state = {
+                "yield_stop_seen": False,
+                "yield_stop_active_prev": False,
+                "yield_recovery_steps_remaining": 0,
+                "yield_last_applied_accel": None,
+            }
+            if (
+                not supervisor_authority_on
+                and factual_behaviour_state_before_solve != neutral_behaviour_state
+            ):
+                raise RuntimeError(
+                    "Supervisor behavioural authority-off factual state is non-neutral "
+                    f"before solve: {factual_behaviour_state_before_solve!r}"
+                )
+            if supervisor_authority_on:
+                shadow_bypass_reason = self._rule_yield_smpc_bypass_reason(
+                    pre_solve_yield_status, speed
+                )
+                bypass_shadow_isolated = True
+            else:
+                isolated_bypass = run_isolated_supervisor_shadow(
+                    owner=self,
+                    shadow_state=self._yield_shadow_behavior_state,
+                    shadow_fields=(
+                        "_yield_stop_seen",
+                        "_yield_stop_active_prev",
+                        "_yield_recovery_steps_remaining",
+                        "_yield_last_applied_accel",
+                        "_rule_yield_phase",
+                    ),
+                    protected_fields=("control_prev",),
+                    callback=lambda: self._rule_yield_smpc_bypass_reason(
+                        copy.deepcopy(pre_solve_yield_status), speed
+                    ),
+                )
+                shadow_bypass_reason = isolated_bypass.result
+                bypass_shadow_isolated = bool(
+                    isolated_bypass.protected_restored
+                )
+            bypass_reason = shadow_bypass_reason if supervisor_authority_on else None
+            bypass_smpc_for_rule_yield = bypass_reason is not None
+            upstream_shadow_requests = {
+                "reference_requested": bool(
+                    stable_value_sha256(shadow_reference_states)
+                    != stable_value_sha256(nominal_reference_states)
+                    or stable_value_sha256(shadow_reference_inputs)
+                    != stable_value_sha256(nominal_reference_inputs)
+                ),
+                "heading_cost_requested": bool(
+                    np.any(np.abs(np.asarray(shadow_heading_cost_weights)) > 1.0e-9)
+                ),
+                "reference_linearization_requested": bool(
+                    shadow_supervisor_forced_reference_linearization
+                    or stable_value_sha256(shadow_l_states)
+                    != stable_value_sha256(nominal_l_states)
+                    or stable_value_sha256(shadow_l_inputs)
+                    != stable_value_sha256(nominal_l_inputs)
+                ),
+                "rule_smpc_bypass_requested": bool(
+                    shadow_bypass_reason is not None
+                ),
+            }
+            upstream_shadow_requests["any_requested"] = any(
+                upstream_shadow_requests.values()
+            )
+            upstream_shadow_intensity = {
+                "reference_states_max_abs_delta": float(
+                    np.max(
+                        np.abs(
+                            np.asarray(shadow_reference_states, dtype=float)
+                            - np.asarray(nominal_reference_states, dtype=float)
+                        )
+                    )
+                ),
+                "reference_inputs_max_abs_delta": float(
+                    np.max(
+                        np.abs(
+                            np.asarray(shadow_reference_inputs, dtype=float)
+                            - np.asarray(nominal_reference_inputs, dtype=float)
+                        )
+                    )
+                ),
+                "linearization_states_max_abs_delta": float(
+                    np.max(
+                        np.abs(
+                            np.asarray(shadow_l_states, dtype=float)
+                            - np.asarray(nominal_l_states, dtype=float)
+                        )
+                    )
+                ),
+                "linearization_inputs_max_abs_delta": float(
+                    np.max(
+                        np.abs(
+                            np.asarray(shadow_l_inputs, dtype=float)
+                            - np.asarray(nominal_l_inputs, dtype=float)
+                        )
+                    )
+                ),
+                "heading_cost_max_abs_weight": float(
+                    np.max(np.abs(np.asarray(shadow_heading_cost_weights, dtype=float)))
+                ),
+            }
+            supervisor_authority_record = {
+                "schema_version": "supervisor_behavioural_authority_step_v1",
+                "mode": self.yield_supervisor_behavioural_authority_mode,
+                "authority_enabled": bool(supervisor_authority_on),
+                "interaction_estimator_computed": True,
+                "adaptive_risk_only_solver_influence_allowed_when_off": True,
+                "allowed_solver_influence_when_off": [
+                    "adaptive_risk_allocation"
+                ],
+                "rule_smpc_bypass_configured": bool(
+                    self.yield_rule_smpc_bypass_enabled
+                ),
+                "shadow_state_isolated": bool(
+                    (
+                        supervisor_authority_on
+                        or reference_authority_audit.get("shadow_state_isolated")
+                    )
+                    and bypass_shadow_isolated
+                ),
+                "rule_smpc_bypass_channel": {
+                    "configured": bool(self.yield_rule_smpc_bypass_enabled),
+                    "shadow_requested": bool(shadow_bypass_reason is not None),
+                    "shadow_reason": shadow_bypass_reason,
+                    "effective": bool(bypass_smpc_for_rule_yield),
+                    "authority_gated": True,
+                    "off_always_executes_solver": True,
+                },
+                "upstream_shadow_requests": upstream_shadow_requests,
+                "upstream_shadow_intensity": upstream_shadow_intensity,
+                "interaction_risk_estimator_state": {
+                    "rule_yield_phase": str(
+                        pre_solve_yield_status.get("phase", self._rule_yield_phase)
+                    ),
+                    "clear_path_release_steps_remaining": int(
+                        self._yield_clear_path_release_steps_remaining
+                    ),
+                    "permitted_factual_use_when_authority_off": [
+                        "adaptive_risk_allocation"
+                    ],
+                    "nonrisk_solver_or_control_use_when_authority_off": False,
+                    "separate_from_shadow_behaviour_state": True,
+                },
+                "reference_and_solver_input_audit": reference_authority_audit,
+                "factual_behaviour_state_before_solve": (
+                    factual_behaviour_state_before_solve
+                ),
+                "implementation_manipulation_gate": {
+                    "status": "pass",
+                    "candidate_channels_computed": [
+                        "reference",
+                        "reference_linearization",
+                        "heading_cost",
+                        "rule_smpc_bypass",
+                    ],
+                    "authority_off_nonrisk_solver_channels_neutral": bool(
+                        supervisor_authority_on
+                        or solver_input_authority_audit.get("status") == "pass"
+                    ),
+                },
+            }
 
             debug_payload = {
                 "agent": "SMPCAgent",
@@ -3654,6 +4250,7 @@ class SMPCAgent(object):
                 },
                 "completion": completion_metrics,
                 "lane_entry_heading_cost": heading_cost_status,
+                "supervisor_behavioural_authority": supervisor_authority_record,
                 "prediction": self._debug_prediction_summary(
                     target_vehicle_positions,
                     target_vehicle_gmm_preds,
@@ -3677,11 +4274,15 @@ class SMPCAgent(object):
 
 
 
-            bypass_reason = self._rule_yield_smpc_bypass_reason(pre_solve_yield_status, speed)
-            bypass_smpc_for_rule_yield = bypass_reason is not None
             debug_payload["solver_bypass"] = {
+                "configuration_enabled": bool(self.yield_rule_smpc_bypass_enabled),
                 "enabled": bool(bypass_smpc_for_rule_yield),
                 "reason": bypass_reason if bypass_smpc_for_rule_yield else "not_applicable",
+                "shadow_requested": bool(shadow_bypass_reason is not None),
+                "shadow_reason": shadow_bypass_reason,
+                "authority_mode": self.yield_supervisor_behavioural_authority_mode,
+                "authority_gated": True,
+                "off_always_executes_solver": True,
                 "yield_phase": pre_solve_yield_status.get("phase"),
                 "yield_active": bool(pre_solve_yield_status.get("active")),
                 "recovery_steps_remaining": int(self._yield_recovery_steps_remaining),
@@ -3790,15 +4391,405 @@ class SMPCAgent(object):
             self.control_prev=np.array([u_control[0]+update_dict['a_lin'][0],u_control[1]+update_dict['df_lin'][0]])
             u0=self.control_prev
             v_des=v_next
-            yield_status = pre_solve_yield_status
-            u0, v_des, yield_status = self._apply_rule_aware_yield_control(
-                yield_status,
-                u0,
-                v_des,
-                speed,
-                lateral_error=ey,
-                heading_error=epsi,
-                completion_metrics=completion_metrics,
+            nominal_solver_u0 = np.asarray(u0, dtype=float).reshape(-1).copy()
+            nominal_solver_v_des = float(np.asarray(v_des, dtype=float).reshape(-1)[0])
+            if supervisor_authority_on:
+                (
+                    filter_candidate_u0,
+                    filter_candidate_v_des,
+                    yield_status,
+                ) = self._apply_rule_aware_yield_control(
+                    copy.deepcopy(pre_solve_yield_status),
+                    u0,
+                    v_des,
+                    speed,
+                    lateral_error=ey,
+                    heading_error=epsi,
+                    completion_metrics=completion_metrics,
+                )
+                shadow_post_state = {
+                    "_yield_stop_seen": copy.deepcopy(self._yield_stop_seen),
+                    "_yield_stop_active_prev": copy.deepcopy(
+                        self._yield_stop_active_prev
+                    ),
+                    "_yield_recovery_steps_remaining": copy.deepcopy(
+                        self._yield_recovery_steps_remaining
+                    ),
+                    "_yield_last_applied_accel": copy.deepcopy(
+                        self._yield_last_applied_accel
+                    ),
+                    "_rule_yield_phase": copy.deepcopy(self._rule_yield_phase),
+                }
+                post_shadow_isolated = True
+            else:
+                def _shadow_post_solver_candidate():
+                    return self._apply_rule_aware_yield_control(
+                        copy.deepcopy(pre_solve_yield_status),
+                        nominal_solver_u0,
+                        nominal_solver_v_des,
+                        speed,
+                        lateral_error=ey,
+                        heading_error=epsi,
+                        completion_metrics=completion_metrics,
+                    )
+
+                isolated_post = run_isolated_supervisor_shadow(
+                    owner=self,
+                    shadow_state=self._yield_shadow_behavior_state,
+                    shadow_fields=(
+                        "_yield_stop_seen",
+                        "_yield_stop_active_prev",
+                        "_yield_recovery_steps_remaining",
+                        "_yield_last_applied_accel",
+                        "_rule_yield_phase",
+                    ),
+                    protected_fields=(
+                        "control_prev",
+                        "feas_ref_states_new",
+                        "feas_ref_inputs_new",
+                    ),
+                    callback=_shadow_post_solver_candidate,
+                )
+                self._yield_shadow_behavior_state = isolated_post.next_shadow_state
+                (
+                    filter_candidate_u0,
+                    filter_candidate_v_des,
+                    yield_status,
+                ) = isolated_post.result
+                shadow_post_state = copy.deepcopy(
+                    isolated_post.next_shadow_state
+                )
+                post_shadow_isolated = bool(isolated_post.protected_restored)
+            filter_candidate_u0 = np.asarray(filter_candidate_u0, dtype=float).reshape(-1)
+            filter_candidate_v_des = float(
+                np.asarray(filter_candidate_v_des, dtype=float).reshape(-1)[0]
+            )
+            action_filter_decision, yield_status, action_filter_record = integrate_post_solver_action_filter(
+                mode=self.yield_post_solver_action_filter_mode,
+                nominal_u=nominal_solver_u0,
+                nominal_v_des=nominal_solver_v_des,
+                candidate_u=filter_candidate_u0,
+                candidate_v_des=filter_candidate_v_des,
+                supervisor_state=yield_status,
+            )
+            u0 = np.asarray(action_filter_decision.actual_u, dtype=float)
+            v_des = float(action_filter_decision.actual_v_des)
+            # ``acc_prev`` at the next solve must describe the command that was
+            # actually sent, not the counterfactual shadow-filter candidate.
+            self.control_prev = u0.copy()
+            factual_behaviour_state_after_action = {
+                "yield_stop_seen": bool(self._yield_stop_seen),
+                "yield_stop_active_prev": bool(self._yield_stop_active_prev),
+                "yield_recovery_steps_remaining": int(
+                    self._yield_recovery_steps_remaining
+                ),
+                "yield_last_applied_accel": (
+                    None
+                    if self._yield_last_applied_accel is None
+                    else float(self._yield_last_applied_accel)
+                ),
+            }
+            if (
+                not supervisor_authority_on
+                and factual_behaviour_state_after_action != neutral_behaviour_state
+            ):
+                raise RuntimeError(
+                    "Supervisor behavioural authority-off factual state leaked after "
+                    f"action arbitration: {factual_behaviour_state_after_action!r}"
+                )
+            post_action_authority_audit = verify_authority_channels(
+                mode=self.yield_supervisor_behavioural_authority_mode,
+                nominal={
+                    "actual_command": nominal_solver_u0,
+                    "actual_v_des": nominal_solver_v_des,
+                    "next_control_prev": nominal_solver_u0,
+                    "factual_yield_stop_seen": False,
+                    "factual_yield_stop_active_prev": False,
+                    "factual_yield_recovery_steps_remaining": 0,
+                    "factual_yield_last_applied_accel": None,
+                },
+                actual={
+                    "actual_command": u0,
+                    "actual_v_des": v_des,
+                    "next_control_prev": self.control_prev,
+                    "factual_yield_stop_seen": bool(self._yield_stop_seen),
+                    "factual_yield_stop_active_prev": bool(
+                        self._yield_stop_active_prev
+                    ),
+                    "factual_yield_recovery_steps_remaining": int(
+                        self._yield_recovery_steps_remaining
+                    ),
+                    "factual_yield_last_applied_accel": (
+                        None
+                        if self._yield_last_applied_accel is None
+                        else float(self._yield_last_applied_accel)
+                    ),
+                },
+            )
+            post_delta = {
+                "accel_abs": abs(
+                    float(filter_candidate_u0[0]) - float(nominal_solver_u0[0])
+                ),
+                "steer_abs": abs(
+                    float(filter_candidate_u0[1]) - float(nominal_solver_u0[1])
+                ),
+                "v_des_abs": abs(
+                    float(filter_candidate_v_des) - nominal_solver_v_des
+                ),
+            }
+            post_action_requested = bool(
+                action_filter_record.get("intervention_requested", False)
+            )
+            shadow_recovery_state = {
+                "yield_stop_seen": bool(
+                    shadow_post_state.get("_yield_stop_seen", False)
+                ),
+                "yield_stop_active_prev": bool(
+                    shadow_post_state.get("_yield_stop_active_prev", False)
+                ),
+                "yield_recovery_steps_remaining": int(
+                    shadow_post_state.get(
+                        "_yield_recovery_steps_remaining", 0
+                    )
+                ),
+                "yield_last_applied_accel": (
+                    None
+                    if shadow_post_state.get("_yield_last_applied_accel") is None
+                    else float(
+                        shadow_post_state["_yield_last_applied_accel"]
+                    )
+                ),
+            }
+            release_recovery_requested = bool(
+                shadow_recovery_state != neutral_behaviour_state
+            )
+            next_control_requested = bool(
+                post_delta["accel_abs"] > 1.0e-9
+                or post_delta["steer_abs"] > 1.0e-9
+            )
+            next_control_applied = bool(
+                np.max(
+                    np.abs(
+                        np.asarray(self.control_prev, dtype=float)
+                        - np.asarray(nominal_solver_u0, dtype=float)
+                    )
+                ) > 1.0e-9
+            )
+            complete_authority_manifest = (
+                verify_complete_behavioural_authority_manifest(
+                    mode=self.yield_supervisor_behavioural_authority_mode,
+                    channels={
+                        "reference_shaping": {
+                            "candidate_computed": True,
+                            "requested": bool(
+                                upstream_shadow_requests[
+                                    "reference_requested"
+                                ]
+                            ),
+                            "applied": bool(
+                                supervisor_authority_on
+                                and upstream_shadow_requests[
+                                    "reference_requested"
+                                ]
+                            ),
+                            "authority_assignment_consistent": True,
+                            "factual_neutral_when_off": bool(
+                                supervisor_authority_on
+                                or solver_input_authority_audit.get("status")
+                                == "pass"
+                            ),
+                        },
+                        "supervisor_forced_reference_linearization": {
+                            "candidate_computed": True,
+                            "requested": bool(
+                                upstream_shadow_requests[
+                                    "reference_linearization_requested"
+                                ]
+                            ),
+                            "applied": bool(
+                                supervisor_authority_on
+                                and upstream_shadow_requests[
+                                    "reference_linearization_requested"
+                                ]
+                            ),
+                            "authority_assignment_consistent": True,
+                            "factual_neutral_when_off": bool(
+                                supervisor_authority_on
+                                or solver_input_authority_audit.get("status")
+                                == "pass"
+                            ),
+                        },
+                        "lane_entry_heading_cost": {
+                            "candidate_computed": True,
+                            "requested": bool(
+                                upstream_shadow_requests[
+                                    "heading_cost_requested"
+                                ]
+                            ),
+                            "applied": bool(
+                                supervisor_authority_on
+                                and upstream_shadow_requests[
+                                    "heading_cost_requested"
+                                ]
+                            ),
+                            "authority_assignment_consistent": True,
+                            "factual_neutral_when_off": bool(
+                                supervisor_authority_on
+                                or solver_input_authority_audit.get("status")
+                                == "pass"
+                            ),
+                        },
+                        "rule_smpc_bypass": {
+                            "candidate_computed": True,
+                            "requested": bool(shadow_bypass_reason is not None),
+                            "applied": bool(bypass_smpc_for_rule_yield),
+                            "authority_assignment_consistent": bool(
+                                bypass_smpc_for_rule_yield
+                                == (
+                                    supervisor_authority_on
+                                    and shadow_bypass_reason is not None
+                                )
+                            ),
+                            "factual_neutral_when_off": bool(
+                                supervisor_authority_on
+                                or not bypass_smpc_for_rule_yield
+                            ),
+                        },
+                        "post_solver_action_and_desired_speed": {
+                            "candidate_computed": True,
+                            "requested": post_action_requested,
+                            "applied": bool(
+                                action_filter_record.get(
+                                    "intervention_applied", False
+                                )
+                            ),
+                            "authority_assignment_consistent": bool(
+                                action_filter_record.get(
+                                    "intervention_applied", False
+                                )
+                                == (
+                                    supervisor_authority_on
+                                    and post_action_requested
+                                )
+                            ),
+                            "factual_neutral_when_off": bool(
+                                supervisor_authority_on
+                                or post_action_authority_audit.get("status")
+                                == "pass"
+                            ),
+                        },
+                        "release_recovery_state": {
+                            "candidate_computed": True,
+                            "requested": release_recovery_requested,
+                            "applied": bool(
+                                factual_behaviour_state_after_action
+                                != neutral_behaviour_state
+                            ),
+                            "authority_assignment_consistent": bool(
+                                (
+                                    supervisor_authority_on
+                                    and factual_behaviour_state_after_action
+                                    == shadow_recovery_state
+                                )
+                                or (
+                                    not supervisor_authority_on
+                                    and factual_behaviour_state_after_action
+                                    == neutral_behaviour_state
+                                )
+                            ),
+                            "factual_neutral_when_off": bool(
+                                supervisor_authority_on
+                                or factual_behaviour_state_after_action
+                                == neutral_behaviour_state
+                            ),
+                        },
+                        "next_control_history": {
+                            "candidate_computed": True,
+                            "requested": next_control_requested,
+                            "applied": next_control_applied,
+                            "authority_assignment_consistent": bool(
+                                next_control_applied
+                                == (
+                                    supervisor_authority_on
+                                    and next_control_requested
+                                )
+                            ),
+                            "factual_neutral_when_off": bool(
+                                supervisor_authority_on
+                                or post_action_authority_audit.get("status")
+                                == "pass"
+                            ),
+                        },
+                    },
+                )
+            )
+            supervisor_authority_record.update({
+                "shadow_state_isolated": bool(
+                    supervisor_authority_record["shadow_state_isolated"]
+                    and post_shadow_isolated
+                ),
+                "shadow_behaviour_state_after_action": shadow_post_state,
+                "post_solver_shadow_request": {
+                    "requested": post_action_requested,
+                    "delta": post_delta,
+                },
+                "factual_behaviour_state_after_action": (
+                    factual_behaviour_state_after_action
+                ),
+                "post_action_and_next_state_audit": post_action_authority_audit,
+                "complete_candidate_channel_manifest": (
+                    complete_authority_manifest
+                ),
+            })
+            supervisor_authority_record["observed_first_stage_activity"] = {
+                "any_requested": bool(
+                    upstream_shadow_requests["any_requested"]
+                    or post_action_requested
+                ),
+                "upstream_reference_requested": bool(
+                    upstream_shadow_requests["reference_requested"]
+                ),
+                "upstream_heading_cost_requested": bool(
+                    upstream_shadow_requests["heading_cost_requested"]
+                ),
+                "upstream_reference_linearization_requested": bool(
+                    upstream_shadow_requests[
+                        "reference_linearization_requested"
+                    ]
+                ),
+                "rule_smpc_bypass_requested": bool(
+                    upstream_shadow_requests["rule_smpc_bypass_requested"]
+                ),
+                "post_solver_action_requested": post_action_requested,
+                "scientific_outcome_not_integrity_gate": True,
+            }
+            supervisor_authority_record["implementation_manipulation_gate"].update({
+                "candidate_channels_computed": [
+                    "reference_shaping",
+                    "supervisor_forced_reference_linearization",
+                    "lane_entry_heading_cost",
+                    "rule_smpc_bypass",
+                    "post_solver_action_and_desired_speed",
+                    "release_recovery_state",
+                    "next_control_history",
+                ],
+                "post_action_and_next_state_neutral_when_off": bool(
+                    supervisor_authority_on
+                    or post_action_authority_audit.get("status") == "pass"
+                ),
+                "shadow_state_isolated": bool(
+                    supervisor_authority_record["shadow_state_isolated"]
+                ),
+            })
+            yield_status["factual_behaviour_state"] = (
+                factual_behaviour_state_after_action
+            )
+            yield_status["shadow_behaviour_state"] = shadow_post_state
+            yield_status["supervisor_behavioural_authority"] = (
+                supervisor_authority_record
+            )
+            debug_payload["supervisor_behavioural_authority"] = (
+                supervisor_authority_record
             )
             debug_payload["yield_stop_supervisor"] = yield_status
             debug_payload["rule_aware_yield"] = yield_status
@@ -3809,6 +4800,9 @@ class SMPCAgent(object):
                 "u0": u0,
                 "u_control": u_control,
                 "v_des": v_des,
+                "nominal_solver_u0": nominal_solver_u0,
+                "nominal_solver_v_des": nominal_solver_v_des,
+                "post_solver_action_filter": action_filter_record,
                 "control_prev_after": self.control_prev,
             }
             self._debug_record_step(debug_payload, is_failure=not bool(is_opt))

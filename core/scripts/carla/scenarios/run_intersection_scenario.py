@@ -10,6 +10,7 @@ import numpy as np
 import random
 import pickle
 import json
+import time
 import traceback
 
 scriptdir = os.path.abspath(__file__).split('carla')[0] + 'carla/'
@@ -46,6 +47,45 @@ from models.prediction_input_contract import (
     save_logged_raster,
 )
 
+
+def _wall_time_summary(
+    values: List[float], *, nonfinite_count: int, exception_count: int
+) -> Dict[str, Any]:
+    """Summarise raw server-side wall-clock samples without hiding failures."""
+
+    array = np.asarray(values, dtype=float).reshape(-1)
+    finite = array[np.isfinite(array)]
+    result: Dict[str, Any] = {
+        "observed_sample_count": int(array.size + nonfinite_count),
+        "finite_sample_count": int(finite.size),
+        "nonfinite_sample_count": int(nonfinite_count),
+        "exception_count": int(exception_count),
+        "thresholds_ms": [50.0, 200.0, 500.0],
+    }
+    if finite.size:
+        result.update({
+            "mean_s": float(np.mean(finite)),
+            "p50_s": float(np.percentile(finite, 50.0)),
+            "p95_s": float(np.percentile(finite, 95.0)),
+            "p99_s": float(np.percentile(finite, 99.0)),
+            "max_s": float(np.max(finite)),
+            "over_50ms_fraction": float(np.mean(finite > 0.050)),
+            "over_200ms_fraction": float(np.mean(finite > 0.200)),
+            "over_500ms_fraction": float(np.mean(finite > 0.500)),
+        })
+    else:
+        result.update({
+            "mean_s": None,
+            "p50_s": None,
+            "p95_s": None,
+            "p99_s": None,
+            "max_s": None,
+            "over_50ms_fraction": None,
+            "over_200ms_fraction": None,
+            "over_500ms_fraction": None,
+        })
+    return result
+
 """
 Simulation parameter classes.
 """
@@ -67,6 +107,7 @@ class CarlaParams:
     side_of_road    : str = "left"          # "left" for UK-style traffic, "right" otherwise
     traffic_control : str = "unsignalised"  # "unsignalised" or "signalised"
     priority_rule   : str = ""              # e.g. "turning_gives_way_to_oncoming_straight"
+    terminate_on_collision : bool = False    # outcome handling only; never changes a control command
 
 @dataclass(frozen=True)
 class DroneVizParams:
@@ -187,6 +228,9 @@ class VehicleParams:
     yield_recovery_speed : float = 5.5
     yield_recovery_accel : float = 1.8
     yield_supervisor_mode : str = "full"
+    yield_rule_smpc_bypass_enabled : bool = True
+    yield_post_solver_action_filter_mode : str = "apply"
+    yield_supervisor_behavioural_authority_mode : str = "on"
     completion_s_margin : float = 6.0
     completion_goal_dist : float = 8.0
     completion_lateral_error : float = 4.0
@@ -384,6 +428,9 @@ def get_vehicle_policy(
                             yield_recovery_speed=vehicle_params.yield_recovery_speed,
                             yield_recovery_accel=vehicle_params.yield_recovery_accel,
                             yield_supervisor_mode=vehicle_params.yield_supervisor_mode,
+                            yield_rule_smpc_bypass_enabled=vehicle_params.yield_rule_smpc_bypass_enabled,
+                            yield_post_solver_action_filter_mode=vehicle_params.yield_post_solver_action_filter_mode,
+                            yield_supervisor_behavioural_authority_mode=vehicle_params.yield_supervisor_behavioural_authority_mode,
                             completion_s_margin=vehicle_params.completion_s_margin,
                             completion_goal_dist=vehicle_params.completion_goal_dist,
                             completion_lateral_error=vehicle_params.completion_lateral_error,
@@ -473,6 +520,9 @@ def get_vehicle_policy(
                             yield_recovery_speed=vehicle_params.yield_recovery_speed,
                             yield_recovery_accel=vehicle_params.yield_recovery_accel,
                             yield_supervisor_mode=vehicle_params.yield_supervisor_mode,
+                            yield_rule_smpc_bypass_enabled=vehicle_params.yield_rule_smpc_bypass_enabled,
+                            yield_post_solver_action_filter_mode=vehicle_params.yield_post_solver_action_filter_mode,
+                            yield_supervisor_behavioural_authority_mode=vehicle_params.yield_supervisor_behavioural_authority_mode,
                             completion_s_margin=vehicle_params.completion_s_margin,
                             completion_goal_dist=vehicle_params.completion_goal_dist,
                             completion_lateral_error=vehicle_params.completion_lateral_error,
@@ -560,6 +610,9 @@ def get_vehicle_policy(
                             yield_recovery_speed=vehicle_params.yield_recovery_speed,
                             yield_recovery_accel=vehicle_params.yield_recovery_accel,
                             yield_supervisor_mode=vehicle_params.yield_supervisor_mode,
+                            yield_rule_smpc_bypass_enabled=vehicle_params.yield_rule_smpc_bypass_enabled,
+                            yield_post_solver_action_filter_mode=vehicle_params.yield_post_solver_action_filter_mode,
+                            yield_supervisor_behavioural_authority_mode=vehicle_params.yield_supervisor_behavioural_authority_mode,
                             completion_s_margin=vehicle_params.completion_s_margin,
                             completion_goal_dist=vehicle_params.completion_goal_dist,
                             completion_lateral_error=vehicle_params.completion_lateral_error,
@@ -755,6 +808,7 @@ class RunIntersectionScenario:
             self.side_of_road = carla_params.side_of_road
             self.traffic_control = carla_params.traffic_control
             self.priority_rule = carla_params.priority_rule
+            self.terminate_on_collision = bool(carla_params.terminate_on_collision)
             self._setup_carla_world(carla_params)
             self._setup_vehicles(vehicle_params_list, carla_params)
             self._setup_collision_sensors()
@@ -1024,6 +1078,18 @@ class RunIntersectionScenario:
         ran_successfully = False
         rows_buffer: List[Dict[str, Any]] = []
         run_error: Optional[str] = None
+        collision_terminated = False
+        collision_termination_step: Optional[int] = None
+        ego_policy_wall_times: List[float] = []
+        ego_policy_active_wall_times: List[float] = []
+        ego_policy_wall_time_nonfinite_count = 0
+        ego_policy_active_wall_time_nonfinite_count = 0
+        ego_policy_wall_time_exception_count = 0
+        prediction_wall_times: List[float] = []
+        prediction_active_wall_times: List[float] = []
+        prediction_wall_time_nonfinite_count = 0
+        prediction_active_wall_time_nonfinite_count = 0
+        prediction_wall_time_exception_count = 0
         log = exp_log.get_logger()
         policy_types = [type(p).__name__ for p in self.vehicle_policies]
         log.info(
@@ -1094,11 +1160,34 @@ class RunIntersectionScenario:
                     snap = tick_data[0]
                     img = tick_data[1] if self.use_camera else None
 
+                    # Collision sensing is an outcome monitor, not a safety
+                    # controller.  In the causal supervisor ablation it ends
+                    # data collection after the factual collision without
+                    # modifying throttle, brake, steering, reference, or risk.
+                    if self.terminate_on_collision and self.collision_events:
+                        collision_terminated = True
+                        collision_termination_step = loop_step
+                        break
+
                     # Handle predictions.
                     self._current_loop_step = loop_step
                     self._current_sim_time = float(snap.elapsed_seconds)
                     self.agent_history.update(snap, self.world)
-                    tvs_positions, tvs_mode_probs, tvs_mode_dists, tvs_valid_pred = self._make_predictions()
+                    prediction_started = time.perf_counter()
+                    prediction_failed = False
+                    try:
+                        tvs_positions, tvs_mode_probs, tvs_mode_dists, tvs_valid_pred = self._make_predictions()
+                    except Exception:
+                        prediction_failed = True
+                        prediction_wall_time_exception_count += 1
+                        raise
+                    finally:
+                        prediction_wall_time_s = time.perf_counter() - prediction_started
+                        if not prediction_failed:
+                            if np.isfinite(prediction_wall_time_s):
+                                prediction_wall_times.append(float(prediction_wall_time_s))
+                            else:
+                                prediction_wall_time_nonfinite_count += 1
                     pred_dict={ "tvs_positions": tvs_positions,
                                 "tvs_mode_dists": tvs_mode_dists,
                                 "tvs_mode_probs": tvs_mode_probs,
@@ -1113,13 +1202,36 @@ class RunIntersectionScenario:
                     ego_feasible = None
                     ego_solve_time = None
                     ego_control = None
+                    ego_policy_run_step_wall_time_s = None
+                    ego_policy_done_after_step = None
                     ego_traffic_light_state = None
                     ego_traffic_light_forced_stop = False
                     target0_control = None
 
                     for idx_act, (act, policy) in enumerate(zip(self.vehicle_actors, self.vehicle_policies)):
                         vehicle_role = self.vehicle_params_list[idx_act].role
-                        policy_result = policy.run_step(pred_dict)
+                        is_ego_policy = idx_act == self.ego_vehicle_idx
+                        policy_started = time.perf_counter() if is_ego_policy else None
+                        policy_failed = False
+                        try:
+                            policy_result = policy.run_step(pred_dict)
+                        except Exception:
+                            policy_failed = True
+                            if is_ego_policy:
+                                ego_policy_wall_time_exception_count += 1
+                            raise
+                        finally:
+                            if is_ego_policy and policy_started is not None:
+                                ego_policy_run_step_wall_time_s = (
+                                    time.perf_counter() - policy_started
+                                )
+                                if not policy_failed:
+                                    if np.isfinite(ego_policy_run_step_wall_time_s):
+                                        ego_policy_wall_times.append(
+                                            float(ego_policy_run_step_wall_time_s)
+                                        )
+                                    else:
+                                        ego_policy_wall_time_nonfinite_count += 1
                         if len(policy_result) == 6:
                             control, z0, u0, is_feasible, solve_time, collision_prob = policy_result
                         else:
@@ -1142,6 +1254,24 @@ class RunIntersectionScenario:
                         if self.tv_vehicle_idxs and idx_act == self.tv_vehicle_idxs[0]:
                             target0_control = control
                         policy_done = policy.done()
+                        if is_ego_policy:
+                            ego_policy_done_after_step = bool(policy_done)
+                            if not policy_done:
+                                if (
+                                    ego_policy_run_step_wall_time_s is not None
+                                    and np.isfinite(ego_policy_run_step_wall_time_s)
+                                ):
+                                    ego_policy_active_wall_times.append(
+                                        float(ego_policy_run_step_wall_time_s)
+                                    )
+                                else:
+                                    ego_policy_active_wall_time_nonfinite_count += 1
+                                if np.isfinite(prediction_wall_time_s):
+                                    prediction_active_wall_times.append(
+                                        float(prediction_wall_time_s)
+                                    )
+                                else:
+                                    prediction_active_wall_time_nonfinite_count += 1
                         if not policy_done:
                             z0 = np.append(t_elapsed, z0) # add the Carla timestamp
                             act_key = f"{act.attributes['role_name']}_{idx_act}"
@@ -1170,6 +1300,18 @@ class RunIntersectionScenario:
                             "sim_time_s": float(t_elapsed),
                             "ego_feasible": ego_feasible,
                             "ego_solve_time_s": ego_solve_time,
+                            "ego_policy_run_step_wall_time_s": (
+                                float(ego_policy_run_step_wall_time_s)
+                                if ego_policy_run_step_wall_time_s is not None
+                                and np.isfinite(ego_policy_run_step_wall_time_s)
+                                else None
+                            ),
+                            "ego_policy_done_after_step": ego_policy_done_after_step,
+                            "prediction_pipeline_wall_time_s": (
+                                float(prediction_wall_time_s)
+                                if np.isfinite(prediction_wall_time_s)
+                                else None
+                            ),
                             "ego_throttle": float(ego_control.throttle),
                             "ego_brake": float(ego_control.brake),
                             "ego_steer": float(ego_control.steer),
@@ -1297,6 +1439,58 @@ class RunIntersectionScenario:
                 ),
                 "collision_event_count": len(getattr(self, "collision_events", [])),
                 "collision_events": list(getattr(self, "collision_events", [])),
+                "terminate_on_collision": bool(
+                    getattr(self, "terminate_on_collision", False)
+                ),
+                "collision_terminated": bool(collision_terminated),
+                "collision_termination_step": collision_termination_step,
+                "termination_reason": (
+                    "native_carla_collision_event"
+                    if collision_terminated
+                    else "completion_or_iteration_limit"
+                ),
+                "server_wall_time_diagnostics": {
+                    "schema_version": "server_wall_time_diagnostics_v1",
+                    "clock": "time.perf_counter",
+                    "server_side_diagnostic_only": True,
+                    "deployment_or_real_time_guarantee": False,
+                    "ego_policy_scope": (
+                        "wall time around ego policy.run_step; includes risk "
+                        "allocation, solver update/solve and supervisor; excludes "
+                        "the shared prediction pipeline and other-agent policies"
+                    ),
+                    "prediction_scope": (
+                        "wall time around the shared _make_predictions pipeline, "
+                        "reported separately from ego policy.run_step"
+                    ),
+                    "active_planning_definition": (
+                        "ego policy.done() is false immediately after run_step"
+                    ),
+                    "ego_policy_all_invocations": _wall_time_summary(
+                        ego_policy_wall_times,
+                        nonfinite_count=ego_policy_wall_time_nonfinite_count,
+                        exception_count=ego_policy_wall_time_exception_count,
+                    ),
+                    "ego_policy_active_planning_invocations": _wall_time_summary(
+                        ego_policy_active_wall_times,
+                        nonfinite_count=(
+                            ego_policy_active_wall_time_nonfinite_count
+                        ),
+                        exception_count=ego_policy_wall_time_exception_count,
+                    ),
+                    "prediction_all_invocations": _wall_time_summary(
+                        prediction_wall_times,
+                        nonfinite_count=prediction_wall_time_nonfinite_count,
+                        exception_count=prediction_wall_time_exception_count,
+                    ),
+                    "prediction_during_ego_active_planning": _wall_time_summary(
+                        prediction_active_wall_times,
+                        nonfinite_count=(
+                            prediction_active_wall_time_nonfinite_count
+                        ),
+                        exception_count=prediction_wall_time_exception_count,
+                    ),
+                },
             }
             try:
                 extra["map"] = self.world.get_map().name

@@ -12,6 +12,14 @@ together with the pretrained \Bzero{} control. Constant-velocity, clipped
 constant-acceleration and train-mean route-prior predictors provide simple
 physical baselines. This design addresses H1 and H2 without test-set tuning.
 
+The frozen test contains 315 overlapping full-horizon windows nested within
+20 rollouts and five held-out ego initialisations (46--50). Headline NLL, ADE
+and FDE point estimates first average within rollout and then equally across
+rollouts. Paired directional inference contributes one effect per held-out
+initialisation; prediction windows are never treated as independent
+replications. These groups are distinct from corrected-R3 groups 101--105 and
+are not pooled with them.
+
 \subsection{Mechanism and fairness diagnostics}
 
 For \Tone{} and \Ttwo{}, valid interaction tokens are zeroed or shuffled while
@@ -58,14 +66,19 @@ excess binary scientific failure.
 The primary efficiency outcome is event-clock completion time. The primary
 continuous safety-margin outcome is minimum separation computed from actual
 actor bounding boxes. Native collision, footprint collision, fixed-geometry
-yield failure and completion failure are binary guards. Solver identity,
-solver failure and supervisor activity audit treatment implementation and
-mechanisms; they are not alternative primary outcomes.
+yield failure and completion failure are binary guards. Solver identity, factual
+controller acceptance/fallback, raw return status and supervisor activity audit
+treatment implementation and mechanisms; they are not alternative primary
+outcomes or certificates of mathematical feasibility.
 
-The five paired initialisation groups are the independent units. We report
+For each formal contrast, the five paired initialisation groups are the
+independent units. We report
 paired directions, mean effects and deterministic cluster-bootstrap intervals.
 Two-sided exact sign-flip tests are adjusted within prospectively declared
-families using Holm's method. With five pairs, the minimum attainable
+families using Holm's method. Their interpretation assumes a symmetric
+distribution of paired cluster effects; treatment labels were not randomly
+assigned within a pair, so they are reported as small-sample sensitivity
+analyses rather than randomisation inference. With five pairs, the minimum attainable
 two-sided exact value is $p=0.0625$; consequently the analysis does not claim
 conventional significance or equivalence.
 
@@ -73,8 +86,77 @@ conventional significance or equivalence.
 
 The R3 analysis contract, outcomes, censoring rules, multiplicity families and
 study-stop rule were frozen before formal outcomes. R3 completed all 80
-prespecified rollouts and passed its integrity gate, so additional large-scale
-CARLA collection is neither required nor selected according to the observed
-direction. Earlier nominal/timing experiments are retained only as secondary
+prespecified rollouts and passed its integrity gate, so no outcome-selected R3
+expansion or R4 matrix is authorised. The sole later CARLA collection is the
+externally requested, prospectively frozen SF4 mechanism ablation; its size and
+stopping rule do not depend on the observed R3 direction. Earlier nominal/timing experiments are retained only as secondary
 mechanism and sensitivity evidence because their control and geometry
 implementation differs; their estimates are never pooled with corrected R3.
+
+\subsection{Supervisor-feedback mechanism amendment}
+\label{sec:supervisor-feedback-amendment}
+
+After R3 and before submission, external supervisor feedback identified four
+specific audit questions.  This amendment does not introduce H5 or use the
+observed H3/H4 direction to enlarge R3.  First, hash-verified R3 telemetry is
+reanalysed post hoc to quantify cautious approach, sustained stop position and
+clearance-to-resumption event clocks.  Here stop--conflict distance is the
+signed frozen-route quantity $s_{\mathrm{conflict}}-s_{\mathrm{ego}}$ from the
+ego actor/reference point, not vehicle-bumper clearance; positive means the
+reference point remains upstream.  Configured designed clearance is
+$s_{\mathrm{conflict}}-s_{\mathrm{stop}}$, while signed stop-line error is
+$s_{\mathrm{stop}}-s_{\mathrm{ego}}$: positive means stopping upstream/short
+of the configured stop point and negative means passing it.  Second, the same raw logs are used to
+separate control contexts without solver telemetry, rule-bypass/no-solve,
+attempted-controller-accepted and attempted-fallback/nonaccepted decisions.
+Finite CasADi solver-time and controller-acceptance denominators contain factual
+solve attempts only; bypass requests, raw return statuses and eventual rollout
+outcomes are reported separately.  The historical logger field named
+``optimal'' is explicitly not treated as mathematical optimality or an MPC
+feasibility certificate.  Third, the withdrawn top-probability/oracle-best-mode
+hit-rate percentage is replaced throughout by rollout-macro frozen
+test NLL/ADE/FDE and paired held-out-initialisation effects.
+
+The sole additional CARLA experiment, SF4, prospectively isolates the complete
+application authority of the corrected reduced-intervention rule-aware
+supervisor.  This is not the historical full-supervisor configuration. Both arms use the same B1
+predictor, estimator, configured rule-SMPC bypass logic, risk interface and
+candidate computations.  With authority \emph{on}, requested reference
+shaping, forced reference linearisation, heading cost, rule-SMPC bypass,
+post-solver action replacement, release/recovery state and next-step control
+history may affect execution.  With authority \emph{off}, those requests are
+retained as shadow telemetry, rule-bypass requests do not skip the solve, and
+the solver/control/state path is neutral except that estimator output may still
+feed the adaptive-risk treatment.  Native collision monitoring remains active
+in both arms.  The matrix is
+\[
+1\ \text{B1 stack}\times2\ \text{risk policies}\times
+2\ \text{authority arms}\times2\ \text{target styles}\times
+10\ \text{new init groups}=80\ \text{rollouts}.
+\]
+Risk compares adaptive with the original fixed-medium control shown in the
+criticised baseline figure; SF4 therefore identifies authority masking for
+this pair, not for the aggressive or conservative fixed operating points.
+Init groups 106--115 form complete treatment blocks.  The primary mechanism estimand is
+the init-level difference in differences
+\[
+ (\text{adaptive}-\text{fixed})_{\mathrm{authority\ on}}-
+ (\text{adaptive}-\text{fixed})_{\mathrm{authority\ off}},
+\]
+after averaging the two target styles.  Failure-penalised completion time uses
+the 30\,s horizon for a native CARLA collision or zero-margin physical
+actual-bounding-box overlap, route-projected fixed-geometry yield failure, or
+non-completion.  Realised-trajectory conflict geometry is sensitivity-only;
+overlap after 0.25\,m inflation per actor is a separate safety-margin
+diagnostic, not a physical-collision label.  Inference
+uses the exact two-sided sign-flip distribution over the ten blocks and a
+10,000-resample block bootstrap.  The sign-flip value is interpreted under a
+symmetric cluster-effect assumption and accompanies the effect estimate and
+interval rather than replacing them.  All adverse scientific outcomes are retained
+and the registered 80-rollout stop rule applies irrespective of effect
+direction.  Zero requested supervisor activity is retained as a scientific
+first-stage result rather than an integrity failure or rerun trigger.  The
+intervention identifies the complete application authority of that corrected
+reduced-intervention supervisor inside the
+frozen stack; prediction, interaction estimation, adaptive-risk allocation,
+SMPC constraints and outcome monitoring remain present in both arms.

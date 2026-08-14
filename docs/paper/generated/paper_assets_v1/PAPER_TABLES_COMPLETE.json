@@ -1,7 +1,28 @@
 {
-  "manifest_sha256": "c50959104779c3ed0443041a8c1d334d9090617dad3ee9fb284ebd28a4f92d2e",
-  "result_count": 210,
+  "artifacts": {
+    "paper_results_manifest.json": "2071479d62e3c0334fade972a710c6986749e3ac1dbf50292b70351e41adbb7d",
+    "paper_tables.md": "22fdbb24e34844904918c6be500d81bc90729f53a906afdc8ec821bd1aacb5e8",
+    "table01_dataset_split_counts.csv": "a2cec4ee1f3d3569873acc00f5dbd08b49fddd34439566d9d437a9b0d5f4875f",
+    "table02_validation_5models_3seeds.csv": "1cf17f2781cba965fb8049780dcde4c36910d37e9c834559132a4b246a617e40",
+    "table03_frozen_test_and_b0_control.csv": "5b5359d1c0a36cdc6c2b4bd5232ef9b8da1b870ff64af95d6dda49175c3d955d",
+    "table04_calibration_aggregate_vs_response_tail.csv": "59ddd71297f7306540b3300e9018cc40e57ee0575b98f5e7a1b0d7c5967da0c5",
+    "table05_day10_predictor_risk_frontier.csv": "126204ee7f6f1d97064f13200e7dcb3fccc0a23524c694a20cc015fdc1f1228f",
+    "table06_timing_robustness_key_contrasts.csv": "1fc4c6e7da5f32808b4b40467ca9dca4f4298e94a0c239fe8ecfce7b38647dc4",
+    "table07_hypothesis_evidence_verdicts.csv": "ec6fb952be0f567b8a6bd5dbce760c8d378cb670e5ebfd66570a609f83d5b142",
+    "table08_threats_to_validity.csv": "a5488c96868d170acbd93c918fcc72e320349d5c195f58b739cd11960baf7777"
+  },
+  "closure_mode": "pre-sf4",
+  "evidence_chain_sha256": {
+    "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_COMPLETE.json": "8e91432c7b7fd9a564262b7c8c311cb2a0cfb33ac2db7d4a92a0e09a334e8d7d",
+    "docs/paper/generated/distinction_v1/11_w1_manuscript/W1_EVIDENCE_TABLES_COMPLETE.json": "94ff480b627dfb3e0d23065d9e6d3cdc1867230527c18bedc5b7bb0e536439f6"
+  },
+  "final_release_eligible": false,
+  "headline_offline_aggregation": "rollout_macro",
+  "manifest_sha256": "2071479d62e3c0334fade972a710c6986749e3ac1dbf50292b70351e41adbb7d",
+  "overlapping_windows_treated_as_independent": false,
+  "result_count": 243,
   "schema_version": "paper_tables_complete_v1",
-  "status": "pass",
+  "status": "partial_pre_sf4",
+  "supervisor_feedback_closure_status": "incomplete",
   "table_count": 8
 }

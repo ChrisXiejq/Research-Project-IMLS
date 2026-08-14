@@ -1,15 +1,24 @@
 # Final route from frozen evidence to dissertation submission
 
 **Status:** active and canonical  
-**Evidence cut:** R3/A2/M1, 2026-08-08  
-**Experiment decision:** large-scale CARLA collection is closed; R4 is `not_run`  
-**Current gate:** Q1 scientific/rubric/PDF gate passed; verified human release
-metadata pending before Q1 can close
+**Evidence cut:** R3/A2/M1 plus the preregistered supervisor-feedback closure,
+2026-08-14
+**Experiment decision:** outcome-selected R3 expansion and R4 remain closed;
+one externally prompted, preregistered SF4 corrected-supervisor application-authority
+on/off audit is the final permitted CARLA matrix
+**Current gate:** SF1--SF5 supervisor-feedback closure, followed by a complete
+Q1 rebuild; verified human release metadata remains pending
 
 This is the sole active route from the completed experiments to the final
 dissertation. [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)
-remains the historical record of how the evidence was produced; it must not be
-used to reopen experiments or redefine hypotheses after seeing R3 outcomes.
+remains the historical record of how the original evidence was produced; it
+must not be used to reopen experiments or redefine hypotheses after seeing R3
+outcomes. The later SF4 amendment is not outcome-selected: it is a bounded
+response to an external supervisor request for a supervisor-on/off ablation
+and does not create a fifth headline hypothesis. It toggles the complete
+behavioural authority of the rule-aware supervisor, including reference,
+linearisation, heading-cost, rule-SMPC-bypass, post-action, release/recovery and
+next-control-history channels; it is not merely a post-solver filter switch.
 
 ## 1. Frozen destination
 
@@ -91,8 +100,9 @@ Write these sections first because the protocol is frozen:
    $5$ new init groups $=80$ rollouts;
 6. event-clock completion, actual-bounding-box separation, binary guards and
    telemetry outcomes;
-7. paired-init analysis, bootstrap intervals, exact sign-flip tests, Holm
-   families and the minimum two-sided exact $p=0.0625$;
+7. paired-init analysis, bootstrap intervals, exact sign-flip sensitivity
+   analyses under a symmetric cluster-effect assumption, Holm families and the
+   minimum two-sided exact $p=0.0625$;
 8. declared estimands: B1 versus B0 is a frozen predictor-stack contrast, not
    a weight-only causal effect.
 
@@ -105,8 +115,8 @@ without reading experiment-day notes.
 Write in the following order:
 
 1. data integrity and physical-baseline context;
-2. H1 frozen offline effect: NLL reduction 0.314 nats/step, ADE reduction
-   1.193 m and FDE reduction 2.555 m versus B0;
+2. H1 frozen offline effect: NLL reduction 0.314 nats/step, rollout-macro ADE
+   reduction 1.183 m and FDE reduction 2.523 m versus B0;
 3. H2: T1 versus B2-M and T2 versus B2-D point in different directions, plus
    the non-parameter-matched limitation;
 4. R3 manipulation validity: B1 wins all five init groups in 40/40
@@ -115,7 +125,8 @@ Write in the following order:
    separation;
 6. H4 corrected dominance: adaptive dominates in 3/12 comparisons;
 7. reliability: no observed binary scientific failures, so those endpoints
-   validate nominal feasibility but do not discriminate treatments;
+   establish nominal binary-outcome reliability but neither per-step MPC
+   feasibility nor treatment discrimination;
 8. legacy active-tail/timing/collision analyses as clearly labelled mechanism
    or sensitivity evidence.
 
@@ -159,9 +170,9 @@ models, the two-second horizon or the frozen stack.
 ### W1.5 — Reproducibility and appendices
 
 Include configuration/provenance tables, split checks, model fairness,
-secondary diagnostics, full R3 contrast tables, evidence-ID instructions and
-the no-more-CARLA decision. Keep supplementary detail after the references as
-required by the TMLR layout.
+secondary diagnostics, full R3/SF4 contrast tables, evidence-ID instructions
+and the post-SF4 study-stop decision. Keep supplementary detail after the
+references as required by the TMLR layout.
 
 **Gate W1.5:** a clean checkout can rebuild the R3 synthesis, M1 evidence audit
 and manuscript PDF without manual result editing.
@@ -197,11 +208,23 @@ unit, number, uncertainty and boundary without opening the code.
 
 ## 4. Actions that are now out of scope
 
-Do not start R4, a larger Transformer, additional maps, extra init groups or
+Do not start R4, a larger Transformer, additional maps, an SF4 extension or
 new outcome definitions for this dissertation. They would be post-outcome
-scope expansion and are not required by the frozen stop rule. They belong in
-Future Work unless Q1 discovers an actual data-integrity or implementation
-error that invalidates an existing headline result.
+scope expansion and are not required by the frozen stop rule. The sole narrow
+exception is the already preregistered SF4 matrix: B1 seed 37, adaptive versus
+the original fixed-medium policy, complete application authority of the corrected
+`reduced_intervention` supervisor
+on versus off, two target styles and init groups 106--115. Both arms retain the
+predictor, estimator, risk interface and SMPC constraints; the off arm always
+solves, keeps supervisor requests as shadow telemetry and permits estimator
+influence only through adaptive risk. It was requested by
+the supervisor after R3 and frozen before those outcomes are observed. Once
+its 80 integrity-valid rollouts are complete, their direction cannot authorise
+further CARLA collection. Zero observed supervisor activity is a bounded
+scientific first-stage result, not an integrity failure or a reason to rerun.
+Cross-map, naturalistic-traffic and larger-sample
+experiments belong in Future Work unless a genuine integrity error invalidates
+an existing headline result.
 
 Do not delete raw results, generated evidence, completion markers, manifests or
 hash records. Documentation can be consolidated; evidence must remain
@@ -209,8 +232,14 @@ auditable.
 
 ## 5. Immediate next action
 
-W0 and W1 are accepted. Q1's scientific, rubric, clean-checkout and PDF gates
-passed on 2026-08-09. The upload-ready release gate remains open only for
-verified candidate/programme metadata, the ELEC0054 GenAI category and the
-module word/page rule. This is not permission to reopen CARLA, select new
-outcomes or alter a verdict because its direction is inconvenient.
+Execute SF1 and SF2 as hash-verified offline analyses of the existing R3 raw
+archive; no CARLA is involved. SF3 is the frozen-test fine-tuning audit and
+must replace the withdrawn percentage metric throughout M1, W1 and the paper
+figures. Run SF4 only after its prospective preflight passes, retain all
+scientific outcomes, and stop after the prespecified 80 rollouts. SF5 then
+rebuilds M1, the manuscript, all figures and Q1 from the new evidence.
+
+The upload-ready release gate additionally remains open for verified
+candidate/programme metadata, the ELEC0054 GenAI category and the module
+word/page rule. None of these gates permits outcome-selected tuning or a
+verdict change because its direction is inconvenient.

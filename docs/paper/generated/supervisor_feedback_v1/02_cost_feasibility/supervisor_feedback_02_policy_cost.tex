@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering\small
+\caption{Preliminary legacy aggregate (not a final solver-latency result). These rollout P95 values include rule-yield bypass/no-solve rows recorded as zero-second successful solves. Final reporting must use the raw attempted-solve-only audit.}
+\label{tab:supervisor-feedback-policy-cost}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Policy & $n$ & Legacy mean P95 (ms) & Legacy median P95 (ms) \\
+\midrule
+Adaptive & 20 & 104.24 & 105.24 \\
+Fixed aggressive & 20 & 91.60 & 90.57 \\
+Fixed medium & 20 & 90.23 & 88.98 \\
+Fixed conservative & 20 & 93.66 & 90.97 \\
+\bottomrule
+\end{tabular}
+\end{table}

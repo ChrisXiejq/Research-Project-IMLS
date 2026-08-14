@@ -1,0 +1,199 @@
+{
+  "schema_version": "sf4_supervisor_behavioural_authority_prereg_v1",
+  "status": "frozen_before_outcomes",
+  "frozen_date": "2026-08-14",
+  "stage": "SF4 prospective corrected-supervisor behavioural-authority causal ablation",
+  "pre_outcome_amendment": {
+    "date": "2026-08-14",
+    "status": "frozen_before_smoke_or_formal_outcomes",
+    "reason": "Pre-run adversarial audit aligned the prospectively analysed behaviour endpoints with supervisor comment 1 by adding cautious-approach progress and signed stop-line error, and completed the excluded smoke from three path-covering cases to the full four-cell risk-by-authority factorial by adding adaptive-on. No smoke or formal treatment outcome was read or used to choose these amendments."
+  },
+  "research_question": "Does the complete application authority of the corrected reduced_intervention rule-aware supervisor mask the closed-loop difference between adaptive risk and the original fixed-medium risk policy? This treatment is not the historical full supervisor configuration.",
+  "scope": {
+    "predictor_stack": "B1 seed 37 with frozen validation-fitted calibration",
+    "map_scenario": "Town05 unsignalised give-way intersection",
+    "risk_policies": ["adaptive_interaction_severity floor_weak", "original fixed_frontier_medium"],
+    "target_styles": ["assertive_constant_speed", "defensive_reactive"],
+    "ego_init_ids": [106, 107, 108, 109, 110, 111, 112, 113, 114, 115],
+    "independent_clusters": 10,
+    "rollouts_per_cluster": 8,
+    "expected_rollouts": 80,
+    "pilot_or_legacy_rollouts_excluded": true,
+    "server_wall_time_instrumentation": "Prospectively enabled before the excluded smoke and all formal outcomes; common instrumentation in both arms"
+  },
+  "treatment": {
+    "factor": "yield_supervisor_behavioural_authority_mode",
+    "levels": {
+      "on": "The rule-aware supervisor may shape the pre-solve reference, force reference linearization, apply lane-entry heading cost, invoke an eligible rule-SMPC bypass, replace the post-solver command, and carry release/recovery effects into reference, control, desired speed and next-step control history.",
+      "off": "The interaction/yield estimator still runs and may feed adaptive-risk allocation; every behavioural channel in the corrected reduced_intervention supervisor is evaluated only in isolated shadow state, while all reference, linearization, cost, rule-SMPC-bypass, command, release/recovery and next-step-control channels remain factual-nominal. Authority-off always attempts the factual SMPC solve."
+    },
+    "only_allowed_behavioral_difference_between_configs": "vehicle_role_overrides.ego.yield_supervisor_behavioural_authority_mode",
+    "common_conditions": {
+      "yield_rule_smpc_bypass_enabled": true,
+      "yield_post_solver_action_filter_mode": "apply",
+      "yield_supervisor_mode": "reduced_intervention",
+      "terminate_on_collision": true
+    },
+    "off_arm_allowed_solver_path": "interaction/yield estimator to adaptive-risk allocation only",
+    "off_arm_disabled_behavioural_channels": [
+      "pre-solve reference shaping",
+      "supervisor-forced reference linearization",
+      "lane-entry heading-cost update",
+      "rule-SMPC bypass",
+      "post-solver action and desired-speed replacement",
+      "release/recovery effects on factual reference and control",
+      "supervisor state effects on factual next-step control_prev"
+    ],
+    "off_arm_shadow_rule": "Supervisor candidates and release/recovery state evolve in a separately persisted shadow state that is hash-audited not to mutate factual solver inputs, commands or next state.",
+    "common_components": [
+      "B1 weights, calibration, raster and interaction-history inputs",
+      "prediction outputs and interaction/yield estimator",
+      "adaptive/fixed risk mapping within each policy",
+      "SMPC implementation and constraints",
+      "target behaviour and completion criteria"
+    ],
+    "collision_monitor": "Native CARLA collision sensors record factual events and terminate collection after collision; they never modify control.",
+    "off_arm_name_boundary": "Behavioural authority off is not deletion of prediction, the interaction estimator, adaptive-risk allocation, collision monitoring or the SMPC safety constraints."
+  },
+  "design": {
+    "factorial": "2 risk policies x 2 behavioural-authority levels x 2 target styles x 10 init clusters",
+    "blocking_unit": "ego_init_id",
+    "execution_order_seed": 20260814,
+    "execution_order_method": "All eight treatment combinations are shuffled independently inside each init block; init blocks remain 106 through 115.",
+    "retry_policy": "Only predefined infrastructure failures may be retried in isolated attempt directories. Collision, controller fallback/non-acceptance, adverse raw solver return status, yield failure and noncompletion are scientific outcomes and are never retried or replaced.",
+    "candidate_init_rule": "Strict continuation of default_rng/PCG64 seed 123 after original 50 speed + 50 offset draws and R3 5 speed + 5 offset draws; then 10 speeds followed by 10 offsets.",
+    "candidate_init_eligibility": "All init106-115 must pass a treatment-free Town05 spawn-only preflight before the first formal rollout. No failed candidate may be replaced or hand-selected.",
+    "excluded_full_stack_smoke": {
+      "count": 4,
+      "excluded_init_id": 105,
+      "target_style": "assertive_constant_speed",
+      "cases": [
+        {"label": "fixed_on", "risk_policy": "fixed_medium", "authority": "on"},
+        {"label": "fixed_off", "risk_policy": "fixed_medium", "authority": "off"},
+        {"label": "adaptive_on", "risk_policy": "adaptive", "authority": "on"},
+        {"label": "adaptive_off", "risk_policy": "adaptive", "authority": "off"}
+      ],
+      "purpose": "Validate runtime, complete authority application and isolation, and both adaptive-risk solver paths before any formal receipt.",
+      "excluded_from_formal_evidence": true,
+      "scientific_outcomes_may_be_read": false,
+      "allowed_decisions": "Only runtime, integrity or manipulation defects may be corrected before refreezing; scientific direction cannot be inspected or used for tuning."
+    }
+  },
+  "primary_estimand": {
+    "name": "risk_by_supervisor_behavioural_authority_interaction_on_failure_penalized_completion_time",
+    "cluster_value": "For init i, first average each treatment cell over assertive/reactive style, then DID_i = (adaptive - fixed_medium)_on - (adaptive - fixed_medium)_off.",
+    "population_estimate": "Arithmetic mean of DID_i over the ten prespecified init clusters.",
+    "outcome": "failure_penalized_completion_time_s",
+    "outcome_definition": "SMPC completion step / 20 Hz; assign the prospective 30.0 s horizon to a native CARLA collision event or zero-margin actual-bounding-box overlap, fixed-geometry yield failure, or noncompletion. A 0.25 m per-actor margin violation is a separate safety-margin diagnostic and is not by itself assigned the failure penalty.",
+    "orientation": "Lower completion time is better. The test is two-sided; sign is interpreted after unblinding and is not a collection rule.",
+    "formula": "mean_i{mean_style[(Y_adaptive,on - Y_fixed,on) - (Y_adaptive,off - Y_fixed,off)]}",
+    "missingness": "The failure penalty makes the primary outcome defined for every integrity-valid rollout. A missing primary value is an integrity failure, not scientific censoring."
+  },
+  "direct_paired_effects": {
+    "risk_effect_authority_on": "mean_i,style(Y_adaptive,on - Y_fixed_medium,on)",
+    "risk_effect_authority_off": "mean_i,style(Y_adaptive,off - Y_fixed_medium,off)",
+    "authority_effect_adaptive": "mean_i,style(Y_adaptive,on - Y_adaptive,off)",
+    "authority_effect_fixed_medium": "mean_i,style(Y_fixed_medium,on - Y_fixed_medium,off)"
+  },
+  "secondary_estimands": {
+    "same_did_and_direct_effects": [
+      "minimum_margin_adjusted_bbox_separation_m",
+      "native_collision_any",
+      "physical_bbox_overlap_any",
+      "margin_adjusted_bbox_violation_any",
+      "adverse_collision_any",
+      "trajectory_inferred_yield_rule_failure",
+      "attempted_fallback_or_nonaccepted_fraction",
+      "ego_policy_wall_time_p50_ms",
+      "ego_policy_wall_time_p95_ms",
+      "ego_policy_wall_time_p99_ms",
+      "ego_policy_wall_time_over_50ms_fraction",
+      "ego_policy_wall_time_over_200ms_fraction",
+      "ego_policy_wall_time_over_500ms_fraction",
+      "prediction_wall_time_p50_ms",
+      "prediction_wall_time_p95_ms",
+      "prediction_wall_time_p99_ms",
+      "supervisor_candidate_requested_fraction",
+      "supervisor_authority_applied_fraction",
+      "candidate_minus_nominal_accel_abs_mean_mps2",
+      "actual_minus_nominal_accel_abs_mean_mps2",
+      "cautious_approach_progress_m",
+      "first_stop_distance_to_conflict_m",
+      "first_stop_distance_to_designed_stop_m",
+      "stopped_duration_s",
+      "nominal_conflict_clear_to_actual_path_release_s",
+      "actual_path_release_to_sustained_resume_s",
+      "buffered_conflict_clear_to_sustained_resume_s"
+    ],
+    "controller_acceptance_denominator": "attempted_fallback_or_nonaccepted_fraction is controller fallback/non-acceptance divided by factual SMPC attempts; effective rule-SMPC-bypass steps are excluded from both numerator and denominator. Controller acceptance is the implementation's applied.is_opt/solver.optimal command-acceptance decision (which may include accepted SUBOPTIMAL solutions), not strict optimizer optimality or feasibility. Raw return-status counts, missing-status counts, bypass requested/applied and factual-attempt counts are reported separately.",
+    "behaviour_endpoint_definitions": {
+      "cautious_approach_progress_m": "Signed progress along the frozen ego route from first registered yield entry to the first sustained stop. Prefer stop ego_route_s minus entry ego_route_s; if those coordinates are unavailable, use entry minus stop ego_distance_to_conflict. Positive means the ego reference point continued toward the conflict after detection, but is not automatically beneficial.",
+      "first_stop_distance_to_conflict_m": "Signed frozen-route distance conflict_s minus ego_route_s at the first sustained stop, measured from the ego actor/reference point rather than the front bumper. Positive is upstream of the conflict point.",
+      "first_stop_distance_to_designed_stop_m": "Signed frozen-route stop-line error stop_s minus ego_route_s at the first sustained stop. Positive means upstream/short of the configured stop point; negative means the reference point passed it. If ego_distance_to_stop is unavailable, reconstruct as first_stop_distance_to_conflict_m minus stop_clearance.",
+      "stopped_duration_s": "Elapsed time from first sustained stop to sustained resume. It includes necessary pre-release waiting and post-release response; the separately reported release clocks decompose it.",
+      "missingness": "All four endpoints require a registered give-way entry and an observed path-release boundary. The stop search is half-open [entry, release); missing entry, release, stop or resume remains explicitly censored and is never imputed."
+    },
+    "collision_and_separation_definitions": {
+      "native_collision_any": "Any factual native CARLA collision callback recorded by the hardened all-moving-actor monitor.",
+      "physical_bbox_overlap_any": "Any overlap in offline replay of the actual CARLA bounding boxes with 0.0 m inflation per actor.",
+      "margin_adjusted_bbox_violation_any": "Any overlap after inflating each actual CARLA bounding box by the registered 0.25 m safety margin; this is not relabelled as physical collision.",
+      "minimum_margin_adjusted_bbox_separation_m": "Minimum oriented-box separation after the registered 0.25 m inflation per actor; actual blueprint dimensions and local bounding-box poses are used.",
+      "adverse_collision_any": "Union of native_collision_any and physical_bbox_overlap_any; this union, not the 0.25 m safety-margin violation alone, receives the primary completion-time failure penalty."
+    },
+    "yield_failure_definition": "The primary failure penalty uses exactly one route-defined fixed_geometry_yield_rules outcome from frozen controller route projections and the 4.0 m radius. A missing/unknown or false target_clears_before_ego_enters is a penalized failure. The realised-trajectory-inferred yield_rules result is reported only as trajectory_inferred_yield_rule_failure sensitivity and never defines the primary endpoint.",
+    "computational_wall_time": {
+      "clock": "time.perf_counter",
+      "raw_logging": "Every scenario-loop invocation records ego_policy_run_step_wall_time_s, ego_policy_done_after_step and prediction_pipeline_wall_time_s in scenario_steps.csv; exact aggregate diagnostics are copied into scenario_run_summary.json.",
+      "ego_policy_scope": "Wall time around ego policy.run_step. It includes interaction/risk allocation, solver update and solve, every supervisor authority channel, action arbitration and policy-local telemetry. It excludes the common prediction pipeline, other-agent policies, CARLA tick wait, rendering and post-processing.",
+      "analysis_scope": "Within each rollout, summarize invocations for which ego policy.done() remains false after run_step, excluding completion-tail calls that do not execute the planning pipeline.",
+      "prediction_scope": "The common _make_predictions pipeline is timed and reported separately over the same active-planning steps.",
+      "rollout_statistics": ["P50", "P95", "P99", "fraction >50 ms", "fraction >200 ms", "fraction >500 ms"],
+      "paired_analysis": "Apply the same init-cluster blocking, DID and four direct paired effects to each wall-time statistic. Simulation steps are never treated as independent observations.",
+      "failure_accounting": "Non-finite samples and timing exceptions are reported separately and never silently removed or imputed. Missing timing may make that exploratory timing contrast descriptive-only; it does not invalidate the primary outcome or permit a replacement rollout.",
+      "claim_boundary": "Machine- and load-specific server-side diagnostic only; not an embedded deployment benchmark, deadline guarantee or claim of real-time feasibility."
+    },
+    "behavior_thresholds": {
+      "stop_speed_mps": 0.15,
+      "stop_hysteresis_consecutive_debug_steps": 3,
+      "give_way_stop_search_interval": "closed-open [yield entry, actual path release). If entry or release is unobserved, the stop clock is censored and not searched; a later goal/terminal stop cannot be reclassified as a give-way stop",
+      "approach_progress_orientation": "Positive cautious_approach_progress_m means the ego actor/reference point progressed toward the conflict after yield entry; direction is reported without automatically labelling it beneficial or harmful.",
+      "stop_geometry_orientation": "first_stop_distance_to_conflict_m = conflict_s - ego_route_s and first_stop_distance_to_designed_stop_m = stop_s - ego_route_s along the frozen route. Both use the actor/reference point, not bumper clearance; positive means upstream.",
+      "resume_speed_mps": 0.8,
+      "resume_hysteresis_consecutive_debug_steps": 3,
+      "nominal_conflict_clear_signal": "yield_stop_supervisor.target_nominally_cleared_conflict first true after yield entry",
+      "actual_path_release_signal": "first true of raw_reduced_clear_path_release, reduced_clear_path_release, recovery.clear_path_release_start, or phase=released_recovery after yield entry",
+      "buffered_conflict_clear_signal": "yield_stop_supervisor.target_cleared_conflict first true after yield entry",
+      "clearance_clock_noninterchangeability": "The three event clocks are separately reported and may not be substituted.",
+      "bbox_inflation_margin_m_per_actor": 0.25
+    }
+  },
+  "inference": {
+    "independent_unit": "ego_init_id",
+    "primary_test": "Two-sided exact sign-flip sensitivity value over 10 cluster DID values using all 2^10 sign assignments; interpretation requires a symmetric cluster-effect distribution and is not treatment-randomisation inference.",
+    "minimum_attainable_two_sided_p": 0.001953125,
+    "uncertainty": "Percentile cluster bootstrap over init IDs, resampling all within-init treatments together.",
+    "bootstrap_replicates": 10000,
+    "bootstrap_seed": 20260814,
+    "confidence_interval": "2.5th and 97.5th percentiles",
+    "multiplicity": "The completion-time DID is the sole primary test. Direct paired effects and secondary outcomes are labelled exploratory and reported with effect sizes and intervals.",
+    "conventional_asymptotic_independence_claims_prohibited": true
+  },
+  "implementation_manipulation_gate": [
+    "All 80 integrity-valid receipts bind immutable raw artifacts and valid attempt provenance.",
+    "Every step reports the identically configured bypass candidate. Authority-on applies an eligible request; authority-off logs the shadow request but never bypasses the factual SMPC solve.",
+    "Authority-on applies each requested behavioural channel and its post-solver actual command equals the candidate.",
+    "Authority-off hash-audits factual reference, linearization, heading cost, action, desired speed, release/recovery state and next control history against their nominal values.",
+    "Authority-off shadow state is isolated; adaptive-risk allocation is the only permitted estimator-to-solver path.",
+    "Effective configs differ behaviourally only at yield_supervisor_behavioural_authority_mode.",
+    "All collision and other adverse scientific outcomes remain included.",
+    "Every scenario step exposes the common prospective wall-time columns and the raw samples exactly reconcile with the summary counts and quantiles."
+  ],
+  "observed_first_stage_activity": {
+    "reporting": "Report requested frequency and intensity separately for upstream reference, heading, forced-linearization and post-action channels by authority level, risk policy, target style and risk-by-style block.",
+    "status_values": ["active", "inactive_scientific_outcome"],
+    "zero_activity_rule": "Zero requested activity in any cell, block or the entire matrix is retained as a scientific outcome. It is not an integrity failure and cannot trigger rerunning, replacement or tuning.",
+    "inactive_claim_limit": "If the full matrix is inactive, report that authority assignment was implemented but no data identify masking conditional on an activated intervention; do not claim evidence for or against supervisor masking under activation."
+  },
+  "stopping_rule": "Stop after the 80 prespecified integrity-valid treatment keys have accepted raw receipts and the offline analysis receipt verifies. Scientific direction, p-values, collision incidence, intervention activity or apparent support never trigger extra or replacement rollouts.",
+  "claim_boundary": "This identifies assignment to the complete application authority of the corrected reduced_intervention rule-aware supervisor within the frozen B1/estimator/risk/SMPC stack; it is not the historical full supervisor configuration. It does not identify deletion of prediction, adaptive risk, the interaction estimator, collision monitoring or SMPC constraints. Server wall-time results are platform-specific diagnostics rather than deployment or real-time guarantees."
+}

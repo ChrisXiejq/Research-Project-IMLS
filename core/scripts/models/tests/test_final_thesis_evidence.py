@@ -16,14 +16,18 @@ class FinalThesisEvidenceAuditTest(unittest.TestCase):
     def test_final_evidence_gates_and_warnings(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "audit.json"
-            result = build(self.repo, output)
-            self.assertEqual(result["status"], "pass")
+            result = build(self.repo, output, closure_mode="pre-sf4")
+            self.assertEqual(result["status"], "partial_pre_sf4")
             self.assertEqual(result["check_count"], 14)
             self.assertEqual(result["failure_count"], 0)
             self.assertEqual(result["warning_count"], 8)
-            self.assertFalse(result["new_formal_experiment_required"])
+            self.assertTrue(result["new_formal_experiment_required"])
             self.assertTrue(all(item["status"] == "pass" for item in result["checks"]))
             self.assertEqual(json.loads(output.read_text()), result)
+
+            final = build(self.repo, Path(directory) / "final.json")
+            self.assertEqual(final["status"], "fail")
+            self.assertFalse(final["final_release_eligible"])
 
 
 if __name__ == "__main__":

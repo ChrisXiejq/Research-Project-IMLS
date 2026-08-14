@@ -39,7 +39,13 @@ sys.path.insert(0, str(REPO_DIR))
 
 import finalize_r3_offline as finalizer  # noqa: E402
 from core.scripts.evaluation.closed_loop_metrics import load_scenario_result  # noqa: E402
-from r3_attempt_manager import RAW_REQUIRED_JSON, RAW_REQUIRED_JSONL, raw_evidence_sha256  # noqa: E402
+from r3_attempt_manager import (  # noqa: E402
+    RAW_REQUIRED_JSON,
+    RAW_REQUIRED_JSONL,
+    raw_evidence_sha256,
+    refresh_ledger,
+    write_receipt,
+)
 
 
 def write_json(path: Path, payload: dict) -> None:
@@ -132,18 +138,38 @@ class OfflineFinalizerGuardTest(unittest.TestCase):
             with (scenario / "scenario_result.pkl").open("wb") as handle:
                 pickle.dump({"ego_0": trajectory_payload()}, handle)
             (scenario / "scenario_steps.csv").write_text("step,value\n0,1\n", encoding="utf-8")
-            summary = scenario / "scenario_run_summary.json"
-            receipt = {
-                "schema_version": "r3_rollout_complete_v2",
-                "status": "pass",
-                "cell_id": cell_id,
-                "ego_init_id": init_id,
-                "accepted_attempt": 1,
-                "scenario_dir": scenario.relative_to(cell).as_posix(),
-                "raw_evidence_sha256": raw_evidence_sha256(scenario),
-                "scenario_summary_sha256": hashlib.sha256(summary.read_bytes()).hexdigest(),
-            }
-            write_json(cell / f"R3_ROLLOUT_{init_id}_COMPLETE.json", receipt)
+            attempt = cell / "_attempts" / f"init_{init_id}" / "attempt_001"
+            started = attempt / "attempt_started.json"
+            record = attempt / "attempt_record.json"
+            write_json(
+                started,
+                {"attempt": 1, "cell_id": cell_id, "ego_init_id": init_id},
+            )
+            write_json(
+                record,
+                {
+                    "attempt": 1,
+                    "cell_id": cell_id,
+                    "ego_init_id": init_id,
+                    "accepted": True,
+                    "classification": "accepted",
+                    "retry_allowed": False,
+                    "raw_evidence_sha256_before_promotion": raw_evidence_sha256(
+                        scenario
+                    ),
+                },
+            )
+            ledger = refresh_ledger(cell, cell_id, init_id, max_attempts=3)
+            write_receipt(
+                cell_dir=cell,
+                cell_id=cell_id,
+                init_id=init_id,
+                scenario_dir=scenario,
+                attempt_number=1,
+                record_path=record,
+                ledger_path=ledger,
+                recovery=False,
+            )
             contract = {
                 "git_commit": "a" * 40,
                 "execution_order": [{"cell_id": cell_id, "ego_init_id": init_id}],

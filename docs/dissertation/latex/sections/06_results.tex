@@ -2,11 +2,14 @@
 \label{sec:results}
 
 Results follow H1--H4 and separate corrected primary evidence from legacy
-mechanism diagnostics.
+mechanism diagnostics. The targeted analyses arising from supervisor feedback
+are reported through one hash-bound insertion after the corresponding raw-data,
+manipulation and provenance gates; they do not create a fifth headline
+hypothesis or reopen outcome-selected tuning.
 
 \subsection{Data and protocol integrity}
 
-% SOURCE: distinction_v1/05_dataset_audit and 06_split_balance
+% SOURCE: day7/day7_split_audit.json and distinction_v1/06_split_balance
 All 200 planned prediction-data rollouts completed. Raw and merged manifests
 agree on 11,230 samples, rollout groups are disjoint across the 160/20/20
 train/validation/test split, no duplicate keys or normalisation leakage are
@@ -15,25 +18,45 @@ difference is 0.208. The corrected R3 matrix subsequently completed all 80/80
 prespecified rollouts and passed its analysis, integrity, stop and archive
 gates.
 
-\subsection{H1: simple task adaptation produces the reliable offline gain}
+\subsection{H1: task adaptation gives a directionally consistent in-distribution gain}
 
 % EVIDENCE: H1_B1_MINUS_B0_TEST_NLL, H1_B1_MINUS_B0_TEST_ADE,
 % H1_B1_MINUS_B0_TEST_FDE
-% SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
+% SOURCE: supervisor_feedback_v1/03_finetune_audit/FINETUNE_AUDIT_MANIFEST.json
 Across the three validation seeds, median macro NLL ranks \Bone{} first,
 followed by \BtwoD{}, \Ttwo{}, \Tone{} and \BtwoM{}. Relative to pretrained
-\Bzero{} on the frozen test, \Bone{} reduces top-1 ADE by 1.193~m, FDE by
-2.555~m and uncalibrated rollout-macro NLL by 0.314~nats/step. It also improves
-ADE and FDE relative to constant velocity, clipped constant acceleration and
-the train-mean prior in all five test initialisation groups. H1 is therefore
-supported within the frozen Town05 distribution.
+\Bzero{} on the frozen test, \Bone{} reduces rollout-macro top-1 ADE by
+1.183~m, FDE by 2.523~m and uncalibrated NLL by 0.314~nats/step. All three
+paired effects favour \Bone{} in each of the five held-out initialisation
+groups (the minimum attainable two-sided exact sign-flip value is
+$p=0.0625$). At that independent-unit level, the init-macro mean
+\Bone{}--\Bzero{} effects are $-0.316$~nats/step NLL, $-1.189$~m ADE and
+$-2.544$~m FDE. It also improves ADE and FDE relative to constant velocity,
+clipped constant acceleration and the train-mean prior in all five groups.
+H1 is therefore supported within the frozen Town05 distribution.
+
+\input{../../paper/generated/supervisor_feedback_v1/03_finetune_audit/finetune_b0_b1_rollout_macro.tex}
+
+An earlier progress report described a rise from $0.98\%$ to $100\%$.  That
+number was the fraction of prediction windows for which the top-probability
+mode matched the oracle-best mode; it was not a thresholded trajectory-accuracy
+endpoint.  We therefore withdraw the number: it is not evidence for the
+fine-tuned model's trajectory quality.  Its interpretation was particularly
+fragile because the split was narrow, the oracle-best mode was concentrated,
+and overlapping-window aggregation made many correlated windows look like a
+large headline sample.  The replacement above uses frozen-test NLL, ADE and
+FDE with a common rollout-macro aggregation for \Bzero{} and \Bone{}, and the
+five held-out initialisations as independent paired units.  This correction
+does not require retraining or reopening model selection.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.98\linewidth]{figure03_offline_model_comparison.png}
   \caption{Frozen offline model comparison. Points show validation seeds and
   horizontal segments their medians; test ADE/FDE include the pretrained
-  \Bzero{} control. The figure is generated from the frozen offline package.}
+  \Bzero{} control. Every NLL/ADE/FDE value uses rollout-macro aggregation;
+  overlapping windows are not independent replications. The figure is
+  generated from the frozen offline package.}
   \label{fig:offline}
 \end{figure}
 
@@ -64,9 +87,15 @@ inside R3; they are not an independent offline benchmark.
 The adaptive solver is used on every audited step in all four adaptive cells,
 all 20 adaptive rollouts vary within rollout, and fixed settings are stable
 across initialisations. No native collision, footprint collision,
-fixed-geometry yield failure or completion failure is observed. These zero
-counts establish nominal feasibility for the observed matrix but cannot prove
-zero population risk or treatment equivalence.
+fixed-geometry yield failure or completion failure is observed. All rollouts
+therefore completed without an observed collision or yield failure. Historical
+debug telemetry nevertheless contains non-zero logger-unaccepted rows; these
+are reclassified below rather than being called infeasible solves. Rollout
+completion is not a per-step MPC feasibility certificate. The zero
+binary-outcome counts cannot prove zero population risk or treatment
+equivalence.
+
+\input{../../paper/generated/supervisor_feedback_v1/paper_integration/supervisor_feedback_final_results.tex}
 
 \subsection{H3: prediction gain does not transfer uniformly}
 
@@ -148,7 +177,7 @@ as a context-dependent operating point rather than a universal replacement.
     \toprule
     ID & Hypothesis & Verdict & Boundary \\
     \midrule
-    H1 & Task adaptation improves in-distribution prediction & Supported & Frozen Town05 distribution \\
+    H1 & Task adaptation improves in-distribution prediction & Supported with boundary & Frozen Town05 distribution \\
     H2 & Transformer adapters add consistent value & Not supported & Tested configurations/budget \\
     H3 & Offline gain transfers consistently to closed loop & 2/8 cells & Universal claim not supported \\
     H4 & Adaptive risk dominates fixed controls & 3/12 comparisons & Universal dominance not supported \\
@@ -162,9 +191,12 @@ Input diagnostics characterise \Bone{} as raster-dominant: raster shuffling
 increases ADE by approximately 0.270--0.293~m across seeds, whereas target
 history shuffling changes aggregate ADE by only about 0.00008~m on average.
 Legacy response-active analysis also shows that global calibration can improve
-aggregate NLL while worsening a very small shifted active tail (15 windows,
-six rollouts and three initialisation groups). Earlier arrival-timing logs show
-that separation, solver feasibility and supervisor activity change together,
+aggregate NLL while worsening a very small shifted active tail. In that subset,
+\Bone{} uncalibrated NLL is 2.076 versus 2.472 for \Bzero{}, but
+validation-frozen calibration yields 8.573 versus 2.959. The subset contains
+only 15 overlapping windows from six rollouts and three initialisation groups,
+so it is diagnostic rather than confirmatory. Earlier arrival-timing logs show
+that separation, logger acceptance/fallback status and supervisor activity change together,
 so the supervisor cannot be identified as the single cause. Finally, a
 collision-filtered 15-run validation sensitivity preserves the architecture
 ranking. These analyses explain boundaries and alternative explanations; they

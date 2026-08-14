@@ -37,8 +37,8 @@ R3 first establishes that the deployed manipulation is real: B1 improves all
 40/40 in-loop prediction checks. The failure of uniform H3 translation cannot
 therefore be dismissed as a missing predictor difference. The planner consumes
 a calibrated distribution rather than ADE alone; risk allocation transforms
-that distribution into constraints, solver feasibility limits candidate
-motion, and the supervisor can change execution. Because B1 and B0 also use
+that distribution into constraints, controller acceptance/fallback and active
+constraints limit candidate motion, and the supervisor can change execution. Because B1 and B0 also use
 different frozen calibration, the valid estimand is the deployed predictor
 stack rather than neural weights alone.
 
@@ -76,6 +76,10 @@ results depend on their modelling assumptions \citep{ren2025recursively}; the
 finite CARLA comparison instead asks which executed operating point is preferred
 under the shared corrected controller and supervisor.
 
+\subsection{What corrected-supervisor application authority explains}
+
+\input{../../paper/generated/supervisor_feedback_v1/paper_integration/supervisor_feedback_final_discussion.tex}
+
 \subsection{Threats to validity}
 
 \begin{table}[t]
@@ -87,13 +91,15 @@ under the shared corrected controller and supervisor.
     \toprule
     Threat & Mitigation & Remaining boundary \\
     \midrule
-    Five independent init groups & Paired effects, cluster intervals and exact tests & Minimum two-sided exact $p=0.0625$ \\
+    315 overlapping offline windows & Rollout-macro points and five init-level paired effects & Effective inferential unit is five test init groups; minimum exact $p=0.0625$ \\
+    Five corrected-R3 init groups & Paired effects, cluster intervals and exact tests & Minimum two-sided exact $p=0.0625$ \\
     Single map and junction & Predictor, policy and target-style factorial & No cross-map or real-road claim \\
     Configuration fairness & Two matched adapter scopes and full parameter/epoch audit & No pure architecture causality \\
     Predictor calibration differs & Stack-level estimand declared before R3 & No weight-only B1 effect \\
-    Coupled solver/supervisor & Corrected contracts and mechanism telemetry & No single-component attribution \\
-    Zero observed binary failures & Continuous actual-bbox separation reported & No zero-risk or equivalence claim \\
-    Very small active tail & Separate labelled legacy diagnostic & No stable tail-population estimate \\
+    Coupled solver/supervisor & Preregistered corrected-supervisor application-authority on/off SF4 intervention & The DID covers adaptive versus the criticised fixed-medium pair only; estimator-to-risk path and SMPC constraints remain in both arms \\
+    Solver bypass and acceptance & Raw classification; factual attempts alone define finite CasADi timing and controller acceptance; bypass and raw status are separate & Acceptance is not mathematical feasibility; CasADi time is not full-stack deployment latency \\
+    Zero observed binary failures & Native callbacks, zero-margin physical overlap and 0.25-m-per-actor margin-adjusted separation are reported separately & No zero-risk or equivalence claim \\
+    Very small active tail & Separate labelled legacy diagnostic & 15 windows/six rollouts/three groups; no stable tail estimate \\
     Legacy implementation differs & Corrected R3 is primary; no pooling & Legacy evidence is mechanism-only \\
     \bottomrule
   \end{tabular}

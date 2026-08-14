@@ -1,7 +1,22 @@
 {
+  "artifacts": {
+    "figure01_research_workflow.svg": "caca67e46d6ba7fac7e7e4be58940627b329d60d78f70e8851a2ecf0ca615e76",
+    "figure02_model_architecture.svg": "e0a78b234969d7500de4602a19d3530cb8e70c20afc9d9c41daf5c2b84e4bd7b",
+    "figure03_offline_model_comparison.svg": "484a7aead21288b1f999e8f10b89f743935f8993f0d311415c73c95ded5eacee",
+    "figure04_calibration_tail.svg": "70ce6ead8e057b1df5928516ba253e879fd4fc0e877901ce304f6a3e9ab4d18b",
+    "figure05_day10_frontier.svg": "37f8d794adf1fc047cbb52c0cabae0f7e94092d35afa2d0b3f369fd8c8f0d5cd",
+    "figure06_predictor_effect_moderation.svg": "ad975573ba1870360792c5d147bedefaa302a0ed3b4066607c325cdeb9528c5e",
+    "figure07_arrival_timing_mechanisms.svg": "8b84d74a37b87138a69c311a042c0043544b1040127abe06c041f5d9ce7be226",
+    "figure08_deployment_chain.svg": "2c7368b07f1fd83c2b732948f9596c4ba892d1fed1e8bae30086a59184666f64",
+    "figure_captions.md": "5de432eb3daa53fc4ee6b3856d8d97d9b32b22821a4a487e33db07cf7e44aafc",
+    "paper_figures_manifest.json": "175884e9dc29aab24f82a35428f17eb54ced69d1458bd999372602efd0c684c5"
+  },
+  "closure_mode": "pre-sf4",
   "figure_count": 8,
-  "figures_manifest_sha256": "c99895c2f947d0e702d8b1a2336ea6d1b639f6e210ba242b130ebb876bcb42f5",
+  "figures_manifest_sha256": "175884e9dc29aab24f82a35428f17eb54ced69d1458bd999372602efd0c684c5",
+  "final_release_eligible": false,
   "schema_version": "paper_figures_complete_v1",
-  "source_results_manifest_sha256": "c50959104779c3ed0443041a8c1d334d9090617dad3ee9fb284ebd28a4f92d2e",
-  "status": "pass"
+  "source_results_manifest_sha256": "2071479d62e3c0334fade972a710c6986749e3ac1dbf50292b70351e41adbb7d",
+  "status": "partial_pre_sf4",
+  "supervisor_feedback_closure_status": "incomplete"
 }

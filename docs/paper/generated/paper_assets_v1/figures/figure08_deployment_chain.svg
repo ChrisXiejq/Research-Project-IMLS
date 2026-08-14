@@ -23,8 +23,8 @@
 <rect x="525.00" y="190.00" width="165.00" height="180.00" rx="12" fill="#FFFFFF" stroke="#17845B" stroke-width="2"/>
 <rect x="525.00" y="190.00" width="165.00" height="42.00" rx="12" fill="#17845B" stroke="#17845B" stroke-width="0"/>
 <text x="607.50" y="218.00" class="panel" text-anchor="middle" fill="#FFFFFF">Trajectory solver</text>
-<text x="607.50" y="278.00" class="label" text-anchor="middle">Feasibility and</text>
-<text x="607.50" y="306.00" class="label" text-anchor="middle">failure fraction</text>
+<text x="607.50" y="278.00" class="label" text-anchor="middle">Acceptance and</text>
+<text x="607.50" y="306.00" class="label" text-anchor="middle">fallback fraction</text>
 <line x1="695.00" y1="280.00" x2="757.00" y2="280.00" stroke="#5B6773" stroke-width="2" marker-end="url(#arrow)"/>
 <rect x="765.00" y="190.00" width="165.00" height="180.00" rx="12" fill="#FFFFFF" stroke="#8A55A3" stroke-width="2"/>
 <rect x="765.00" y="190.00" width="165.00" height="42.00" rx="12" fill="#8A55A3" stroke="#8A55A3" stroke-width="0"/>

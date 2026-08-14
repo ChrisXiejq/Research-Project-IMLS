@@ -4,7 +4,7 @@ This directory is the canonical source for thesis numbers, tables and figures.
 
 ## Contents
 
-- `paper_results_manifest.json`: 210 stable result IDs with source SHA-256, locator, unit, aggregation unit and evidence role;
+- `paper_results_manifest.json`: stable result IDs with source SHA-256, locator, unit, aggregation unit and evidence role (the current count is recorded in the manifest and completion receipt);
 - `table01`–`table08`: canonical thesis tables;
 - `figures/figure01`–`figure08`: editable SVG and high-resolution PNG figures;
 - `figures/figure_captions.md`: canonical captions and interpretation boundaries;

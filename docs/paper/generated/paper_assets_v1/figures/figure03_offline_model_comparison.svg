@@ -58,37 +58,37 @@
 <text x="989.66" y="585.00" class="tiny" text-anchor="middle">2.0</text>
 <line x1="1062.07" y1="135.00" x2="1062.07" y2="565.00" stroke="#D7DEE5" stroke-width="1"/>
 <text x="1062.07" y="585.00" class="tiny" text-anchor="middle">2.5</text>
-<line x1="888.10" y1="175.00" x2="1088.79" y2="175.00" stroke="#7A8793" stroke-width="3"/>
-<circle cx="888.10" cy="175.00" r="6.00" fill="#7A8793" stroke="#FFFFFF" stroke-width="1.5"/>
-<polygon points="1088.79,169.00 1082.79,181.00 1094.79,181.00" fill="#7A8793" stroke="#17212B" stroke-width="1"/>
+<line x1="885.77" y1="175.00" x2="1082.97" y2="175.00" stroke="#7A8793" stroke-width="3"/>
+<circle cx="885.77" cy="175.00" r="6.00" fill="#7A8793" stroke="#FFFFFF" stroke-width="1.5"/>
+<polygon points="1082.97,169.00 1076.97,181.00 1088.97,181.00" fill="#7A8793" stroke="#17212B" stroke-width="1"/>
 <text x="682.00" y="179.00" class="label" text-anchor="end">B0</text>
-<text x="1098.79" y="179.00" class="tiny" text-anchor="start">1.30/2.68</text>
-<line x1="715.33" y1="238.00" x2="718.71" y2="238.00" stroke="#2474B5" stroke-width="3"/>
-<circle cx="715.33" cy="238.00" r="6.00" fill="#2474B5" stroke="#FFFFFF" stroke-width="1.5"/>
-<polygon points="718.71,232.00 712.71,244.00 724.71,244.00" fill="#2474B5" stroke="#17212B" stroke-width="1"/>
+<text x="1092.97" y="179.00" class="tiny" text-anchor="start">1.28/2.64</text>
+<line x1="714.43" y1="238.00" x2="717.51" y2="238.00" stroke="#2474B5" stroke-width="3"/>
+<circle cx="714.43" cy="238.00" r="6.00" fill="#2474B5" stroke="#FFFFFF" stroke-width="1.5"/>
+<polygon points="717.51,232.00 711.51,244.00 723.51,244.00" fill="#2474B5" stroke="#17212B" stroke-width="1"/>
 <text x="682.00" y="242.00" class="label" text-anchor="end">B1</text>
-<text x="728.71" y="242.00" class="tiny" text-anchor="start">0.11/0.13</text>
-<line x1="732.66" y1="301.00" x2="755.49" y2="301.00" stroke="#17845B" stroke-width="3"/>
-<circle cx="732.66" cy="301.00" r="6.00" fill="#17845B" stroke="#FFFFFF" stroke-width="1.5"/>
-<polygon points="755.49,295.00 749.49,307.00 761.49,307.00" fill="#17845B" stroke="#17212B" stroke-width="1"/>
+<text x="727.51" y="242.00" class="tiny" text-anchor="start">0.10/0.12</text>
+<line x1="730.46" y1="301.00" x2="750.90" y2="301.00" stroke="#17845B" stroke-width="3"/>
+<circle cx="730.46" cy="301.00" r="6.00" fill="#17845B" stroke="#FFFFFF" stroke-width="1.5"/>
+<polygon points="750.90,295.00 744.90,307.00 756.90,307.00" fill="#17845B" stroke="#17212B" stroke-width="1"/>
 <text x="682.00" y="305.00" class="label" text-anchor="end">B2-D</text>
-<text x="765.49" y="305.00" class="tiny" text-anchor="start">0.23/0.38</text>
-<line x1="735.58" y1="364.00" x2="758.32" y2="364.00" stroke="#C44E52" stroke-width="3"/>
-<circle cx="735.58" cy="364.00" r="6.00" fill="#C44E52" stroke="#FFFFFF" stroke-width="1.5"/>
-<polygon points="758.32,358.00 752.32,370.00 764.32,370.00" fill="#C44E52" stroke="#17212B" stroke-width="1"/>
+<text x="760.90" y="305.00" class="tiny" text-anchor="start">0.21/0.35</text>
+<line x1="733.47" y1="364.00" x2="754.20" y2="364.00" stroke="#C44E52" stroke-width="3"/>
+<circle cx="733.47" cy="364.00" r="6.00" fill="#C44E52" stroke="#FFFFFF" stroke-width="1.5"/>
+<polygon points="754.20,358.00 748.20,370.00 760.20,370.00" fill="#C44E52" stroke="#17212B" stroke-width="1"/>
 <text x="682.00" y="368.00" class="label" text-anchor="end">T2</text>
-<text x="768.32" y="368.00" class="tiny" text-anchor="start">0.25/0.40</text>
-<line x1="834.35" y1="427.00" x2="946.82" y2="427.00" stroke="#8A55A3" stroke-width="3"/>
-<circle cx="834.35" cy="427.00" r="6.00" fill="#8A55A3" stroke="#FFFFFF" stroke-width="1.5"/>
-<polygon points="946.82,421.00 940.82,433.00 952.82,433.00" fill="#8A55A3" stroke="#17212B" stroke-width="1"/>
+<text x="764.20" y="368.00" class="tiny" text-anchor="start">0.23/0.37</text>
+<line x1="832.34" y1="427.00" x2="941.28" y2="427.00" stroke="#8A55A3" stroke-width="3"/>
+<circle cx="832.34" cy="427.00" r="6.00" fill="#8A55A3" stroke="#FFFFFF" stroke-width="1.5"/>
+<polygon points="941.28,421.00 935.28,433.00 947.28,433.00" fill="#8A55A3" stroke="#17212B" stroke-width="1"/>
 <text x="682.00" y="431.00" class="label" text-anchor="end">T1</text>
-<text x="956.82" y="431.00" class="tiny" text-anchor="start">0.93/1.70</text>
-<line x1="851.68" y1="490.00" x2="950.56" y2="490.00" stroke="#D97706" stroke-width="3"/>
-<circle cx="851.68" cy="490.00" r="6.00" fill="#D97706" stroke="#FFFFFF" stroke-width="1.5"/>
-<polygon points="950.56,484.00 944.56,496.00 956.56,496.00" fill="#D97706" stroke="#17212B" stroke-width="1"/>
+<text x="951.28" y="431.00" class="tiny" text-anchor="start">0.91/1.67</text>
+<line x1="850.06" y1="490.00" x2="945.47" y2="490.00" stroke="#D97706" stroke-width="3"/>
+<circle cx="850.06" cy="490.00" r="6.00" fill="#D97706" stroke="#FFFFFF" stroke-width="1.5"/>
+<polygon points="945.47,484.00 939.47,496.00 951.47,496.00" fill="#D97706" stroke="#17212B" stroke-width="1"/>
 <text x="682.00" y="494.00" class="label" text-anchor="end">B2-M</text>
-<text x="960.56" y="494.00" class="tiny" text-anchor="start">1.05/1.73</text>
-<text x="910.00" y="112.00" class="panel" text-anchor="middle">(b) Frozen-test ADE ● and FDE ▲</text>
+<text x="955.47" y="494.00" class="tiny" text-anchor="start">1.04/1.69</text>
+<text x="910.00" y="112.00" class="panel" text-anchor="middle">(b) Frozen-test rollout-macro ADE ● and FDE ▲</text>
 <text x="910.00" y="613.00" class="small" text-anchor="middle">Error (m) ↓</text>
-<text x="600.00" y="655.00" class="small" text-anchor="middle">B1 ranks first on validation NLL and frozen-test displacement error; complexity alone does not determine performance.</text>
+<text x="600.00" y="655.00" class="small" text-anchor="middle">All displayed offline metrics use equal-rollout macro aggregation; overlapping windows are not replications.</text>
 </svg>

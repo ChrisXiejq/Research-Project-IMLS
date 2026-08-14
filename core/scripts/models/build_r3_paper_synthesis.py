@@ -269,7 +269,7 @@ def build(repo: Path, r3_root: Path, output: Path) -> dict[str, Any]:
 
 ## Completion decision
 
-R3 is complete and integrity-valid: **80/80** prespecified rollouts and all formal tables passed their frozen gates. `R3_STUDY_STOP_GATE.json` records `stop_formal_large_scale_collection`, so no additional large-scale CARLA experiment is required or scientifically justified for this dissertation.
+R3 is complete and integrity-valid: **80/80** prespecified rollouts and all formal tables passed their frozen gates. `R3_STUDY_STOP_GATE.json` records `stop_formal_large_scale_collection`, so its observed H3/H4 direction cannot justify an outcome-selected R3 extension or R4. A later, separately preregistered SF4 application-authority on/off audit of the corrected `reduced_intervention` supervisor responds to external supervisor feedback; it is not the historical `full` supervisor configuration and does not alter the R3 estimands, reopen H1--H4 or weaken this stop decision.
 
 ## Central thesis claim
 
@@ -288,7 +288,7 @@ This is the paper's single organising claim. It keeps machine learning central (
 
 Each primary contrast uses five paired init groups (101–105). The smallest possible two-sided exact sign-flip p-value is 0.0625, and all Holm-adjusted results are non-confirmatory. The paper must therefore report effect sizes, paired directions and bootstrap intervals, and must not claim conventional statistical significance or equivalence.
 
-No native collision, footprint collision, fixed-geometry yield failure or completion failure occurred. This confirms nominal feasibility but means binary safety endpoints cannot distinguish the tested arms. The continuous footprint-separation outcome remains the primary safety-margin evidence.
+No native collision, footprint collision, fixed-geometry yield failure or completion failure occurred. These are nominal outcome-reliability observations, not evidence that every MPC step was feasible: the legacy debug telemetry contains logger-unaccepted rows that require execution-level reclassification. The binary endpoints cannot distinguish the tested arms, so continuous footprint separation remains the primary safety-margin evidence.
 
 ## What the thesis may and may not claim
 

@@ -6,7 +6,7 @@
 <style>text{font-family:Arial,Helvetica,sans-serif;fill:#17212B} .title{font-size:24px;font-weight:700}.subtitle{font-size:14px;fill:#5B6773}.panel{font-size:17px;font-weight:700}.label{font-size:14px}.small{font-size:12px;fill:#5B6773}.tiny{font-size:10.5px;fill:#5B6773}.axis{stroke:#5B6773;stroke-width:1.2}.grid{stroke:#D7DEE5;stroke-width:1}.box{fill:#F3F6F8;stroke:#AAB4BE;stroke-width:1.2}</style>
 </defs>
 <rect x="0" y="0" width="1200" height="700" fill="#FFFFFF"/>
-<text x="60.00" y="42.00" class="title" text-anchor="start">Arrival timing changes safety margin, solver feasibility and supervisor activity</text>
+<text x="60.00" y="42.00" class="title" text-anchor="start">Arrival timing changes safety margin, controller acceptance and supervisor activity</text>
 <text x="60.00" y="66.00" class="subtitle" text-anchor="start">+3 m minus −3 m effects for B1; five-init cluster intervals.</text>
 <line x1="85.00" y1="180.00" x2="85.00" y2="480.00" stroke="#D7DEE5" stroke-width="1"/>
 <text x="85.00" y="500.00" class="tiny" text-anchor="middle">0.20</text>
@@ -53,7 +53,7 @@
 <circle cx="662.80" cy="375.00" r="7.00" fill="#2474B5" stroke="#FFFFFF" stroke-width="1.5"/>
 <text x="475.00" y="357.00" class="small" text-anchor="start">adaptive</text>
 <text x="662.80" y="403.00" class="tiny" text-anchor="middle">2.38</text>
-<text x="625.00" y="145.00" class="panel" text-anchor="middle">(b) Solver failures (pp)</text>
+<text x="625.00" y="145.00" class="panel" text-anchor="middle">(b) Legacy logger-unaccepted proxy (pp)</text>
 <line x1="865.00" y1="180.00" x2="865.00" y2="480.00" stroke="#D7DEE5" stroke-width="1"/>
 <text x="865.00" y="500.00" class="tiny" text-anchor="middle">-10.5</text>
 <line x1="940.00" y1="180.00" x2="940.00" y2="480.00" stroke="#D7DEE5" stroke-width="1"/>
@@ -78,6 +78,6 @@
 <text x="1007.44" y="403.00" class="tiny" text-anchor="middle">-6.94</text>
 <text x="1015.00" y="145.00" class="panel" text-anchor="middle">(c) Supervisor activity (pp)</text>
 <rect x="125.00" y="565.00" width="950.00" height="65.00" rx="10" fill="#F3F6F8" stroke="#D7DEE5" stroke-width="1.2"/>
-<text x="600.00" y="592.00" class="label" text-anchor="middle">+3 m increases physical separation and solver failure while reducing supervisor activity.</text>
-<text x="600.00" y="616.00" class="small" text-anchor="middle">This is a coupled mechanism trade-off, not evidence that any single controller component is the sole cause.</text>
+<text x="600.00" y="592.00" class="label" text-anchor="middle">+3 m increases separation and the legacy logger-unaccepted proxy while reducing supervisor activity.</text>
+<text x="600.00" y="616.00" class="small" text-anchor="middle">This preliminary bypass-conflated diagnostic is a coupled trade-off, not a solver-feasibility result or a single-cause claim.</text>
 </svg>

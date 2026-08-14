@@ -1,9 +1,18 @@
 # Q1 distinction audit — 2026-08-09
 
+> Historical status note (2026-08-14): this audit passed for the pre-feedback
+> evidence cut. A later external supervisor request created the bounded SF1--SF5
+> amendment documented in `SUPERVISOR_FEEDBACK_CLOSURE_2026-08-14.md`. Its SF4
+> corrected-supervisor application-authority experiment is not an outcome-selected continuation of R3 or the
+> cancelled R4. Q1 must be rerun after SF1--SF5 before release.
+
 ## Decision
 
-**Scientific Q1: PASS. Submission-release Q1: waiting for four verified human
-inputs. No additional CARLA experiment is required or authorised.**
+**Historical decision for the 2026-08-09 evidence cut:** scientific Q1 passed
+and submission-release Q1 awaited four verified human inputs; at that time no
+additional CARLA experiment was required or authorised. This decision is
+superseded only by the bounded, externally requested SF1--SF5 amendment in the
+status note above.
 
 The detached clean-checkout gate at commit
 `2f80639d56289253149a40fa08f1b2c44f0dc00a` regenerated the corrected A2
@@ -56,7 +65,7 @@ Machine receipts:
 | Active release scripts | `--help` and declared inputs pass |
 | Bibliography | 27 cited / 27 defined; no missing or unused entry |
 | Credential scan | zero hit in tracked release source |
-| CARLA status | not reopened; no additional large-scale run required |
+| CARLA status at this historical cut | not reopened; later superseded only by the bounded external-feedback SF4 amendment |
 
 Appendix A now distinguishes two reproducibility levels. A normal Git checkout
 contains the code, frozen configuration, selected deployed weights, R3 raw

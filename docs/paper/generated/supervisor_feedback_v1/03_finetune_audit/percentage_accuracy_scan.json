@@ -1,0 +1,13 @@
+{
+  "hit_count": 0,
+  "hits": [],
+  "rule": "No positive prose claim may report the superseded 0.98/0.98%-to-100% mode-ranking hit-rate jump. It may be named only inside an explicit withdrawal that marks it as not evidence; current ML claims must use frozen NLL/ADE/FDE.",
+  "scanned_bytes": 13519705,
+  "scanned_files": 181,
+  "scanned_roots": [
+    "docs/dissertation/latex",
+    "docs/paper/generated/distinction_v1",
+    "docs/paper/generated/paper_assets_v1"
+  ],
+  "status": "pass"
+}

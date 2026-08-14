@@ -20,6 +20,13 @@ bridge and did not alter the selected B1 stack.
 
 \input{../../paper/generated/distinction_v1/11_w1_manuscript/w1_frozen_test.tex}
 
+Table~\ref{tab:finetune-b0-b1-paired-init} gives the corresponding paired
+effects at the five held-out initialisation groups. This grouping, rather than
+the 315 overlapping prediction windows, defines the independent unit for the
+fine-tuning audit.
+
+\input{../../paper/generated/supervisor_feedback_v1/03_finetune_audit/finetune_b0_b1_paired_init_effects.tex}
+
 \subsection{Complete corrected closed-loop contrasts}
 
 Tables~\ref{tab:app-h3-contrasts} and~\ref{tab:app-h4-contrasts} contain every
@@ -42,9 +49,9 @@ over comparators or geometry margins.
 
 The following generated tables separate three distinct mechanism questions:
 whether the Transformer uses its sequence, which B1 input drives aggregate
-accuracy, and whether aggregate calibration represents the response-active
-tail. An ablation delta establishes sensitivity to an input transformation,
-not semantic understanding or closed-loop causality.
+forecasting performance, and whether aggregate calibration represents the
+response-active tail. An ablation delta establishes sensitivity to an input
+transformation, not semantic understanding or closed-loop causality.
 
 \input{../../paper/generated/distinction_v1/11_w1_manuscript/w1_diagnostics.tex}
 

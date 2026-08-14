@@ -1,7 +1,9 @@
 # Dissertation writing and review checklist
 
-W1 scientific drafting is complete. Unchecked items below are Q1/V1 release
-checks, not invitations to alter the frozen experiments or hypotheses.
+The original pre-feedback W1 draft and Q1 audit are historical baselines, not
+submission-ready receipts. SF1/SF2 offline closure and the prospectively frozen
+SF4 authority ablation must finish before SF5 rebuilds M1/W1/Q1. The checklist
+below records both completed foundations and still-open final-release gates.
 
 ## Recommended order
 
@@ -48,8 +50,9 @@ checks, not invitations to alter the frozen experiments or hypotheses.
   explicitly disclose unavailable archived CUDA/cuDNN/solver version strings.
 - [x] State routes, weather, fixed-risk values, adaptive rule and supervisor
   authority.
-- [x] Give the frozen collection, training, evaluation and analysis entry
-  points; no new CARLA execution is required.
+- [ ] Give the frozen collection, training, evaluation and analysis entry
+  points; SF4 is the one remaining CARLA experiment, after which only offline
+  regeneration and manuscript work are allowed.
 - [x] Verify that the Q1 manuscript/evidence source contains no credentials;
   repeat on the exact final V1 archive after inserting submission metadata.
 
@@ -63,9 +66,9 @@ checks, not invitations to alter the frozen experiments or hypotheses.
   official repository; never edit layout parameters.
 - [x] Check every figure in colour and greyscale; captions stand alone and
   outcome labels remain readable without colour.
-- [x] Compile and inspect all 24 W1 pages for overflow, unreadable labels,
-  isolated captions and broken references.
-- [x] Rebuild from a clean checkout during Q1 scientific release verification;
-  repeat after inserting the four verified submission-only values.
+- [ ] Compile and inspect the post-SF5 PDF for overflow, unreadable labels,
+  isolated captions and broken references; the earlier W1 inspection is stale.
+- [ ] Rebuild from a clean checkout after SF1--SF5 and the final Q1 audit, then
+  repeat after inserting the verified submission-only values.
 - [ ] If submitting to TMLR rather than UCL, switch to anonymous mode and audit
   the PDF/source/supplement for identity and repository links.

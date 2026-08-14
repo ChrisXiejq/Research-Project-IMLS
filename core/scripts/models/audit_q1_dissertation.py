@@ -22,8 +22,30 @@ import re
 import shutil
 import subprocess
 import tempfile
+import unittest
 from pathlib import Path
 from typing import Any, Iterable
+
+try:
+    from .build_m1_evidence_package import (
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        CLOSURE_PRE_SF4,
+        SUPERVISOR_CONTENT_EVIDENCE_IDS,
+        audit_supervisor_feedback_closure,
+        audit_supervisor_feedback_content_integration,
+        stage_aware_status,
+    )
+except ImportError:  # direct script execution
+    from build_m1_evidence_package import (
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        CLOSURE_PRE_SF4,
+        SUPERVISOR_CONTENT_EVIDENCE_IDS,
+        audit_supervisor_feedback_closure,
+        audit_supervisor_feedback_content_integration,
+        stage_aware_status,
+    )
 
 
 DEFAULT_REPO = Path(__file__).resolve().parents[3]
@@ -79,13 +101,15 @@ def run(
     return completed
 
 
-def verify_completion(directory: Path, filename: str) -> list[str]:
+def verify_completion(
+    directory: Path, filename: str, *, accepted_statuses: tuple[str, ...] = ("pass",)
+) -> list[str]:
     marker = directory / filename
     failures: list[str] = []
     if not marker.is_file():
         return [f"missing_marker:{marker}"]
     payload = load_json(marker)
-    if payload.get("status") != "pass":
+    if payload.get("status") not in accepted_statuses:
         failures.append(f"status_not_pass:{marker}")
     for artifact, expected in payload.get("artifacts", {}).items():
         path = directory / artifact
@@ -114,6 +138,36 @@ def verify_w1_manifest(repo: Path, filename: str) -> list[str]:
     return failures
 
 
+def verify_paper_evidence_package(repo: Path, closure_mode: str) -> list[str]:
+    assets = repo / "docs/paper/generated/paper_assets_v1"
+    marker = assets / "PAPER_EVIDENCE_PACKAGE_COMPLETE.json"
+    if not marker.is_file():
+        return [f"missing_marker:{marker}"]
+    payload = load_json(marker)
+    expected_status = (
+        "partial_pre_sf4" if closure_mode == CLOSURE_PRE_SF4 else "pass"
+    )
+    failures: list[str] = []
+    if (
+        payload.get("status") != expected_status
+        or payload.get("closure_mode") != closure_mode
+        or payload.get("final_release_eligible") is not (closure_mode == CLOSURE_FINAL)
+    ):
+        failures.append(f"paper_evidence_stage_status:{marker}")
+    bindings = {
+        "results_manifest_sha256": assets / "paper_results_manifest.json",
+        "figures_manifest_sha256": assets / "figures/paper_figures_manifest.json",
+        "png_completion_sha256": assets / "figures/PAPER_FIGURES_PNG_COMPLETE.json",
+        "inventory_sha256": assets / "paper_asset_inventory.csv",
+        "claim_matrix_sha256": assets / "paper_claim_evidence_matrix.csv",
+        "key_results_sha256": assets / "paper_key_results.csv",
+    }
+    for field, path in bindings.items():
+        if not path.is_file() or payload.get(field) != sha256(path):
+            failures.append(f"paper_evidence_hash:{field}")
+    return failures
+
+
 def compare_artifacts(
     regenerated: Path, canonical: Path, names: Iterable[str]
 ) -> list[str]:
@@ -130,6 +184,16 @@ def compare_artifacts(
     return failures
 
 
+def discover_regression_test_count(repo: Path) -> int:
+    """Count tests discoverable by the exact analysis-suite pattern."""
+
+    suite = unittest.defaultTestLoader.discover(
+        str(repo / "core/scripts/models/tests"),
+        pattern="test_*.py",
+    )
+    return suite.countTestCases()
+
+
 def pdf_pages(pdf: Path, cwd: Path) -> int | None:
     info = run(["pdfinfo", str(pdf)], cwd=cwd).stdout
     match = re.search(r"^Pages:\s+(\d+)$", info, flags=re.MULTILINE)
@@ -137,7 +201,12 @@ def pdf_pages(pdf: Path, cwd: Path) -> int | None:
 
 
 def clean_checkout_audit(
-    repo: Path, *, python: str, node: str, expected_tests: int
+    repo: Path,
+    *,
+    python: str,
+    node: str,
+    expected_tests: int | None,
+    closure_mode: str = CLOSURE_FINAL,
 ) -> dict[str, Any]:
     status = run(["git", "status", "--porcelain"], cwd=repo).stdout.strip()
     if status:
@@ -163,6 +232,14 @@ def clean_checkout_audit(
             [python, "core/scripts/models/build_w1_latex_evidence.py", "--help"],
             [python, "core/scripts/models/audit_w1_manuscript.py", "--help"],
             [python, "core/scripts/models/audit_q1_dissertation.py", "--help"],
+            [python, "core/scripts/models/build_paper_results_manifest.py", "--help"],
+            [python, "core/scripts/models/build_paper_figures.py", "--help"],
+            [
+                python,
+                "core/scripts/models/build_supervisor_feedback_paper_integration.py",
+                "--help",
+            ],
+            [python, "core/scripts/models/audit_paper_evidence_package.py", "--help"],
             [node, "core/scripts/models/render_w1_r3_figures_png.cjs", "--help"],
         ]
         for command in active_help:
@@ -192,6 +269,8 @@ def clean_checkout_audit(
                     str(checkout),
                     "--output",
                     str(regenerated_root / "m1"),
+                    "--closure-mode",
+                    closure_mode,
                 ],
                 regenerated_root / "m1",
                 checkout
@@ -206,11 +285,45 @@ def clean_checkout_audit(
                     str(checkout),
                     "--output",
                     str(regenerated_root / "w1"),
+                    "--closure-mode",
+                    closure_mode,
                 ],
                 regenerated_root / "w1",
                 checkout
                 / "docs/paper/generated/distinction_v1/11_w1_manuscript",
                 "W1_EVIDENCE_TABLES_COMPLETE.json",
+            ),
+            (
+                [
+                    python,
+                    "core/scripts/models/build_paper_results_manifest.py",
+                    "--repo-root",
+                    str(checkout),
+                    "--output-dir",
+                    str(regenerated_root / "paper"),
+                    "--closure-mode",
+                    closure_mode,
+                ],
+                regenerated_root / "paper",
+                checkout / "docs/paper/generated/paper_assets_v1",
+                "PAPER_TABLES_COMPLETE.json",
+            ),
+            (
+                [
+                    python,
+                    "core/scripts/models/build_paper_figures.py",
+                    "--repo-root",
+                    str(checkout),
+                    "--output-dir",
+                    str(regenerated_root / "paper/figures"),
+                    "--tables-dir",
+                    str(regenerated_root / "paper"),
+                    "--closure-mode",
+                    closure_mode,
+                ],
+                regenerated_root / "paper/figures",
+                checkout / "docs/paper/generated/paper_assets_v1/figures",
+                "PAPER_FIGURES_COMPLETE.json",
             ),
         ]
         for command, regenerated, canonical, marker_name in stage_specs:
@@ -219,6 +332,65 @@ def clean_checkout_audit(
             marker = load_json(regenerated / marker_name)
             names = list(marker.get("artifacts", {}))
             comparisons.extend(compare_artifacts(regenerated, canonical, names))
+
+        paper_root = regenerated_root / "paper"
+        canonical_paper = checkout / "docs/paper/generated/paper_assets_v1"
+        shutil.copy2(canonical_paper / "README.md", paper_root / "README.md")
+        png = run(
+            [
+                node,
+                "core/scripts/models/render_paper_figures_png.cjs",
+                str(paper_root / "figures"),
+            ],
+            cwd=checkout,
+        )
+        commands.append(
+            {
+                "command": [node, "core/scripts/models/render_paper_figures_png.cjs"],
+                "returncode": png.returncode,
+            }
+        )
+        png_marker = load_json(
+            paper_root / "figures/PAPER_FIGURES_PNG_COMPLETE.json"
+        )
+        comparisons.extend(
+            compare_artifacts(
+                paper_root / "figures",
+                canonical_paper / "figures",
+                [*sorted(png_marker.get("files", {})), "PAPER_FIGURES_PNG_COMPLETE.json"],
+            )
+        )
+        paper_audit = run(
+            [
+                python,
+                "core/scripts/models/audit_paper_evidence_package.py",
+                "--repo-root",
+                str(checkout),
+                "--assets-dir",
+                str(paper_root),
+                "--closure-mode",
+                closure_mode,
+            ],
+            cwd=checkout,
+        )
+        commands.append(
+            {
+                "command": [python, "core/scripts/models/audit_paper_evidence_package.py"],
+                "returncode": paper_audit.returncode,
+            }
+        )
+        comparisons.extend(
+            compare_artifacts(
+                paper_root,
+                canonical_paper,
+                [
+                    "paper_asset_inventory.csv",
+                    "paper_claim_evidence_matrix.csv",
+                    "paper_key_results.csv",
+                    "PAPER_EVIDENCE_PACKAGE_COMPLETE.json",
+                ],
+            )
+        )
 
         tests = run(
             [
@@ -235,6 +407,10 @@ def clean_checkout_audit(
         )
         test_match = re.search(r"Ran (\d+) tests", tests.stdout + tests.stderr)
         test_count = int(test_match.group(1)) if test_match else None
+        discovered_test_count = discover_regression_test_count(checkout)
+        bound_test_count = (
+            expected_tests if expected_tests is not None else discovered_test_count
+        )
         commands.append(
             {"command": [python, "-m", "unittest", "discover"], "returncode": 0}
         )
@@ -247,8 +423,11 @@ def clean_checkout_audit(
                 python,
                 "core/scripts/models/audit_w1_manuscript.py",
                 "--visual-review-complete",
+                "--closure-mode",
+                closure_mode,
             ],
             cwd=checkout,
+            require_success=closure_mode == CLOSURE_FINAL,
         )
         commands.append(
             {
@@ -256,20 +435,38 @@ def clean_checkout_audit(
                 "returncode": w1.returncode,
             }
         )
-        checks = {
-            "active_scripts_help": all(row["returncode"] == 0 for row in commands[:6]),
+        expected_w1_status = (
+            "pass" if closure_mode == CLOSURE_FINAL else "partial_pre_sf4"
+        )
+        base_checks = {
+            "active_scripts_help": all(
+                row["returncode"] == 0 for row in commands[: len(active_help)]
+            ),
             "a2_m1_w1_recompute_matches": not comparisons,
-            "analysis_tests_pass": test_count == expected_tests,
+            "paper_asset_chain_recompute_matches": not comparisons,
+            "analysis_tests_pass": (
+                test_count == discovered_test_count == bound_test_count
+            ),
             "latex_build_pass": pdf.is_file() and pdf.stat().st_size > 0,
             "pdf_page_count_recorded": isinstance(pages, int) and pages > 0,
-            "w1_audit_pass": '"status": "pass"' in w1.stdout,
+            "w1_audit_stage_appropriate": f'"status": "{expected_w1_status}"' in w1.stdout,
         }
+        clean_status = (
+            "pass"
+            if closure_mode == CLOSURE_FINAL and all(base_checks.values())
+            else "partial_pre_sf4"
+            if closure_mode == CLOSURE_PRE_SF4 and all(base_checks.values())
+            else "fail"
+        )
         return {
             "schema_version": "q1_clean_checkout_v1",
-            "status": "pass" if all(checks.values()) else "fail",
+            "status": clean_status,
+            "closure_mode": closure_mode,
             "commit": commit,
-            "checks": checks,
+            "checks": base_checks,
             "regression_test_count": test_count,
+            "discovered_regression_test_count": discovered_test_count,
+            "bound_regression_test_count": bound_test_count,
             "pdf": {
                 "pages": pages,
                 "sha256": sha256(pdf) if pdf.is_file() else None,
@@ -293,6 +490,9 @@ def manuscript_audit(
     visual_review_complete: bool,
     programme_ai_confirmed: bool,
     module_length_rule_confirmed: bool,
+    closure_mode: str = CLOSURE_FINAL,
+    supervisor_feedback_root: Path | None = None,
+    sf4_results_root: Path | None = None,
 ) -> dict[str, Any]:
     latex = repo / LATEX_RELATIVE
     tex_files = sorted(latex.rglob("*.tex"))
@@ -326,7 +526,18 @@ def manuscript_audit(
 
     a2 = load_json(a2_dir / "A2_COMPLETE.json")
     marker_failures = []
-    marker_failures.extend(verify_completion(m1_dir, "M1_COMPLETE.json"))
+    expected_m1_statuses = (
+        ("pass", "partial_pre_sf4")
+        if closure_mode == CLOSURE_PRE_SF4
+        else ("pass",)
+    )
+    marker_failures.extend(
+        verify_completion(
+            m1_dir,
+            "M1_COMPLETE.json",
+            accepted_statuses=expected_m1_statuses,
+        )
+    )
     marker_failures.extend(verify_completion(a2_dir, "A2_COMPLETE.json"))
     marker_failures.extend(
         verify_w1_manifest(repo, "W1_EVIDENCE_TABLES_COMPLETE.json")
@@ -334,6 +545,8 @@ def manuscript_audit(
     marker_failures.extend(
         verify_w1_manifest(repo, "W1_R3_FIGURES_COMPLETE.json")
     )
+    paper_evidence_failures = verify_paper_evidence_package(repo, closure_mode)
+    marker_failures.extend(paper_evidence_failures)
 
     # Negated statements are safeguards, not overclaims. Remove the explicit
     # forms used by the manuscript before applying the assertion-language scan.
@@ -389,13 +602,24 @@ def manuscript_audit(
         "Predictor--Risk Coupling: A Controlled CARLA",
         "Give-Way Study",
     )
-    scientific_checks = {
+    closure = audit_supervisor_feedback_closure(
+        repo,
+        supervisor_feedback_root=supervisor_feedback_root,
+        sf4_results_root=sf4_results_root,
+    )
+    content_integration = audit_supervisor_feedback_content_integration(
+        repo,
+        closure_mode=closure_mode,
+        closure_payload=closure,
+    )
+    base_scientific_checks = {
         "m1_value_audit_pass": (
-            m1.get("status") == "pass"
+            m1.get("status") in expected_m1_statuses
             and m1.get("record_count") == 82
             and load_json(m1_dir / "M1_VALUE_AUDIT.json").get("status") == "pass"
         ),
         "m1_a2_completion_hashes_resolve": not marker_failures,
+        "paper_asset_chain_stage_and_hashes_resolve": not paper_evidence_failures,
         "a2_corrected_matrix_complete": (
             a2.get("status") == "pass"
             and a2.get("r3_rollouts") == 80
@@ -442,7 +666,8 @@ def manuscript_audit(
         "title_matches_frozen_route": all(token in tex for token in title_tokens),
         "citation_keys_resolve": citation_keys == bib_keys,
         "primary_source_count_in_range": 25 <= len(bib_keys) <= 35,
-        "headline_evidence_ids_resolve": evidence_comments <= m1_ids,
+        "headline_evidence_ids_resolve": evidence_comments
+        <= (m1_ids | set(SUPERVISOR_CONTENT_EVIDENCE_IDS)),
         "prohibited_overclaim_absent": not overclaim_hits,
         "data_availability_boundary_present": (
             "Data and artefact availability" in tex
@@ -454,6 +679,25 @@ def manuscript_audit(
         ),
         "visual_review_recorded": visual_review_complete,
     }
+    scientific_checks = {
+        **base_scientific_checks,
+        "supervisor_feedback_final_closure": closure["status"] == "pass",
+        "supervisor_feedback_results_integrated_into_paper": content_integration[
+            "status"
+        ]
+        == "pass",
+    }
+    scientific_status = stage_aware_status(
+        base_ready=(
+            all(base_scientific_checks.values())
+            and (
+                closure_mode != CLOSURE_FINAL
+                or content_integration["status"] == "pass"
+            )
+        ),
+        closure_status=str(closure["status"]),
+        closure_mode=closure_mode,
+    )
 
     neutral_metadata = (
         "UCL MSc Candidate" in tex
@@ -471,7 +715,11 @@ def manuscript_audit(
     }
     return {
         "schema_version": "q1_scientific_manuscript_audit_v1",
-        "status": "pass" if all(scientific_checks.values()) else "fail",
+        "status": scientific_status,
+        "closure_mode": closure_mode,
+        "final_release_eligible": scientific_status == "pass",
+        "supervisor_feedback_final_closure": closure,
+        "supervisor_feedback_paper_content_integration": content_integration,
         "scientific_checks": scientific_checks,
         "release_checks": release_checks,
         "release_status": (
@@ -516,7 +764,12 @@ def main() -> None:
         "--node", default="node", help="Node.js executable used for script --help checks."
     )
     parser.add_argument(
-        "--expected-tests", type=int, default=66, help="Expected analysis regression count."
+        "--expected-tests",
+        type=int,
+        help=(
+            "Optional externally frozen analysis-test count. By default the gate "
+            "binds the executed count to unittest discovery in the audited checkout."
+        ),
     )
     parser.add_argument(
         "--clean-checkout",
@@ -538,6 +791,17 @@ def main() -> None:
         action="store_true",
         help="Confirm that the current manuscript and word-count presentation comply with ELEC0054.",
     )
+    parser.add_argument(
+        "--closure-mode",
+        choices=CLOSURE_MODES,
+        default=CLOSURE_FINAL,
+        help=(
+            "Default final mode fails closed until SF1--SF4 are hash-verified. "
+            "pre-sf4 records an explicitly partial audit and can never release Q1."
+        ),
+    )
+    parser.add_argument("--supervisor-feedback-root", type=Path)
+    parser.add_argument("--sf4-results-root", type=Path)
     args = parser.parse_args()
 
     repo = args.repo_root.resolve()
@@ -547,6 +811,9 @@ def main() -> None:
         visual_review_complete=args.visual_review_complete,
         programme_ai_confirmed=args.programme_ai_confirmed,
         module_length_rule_confirmed=args.module_length_rule_confirmed,
+        closure_mode=args.closure_mode,
+        supervisor_feedback_root=args.supervisor_feedback_root,
+        sf4_results_root=args.sf4_results_root,
     )
 
     clean: dict[str, Any] = {
@@ -559,6 +826,7 @@ def main() -> None:
             python=args.python,
             node=args.node,
             expected_tests=args.expected_tests,
+            closure_mode=args.closure_mode,
         )
     # Write receipts only after the detached worktree gate. Creating them
     # earlier would make the source repository dirty and defeat the purpose of
@@ -567,6 +835,11 @@ def main() -> None:
     atomic_json(output / "Q1_CLEAN_CHECKOUT_AUDIT.json", clean)
 
     scientific_pass = manuscript["status"] == "pass" and clean["status"] == "pass"
+    partial_ready = (
+        args.closure_mode == CLOSURE_PRE_SF4
+        and manuscript["status"] == "partial_pre_sf4"
+        and clean["status"] in {"not_run", "partial_pre_sf4"}
+    )
     release_pass = manuscript["release_status"] == "pass"
     payload = {
         "schema_version": "q1_complete_v1",
@@ -576,12 +849,20 @@ def main() -> None:
             if scientific_pass and release_pass
             else "scientific_pass_human_release_inputs_pending"
             if scientific_pass
+            else "partial_pre_sf4"
+            if partial_ready
             else "fail"
         ),
+        "closure_mode": args.closure_mode,
+        "supervisor_feedback_closure_status": manuscript[
+            "supervisor_feedback_final_closure"
+        ]["status"],
         "q1_scientific_gate_complete": scientific_pass,
         "q1_submission_release_gate_complete": scientific_pass and release_pass,
-        "large_scale_carla_reopened": False,
-        "additional_large_scale_carla_required": False,
+        "large_scale_carla_reopened": args.closure_mode == CLOSURE_PRE_SF4,
+        "additional_large_scale_carla_required": manuscript[
+            "supervisor_feedback_final_closure"
+        ]["status"] != "pass",
         "scientific_audit_sha256": sha256(
             output / "Q1_SCIENTIFIC_MANUSCRIPT_AUDIT.json"
         ),
@@ -596,12 +877,14 @@ def main() -> None:
             if scientific_pass and not release_pass
             else "V1_viva_and_submission_package"
             if scientific_pass
+            else "complete_SF1_SF2_SF4_then_rerun_Q1_final"
+            if partial_ready
             else "repair_q1_failures"
         ),
     }
     atomic_json(output / "Q1_COMPLETE.json", payload)
     print(json.dumps(payload, indent=2, sort_keys=True))
-    if not scientific_pass:
+    if not scientific_pass and not partial_ready:
         raise SystemExit(1)
 
 

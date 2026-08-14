@@ -1,0 +1,1 @@
+contrast,metric,unit,paired_rollouts,mean_effect,median_effect,minimum_effect,maximum_effect,positive_pairs,zero_pairs,negative_pairs,independent_init_clusters,cluster_mean_effect,cluster_effects_json,two_sided_exact_sign_flip_p_descriptive,inference_scope

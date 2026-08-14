@@ -1,10 +1,12 @@
 # Paper evidence and writing guide
 
-The experiment phase is complete. Corrected R3 finished all 80 prespecified
-rollouts, A2 produced the closed-loop synthesis, and M1 value-audited the four
-headline hypotheses. W1/Q1 have now frozen and audited the full 25-page
-TMLR-layout scientific manuscript and its deterministic presentation assets. Large-scale CARLA
-collection is closed for this dissertation; R4 is frozen as `not_run`.
+Corrected R3 finished all 80 prespecified rollouts, A2 produced the closed-loop
+synthesis, and M1 value-audited the four frozen headline hypotheses. W1/Q1
+audited the manuscript before the latest external supervisor feedback. That
+feedback now adds SF1--SF5: two R3 offline mechanism audits, a frozen-test
+aggregation audit, and one final preregistered 80-rollout corrected-supervisor
+behavioural-authority on/off ablation. R4 remains `not_run`; no hypothesis is
+added or reselected.
 
 ## Read in this order
 
@@ -29,9 +31,10 @@ collection is closed for this dissertation; R4 is frozen as `not_run`.
   prospective contracts.
 - `generated/distinction_v1/11_w1_manuscript/`: W1 tables, corrected figures
   and the manuscript completion gate.
-- `generated/distinction_v1/12_q1_final_audit/`: clean-checkout and final
-  scientific/rubric release audit; only verified human submission metadata is
-  pending.
+- `generated/distinction_v1/12_q1_final_audit/`: clean-checkout and scientific
+  audit before the bounded supervisor-feedback amendment;
+- `generated/supervisor_feedback_v1/`: comment-specific offline evidence;
+- `generated/distinction_sf4_supervisor_authority_ablation/`: prospective SF4 corrected-supervisor application-authority contract.
 
 `generated/paper_assets_v1/` and Day10--13 artifacts are retained for
 provenance and secondary diagnostics. They are not the primary corrected

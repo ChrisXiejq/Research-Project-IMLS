@@ -1,0 +1,261 @@
+{
+  "checks": [
+    {
+      "check": "source_gates_pass",
+      "status": "pass"
+    },
+    {
+      "check": "same_frozen_test_population",
+      "status": "pass"
+    },
+    {
+      "check": "selection_frozen_before_test",
+      "status": "pass"
+    },
+    {
+      "check": "frozen_b1_hash_matches_test",
+      "status": "pass"
+    },
+    {
+      "check": "rollout_disjoint_split_and_train_only_normalisation",
+      "status": "pass"
+    },
+    {
+      "check": "five_paired_init_rows",
+      "status": "pass"
+    },
+    {
+      "check": "all_three_metrics_favour_b1_in_each_init",
+      "status": "pass"
+    },
+    {
+      "check": "physical_baselines_same_aggregation",
+      "status": "pass"
+    },
+    {
+      "check": "superseded_percentage_accuracy_absent",
+      "status": "pass"
+    }
+  ],
+  "frozen_test": {
+    "contrast_rows": [
+      {
+        "aggregation_level": "rollout_macro",
+        "contrast": "B1_minus_B0",
+        "delta_top1_ADE_m": -1.1830141693353653,
+        "delta_top1_FDE_m": -2.5234159231185913,
+        "delta_trajectory_mixture_NLL_nats_per_step": -0.3136173486709595,
+        "full_horizon_windows": 315,
+        "held_out_init_groups": 5,
+        "rollouts": 20
+      },
+      {
+        "aggregation_level": "held_out_init_group_macro",
+        "contrast": "B1_minus_B0",
+        "delta_top1_ADE_m": -1.189002811908722,
+        "delta_top1_FDE_m": -2.544023558497429,
+        "delta_trajectory_mixture_NLL_nats_per_step": -0.31553101539611816,
+        "full_horizon_windows": 315,
+        "held_out_init_groups": 5,
+        "rollouts": 20
+      }
+    ],
+    "paired_summary": [
+      {
+        "favourable_init_count": 5,
+        "independent_paired_init_groups": 5,
+        "inference_note": "The five held-out ego initialisations are independent units; overlapping prediction windows are not replications. The exact two-sided sign-flip value is a sensitivity analysis under a symmetric paired-cluster-effect assumption, not treatment-randomisation inference.",
+        "maximum_B1_minus_B0": -1.082163017243147,
+        "mean_B1_minus_B0": -1.1890026696026326,
+        "median_B1_minus_B0": -1.195469543337822,
+        "metric": "top1_ADE_m",
+        "minimum_B1_minus_B0": -1.3073908016085625,
+        "preferred_direction": "lower",
+        "two_sided_exact_sign_flip_p": 0.0625
+      },
+      {
+        "favourable_init_count": 5,
+        "independent_paired_init_groups": 5,
+        "inference_note": "The five held-out ego initialisations are independent units; overlapping prediction windows are not replications. The exact two-sided sign-flip value is a sensitivity analysis under a symmetric paired-cluster-effect assumption, not treatment-randomisation inference.",
+        "maximum_B1_minus_B0": -2.211734663695097,
+        "mean_B1_minus_B0": -2.544023609161377,
+        "median_B1_minus_B0": -2.6604383438825607,
+        "metric": "top1_FDE_m",
+        "minimum_B1_minus_B0": -2.826069176197052,
+        "preferred_direction": "lower",
+        "two_sided_exact_sign_flip_p": 0.0625
+      },
+      {
+        "favourable_init_count": 5,
+        "independent_paired_init_groups": 5,
+        "inference_note": "The five held-out ego initialisations are independent units; overlapping prediction windows are not replications. The exact two-sided sign-flip value is a sensitivity analysis under a symmetric paired-cluster-effect assumption, not treatment-randomisation inference.",
+        "maximum_B1_minus_B0": -0.2771109342575073,
+        "mean_B1_minus_B0": -0.315530800819397,
+        "median_B1_minus_B0": -0.2952296733856201,
+        "metric": "trajectory_mixture_NLL_nats_per_step",
+        "minimum_B1_minus_B0": -0.36142778396606445,
+        "preferred_direction": "lower",
+        "two_sided_exact_sign_flip_p": 0.0625
+      }
+    ],
+    "summary_rows": [
+      {
+        "aggregation_level": "rollout_macro",
+        "full_horizon_windows": 315,
+        "held_out_init_groups": 5,
+        "rollouts": 20,
+        "top1_ADE_m": 1.2826716899871826,
+        "top1_FDE_m": 2.6443111896514893,
+        "trajectory_mixture_NLL_nats_per_step": 2.1707117557525635,
+        "variant": "B0"
+      },
+      {
+        "aggregation_level": "rollout_macro",
+        "full_horizon_windows": 315,
+        "held_out_init_groups": 5,
+        "rollouts": 20,
+        "top1_ADE_m": 0.09965752065181732,
+        "top1_FDE_m": 0.12089526653289795,
+        "trajectory_mixture_NLL_nats_per_step": 1.857094407081604,
+        "variant": "B1"
+      },
+      {
+        "aggregation_level": "held_out_init_group_macro",
+        "full_horizon_windows": 315,
+        "held_out_init_groups": 5,
+        "rollouts": 20,
+        "top1_ADE_m": 1.293238639831543,
+        "top1_FDE_m": 2.670948028564453,
+        "trajectory_mixture_NLL_nats_per_step": 2.173595905303955,
+        "variant": "B0"
+      },
+      {
+        "aggregation_level": "held_out_init_group_macro",
+        "full_horizon_windows": 315,
+        "held_out_init_groups": 5,
+        "rollouts": 20,
+        "top1_ADE_m": 0.10423582792282104,
+        "top1_FDE_m": 0.12692447006702423,
+        "trajectory_mixture_NLL_nats_per_step": 1.858064889907837,
+        "variant": "B1"
+      }
+    ]
+  },
+  "frozen_test_population_contract": {
+    "anchors": {
+      "bytes": 6528,
+      "sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982"
+    },
+    "calibration_schema_version": "multipath_posthoc_calibration_v2",
+    "checks": {
+      "aggregate_counts_exact_and_equal": true,
+      "anchors_bytes_exact_and_equal": true,
+      "anchors_sha256_exact_and_equal": true,
+      "evaluation_contract_exact_and_equal": true,
+      "jsonl_bytes_exact_and_equal": true,
+      "jsonl_sha256_exact_and_equal": true,
+      "per_init_keys_and_counts_exact_and_equal": true,
+      "per_rollout_keys_and_counts_exact_and_equal": true
+    },
+    "evaluation_schema_version": "multipath_accuracy_calibration_v2",
+    "horizon": 10,
+    "per_init_sample_signature": "049eb15076543a54371d9bebd3452ecb02ea9874f54cf72e29a115120d2e2745",
+    "per_init_samples": {
+      "ego_init_46": 66,
+      "ego_init_47": 60,
+      "ego_init_48": 66,
+      "ego_init_49": 63,
+      "ego_init_50": 60
+    },
+    "per_rollout_sample_signature": "023009fc0e623aaf638a7dd1726ecde3fc1bdb9dd7707fb4c123a87780f96e52",
+    "per_rollout_samples": {
+      "S0_ADAPTIVE::scenario_uk_give_way_ego_init_46_smpc_var_risk": 15,
+      "S0_ADAPTIVE::scenario_uk_give_way_ego_init_47_smpc_var_risk": 15,
+      "S0_ADAPTIVE::scenario_uk_give_way_ego_init_48_smpc_var_risk": 15,
+      "S0_ADAPTIVE::scenario_uk_give_way_ego_init_49_smpc_var_risk": 15,
+      "S0_ADAPTIVE::scenario_uk_give_way_ego_init_50_smpc_var_risk": 15,
+      "S0_FIXED::scenario_uk_give_way_ego_init_46_smpc_fixed_risk": 15,
+      "S0_FIXED::scenario_uk_give_way_ego_init_47_smpc_fixed_risk": 15,
+      "S0_FIXED::scenario_uk_give_way_ego_init_48_smpc_fixed_risk": 15,
+      "S0_FIXED::scenario_uk_give_way_ego_init_49_smpc_fixed_risk": 15,
+      "S0_FIXED::scenario_uk_give_way_ego_init_50_smpc_fixed_risk": 15,
+      "S1_ADAPTIVE::scenario_uk_give_way_ego_init_46_smpc_var_risk": 18,
+      "S1_ADAPTIVE::scenario_uk_give_way_ego_init_47_smpc_var_risk": 15,
+      "S1_ADAPTIVE::scenario_uk_give_way_ego_init_48_smpc_var_risk": 18,
+      "S1_ADAPTIVE::scenario_uk_give_way_ego_init_49_smpc_var_risk": 16,
+      "S1_ADAPTIVE::scenario_uk_give_way_ego_init_50_smpc_var_risk": 15,
+      "S1_FIXED::scenario_uk_give_way_ego_init_46_smpc_fixed_risk": 18,
+      "S1_FIXED::scenario_uk_give_way_ego_init_47_smpc_fixed_risk": 15,
+      "S1_FIXED::scenario_uk_give_way_ego_init_48_smpc_fixed_risk": 18,
+      "S1_FIXED::scenario_uk_give_way_ego_init_49_smpc_fixed_risk": 17,
+      "S1_FIXED::scenario_uk_give_way_ego_init_50_smpc_fixed_risk": 15
+    },
+    "schema_version": "frozen_test_population_contract_v1",
+    "status": "pass",
+    "subset": "all",
+    "test_jsonl": {
+      "bytes": 5673913,
+      "sha256": "29291fe2a172047267c3a0c4c3d5693519f550881010a965fb60166a5013d770"
+    }
+  },
+  "limitations": [
+    "Inference is bounded to the frozen Town05 give-way distribution; there is no cross-map or real-road claim.",
+    "The five held-out ego initialisations, not the 315 overlapping full-horizon windows, are the independent paired units.",
+    "Only 15/315 full-horizon test windows (4.76%) are response-active, so the aggregate result is dominated by non-active interaction periods.",
+    "B1 exposes 1,034,208 trainable parameters; the tested adapter configurations expose substantially fewer, so architecture-only causality is not identified.",
+    "10/15 training runs selected the final allowed epoch; all three B1 seeds reached that boundary.",
+    "B1 is raster-dominant: raster shuffle changes aggregate ADE by 0.284098 m on average, whereas past-state shuffle changes it by only 0.000080 m.",
+    "The response-active calibration finding is based on 15 windows from six rollouts and three init groups and is therefore a tail diagnostic, not a stable population estimate.",
+    "Physical-baseline NLL is intentionally not contrasted with MultiPath NLL because their probabilistic models define different estimands."
+  ],
+  "metric_policy": {
+    "independent_unit": "held-out ego initialisation",
+    "overlapping_windows_are_independent": false,
+    "paired_init_ids": [
+      46,
+      47,
+      48,
+      49,
+      50
+    ],
+    "primary_comparison": "uncalibrated rollout-macro NLL/ADE/FDE",
+    "superseded_percentage_accuracy_is_current_evidence": false
+  },
+  "physical_baseline_policy": "ADE/FDE are paired and averaged at the held-out init-group level; no sample-micro/rollout-macro subtraction and no cross-model NLL subtraction.",
+  "response_active_tail": {
+    "B0": {
+      "calibrated_rollout_macro_NLL": 2.958937883377075,
+      "top1_ADE_m": 1.7633986473083496,
+      "top1_FDE_m": 4.7082719802856445,
+      "uncalibrated_rollout_macro_NLL": 2.471771478652954
+    },
+    "B1": {
+      "calibrated_rollout_macro_NLL": 8.572831153869629,
+      "top1_ADE_m": 0.9420049786567688,
+      "top1_FDE_m": 1.244974970817566,
+      "uncalibrated_rollout_macro_NLL": 2.0763132572174072
+    },
+    "fraction_of_all_full_horizon_windows": 0.047619047619047616,
+    "full_horizon_windows": 15,
+    "held_out_init_groups": 3,
+    "interpretation": "The aggregate B1 point-error gain persists, but validation-frozen global calibration is worse in this small response-active tail.",
+    "rollouts": 6
+  },
+  "schema_version": "supervisor_finetune_feedback_audit_v2",
+  "status": "pass",
+  "superseded_accuracy_scan": {
+    "hit_count": 0,
+    "hits": [],
+    "rule": "No positive prose claim may report the superseded 0.98/0.98%-to-100% mode-ranking hit-rate jump. It may be named only inside an explicit withdrawal that marks it as not evidence; current ML claims must use frozen NLL/ADE/FDE.",
+    "scanned_bytes": 13519705,
+    "scanned_files": 181,
+    "scanned_roots": [
+      "docs/dissertation/latex",
+      "docs/paper/generated/distinction_v1",
+      "docs/paper/generated/paper_assets_v1"
+    ],
+    "status": "pass"
+  },
+  "supervisor_comment": "The earlier 0.98%-to-100% top-probability/oracle-best-mode hit-rate claim required an implementation, split, evaluation and metric audit.",
+  "verdict": "closed_for_the_frozen_in_distribution_claim_with_explicit_generalisation_and_tail_boundaries"
+}

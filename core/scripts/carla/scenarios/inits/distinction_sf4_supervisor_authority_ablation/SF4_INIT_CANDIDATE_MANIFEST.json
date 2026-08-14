@@ -1,0 +1,80 @@
+{
+  "formal_use_condition": "All ten candidates must pass the committed Town05 spawn preflight before any treatment rollout starts.",
+  "generated_before_formal_outcomes": true,
+  "generation_order": "reproduce/discard original 50 speeds, original 50 offsets, R3 five speeds and R3 five offsets; then draw 10 candidate speeds followed by 10 candidate offsets",
+  "independent_of_training_validation_test_ids": true,
+  "numpy_generator": "default_rng/PCG64",
+  "offset_distribution": "Uniform(-2.5, 2.5) m",
+  "records": [
+    {
+      "ego_init_id": 106,
+      "init_speed": 9.480309946842153,
+      "sha256": "e9a718d534496c56a92ed30baaa5c1771dd13a69c698a6b84a6f6a0b8716a380",
+      "start_longitudinal_offset": 2.302768641875152
+    },
+    {
+      "ego_init_id": 107,
+      "init_speed": 8.58636256604212,
+      "sha256": "e33681648b1d6d6ca5acb0449481a519da753cc7238dc0e8619d6be79ae93a88",
+      "start_longitudinal_offset": 0.21741379300052877
+    },
+    {
+      "ego_init_id": 108,
+      "init_speed": 8.487490209140814,
+      "sha256": "2c2c8c5e302019442cde55409d708c3802d44ee510ce4fde412792d764b34b1c",
+      "start_longitudinal_offset": 0.8971207420475874
+    },
+    {
+      "ego_init_id": 109,
+      "init_speed": 8.459642875689834,
+      "sha256": "ce10d1c415899bebffe3a1b3d2f6836ab266c869ea294e18bf08b6da88e39cbd",
+      "start_longitudinal_offset": 0.941296242463428
+    },
+    {
+      "ego_init_id": 110,
+      "init_speed": 8.741302330335131,
+      "sha256": "4445711f420e0456b0bfc73e006305a4b667078f8830910602439ae3e4d8c564",
+      "start_longitudinal_offset": -1.7385110362533251
+    },
+    {
+      "ego_init_id": 111,
+      "init_speed": 8.657110174962295,
+      "sha256": "ebe3463d2990769007010872755b5ea3c2ba243018882c2acaeb4777c0a689cf",
+      "start_longitudinal_offset": -1.774877742243317
+    },
+    {
+      "ego_init_id": 112,
+      "init_speed": 9.225283343636303,
+      "sha256": "c516655a2afb8cca4ddb6e8c5b6a0922f3ac017e1b267afc54bd92284cf6f459",
+      "start_longitudinal_offset": -0.18978088975110052
+    },
+    {
+      "ego_init_id": 113,
+      "init_speed": 9.089430800383273,
+      "sha256": "896c3a7a505c047921ece75fbf5085004e85769b6a0f51c28899a7fc046f9f16",
+      "start_longitudinal_offset": 0.10966766707188158
+    },
+    {
+      "ego_init_id": 114,
+      "init_speed": 9.499286209781818,
+      "sha256": "54daff4f8276a0f4fde3c5089de667543c3743bc789e3d1d259aba395c6c0318",
+      "start_longitudinal_offset": -1.1397762341940576
+    },
+    {
+      "ego_init_id": 115,
+      "init_speed": 8.58990857085208,
+      "sha256": "2488b9f7d3d3c49363940136cd2c1eaa22b3f79a127145d97e5ce0c9971f4075",
+      "start_longitudinal_offset": -1.5993952652797176
+    }
+  ],
+  "schema_version": "sf4_supervisor_authority_ablation_init_candidates_v1",
+  "seed": 123,
+  "speed_distribution": "Uniform(8.0, 10.0) m/s",
+  "status": "candidate_requires_town05_spawn_preflight",
+  "stream_predecessor": {
+    "original_init_count": 50,
+    "path": "core/scripts/carla/scenarios/inits/distinction_r3_new/R3_INIT_GENERATION_MANIFEST.json",
+    "r3_continuation_count": 5,
+    "sha256": "85ec9738373f986347668a6495c8eb717883d70a3a8383174b0066f770a631d4"
+  }
+}

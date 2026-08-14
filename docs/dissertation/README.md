@@ -1,9 +1,12 @@
 # Dissertation workspace
 
-The experiment phase is frozen at corrected R3/A2/M1 and the W1 manuscript has
-passed its source, citation, regression, build and visual gates. The active task
-is Q1 final scientific/rubric/release audit; no further large-scale CARLA
-experiment is required.
+The four headline hypotheses remain frozen at corrected R3/A2/M1. Following
+external supervisor feedback, the active task is the bounded SF1--SF5 closure:
+two offline audits of existing R3 logs, one corrected frozen-test evidence
+audit, and one prospectively registered 80-rollout corrected-supervisor
+behavioural-authority on/off ablation. This is not an outcome-selected
+reopening of R3 or the cancelled R4;
+SF4 is the final authorised CARLA matrix.
 
 ## Start here
 
@@ -11,8 +14,12 @@ experiment is required.
    route from evidence to submission;
 2. [`DISTINCTION_PROGRESS_TRACKER.md`](DISTINCTION_PROGRESS_TRACKER.md) —
    current gate and immutable decisions;
-3. [`latex/README.md`](latex/README.md) — canonical English TMLR-format source;
-4. [`../paper/README.md`](../paper/README.md) — current hypotheses, results and
+3. [`SUPERVISOR_FEEDBACK_CLOSURE_2026-08-14.md`](SUPERVISOR_FEEDBACK_CLOSURE_2026-08-14.md)
+   — exact closure criteria for the four comments;
+4. [`SUPERVISOR_FEEDBACK_EXECUTION_RUNBOOK_2026-08-14.md`](SUPERVISOR_FEEDBACK_EXECUTION_RUNBOOK_2026-08-14.md)
+   — exact Git-only server commands, resume rules and result packages;
+5. [`latex/README.md`](latex/README.md) — canonical English TMLR-format source;
+6. [`../paper/README.md`](../paper/README.md) — current hypotheses, results and
    evidence hierarchy.
 
 Use [`latex/WRITING_CHECKLIST.md`](latex/WRITING_CHECKLIST.md) for drafting and

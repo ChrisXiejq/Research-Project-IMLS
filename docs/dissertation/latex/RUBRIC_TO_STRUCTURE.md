@@ -1,8 +1,10 @@
 # ELEC0054 rubric → distinction evidence map
 
-This is the canonical Q1 mapping from the supplied two-page ELEC0054 marking
-rubric to examiner-visible evidence. It does not replace the current module
-brief or Moodle submission instructions.
+This is the active mapping from the supplied two-page ELEC0054 marking rubric
+to examiner-visible evidence. The original Q1 receipt is a pre-feedback
+baseline; this map becomes final only after SF1/SF2/SF4, the SF5 evidence and
+manuscript rebuild, and a new clean Q1 audit. It does not replace the current
+module brief or Moodle submission instructions.
 
 ## Descriptor-level mapping
 
@@ -10,13 +12,13 @@ brief or Moodle submission instructions.
 | --- | --- | --- | --- | --- |
 | Research area and gap | “Clear, strong, and focused” | Abstract; Introduction §§1.1–1.3; Related Work synthesis; exactly one central thesis and RQ1–RQ4 | Q1 title/thesis/verdict consistency checks; M1 four-hypothesis package | **Pass.** The thesis is not “the supervisor caused the result”; it is the bounded relation between task adaptation, tested temporal adapters and predictor–risk coupling. Do not add a fifth hypothesis. |
 | State of the art and related work | “Present, relevant, critical and sufficiently broad” | Related Work compares risk-aware planning, multimodal prediction/calibration, interaction Transformers and closed-loop evaluation, then states why each strand does not answer the crossed frozen-stack question | 27 cited and 27 resolved bibliography records; no uncited entry or missing key; Q1 overclaim scan | **Pass with normal examiner judgement.** The contribution is a controlled empirical synthesis, not the first discovery of open/closed-loop mismatch or a general new Transformer. |
-| Methodology | “Unambiguous, fully specified, and reproducible end-to-end method with explicit assumptions and audit trail” | Problem Formulation; Methodology; Experimental Design; Appendix A specify population, split, coordinate frame, models, training budget, calibration, deployment, outcomes, retries, statistics and hashes | Clean-checkout A2/M1/W1 regeneration; 66-test suite; completion manifests and SHA-256 chain | **Pass for analysis-level reproduction.** Full retraining additionally needs the separately retained 200-rollout raster dataset; this boundary is stated in Appendix A rather than hidden. |
-| Experiments and evidence | Correct controls/baselines, statistical evidence and reproducible detail | Physical baselines; simple B1 control; two matched-scope MLP/Transformer pairs; frozen one-shot test; corrected 2×4×2×5 R3 matrix; full H3/H4 contrast appendices | 200 data rollouts; 15 model runs; 80/80 R3 rollouts; five paired init clusters; exact sign-flip tests, Holm families and value-resolving M1 audit | **Scientifically sound but rubric-sensitive.** The design contains formal statistics, yet with five independent R3 clusters the minimum two-sided exact value is 0.0625. Never create false significance from windows/frames. Defend effect sizes, complete controls, prespecification and the honest power limit; do not claim equivalence. |
-| Discussion and conclusions | “Impact discussed, claims supported, broad scope of application (e.g. tested at scale/production)” | Discussion explains why task adaptation wins here, why transfer is conditional, the remaining role of adaptive risk, threats, procedural implications and future cross-map validation; Broader Impact and Conclusion bound safety claims | H1–H4 verdicts re-resolve to M1/A2; legacy/corrected separation and zero-event language gates | **Pass on supported interpretation; external-validity ceiling remains.** This is 80-rollout corrected simulator evidence on one junction, not production. The distinction case rests on technical depth, auditability and critical evaluation, not pretending production scale. |
+| Methodology | “Unambiguous, fully specified, and reproducible end-to-end method with explicit assumptions and audit trail” | Problem Formulation; Methodology; Experimental Design; Appendix A specify population, split, coordinate frame, models, training budget, calibration, deployment, outcomes, retries, statistics and hashes | Clean-checkout regeneration; regression suite; completion manifests and SHA-256 chain; SF1/SF2 immutable-archive audit and SF4 preregistration | **Conditional pass pending final receipts.** Full retraining additionally needs the separately retained 200-rollout raster dataset; this boundary is stated rather than hidden. |
+| Experiments and evidence | Correct controls/baselines, statistical evidence and reproducible detail | Physical baselines; simple B1 control; two matched-scope MLP/Transformer pairs; frozen one-shot test; corrected 2×4×2×5 R3 matrix; SF1 stop/release audit; SF2 solve-attempt taxonomy; prospective SF4 complete-authority ablation | 200 data rollouts; 15 model runs; 80/80 R3 rollouts; five R3 init clusters; 80-key SF4 with ten new clusters; exact sensitivities, cluster intervals, Holm families and value-resolving evidence audit | **R3/ML evidence sound; final closure pending.** Never create false significance from windows/frames. SF1/SF2 raw receipts and SF4 80/80 analysis/full snapshot are mandatory before submission. |
+| Discussion and conclusions | “Impact discussed, claims supported, broad scope of application (e.g. tested at scale/production)” | Discussion explains why task adaptation wins here, why transfer is conditional, the remaining role of adaptive risk, quantified supervisor authority, threats, procedural implications and future cross-map validation; Broader Impact and Conclusion bound safety claims | H1–H4 verdicts plus four-row supervisor response re-resolve to rebuilt M1; legacy/corrected separation and zero-event language gates | **Pending result-specific SF4 synthesis.** This remains one-junction simulator evidence, not production. The distinction case rests on technical depth, auditability and critical evaluation, not pretending production scale. |
 
 ## Focus safeguards
 
-- The single thesis is: task adaptation provides the reliable offline gain in
+- The single thesis is: task adaptation provides the directionally consistent in-distribution offline gain in
   this frozen setting; tested additional sequence complexity does not add a
   consistent gain; downstream value and adaptive-risk value are conditional
   on the coupled operating context.
@@ -33,7 +35,8 @@ brief or Moodle submission instructions.
 - H4 reports empirical operating-point dominance under a shared corrected
   stack; it does not identify risk allocation as an isolated cause or validate
   a real-world chance constraint.
-- Zero observed binary failures establish nominal feasibility only. Continuous
+- Zero observed binary failures establish nominal outcome reliability only;
+  they do not establish per-step MPC feasibility. Continuous
   actual-bounding-box separation remains the discriminating safety-margin
   outcome.
 

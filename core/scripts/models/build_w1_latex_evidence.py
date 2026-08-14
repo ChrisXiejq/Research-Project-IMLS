@@ -14,23 +14,73 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
+try:
+    from .frozen_prediction_evidence import (
+        frozen_test_evaluation_paths,
+        frozen_test_rollout_records,
+        frozen_validation_evaluation_paths,
+        frozen_validation_rollout_records,
+    )
+except ImportError:  # direct script execution
+    from frozen_prediction_evidence import (
+        frozen_test_evaluation_paths,
+        frozen_test_rollout_records,
+        frozen_validation_evaluation_paths,
+        frozen_validation_rollout_records,
+    )
+
+try:
+    from .build_m1_evidence_package import (
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        CLOSURE_PRE_SF4,
+        audit_supervisor_feedback_closure,
+    )
+except ImportError:  # direct script execution
+    from build_m1_evidence_package import (
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        CLOSURE_PRE_SF4,
+        audit_supervisor_feedback_closure,
+    )
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OUT_DIR = REPO_ROOT / "docs/paper/generated/distinction_v1/11_w1_manuscript"
 
-SOURCES = {
-    "validation": REPO_ROOT / "docs/paper/generated/day8/final_validation/day8_validation_summary.json",
-    "test": REPO_ROOT / "docs/paper/generated/day8/final_test/day8_frozen_test_summary.json",
-    "b0": REPO_ROOT / "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
-    "capacity": REPO_ROOT / "docs/paper/generated/distinction_v1/03_training_budget/model_capacity_training_budget_audit.json",
-    "context": REPO_ROOT / "docs/paper/generated/day10/gaps/context_ablation/interaction_context_ablation_summary.json",
-    "b1_inputs": REPO_ROOT / "docs/paper/generated/distinction_v1/02_input_ablations/b1_input_condition_summary.csv",
-    "h3": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h3_contrasts.csv",
-    "h4": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_contrasts.csv",
-    "h4_dominance": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_dominance.csv",
-    "m1": REPO_ROOT / "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_COMPLETE.json",
-    "a2": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json",
-}
+
+def source_paths(repo: Path) -> Dict[str, Path]:
+    sources = {
+        "validation": repo / "docs/paper/generated/day8/final_validation/day8_validation_summary.json",
+        "test": repo / "docs/paper/generated/day8/final_test/day8_frozen_test_summary.json",
+        "b0": repo / "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+        "finetune_complete": repo / "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/SUPERVISOR_COMMENT_3_COMPLETE.json",
+        "finetune_rollout_tex": repo / "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/finetune_b0_b1_rollout_macro.tex",
+        "finetune_paired_tex": repo / "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/finetune_b0_b1_paired_init_effects.tex",
+        "capacity": repo / "docs/paper/generated/distinction_v1/03_training_budget/model_capacity_training_budget_audit.json",
+        "context": repo / "docs/paper/generated/day10/gaps/context_ablation/interaction_context_ablation_summary.json",
+        "b1_inputs": repo / "docs/paper/generated/distinction_v1/02_input_ablations/b1_input_condition_summary.csv",
+        "h3": repo / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h3_contrasts.csv",
+        "h4": repo / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_contrasts.csv",
+        "h4_dominance": repo / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_dominance.csv",
+        "m1": repo / "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_COMPLETE.json",
+        "m1_manifest": repo / "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json",
+        "m1_audit": repo / "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_VALUE_AUDIT.json",
+        "a2": repo / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json",
+    }
+    sources.update(
+        {f"test_eval_{variant}": path for variant, path in frozen_test_evaluation_paths(repo).items()}
+    )
+    sources.update(
+        {
+            f"validation_eval_{variant}_seed_{seed}": path
+            for (variant, seed), path in frozen_validation_evaluation_paths(repo).items()
+        }
+    )
+    return sources
+
+
+SOURCES = source_paths(REPO_ROOT)
 
 
 def sha256(path: Path) -> str:
@@ -84,16 +134,13 @@ def write(name: str, lines: Iterable[str]) -> Path:
     return path
 
 
-def validation_table(validation: Dict[str, Any]) -> Path:
-    runs = validation["runs"]
-    if validation.get("status", "pass") != "pass" or len(runs) != 15:
-        raise ValueError("Day8 validation evidence must contain 15 complete runs")
-    order = {name: index for index, name in enumerate(("B1", "B2-M", "B2-D", "T1", "T2"))}
-    runs = sorted(runs, key=lambda row: (order[row["variant"]], row["seed"]))
+def validation_table(runs: List[Dict[str, Any]]) -> Path:
+    if len(runs) != 15 or any(row["aggregation_level"] != "rollout_macro" for row in runs):
+        raise ValueError("Day8 validation evidence must contain 15 rollout-macro runs")
     lines = [
         r"\begin{table}[p]",
         r"\centering\scriptsize",
-        r"\caption{All validation runs used for frozen model selection. NLL is uncalibrated rollout-macro trajectory NLL per step.}",
+        r"\caption{All validation runs used for frozen model selection. NLL, ADE and FDE are uncalibrated rollout-macro metrics: each is averaged within rollout and then equally across rollouts.}",
         r"\label{tab:app-validation}",
         r"\begin{tabular}{@{}llrrrrrr@{}}",
         r"\toprule",
@@ -101,39 +148,25 @@ def validation_table(validation: Dict[str, Any]) -> Path:
         r"\midrule",
     ]
     for row in runs:
-        all_metrics = row["subsets"]["all"]
-        training = row["training"]
         lines.append(
-            f"{tex(row['variant'])} & {row['seed']} & {training['best_epoch']} & "
-            f"{training['parameters']['trainable_parameters']:,} & "
-            f"{f(all_metrics['uncalibrated_rollout_macro_trajectory_NLL_per_step'])} & "
-            f"{f(all_metrics['top1_ADE_mean'])} & {f(all_metrics['top1_FDE_mean'])} & "
-            f"{f(all_metrics['mean_prediction_ms_per_sample'], 2)} \\\\"
+            f"{tex(row['variant'])} & {row['seed']} & {row['best_epoch']} & "
+            f"{row['trainable_parameters']:,} & "
+            f"{f(row['uncalibrated_rollout_macro_NLL'])} & "
+            f"{f(row['rollout_macro_top1_ADE_m'])} & "
+            f"{f(row['rollout_macro_top1_FDE_m'])} & "
+            f"{f(row['mean_prediction_ms_per_sample'], 2)} \\\\"
         )
     lines.extend((r"\bottomrule", r"\end{tabular}", r"\end{table}"))
     return write("w1_validation_runs.tex", lines)
 
 
-def frozen_test_table(test: Dict[str, Any], b0: Dict[str, Any]) -> Path:
-    runs = test["runs"]
-    if len(runs) != 5 or test.get("retraining_or_retuning_after_test_permitted") is not False:
-        raise ValueError("Frozen test evidence is incomplete or permits post-test tuning")
-    rows: List[Dict[str, Any]] = [{
-        "variant": "B0",
-        "seed": "--",
-        "rank": "control",
-        "metrics": b0["subsets"]["all"]["B0"],
-    }]
-    rows.extend({
-        "variant": run["variant"],
-        "seed": run["seed"],
-        "rank": run["validation_rank"],
-        "metrics": run["subsets"]["all"],
-    } for run in sorted(runs, key=lambda row: row["validation_rank"]))
+def frozen_test_table(rows: List[Dict[str, Any]]) -> Path:
+    if len(rows) != 6 or any(row["aggregation_level"] != "rollout_macro" for row in rows):
+        raise ValueError("Frozen test evidence must contain B0 plus five rollout-macro variants")
     lines = [
         r"\begin{table}[h]",
         r"\centering\small",
-        r"\caption{One-shot frozen-test results. Calibration was fitted on validation and was not used for architecture ranking.}",
+        r"\caption{One-shot frozen-test results at one common rollout-macro aggregation. NLL, ADE and FDE are first averaged within rollout and then equally across 20 rollouts. Calibration was fitted on validation and was not used for architecture ranking; 315 overlapping windows are not independent replications.}",
         r"\label{tab:app-test}",
         r"\begin{tabular}{@{}llrrrrrr@{}}",
         r"\toprule",
@@ -141,13 +174,15 @@ def frozen_test_table(test: Dict[str, Any], b0: Dict[str, Any]) -> Path:
         r"\midrule",
     ]
     for row in rows:
-        metrics = row["metrics"]
-        uncal_nll = metrics.get("uncalibrated_rollout_macro_NLL")
-        cal_nll = metrics.get("calibrated_rollout_macro_NLL")
+        rank = "control" if row["variant"] == "B0" else row["validation_rank"]
+        seed = "--" if row["seed"] is None else row["seed"]
         lines.append(
-            f"{tex(row['variant'])} & {row['seed']} & {row['rank']} & {f(uncal_nll)} & "
-            f"{f(metrics['top1_ADE_mean'])} & {f(metrics['top1_FDE_mean'])} & "
-            f"{f(cal_nll)} & {f(metrics['mean_prediction_ms_per_sample'], 2)} \\\\"
+            f"{tex(row['variant'])} & {seed} & {rank} & "
+            f"{f(row['uncalibrated_rollout_macro_NLL'])} & "
+            f"{f(row['rollout_macro_top1_ADE_m'])} & "
+            f"{f(row['rollout_macro_top1_FDE_m'])} & "
+            f"{f(row['calibrated_rollout_macro_NLL'])} & "
+            f"{f(row['mean_prediction_ms_per_sample'], 2)} \\\\"
         )
     lines.extend((r"\bottomrule", r"\end{tabular}", r"\end{table}"))
     return write("w1_frozen_test.tex", lines)
@@ -284,51 +319,20 @@ def diagnostic_tables(context: Dict[str, Any], b1_rows: List[Dict[str, str]], b0
     return write("w1_diagnostics.tex", lines)
 
 
-def main() -> None:
+def build(
+    repo: Path,
+    output: Path,
+    *,
+    closure_mode: str = CLOSURE_FINAL,
+    supervisor_feedback_root: Path | None = None,
+    sf4_results_root: Path | None = None,
+) -> Dict[str, Any]:
+    if closure_mode not in CLOSURE_MODES:
+        raise ValueError(f"Unknown supervisor-feedback closure mode: {closure_mode}")
     global REPO_ROOT, OUT_DIR, SOURCES
-
-    parser = argparse.ArgumentParser(
-        description=(
-            "Regenerate the W1 LaTeX evidence tables from the canonical frozen "
-            "offline and corrected-R3 evidence. This is presentation-only and "
-            "does not rerun an experiment."
-        )
-    )
-    parser.add_argument(
-        "--repo-root",
-        type=Path,
-        default=REPO_ROOT,
-        help="Repository root (default: inferred from this script).",
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        help=(
-            "Output directory (default: "
-            "docs/paper/generated/distinction_v1/11_w1_manuscript under repo root)."
-        ),
-    )
-    args = parser.parse_args()
-
-    REPO_ROOT = args.repo_root.resolve()
-    OUT_DIR = (
-        args.output.resolve()
-        if args.output
-        else REPO_ROOT / "docs/paper/generated/distinction_v1/11_w1_manuscript"
-    )
-    SOURCES = {
-        "validation": REPO_ROOT / "docs/paper/generated/day8/final_validation/day8_validation_summary.json",
-        "test": REPO_ROOT / "docs/paper/generated/day8/final_test/day8_frozen_test_summary.json",
-        "b0": REPO_ROOT / "docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
-        "capacity": REPO_ROOT / "docs/paper/generated/distinction_v1/03_training_budget/model_capacity_training_budget_audit.json",
-        "context": REPO_ROOT / "docs/paper/generated/day10/gaps/context_ablation/interaction_context_ablation_summary.json",
-        "b1_inputs": REPO_ROOT / "docs/paper/generated/distinction_v1/02_input_ablations/b1_input_condition_summary.csv",
-        "h3": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h3_contrasts.csv",
-        "h4": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_contrasts.csv",
-        "h4_dominance": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_dominance.csv",
-        "m1": REPO_ROOT / "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_COMPLETE.json",
-        "a2": REPO_ROOT / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json",
-    }
+    REPO_ROOT = repo.resolve()
+    OUT_DIR = output.resolve()
+    SOURCES = source_paths(REPO_ROOT)
 
     missing = [str(path) for path in SOURCES.values() if not path.is_file()]
     if missing:
@@ -338,17 +342,74 @@ def main() -> None:
     test = load_json(SOURCES["test"])
     b0 = load_json(SOURCES["b0"])
     context = load_json(SOURCES["context"])
+    finetune = load_json(SOURCES["finetune_complete"])
     m1 = load_json(SOURCES["m1"])
+    m1_manifest = load_json(SOURCES["m1_manifest"])
+    m1_audit = load_json(SOURCES["m1_audit"])
     a2 = load_json(SOURCES["a2"])
-    if m1.get("status") != "pass" or m1.get("record_count") != 82:
-        raise ValueError("M1 evidence package has not passed its 82-record audit")
+    expected_m1_status = (
+        "partial_pre_sf4" if closure_mode == CLOSURE_PRE_SF4 else "pass"
+    )
+    if (
+        m1.get("status") != expected_m1_status
+        or m1.get("value_audit_status") != "pass"
+        or m1.get("closure_mode") != closure_mode
+        or m1_audit.get("status") != "pass"
+        or m1_manifest.get("status") != expected_m1_status
+        or m1_manifest.get("value_audit_status") != "pass"
+        or m1_manifest.get("closure_mode") != closure_mode
+        or m1.get("record_count") != m1_manifest.get("record_count")
+        or m1.get("record_count") != m1_audit.get("record_count")
+        or m1.get("aggregation_semantic_violations") != []
+    ):
+        raise ValueError("M1 evidence package has not passed its value/aggregation audit")
+    closure = audit_supervisor_feedback_closure(
+        REPO_ROOT,
+        supervisor_feedback_root=supervisor_feedback_root,
+        sf4_results_root=sf4_results_root,
+    )
+    if closure_mode == CLOSURE_FINAL and closure.get("status") != "pass":
+        raise ValueError("Supervisor-feedback final closure gate has not passed")
+    required_h1 = {
+        "H1_B1_TEST_NLL",
+        "H1_B0_TEST_NLL",
+        "H1_B1_MINUS_B0_TEST_NLL",
+        "H1_B1_TEST_ADE",
+        "H1_B0_TEST_ADE",
+        "H1_B1_MINUS_B0_TEST_ADE",
+        "H1_B1_TEST_FDE",
+        "H1_B0_TEST_FDE",
+        "H1_B1_MINUS_B0_TEST_FDE",
+    }
+    h1_records = {
+        row["evidence_id"]: row
+        for row in m1_manifest["records"]
+        if row["evidence_id"] in required_h1
+    }
+    if set(h1_records) != required_h1 or any(
+        not row["aggregation_unit"].startswith("rollout-macro")
+        for row in h1_records.values()
+    ):
+        raise ValueError("M1 H1 rollout-macro evidence is incomplete")
+    if (
+        finetune.get("status") != "pass"
+        or finetune.get("overlapping_windows_treated_as_independent") is not False
+        or finetune.get("old_percentage_accuracy_hit_count") != 0
+    ):
+        raise ValueError("Supervisor fine-tuning audit is not complete")
+    for source_key in ("finetune_rollout_tex", "finetune_paired_tex"):
+        name = SOURCES[source_key].name
+        if finetune.get("artifacts", {}).get(name) != sha256(SOURCES[source_key]):
+            raise ValueError(f"Fine-tuning LaTeX artifact hash mismatch: {name}")
     if a2.get("status") != "pass" or a2.get("r3_rollouts") != 80:
         raise ValueError("A2 evidence package is not the complete 80-rollout synthesis")
+    validation_rollout_records = frozen_validation_rollout_records(REPO_ROOT, validation)
+    test_rollout_records = frozen_test_rollout_records(REPO_ROOT, test, b0)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     outputs = [
-        validation_table(validation),
-        frozen_test_table(test, b0),
+        validation_table(validation_rollout_records),
+        frozen_test_table(test_rollout_records),
         contrast_table(
             "w1_r3_h3_contrasts.tex",
             "All corrected R3 H3 metric contrasts. Effects are B1 minus B0; intervals are deterministic cluster-bootstrap descriptions and tests use five paired initialisation groups.",
@@ -367,8 +428,21 @@ def main() -> None:
 
     completion = {
         "schema_version": "w1_latex_evidence_v1",
-        "status": "pass",
+        "status": (
+            "partial_pre_sf4" if closure_mode == CLOSURE_PRE_SF4 else "pass"
+        ),
+        "closure_mode": closure_mode,
+        "value_evidence_ready": True,
+        "supervisor_feedback_closure_status": closure["status"],
+        "supervisor_feedback_closure_checks": closure["checks"],
+        "final_release_eligible": (
+            closure_mode == CLOSURE_FINAL and closure["status"] == "pass"
+        ),
         "role": "presentation_only_no_experiment_recomputation",
+        "aggregation_contract": (
+            "All displayed offline NLL/ADE/FDE values are read from each frozen "
+            "evaluation's rollout_aggregation.macro_mean object."
+        ),
         "source_sha256": {
             str(path.relative_to(REPO_ROOT)): sha256(path)
             for path in SOURCES.values()
@@ -383,12 +457,50 @@ def main() -> None:
             "h3_metric_contrasts": 16,
             "h4_metric_contrasts": 24,
             "h4_dominance_comparisons": 12,
-            "m1_records": 82,
+            "m1_records": int(m1["record_count"]),
             "r3_rollouts": 80,
         },
     }
     write("W1_EVIDENCE_TABLES_COMPLETE.json", [json.dumps(completion, indent=2, sort_keys=True)])
-    print(f"Wrote {len(outputs)} LaTeX evidence files to {OUT_DIR}")
+    return completion
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Regenerate the W1 LaTeX evidence tables from the canonical frozen "
+            "offline and corrected-R3 evidence. This is presentation-only and "
+            "does not rerun an experiment."
+        )
+    )
+    parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
+    parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--closure-mode",
+        choices=CLOSURE_MODES,
+        default=CLOSURE_FINAL,
+        help=(
+            "Default final mode requires all SF1--SF4 gates. pre-sf4 emits "
+            "partial tables and can never emit pass."
+        ),
+    )
+    parser.add_argument("--supervisor-feedback-root", type=Path)
+    parser.add_argument("--sf4-results-root", type=Path)
+    args = parser.parse_args()
+    repo = args.repo_root.resolve()
+    output = (
+        args.output.resolve()
+        if args.output
+        else repo / "docs/paper/generated/distinction_v1/11_w1_manuscript"
+    )
+    completion = build(
+        repo,
+        output,
+        closure_mode=args.closure_mode,
+        supervisor_feedback_root=args.supervisor_feedback_root,
+        sf4_results_root=args.sf4_results_root,
+    )
+    print(json.dumps(completion, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

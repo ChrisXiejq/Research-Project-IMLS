@@ -1,4 +1,5 @@
 {
+  "aggregation_semantic_violations": [],
   "checks": [
     {
       "error": null,

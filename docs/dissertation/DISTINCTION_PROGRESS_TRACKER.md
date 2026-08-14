@@ -2,8 +2,10 @@
 
 **Plan:** [`DISTINCTION_EXECUTION_PLAN.md`](DISTINCTION_EXECUTION_PLAN.md)  
 **Started:** 2026-08-08  
-**Current step:** Q1 submission metadata closure after scientific PASS
-**Overall status:** S0–W1 complete; Q1 scientific/rubric/PDF/clean-checkout gates pass; large-scale CARLA is permanently closed
+**Current step:** SF1--SF5 supervisor-feedback closure
+**Overall status:** S0--W1 and the original Q1 audit complete; R3/R4
+outcome-selected expansion remains closed; one externally requested,
+preregistered SF4 corrected-supervisor application-authority matrix is pending before Q1 is rebuilt
 **Closed-loop route:** Route R frozen prospectively at G2
 
 ## Status legend
@@ -31,14 +33,19 @@
 | R1 | Correct mode/A_MIN implementation | complete | No initially | `08_corrected_closed_loop/r1/R1_COMPLETE.json` | 10 tests PASS; corrected-v1 default; legacy explicit only |
 | R2 | Corrected 10-rollout pilot | complete | Yes | `08_corrected_closed_loop/r2/local_verification/r2_corrected_pilot_v4/R2_LOCAL_VERIFICATION.json` | 10/10 pass; non-statistical deployment gate only |
 | G2 | Freeze Route S or Route R | complete | No | `08_corrected_closed_loop/g2/G2_COMPLETE.json` | Route R frozen before R3 outcomes |
-| R3 | Corrected 80-rollout nominal matrix v2 | complete | Yes | `08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_COMPLETE.json` | 80/80; analysis, stop gate and verified archive pass; no further large-scale CARLA |
+| R3 | Corrected 80-rollout nominal matrix v2 | complete | Yes | `08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_COMPLETE.json` | 80/80; analysis, stop gate and verified archive pass; no outcome-selected R3 expansion |
 | R4 | Calibration factorial | not_run | Yes | frozen scope decision | not required after stack-level estimand was fixed; future work only |
 | A2 | Corrected post-R3 synthesis | complete | No | `08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json` | H3 2/8 directional cells; H4 3/12 dominance cells; paper tables/figures hash-bound |
 | M0 | Freeze statistical analysis contract | complete | No | `09_analysis_contract/M0_AMENDMENT_COMPLETE.json` | v1 preserved; v2 primary outcomes, censoring, families, margins and study-stop rule frozen before R3 |
-| M1 | Four-hypothesis evidence package | complete | No | `10_four_hypothesis_evidence/M1_COMPLETE.json` | 82 records; 0 invalid locator, value mismatch, orphan claim or legacy/corrected pooling violation |
+| M1 | Four-hypothesis evidence package | in_progress | No | `10_four_hypothesis_evidence/M1_COMPLETE.json` | Original 82-record H1--H4 package remains value-valid; current receipt is deliberately `partial_pre_sf4` until SF1/SF2/SF4 are integrated |
 | W0 | Migrate active documents to R3/M1 and retire stale entry points | complete | No | documentation/link/LaTeX audit | corrected R3 is sole primary closed-loop source; obsolete guides removed; PDF builds |
-| W1 | Full TMLR manuscript | complete | No | `11_w1_manuscript/W1_MANUSCRIPT_COMPLETE.json` | 25-page Q1-hardened PDF; 27/27 citations; deterministic assets; 66 tests; colour/greyscale visual pass |
-| Q1 | Final scientific/rubric/PDF audit | blocked | No | `12_q1_final_audit/Q1_COMPLETE.json` | scientific gate PASS; candidate/programme, GenAI-category and word/page metadata require verified user input |
+| W1 | Full TMLR manuscript | in_progress | No | `11_w1_manuscript/W1_MANUSCRIPT_COMPLETE.json` | Current 27-page pre-SF4 draft builds and visually passes; 27/27 citations and 138/138 tests pass, but the receipt correctly remains `partial_pre_sf4` |
+| SF1 | Approach/stop/release behaviour audit | in_progress | No CARLA; server archive only | `supervisor_feedback_v1/01_behaviour/` | code and post-hoc estimands frozen; execute against the immutable R3 raw archive |
+| SF2 | Adaptive-cost and solver-failure audit | in_progress | No CARLA; server archive only | `supervisor_feedback_v1/02_cost_feasibility/` | aggregate evidence generated; exact step taxonomy awaits the immutable R3 raw archive |
+| SF3 | Frozen fine-tuning re-evaluation | complete | No | `supervisor_feedback_v1/03_finetune_audit/SUPERVISOR_COMMENT_3_COMPLETE.json` | withdrawn percentage metric replaced by rollout-macro NLL/ADE/FDE and five-init paired evidence |
+| SF4 | Corrected-supervisor application-authority on/off ablation | pending | Yes | `distinction_sf4_supervisor_authority_ablation/` | externally requested, prospectively frozen 80-run mechanism audit of every behavioural channel in the corrected `reduced_intervention` stack; same configured bypass in both arms, off always solves; no fifth headline hypothesis |
+| SF5 | Rebuild manuscript/evidence/Q1 | pending | No | regenerated M1/W1/Q1 receipts | begins only after SF1--SF4 evidence is immutable |
+| Q1 | Final scientific/rubric/PDF audit | pending | No | `12_q1_final_audit/Q1_COMPLETE.json` | original audit passed; must be rerun after SF1--SF5, then close verified release metadata |
 | V1 | Viva and submission package | pending | No | archive + viva documents | final deliverable |
 
 ## Immutable decisions
@@ -59,6 +66,8 @@
 | 2026-08-08 | Use event-clock completion and actual-bbox separation as R3 primaries | Target exit is treatment-responsive and cannot define the primary efficiency adjustment; hard-coded vehicle geometry is avoidable | M0 v2/R3 audit v2 |
 | 2026-08-08 | Close large-scale CARLA after integrity-valid R3 | H3/H4 direction cannot be used to decide whether to collect more data; all required formal cells and evidence will already exist | M0 v2 study-stop rule |
 | 2026-08-08 | Do not run R4 in this dissertation | H3 is explicitly a deployed predictor-stack contrast, not a weight-only causal contrast | scope freeze before R3 outcomes |
+| 2026-08-14 | Permit one final SF4 corrected-supervisor application-authority audit | External supervisor feedback explicitly requested fixed/adaptive comparisons with and without supervisor authority; every behavioural channel in the corrected `reduced_intervention` stack, outcomes, 80-rollout matrix and stop rule were frozen before SF4 outcomes | `SUPERVISOR_FEEDBACK_CLOSURE_2026-08-14.md` and SF4 preregistration |
+| 2026-08-14 | Stop CARLA after integrity-valid SF4 | SF4 outcome direction cannot authorise tuning, replacement inits or additional simulation; cross-map and naturalistic generalisation remain future work | SF4 preregistered stop rule |
 
 ## Open blockers and risks
 
@@ -73,6 +82,7 @@
 | Only five independent test inits | high | exact/descriptive inference | transparent statistics; no fake n |
 | Manuscript source/build integrity | closed scientifically | Q1 clean-checkout and 25-page visual audit pass | repeat after verified release metadata insertion |
 | Submission identity/AI/length metadata | high release-only | never infer from Git or central generic guidance | candidate supplies current ELEC0054 requirements |
+| Corrected reduced-intervention supervisor application authority not causally isolated in R3 | open, bounded | authority on/off SF4 intervention; off shadows all requests, always solves and leaves only estimator-to-adaptive-risk influence | 80/80 integrity-valid SF4 receipts and preregistered analysis, irrespective of direction or observed activity |
 
 ## Execution log
 

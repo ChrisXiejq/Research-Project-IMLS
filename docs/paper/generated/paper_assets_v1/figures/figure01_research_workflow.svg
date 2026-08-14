@@ -65,8 +65,8 @@
 <text x="155.00" y="518.00" class="panel" text-anchor="start">Final evidence-led claim</text>
 <text x="155.00" y="550.00" class="label" text-anchor="start">
 <tspan x="155.00" dy="0">Task adaptation strongly improves in-distribution prediction, but closed-loop benefit is conditional on risk policy,</tspan>
-<tspan x="155.00" dy="22">arrival timing, solver feasibility and supervisor intervention. Tested Transformers use sequence context but do not beat</tspan>
-<tspan x="155.00" dy="22">simple B1 adaptation.</tspan>
+<tspan x="155.00" dy="22">arrival timing, controller acceptance and supervisor intervention. Tested Transformers use sequence context but do not</tspan>
+<tspan x="155.00" dy="22">beat simple B1 adaptation.</tspan>
 </text>
 <text x="600.00" y="665.00" class="small" text-anchor="middle">Primary evidence: Day8 frozen test + Day10 nominal + Day11/12 timing synthesis | Day13 is sensitivity only</text>
 </svg>

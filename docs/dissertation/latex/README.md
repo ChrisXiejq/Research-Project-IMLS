@@ -1,7 +1,9 @@
 # TMLR-format dissertation LaTeX framework
 
 This directory is the canonical dissertation writing workspace. It uses the
-official TMLR style and the project's frozen R3/A2/M1 evidence package.
+official TMLR style. R3/A2 and the original M1/W1/Q1 package are frozen
+historical foundations; they are not the final submission package until the
+supervisor-feedback SF1--SF5 closure and a clean Q1 rebuild pass.
 
 Companion reading material is available one directory above:
 [`论文骨架中文版.md`](../论文骨架中文版.md) and
@@ -28,7 +30,7 @@ to `tectonic` when available.
 ```
 
 This is the appropriate default for an identifiable UCL dissertation written
-in TMLR layout. The W1 review copy intentionally contains neutral candidate
+in TMLR layout. The current review copy intentionally contains neutral candidate
 metadata because the repository does not contain the student's verified UCL
 submission details. Insert those details only during the later submission
 metadata pass; do not guess them in the scientific manuscript.
@@ -44,7 +46,8 @@ month, year and OpenReview URL required by the official template. Do not edit
 
 - `main.tex`: document order, metadata and TMLR mode.
 - `macros.tex`: stable project notation.
-- `sections/`: complete W1 manuscript sections.
+- `sections/`: active manuscript sections; some final result prose is generated
+  only after SF1/SF2/SF4 receipts pass.
 - `appendices/`: reproducibility, supplementary results and audit material.
 - `references.bib`: checked primary and official references used in W1.
 - `RUBRIC_TO_STRUCTURE.md`: marking-rubric compliance map.
@@ -97,9 +100,12 @@ Reference pages: [Author Guidelines](https://jmlr.org/tmlr/author-guide.html),
 7. Keep source free of visible drafting markers; comments beginning with
    `% EVIDENCE:` are provenance notes and may remain in source.
 
-## Generated W1 evidence
+## Generated evidence and final rebuild
 
-Run the deterministic evidence exporter before building the manuscript:
+Do not treat the old W1 receipts as final after the supervisor-feedback
+amendment. Run the deterministic closure pipeline after SF1/SF2/SF4 evidence is
+immutable; it rebuilds M1, the paper integration, W1 and Q1 with fresh hashes.
+The legacy W1-only exporter remains useful for diagnostics:
 
 ```bash
 python3 ../../../core/scripts/models/build_w1_latex_evidence.py

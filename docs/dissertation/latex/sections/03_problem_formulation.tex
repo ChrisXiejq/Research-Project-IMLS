@@ -38,8 +38,9 @@ Closed-loop performance is multi-objective. The corrected primary efficiency
 outcome is event-clock completion time. The primary continuous safety-margin
 outcome is minimum vehicle-footprint separation computed from actual actor
 bounding boxes. Native/footprint collision, fixed-geometry yield failure and
-completion failure are binary guards. Solver failure and supervisor activity
-are mechanism measurements, not interchangeable safety outcomes. A policy
+completion failure are binary guards. Factual controller fallback/nonacceptance,
+raw solver return status and supervisor activity are mechanism measurements,
+not interchangeable safety outcomes or mathematical-feasibility certificates. A policy
 dominates another only if completion and separation are no worse and no excess
 binary scientific failure occurs within the declared comparison scope.
 

@@ -14,6 +14,21 @@ import textwrap
 from pathlib import Path
 from typing import Any, Iterable
 
+try:
+    from .build_m1_evidence_package import (
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        CLOSURE_PRE_SF4,
+        audit_supervisor_feedback_closure,
+    )
+except ImportError:  # direct script execution
+    from build_m1_evidence_package import (
+        CLOSURE_FINAL,
+        CLOSURE_MODES,
+        CLOSURE_PRE_SF4,
+        audit_supervisor_feedback_closure,
+    )
+
 
 INK = "#17212B"
 MUTED = "#5B6773"
@@ -166,7 +181,7 @@ def figure01_workflow(output: Path) -> list[str]:
             svg.line(x + 250, 275, x_positions[index + 1] - 8, 275, MUTED, 2, arrow=True)
     svg.rect(130, 485, 940, 125, LIGHT, GRID, 12)
     svg.text(155, 518, "Final evidence-led claim", "panel")
-    svg.multiline(155, 550, "Task adaptation strongly improves in-distribution prediction, but closed-loop benefit is conditional on risk policy, arrival timing, solver feasibility and supervisor intervention. Tested Transformers use sequence context but do not beat simple B1 adaptation.", 120, "label", 22)
+    svg.multiline(155, 550, "Task adaptation strongly improves in-distribution prediction, but closed-loop benefit is conditional on risk policy, arrival timing, controller acceptance and supervisor intervention. Tested Transformers use sequence context but do not beat simple B1 adaptation.", 120, "label", 22)
     svg.text(600, 665, "Primary evidence: Day8 frozen test + Day10 nominal + Day11/12 timing synthesis | Day13 is sensitivity only", "small", "middle")
     svg.save(output / "figure01_research_workflow.svg")
     return ["R_DATA_TRAIN_ROLLOUTS", "R_TEST_B1_MINUS_B0_ADE", "R_SENS_SELECTED_ARCHITECTURE_STABLE"]
@@ -251,18 +266,28 @@ def figure03_model_comparison(tables: Path, output: Path) -> list[str]:
         svg.text(xx, y1 + h1 + 20, fmt(tick, 1), "tiny", "middle")
     for index, model in enumerate(test_order):
         yy = y1 + 40 + index * 63
-        ade = float(test_map[model]["test_top1_ade_m"])
-        fde = float(test_map[model]["test_top1_fde_m"])
+        ade = float(test_map[model]["test_rollout_macro_top1_ade_m"])
+        fde = float(test_map[model]["test_rollout_macro_top1_fde_m"])
         svg.line(sx(ade), yy, sx(fde), yy, MODEL_COLORS[model], 3)
         svg.circle(sx(ade), yy, 6, MODEL_COLORS[model])
         svg.triangle(sx(fde), yy, 6, MODEL_COLORS[model])
         svg.text(x1 - 18, yy + 4, model, "label", "end")
         svg.text(sx(fde) + 10, yy + 4, f"{ade:.2f}/{fde:.2f}", "tiny")
-    svg.text(x1 + w1 / 2, 112, "(b) Frozen-test ADE ● and FDE ▲", "panel", "middle")
+    svg.text(x1 + w1 / 2, 112, "(b) Frozen-test rollout-macro ADE ● and FDE ▲", "panel", "middle")
     svg.text(x1 + w1 / 2, y1 + h1 + 48, "Error (m) ↓", "small", "middle")
-    svg.text(600, 655, "B1 ranks first on validation NLL and frozen-test displacement error; complexity alone does not determine performance.", "small", "middle")
+    svg.text(600, 655, "All displayed offline metrics use equal-rollout macro aggregation; overlapping windows are not replications.", "small", "middle")
     svg.save(output / "figure03_offline_model_comparison.svg")
-    return ["R_TEST_B1_MACRO_NLL", "R_TEST_B1_TOP1_ADE_M", "R_TEST_B1_MINUS_B0_ADE", "R_TEST_B1_MINUS_B0_FDE"]
+    validation_ids = [
+        f"R_VAL_{model.replace('-', '_')}_S{seed}_MACRO_NLL"
+        for model in order
+        for seed in (11, 23, 37)
+    ]
+    displacement_ids = [
+        f"R_TEST_{model.replace('-', '_')}_{metric}"
+        for model in test_order
+        for metric in ("TOP1_ADE_M", "TOP1_FDE_M")
+    ]
+    return validation_ids + displacement_ids
 
 
 def figure04_calibration(tables: Path, output: Path) -> list[str]:
@@ -394,10 +419,16 @@ def figure06_predictor_effect(tables: Path, output: Path) -> list[str]:
 def figure07_mechanism(tables: Path, output: Path) -> list[str]:
     rows = read_csv(tables / "table06_timing_robustness_key_contrasts.csv")
     svg = SVG(title="Arrival timing mechanism effects")
-    title(svg, "Arrival timing changes safety margin, solver feasibility and supervisor activity", "+3 m minus −3 m effects for B1; five-init cluster intervals.")
+    title(svg, "Arrival timing changes safety margin, controller acceptance and supervisor activity", "+3 m minus −3 m effects for B1; five-init cluster intervals.")
     specs = [
         ("min_footprint_separation_m", "Separation (m)", 0.2, 1.45, 1),
-        ("solver_failure_fraction", "Solver failures (pp)", 1.0, 3.2, 100),
+        (
+            "solver_failure_fraction",
+            "Legacy logger-unaccepted proxy (pp)",
+            1.0,
+            3.2,
+            100,
+        ),
         ("supervisor_active_fraction", "Supervisor activity (pp)", -10.5, -3.0, 100),
     ]
     for index, (metric, label, low, high, multiplier) in enumerate(specs):
@@ -421,8 +452,8 @@ def figure07_mechanism(tables: Path, output: Path) -> list[str]:
             svg.text(sx(effect), yy + 28, fmt(effect, 2), "tiny", "middle")
         svg.text(x + w / 2, 145, f"({chr(97 + index)}) {label}", "panel", "middle")
     svg.rect(125, 565, 950, 65, LIGHT, GRID, 10)
-    svg.text(600, 592, "+3 m increases physical separation and solver failure while reducing supervisor activity.", "label", "middle")
-    svg.text(600, 616, "This is a coupled mechanism trade-off, not evidence that any single controller component is the sole cause.", "small", "middle")
+    svg.text(600, 592, "+3 m increases separation and the legacy logger-unaccepted proxy while reducing supervisor activity.", "label", "middle")
+    svg.text(600, 616, "This preliminary bypass-conflated diagnostic is a coupled trade-off, not a solver-feasibility result or a single-cause claim.", "small", "middle")
     svg.save(output / "figure07_arrival_timing_mechanisms.svg")
     return [
         "R_TIMING_OFFSET_P3_MINUS_M3_B1_FIXED_MEDIUM_MIN_FOOTPRINT_SEPARATION_M",
@@ -437,7 +468,7 @@ def figure08_chain(output: Path) -> list[str]:
     nodes = [
         ("Prediction", "Mixture trajectories\nNLL, ADE/FDE", BLUE),
         ("Risk allocation", "Fixed frontier or\nadaptive policy", ORANGE),
-        ("Trajectory solver", "Feasibility and\nfailure fraction", GREEN),
+        ("Trajectory solver", "Acceptance and\nfallback fraction", GREEN),
         ("Supervisor", "Safety override and\nactive fraction", PURPLE),
         ("Executed motion", "Delay, separation,\nyield and collisions", RED),
     ]
@@ -465,13 +496,44 @@ def figure08_chain(output: Path) -> list[str]:
     return ["R_DAY10_RELIABILITY_MAX_SOLVER_FAILURE_FRACTION", "R_TIMING_OBSERVED_COLLISIONS"]
 
 
-def build(repo: Path, output: Path) -> dict[str, Any]:
-    tables = repo / "docs/paper/generated/paper_assets_v1"
+def build(
+    repo: Path,
+    output: Path,
+    tables_dir: Path | None = None,
+    *,
+    closure_mode: str = CLOSURE_FINAL,
+    supervisor_feedback_root: Path | None = None,
+    sf4_results_root: Path | None = None,
+) -> dict[str, Any]:
+    if closure_mode not in CLOSURE_MODES:
+        raise ValueError(f"Unknown supervisor-feedback closure mode: {closure_mode}")
+    tables = (tables_dir or repo / "docs/paper/generated/paper_assets_v1").resolve()
     completion_path = tables / "PAPER_TABLES_COMPLETE.json"
     completion = json.loads(completion_path.read_text(encoding="utf-8"))
     manifest = json.loads((tables / "paper_results_manifest.json").read_text(encoding="utf-8"))
-    if completion.get("status") != "pass" or manifest.get("status") != "pass":
+    expected_status = (
+        "partial_pre_sf4" if closure_mode == CLOSURE_PRE_SF4 else "pass"
+    )
+    if (
+        completion.get("status") != expected_status
+        or manifest.get("status") != expected_status
+        or completion.get("closure_mode") != closure_mode
+        or manifest.get("closure_mode") != closure_mode
+    ):
         raise ValueError("Paper table/manifest gate did not pass")
+    closure = audit_supervisor_feedback_closure(
+        repo,
+        supervisor_feedback_root=supervisor_feedback_root,
+        sf4_results_root=sf4_results_root,
+    )
+    if closure_mode == CLOSURE_FINAL and closure.get("status") != "pass":
+        raise ValueError("Supervisor-feedback final closure gate has not passed")
+    if completion.get("manifest_sha256") != sha256(tables / "paper_results_manifest.json"):
+        raise ValueError("Paper table/result manifest hash mismatch")
+    for name, expected_hash in completion.get("artifacts", {}).items():
+        path = tables / name
+        if not path.is_file() or sha256(path) != expected_hash:
+            raise ValueError(f"Paper table artifact hash mismatch: {name}")
     output.mkdir(parents=True, exist_ok=True)
     figure_evidence = {
         "figure01_research_workflow.svg": figure01_workflow(output),
@@ -496,11 +558,11 @@ def build(repo: Path, output: Path) -> dict[str, Any]:
         "",
         "1. **Research workflow and evidence gates.** The project progresses from the initial adaptive-risk planning question through controlled interaction data, matched offline model comparison and a frozen predictor–controller evaluation. Negative and mixed findings are retained as evidence gates rather than hidden.",
         "2. **Matched model architecture and controls.** B2-M/T1 and B2-D/T2 isolate temporal attention from approximate parameter capacity while sharing the frozen MultiPath base and evaluation contract. B1 is the simple task-adaptation control.",
-        "3. **Offline model comparison.** Points in panel (a) are the three validation seeds and horizontal segments are medians. Panel (b) reports ADE/FDE from each validation-selected frozen-test checkpoint plus pretrained B0. B1 is best under the registered selection metric and displacement errors.",
+        "3. **Offline model comparison.** Points in panel (a) are the three validation-seed rollout-macro NLL values and horizontal segments are medians. Panel (b) reports rollout-macro ADE/FDE from each validation-selected frozen-test checkpoint plus pretrained B0. All metrics first average within rollout; overlapping windows are not independent replications.",
         "4. **Aggregate and response-active calibration.** Validation-frozen global calibration improves aggregate B1 NLL but substantially worsens its response-active-tail NLL. The tail contains only 15 windows from 6 rollouts and 3 init groups.",
         "5. **Nominal closed-loop safety–efficiency frontier.** Each mark is a five-rollout Day10 cell mean. No predictor–risk combination uniformly occupies the preferred upper-left region across target styles; zero observed collisions are an event count, not an estimated zero risk.",
         "6. **Predictor-effect moderation.** B1−B0 closed-loop effects and five-init cluster intervals vary by risk policy and arrival offset. Sign changes and intervals crossing zero reject a uniform closed-loop-gain claim despite strong offline B1 improvement.",
-        "7. **Arrival-timing mechanisms.** Moving the target from −3 m to +3 m increases separation and solver failures while reducing supervisor activity. These simultaneous changes demonstrate a coupled trade-off rather than a single-component explanation.",
+        "7. **Arrival-timing mechanisms (legacy diagnostic).** Moving the target from −3 m to +3 m increases separation and the historical logger-unaccepted/debug proxy while reducing supervisor activity. The proxy is bypass-conflated and is neither a mathematical-feasibility endpoint nor final SF2 evidence; the simultaneous changes only motivate a coupled-mechanism audit.",
         "8. **Deployment chain and measurement boundaries.** Prediction, risk allocation, trajectory optimization, supervisor intervention and executed motion form a feedback system. Arrows describe implemented flow and do not by themselves identify causal effects.",
         "",
     ]
@@ -516,7 +578,12 @@ def build(repo: Path, output: Path) -> dict[str, Any]:
         }
     payload = {
         "schema_version": "ucl_thesis_paper_figures_v1",
-        "status": "pass",
+        "status": expected_status,
+        "closure_mode": closure_mode,
+        "supervisor_feedback_closure_status": closure["status"],
+        "final_release_eligible": (
+            closure_mode == CLOSURE_FINAL and closure["status"] == "pass"
+        ),
         "figure_count": len(figure_records),
         "source_results_manifest_sha256": sha256(tables / "paper_results_manifest.json"),
         "figures": figure_records,
@@ -529,14 +596,27 @@ def build(repo: Path, output: Path) -> dict[str, Any]:
         ],
     }
     atomic_json(output / "paper_figures_manifest.json", payload)
+    figure_artifacts = [
+        *sorted(figure_records),
+        captions_path.name,
+        "paper_figures_manifest.json",
+    ]
     atomic_json(
         output / "PAPER_FIGURES_COMPLETE.json",
         {
             "schema_version": "paper_figures_complete_v1",
-            "status": "pass",
+            "status": expected_status,
+            "closure_mode": closure_mode,
+            "supervisor_feedback_closure_status": closure["status"],
+            "final_release_eligible": (
+                closure_mode == CLOSURE_FINAL and closure["status"] == "pass"
+            ),
             "figure_count": len(figure_records),
             "figures_manifest_sha256": sha256(output / "paper_figures_manifest.json"),
             "source_results_manifest_sha256": payload["source_results_manifest_sha256"],
+            "artifacts": {
+                name: sha256(output / name) for name in figure_artifacts
+            },
         },
     )
     return payload
@@ -546,10 +626,21 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[3])
     parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--tables-dir", type=Path)
+    parser.add_argument("--closure-mode", choices=CLOSURE_MODES, default=CLOSURE_FINAL)
+    parser.add_argument("--supervisor-feedback-root", type=Path)
+    parser.add_argument("--sf4-results-root", type=Path)
     args = parser.parse_args()
     repo = args.repo_root.resolve()
     output = (args.output_dir or repo / "docs/paper/generated/paper_assets_v1/figures").resolve()
-    payload = build(repo, output)
+    payload = build(
+        repo,
+        output,
+        args.tables_dir,
+        closure_mode=args.closure_mode,
+        supervisor_feedback_root=args.supervisor_feedback_root,
+        sf4_results_root=args.sf4_results_root,
+    )
     print(json.dumps({"status": payload["status"], "figure_count": payload["figure_count"]}, indent=2))
 
 
