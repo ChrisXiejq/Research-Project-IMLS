@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import contextlib
 import io
@@ -184,6 +185,19 @@ class RecoveryEligibilityTests(unittest.TestCase):
             source.index('run_rollout()'),
         )
         self.assertNotIn("rm -rf", source)
+
+    def test_recovery_helper_is_python38_compatible(self):
+        source = (
+            ROOT / "core" / "scripts" / "models"
+            / "prepare_sf4_infrastructure_recovery.py"
+        ).read_text(encoding="utf-8")
+        ast.parse(source, feature_version=(3, 8))
+        for python39_api in (
+            ".removeprefix(",
+            ".removesuffix(",
+            ".is_relative_to(",
+        ):
+            self.assertNotIn(python39_api, source)
 
     def test_prepare_freezes_and_idempotently_revalidates_amendment(self):
         with tempfile.TemporaryDirectory() as temporary:

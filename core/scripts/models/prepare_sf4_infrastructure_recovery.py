@@ -15,6 +15,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -140,10 +141,10 @@ def audit_infrastructure_attempt(record_path: Path) -> dict[str, Any]:
     record = read_json(record_path)
     log_path = attempt / "runner_attempt.log"
     hygiene_path = attempt / "world_hygiene.json"
-    try:
-        directory_attempt = int(attempt.name.removeprefix("attempt_"))
-    except ValueError as error:
-        raise ValueError(f"Invalid attempt directory: {attempt}") from error
+    directory_match = re.fullmatch(r"attempt_([0-9]{3})", attempt.name)
+    if directory_match is None:
+        raise ValueError(f"Invalid attempt directory: {attempt}")
+    directory_attempt = int(directory_match.group(1))
     if not (
         log_path.is_file()
         and hygiene_path.is_file()
