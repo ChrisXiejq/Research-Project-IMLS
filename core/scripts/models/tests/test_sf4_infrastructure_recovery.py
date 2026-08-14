@@ -282,18 +282,16 @@ class RecoveryEligibilityTests(unittest.TestCase):
                 recovery_runner=recovery_runner,
                 extended_max=20,
             )
-            with (
-                mock.patch.object(recovery, "__file__", str(recovery_source)),
-                mock.patch.object(
+            with mock.patch.object(recovery, "__file__", str(recovery_source)):
+                with mock.patch.object(
                     recovery.subprocess,
                     "check_output",
                     return_value="recovery-commit\n",
-                ),
-            ):
-                with contextlib.redirect_stdout(io.StringIO()) as first:
-                    recovery.prepare(args)
-                with contextlib.redirect_stdout(io.StringIO()) as second:
-                    recovery.prepare(args)
+                ):
+                    with contextlib.redirect_stdout(io.StringIO()) as first:
+                        recovery.prepare(args)
+                    with contextlib.redirect_stdout(io.StringIO()) as second:
+                        recovery.prepare(args)
             first_payload = json.loads(first.getvalue())
             second_payload = json.loads(second.getvalue())
             self.assertEqual(first_payload["amendment_sha256"], second_payload["amendment_sha256"])
