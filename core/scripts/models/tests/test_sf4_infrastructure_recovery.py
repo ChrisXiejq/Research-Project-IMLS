@@ -6,6 +6,7 @@ import importlib.util
 import contextlib
 import io
 import json
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -35,27 +36,60 @@ recovery = load(
 
 
 class RecoveryEligibilityTests(unittest.TestCase):
-    def make_exhausted(self, root: Path, *, scientific_summaries: int = 0) -> Path:
+    def make_exhausted(self, root: Path, *, failed_summary: bool = False) -> Path:
         attempts = root / "SF4_cell" / "_attempts" / "init_112"
         for number in range(1, 11):
             directory = attempts / f"attempt_{number:03d}"
             directory.mkdir(parents=True)
+            summary_count = 1 if failed_summary and number == 1 else 0
             record = {
+                "schema_version": "r3_attempt_record_v2",
                 "attempt": number,
+                "cell_id": "SF4_cell",
+                "ego_init_id": 112,
                 "accepted": False,
                 "classification": "infrastructure_failure",
                 "retry_allowed": True,
                 "exit_code": 1,
                 "classifier_matches": ["carla_timeout", "scenario_setup"],
-                "scenario_summaries_found": scientific_summaries,
+                "scenario_summaries_found": summary_count,
                 "successful_scenarios_found": 0,
+                "raw_evidence_sha256_before_promotion": None,
             }
+            log = directory / "runner_attempt.log"
+            hygiene = directory / "world_hygiene.json"
+            log.write_text(
+                "CARLA timeout\n", encoding="utf-8"
+            )
+            hygiene.write_text('{"status":"fail"}\n', encoding="utf-8")
+            record["attempt_log_sha256"] = hashlib.sha256(log.read_bytes()).hexdigest()
+            record["world_hygiene_sha256"] = hashlib.sha256(
+                hygiene.read_bytes()
+            ).hexdigest()
             (directory / "attempt_record.json").write_text(
                 json.dumps(record) + "\n", encoding="utf-8"
             )
-            (directory / "runner_attempt.log").write_text(
-                "CARLA timeout\n", encoding="utf-8"
-            )
+            if summary_count:
+                scenario = directory / "scenario_case_ego_init_112_policy"
+                scenario.mkdir()
+                (scenario / "scenario_run_summary.json").write_text(
+                    json.dumps(
+                        {
+                            "ran_successfully": False,
+                            "error": (
+                                "RuntimeError: time-out while waiting for the "
+                                "simulator server"
+                            ),
+                        }
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+                prediction = scenario / "prediction_dataset"
+                prediction.mkdir()
+                (prediction / "prediction_dataset_raw.jsonl").write_text(
+                    "", encoding="utf-8"
+                )
         return attempts
 
     def test_exactly_ten_carla_only_failures_are_eligible(self):
@@ -70,11 +104,52 @@ class RecoveryEligibilityTests(unittest.TestCase):
             self.assertEqual(len(result[3]), 10)
             self.assertEqual(result[4], 0)
 
-    def test_any_scientific_summary_blocks_recovery(self):
+    def test_failed_timeout_summary_without_measurements_is_eligible(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            self.make_exhausted(root, scientific_summaries=1)
-            with self.assertRaisesRegex(ValueError, "not eligible"):
+            self.make_exhausted(root, failed_summary=True)
+            result = recovery.find_exhausted(
+                root, {("SF4_cell", 112)}, original_max=10
+            )
+            first_audit = result[3][0][2]
+            self.assertEqual(first_audit["scenario_summaries_found"], 1)
+            self.assertEqual(first_audit["valid_scientific_scenarios_found"], 0)
+            self.assertEqual(first_audit["nonempty_scientific_payloads"], [])
+
+    def test_nonempty_partial_scientific_payload_blocks_recovery(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            attempts = self.make_exhausted(root, failed_summary=True)
+            payload = next(attempts.rglob("prediction_dataset_raw.jsonl"))
+            payload.write_text('{"step": 1}\n', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "partial scientific payloads"):
+                recovery.find_exhausted(
+                    root, {("SF4_cell", 112)}, original_max=10
+                )
+
+    def test_record_summary_count_drift_blocks_recovery(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            attempts = self.make_exhausted(root, failed_summary=True)
+            record_path = attempts / "attempt_001" / "attempt_record.json"
+            record = json.loads(record_path.read_text(encoding="utf-8"))
+            record["scenario_summaries_found"] = 0
+            record_path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "inventory/provenance drift"):
+                recovery.find_exhausted(
+                    root, {("SF4_cell", 112)}, original_max=10
+                )
+
+    def test_non_timeout_failure_summary_blocks_recovery(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            attempts = self.make_exhausted(root, failed_summary=True)
+            summary = next(attempts.rglob("scenario_run_summary.json"))
+            summary.write_text(
+                json.dumps({"ran_successfully": False, "error": "collision"}) + "\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "unambiguous CARLA timeout"):
                 recovery.find_exhausted(
                     root, {("SF4_cell", 112)}, original_max=10
                 )
@@ -103,6 +178,11 @@ class RecoveryEligibilityTests(unittest.TestCase):
         self.assertIn('--prediction_git_commit "${CONTRACT_COMMIT}"', source)
         self.assertIn('max_attempts="$(max_attempts_for', source)
         self.assertIn('--amendment "${AMENDMENT}"', source)
+        self.assertIn('if ((PREPARE_ONLY)); then', source)
+        self.assertLess(
+            source.index('if ((PREPARE_ONLY)); then'),
+            source.index('run_rollout()'),
+        )
         self.assertNotIn("rm -rf", source)
 
     def test_prepare_freezes_and_idempotently_revalidates_amendment(self):
@@ -178,7 +258,7 @@ class RecoveryEligibilityTests(unittest.TestCase):
                 + "\n",
                 encoding="utf-8",
             )
-            attempts = self.make_exhausted(root)
+            attempts = self.make_exhausted(root, failed_summary=True)
             args = Namespace(
                 results_dir=root,
                 repo=repo,
@@ -210,6 +290,13 @@ class RecoveryEligibilityTests(unittest.TestCase):
                 value["complete_scientific_scenario_outputs_observed"]
             )
             self.assertEqual(value["extended_max_attempts_for_target_only"], 20)
+            self.assertEqual(value["prior_attempts"][0]["scenario_summaries_found"], 1)
+            self.assertEqual(
+                value["prior_attempts"][0]["valid_scientific_scenarios_found"], 0
+            )
+            self.assertEqual(
+                value["prior_attempts"][0]["nonempty_scientific_payloads"], []
+            )
 
 
 if __name__ == "__main__":

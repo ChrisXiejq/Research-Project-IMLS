@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+PREPARE_ONLY=0
+if [[ "${1:-}" == "--prepare-only" ]]; then
+  PREPARE_ONLY=1
+  shift
+fi
+if (($# != 0)); then
+  echo "Usage: $0 [--prepare-only]" >&2
+  exit 2
+fi
+
 # Resume the frozen SF4 matrix after exactly one rollout exhausted its original
 # attempt cap exclusively during a CARLA API outage.  Treatment/statistical
 # sources and the original contract remain byte-identical.  A frozen amendment
@@ -102,6 +112,12 @@ read -r RECOVERY_CELL RECOVERY_INIT ORIGINAL_MAX_ATTEMPTS CONTRACT_COMMIT AMENDM
   "${PYTHON_BIN}" -c 'import json,sys; p=json.loads(sys.stdin.read()); print(p["cell_id"],p["ego_init_id"],p["original_max_attempts"],p["contract_git_commit"],p["amendment"])' \
     <<<"${RECOVERY_JSON}"
 )
+
+if ((PREPARE_ONLY)); then
+  echo "SF4 infrastructure recovery prepare-only: PASS"
+  echo "No CARLA rollout was launched. Frozen amendment: ${AMENDMENT}"
+  exit 0
+fi
 
 REACTIVE_CONFIG_JSON="$("${PYTHON_BIN}" -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1]))["reactive_parameters"],separators=(",",":")))' "${CONTRACT}")"
 

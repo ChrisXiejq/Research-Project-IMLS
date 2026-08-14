@@ -223,12 +223,31 @@ Do not delete attempts or merely raise `SF4_MAX_ATTEMPTS` if a key exhausts
 all ten attempts. The dedicated recovery runner is admissible only when its
 fail-closed audit finds exactly one exhausted pending key, every prior attempt
 is classified as retryable CARLA infrastructure failure, every attempt includes
-`carla_timeout`, and zero scenario summaries or successful scientific outputs
-exist. It freezes an immutable amendment inside that key's attempt tree,
+`carla_timeout`, and no valid or partial scientific measurement payload exists.
+A `ran_successfully=false` summary written before the first simulation tick is
+retained and hash-inventoried as failure provenance; it is not counted as a
+scientific rollout. The audit recomputes the canonical complete-scenario
+validator and cross-checks its result against every attempt record. It freezes
+an immutable amendment inside that key's attempt tree,
 revalidates all original contract execution-source hashes, preserves the
 contract Git identity in subsequent raw configs, extends the cap to twenty for
 that key alone, leaves every other key at ten, and retains all prior failures.
 The amendment is included in both compact and full-raw evidence packages.
+
+First run the complete recovery audit in the foreground. This creates and
+idempotently revalidates the frozen amendment, but launches no rollout:
+
+```bash
+env \
+  CARLA_ROOT="$CARLA_ROOT" \
+  PYTHON_BIN="$PYTHON_BIN" \
+  SF4_RESULTS="$SF4_RESULTS" \
+  bash "$COLLECTION_REPO/core/scripts/carla/run_sf4_infrastructure_recovery.sh" \
+  --prepare-only
+```
+
+Proceed only after it prints `SF4 infrastructure recovery prepare-only: PASS`.
+Then launch the identical audited runner without `--prepare-only`:
 
 ```bash
 nohup env \
@@ -242,9 +261,9 @@ echo $! | tee "$SF4_RESULTS/sf4_recovery_runner.pid"
 ```
 
 This is an administrative missing-observation recovery, not a change to the
-scientific stopping rule. Any observed scenario summary, non-infrastructure
-failure, source drift, multiple exhausted keys or existing completion marker
-blocks the recovery.
+scientific stopping rule. Any valid scenario, non-empty trajectory/prediction/
+controller measurement payload, non-infrastructure failure, source drift,
+multiple exhausted keys or existing completion marker blocks the recovery.
 
 ## 6. Completion artifacts
 

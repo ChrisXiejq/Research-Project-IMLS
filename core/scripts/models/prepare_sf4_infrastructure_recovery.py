@@ -3,8 +3,10 @@
 
 This tool may extend the attempt cap for exactly one exhausted rollout only
 when every prior attempt is a retryable CARLA infrastructure failure and no
-scientific scenario output was observed.  The original run contract, treatment
-sources, accepted receipts and statistical design remain immutable.
+usable or partial scientific payload was observed.  A failed scenario summary
+is retained as infrastructure provenance, but is not confused with a valid
+rollout.  The original run contract, treatment sources, accepted receipts and
+statistical design remain immutable.
 """
 
 from __future__ import annotations
@@ -18,11 +20,28 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
-from r3_attempt_manager import valid_receipt
+from r3_attempt_manager import (
+    scenario_summaries,
+    scenario_validation_failures,
+    valid_receipt,
+    valid_scenario,
+)
 
 
-SCHEMA = "sf4_infrastructure_exhaustion_recovery_amendment_v1"
+SCHEMA = "sf4_infrastructure_exhaustion_recovery_amendment_v2"
 COMPLETE_SCHEMA = "sf4_supervisor_behavioural_authority_complete_v1"
+
+# These are measurements from a rollout rather than setup/configuration
+# metadata.  Their non-empty presence would make an interrupted attempt
+# scientifically ambiguous, so recovery must stop instead of silently
+# discarding them.
+SCIENTIFIC_PAYLOAD_BASENAMES = {
+    "scenario_result.pkl",
+    "scenario_steps.csv",
+    "smpc_debug_steps.jsonl",
+    "prediction_dataset_raw.jsonl",
+    "prediction_dataset_labeled.jsonl",
+}
 
 
 def sha256(path: Path) -> str:
@@ -107,9 +126,104 @@ def validate_markers(
         raise ValueError("SF4 excluded smoke marker is invalid")
 
 
+def audit_infrastructure_attempt(record_path: Path) -> dict[str, Any]:
+    """Prove that one finalized attempt contains no scientific observation.
+
+    The attempt manager writes a failure summary even when CARLA times out
+    before the first simulation tick.  Therefore summary *existence* is not a
+    success criterion: the canonical ``valid_scenario`` predicate is.  We also
+    reject non-empty partial measurement files, since accepting those would
+    permit outcome-dependent retrying.
+    """
+
+    attempt = record_path.parent
+    record = read_json(record_path)
+    log_path = attempt / "runner_attempt.log"
+    hygiene_path = attempt / "world_hygiene.json"
+    try:
+        directory_attempt = int(attempt.name.removeprefix("attempt_"))
+    except ValueError as error:
+        raise ValueError(f"Invalid attempt directory: {attempt}") from error
+    if not (
+        log_path.is_file()
+        and hygiene_path.is_file()
+        and record.get("attempt_log_sha256") == sha256(log_path)
+        and record.get("world_hygiene_sha256") == sha256(hygiene_path)
+    ):
+        raise ValueError(f"Exhausted attempt log/hygiene provenance drift: {attempt}")
+    matches = set(record.get("classifier_matches") or [])
+    if not (
+        record.get("schema_version") == "r3_attempt_record_v2"
+        and int(record.get("attempt", -1)) == directory_attempt
+        and record.get("accepted") is False
+        and record.get("classification") == "infrastructure_failure"
+        and record.get("retry_allowed") is True
+        and int(record.get("exit_code", 0)) != 0
+        and "carla_timeout" in matches
+        and "raw_evidence_sha256_before_promotion" in record
+        and record["raw_evidence_sha256_before_promotion"] is None
+    ):
+        raise ValueError(f"Attempt is not eligible infrastructure-only evidence: {record_path}")
+
+    init_id = int(record.get("ego_init_id", -1))
+    summaries = scenario_summaries(attempt, init_id)
+    valid = [path for path in summaries if valid_scenario(path)]
+    if (
+        int(record.get("scenario_summaries_found", -1)) != len(summaries)
+        or int(record.get("successful_scenarios_found", -1)) != len(valid)
+        or valid
+    ):
+        raise ValueError(f"Attempt scenario inventory/provenance drift: {record_path}")
+
+    summary_entries = []
+    for summary_path in summaries:
+        summary = read_json(summary_path)
+        error = str(summary.get("error") or "")
+        normalized_error = error.lower().replace("-", "")
+        if summary.get("ran_successfully") is not False or not (
+            "timeout" in normalized_error
+            and ("simulator" in normalized_error or "server" in normalized_error)
+        ):
+            raise ValueError(
+                f"Failure summary is not an unambiguous CARLA timeout: {summary_path}"
+            )
+        failures = scenario_validation_failures(summary_path)
+        if not failures or "summary_not_successful" not in failures:
+            raise ValueError(f"Failure summary unexpectedly validates: {summary_path}")
+        summary_entries.append(
+            {
+                "path": str(summary_path),
+                "sha256": sha256(summary_path),
+                "ran_successfully": False,
+                "error_sha256": hashlib.sha256(error.encode("utf-8")).hexdigest(),
+                "validation_failures": failures,
+            }
+        )
+
+    nonempty_payloads = sorted(
+        str(path.relative_to(attempt))
+        for path in attempt.rglob("*")
+        if path.is_file()
+        and path.name in SCIENTIFIC_PAYLOAD_BASENAMES
+        and path.stat().st_size > 0
+    )
+    if nonempty_payloads:
+        raise ValueError(
+            f"Attempt contains partial scientific payloads {nonempty_payloads}: {record_path}"
+        )
+    return {
+        "record": record,
+        "log_path": log_path,
+        "scenario_summaries": summary_entries,
+        "scenario_summaries_found": len(summaries),
+        "valid_scientific_scenarios_found": 0,
+        "nonempty_scientific_payloads": [],
+    }
+
+
 def find_exhausted(
     root: Path, keys: set[tuple[str, int]], original_max: int
-) -> tuple[str, int, Path, list[tuple[Path, dict[str, Any]]], int]:
+) -> tuple[str, int, Path, list[tuple[Path, dict[str, Any], dict[str, Any]]], int]:
     observed_receipts = 0
     exhausted = []
     for cell_id, init_id in sorted(keys):
@@ -136,19 +250,14 @@ def find_exhausted(
         record_path = attempt / "attempt_record.json"
         if not record_path.is_file():
             raise ValueError(f"Exhausted attempt lacks final record: {attempt}")
-        record = read_json(record_path)
-        matches = set(record.get("classifier_matches") or [])
+        audit = audit_infrastructure_attempt(record_path)
+        record = audit["record"]
         if not (
-            record.get("accepted") is False
-            and record.get("classification") == "infrastructure_failure"
-            and record.get("retry_allowed") is True
-            and int(record.get("exit_code", 0)) != 0
-            and "carla_timeout" in matches
-            and int(record.get("scenario_summaries_found", -1)) == 0
-            and int(record.get("successful_scenarios_found", -1)) == 0
+            record.get("cell_id") == cell_id
+            and int(record.get("ego_init_id", -1)) == init_id
         ):
-            raise ValueError(f"Attempt is not eligible infrastructure-only evidence: {record_path}")
-        records.append((record_path, record))
+            raise ValueError(f"Attempt target identity drift: {record_path}")
+        records.append((record_path, audit["record"], audit))
     return cell_id, init_id, attempts_root, records, observed_receipts
 
 
@@ -203,16 +312,46 @@ def prepare(args: argparse.Namespace) -> None:
         }
         if amendment.get("recovery_source_sha256") != expected_recovery_sources:
             raise ValueError("Existing SF4 recovery source hashes drifted")
-        for record in amendment.get("prior_attempts") or []:
-            record_path = root / str(record.get("record"))
-            log_path = root / str(record.get("log"))
+        prior_attempts = amendment.get("prior_attempts") or []
+        if (
+            len(prior_attempts) != original_max
+            or [int(item.get("attempt", -1)) for item in prior_attempts]
+            != list(range(1, original_max + 1))
+        ):
+            raise ValueError("Frozen pre-recovery attempt set is incomplete")
+        for frozen in prior_attempts:
+            record_path = root / str(frozen.get("record"))
+            log_path = root / str(frozen.get("log"))
             if not (
                 record_path.is_file()
                 and log_path.is_file()
-                and sha256(record_path) == record.get("record_sha256")
-                and sha256(log_path) == record.get("log_sha256")
+                and sha256(record_path) == frozen.get("record_sha256")
+                and sha256(log_path) == frozen.get("log_sha256")
             ):
                 raise ValueError("Frozen pre-recovery attempt provenance drifted")
+            audit = audit_infrastructure_attempt(record_path)
+            audit_record = audit["record"]
+            expected_summaries = []
+            for item in audit["scenario_summaries"]:
+                expected_summaries.append(
+                    {
+                        **item,
+                        "path": str(Path(item["path"]).relative_to(root)),
+                    }
+                )
+            if not (
+                audit_record.get("cell_id") == target.get("cell_id")
+                and int(audit_record.get("ego_init_id", -1))
+                == int(target.get("ego_init_id", -1))
+                and int(audit_record.get("attempt", -1))
+                == int(frozen.get("attempt", -2))
+                and frozen.get("scenario_summaries") == expected_summaries
+                and frozen.get("scenario_summaries_found")
+                == audit["scenario_summaries_found"]
+                and frozen.get("valid_scientific_scenarios_found") == 0
+                and frozen.get("nonempty_scientific_payloads") == []
+            ):
+                raise ValueError("Frozen pre-recovery scientific inventory drifted")
         print(
             json.dumps(
                 {
@@ -240,8 +379,12 @@ def prepare(args: argparse.Namespace) -> None:
         root, keys, original_max
     )
     record_entries = []
-    for record_path, record in records:
-        log_path = record_path.parent / "runner_attempt.log"
+    for record_path, record, audit in records:
+        log_path = audit["log_path"]
+        summaries = [
+            {**item, "path": str(Path(item["path"]).relative_to(root))}
+            for item in audit["scenario_summaries"]
+        ]
         record_entries.append(
             {
                 "attempt": int(record["attempt"]),
@@ -250,8 +393,10 @@ def prepare(args: argparse.Namespace) -> None:
                 "log": str(log_path.relative_to(root)),
                 "log_sha256": sha256(log_path),
                 "classifier_matches": record.get("classifier_matches"),
-                "scenario_summaries_found": 0,
-                "successful_scenarios_found": 0,
+                "scenario_summaries": summaries,
+                "scenario_summaries_found": audit["scenario_summaries_found"],
+                "valid_scientific_scenarios_found": 0,
+                "nonempty_scientific_payloads": [],
             }
         )
     amendment = {
