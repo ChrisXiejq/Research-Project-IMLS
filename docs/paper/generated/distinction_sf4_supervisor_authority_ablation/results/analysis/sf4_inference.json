@@ -1,0 +1,1756 @@
+{
+  "bootstrap": {
+    "replicates": 10000,
+    "seed": 20260814,
+    "unit": "complete ego-init block"
+  },
+  "direct_paired_effects": {
+    "actual_minus_nominal_accel_abs_mean_mps2": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          0.6329197136090633,
+          0.8806944134443605
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": 0.7476207603590919,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          0.6435995017204615,
+          0.8981411055076192
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": 0.7622570334923158,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.03879500494556034,
+          0.006176468831951666
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.275390625,
+        "mean_effect": -0.01463627313322392,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "actual_minus_nominal_accel_mean_mps2": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -0.8275326572338653,
+          -0.5643305336522995
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -0.6866048099896084,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -0.8456327434066495,
+          -0.5769840718896038
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -0.7030426670867922,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.00403761134635533,
+          0.03996272455088341
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.21484375,
+        "mean_effect": 0.01643785709718385,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "actual_path_release_to_sustained_resume_s": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "adverse_collision_any": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -0.8,
+          -0.3
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.55,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -0.75,
+          -0.25
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.5,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.15
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.05,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "attempted_fallback_or_nonaccepted_fraction": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -0.28530644181815573,
+          -0.11852833151141921
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -0.20844247192383958,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -0.2835375527231231,
+          -0.11809026564204639
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -0.20711206372023433,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -0.00033200481027254036,
+          0.002539607752524528
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.375,
+        "mean_effect": 0.0009736672557947912,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.001189077831282486,
+          0.0002431202687744271
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.5,
+        "mean_effect": -0.0003567409478104688,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "buffered_conflict_clear_to_sustained_resume_s": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "candidate_minus_nominal_accel_abs_mean_mps2": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -1.6324683035836651,
+          -0.37482379495147267
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.017578125,
+        "mean_effect": -0.9614999317085001,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -1.6393988964401067,
+          -0.3594421827955927
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.017578125,
+        "mean_effect": -0.9524411747776155,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -0.01759107031393953,
+          0.005069213120697862
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.396484375,
+        "mean_effect": -0.005577516202339289,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.03879500494556034,
+          0.006176468831951666
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.275390625,
+        "mean_effect": -0.01463627313322392,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "candidate_minus_nominal_accel_mean_mps2": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          0.4341095435908629,
+          1.700300506988098
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": 1.0225158820779838,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          0.4156978761769889,
+          1.7038176812768895
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": 1.0116555411831392,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -0.005069213120697862,
+          0.017591070313939527
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.396484375,
+        "mean_effect": 0.005577516202339289,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.00403761134635533,
+          0.03996272455088341
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.21484375,
+        "mean_effect": 0.01643785709718385,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "cautious_approach_progress_m": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "completion_success": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          1.0,
+          1.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": 1.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          1.0,
+          1.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": 1.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "ego_policy_wall_time_over_200ms_fraction": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          0.11292391013123601,
+          0.1739168934305584
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": 0.14525742552611318,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          0.10846006398351778,
+          0.18312771941355144
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": 0.14770267806605214,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.01691149641137322,
+          0.04810157254324157
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.00390625,
+        "mean_effect": 0.0318066483527607,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          0.016468327682566303,
+          0.04268624279179965
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.00390625,
+        "mean_effect": 0.02936139581282176,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "ego_policy_wall_time_over_500ms_fraction": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -0.011504581501245567,
+          0.0010314889560532835
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.15625,
+        "mean_effect": -0.005161297762338151,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -0.003279605507917274,
+          0.002252945146778499
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.923828125,
+        "mean_effect": -0.00020654652617744336,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0023585849135161403,
+          0.012062220504913804
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.0390625,
+        "mean_effect": 0.00719327087400298,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          0.0009185599109874637,
+          0.004015749875232808
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.009765625,
+        "mean_effect": 0.002238519637842273,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "ego_policy_wall_time_over_50ms_fraction": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -0.11759912899184341,
+          -0.08350905345775293
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -0.10178955118117905,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -0.1219906731630535,
+          -0.09596454932786275
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -0.10992998729321321,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -0.018088440454471798,
+          0.004487379859295884
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.421875,
+        "mean_effect": -0.005809020612949134,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.0012657421223115932,
+          0.005933055036056158
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.25390625,
+        "mean_effect": 0.002331415499085021,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "ego_policy_wall_time_p50_ms": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -3.89018626883626,
+          17.995931725017726
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.32421875,
+        "mean_effect": 6.521261017769575,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -1.3583466876298187,
+          17.45923503069207
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.154296875,
+        "mean_effect": 7.886983081698418,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          8.287934493273497,
+          24.009648852515962
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.0078125,
+        "mean_effect": 16.517697647213936,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          9.227977462578565,
+          21.326340769883238
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.00390625,
+        "mean_effect": 15.151975583285093,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "ego_policy_wall_time_p95_ms": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -32.33617373090234,
+          76.56963305105454
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.421875,
+        "mean_effect": 24.19670998118818,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          6.295464478665938,
+          84.00381015893069
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.052734375,
+        "mean_effect": 48.287630472332246,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          22.324427266139576,
+          61.49029049091041
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.00390625,
+        "mean_effect": 41.74243103712799,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          5.2540629804134475,
+          33.11647491366603
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": 17.65151054598393,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "ego_policy_wall_time_p99_ms": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -11.759272646857491,
+          94.29510214738549
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.177734375,
+        "mean_effect": 41.37746042944486,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -19.47568065989737,
+          55.278328804392444
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.490234375,
+        "mean_effect": 15.07892671041198,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -34.500817437982164,
+          39.82595847584306
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.87890625,
+        "mean_effect": 3.19888975471261,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          10.715166613925387,
+          50.47706637731721
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": 29.49742347374549,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "failure_penalized_completion_time_s": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -19.490000000000002,
+          -17.6125
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -18.630000000000003,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -19.365062500000004,
+          -17.7775
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -18.65,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.26000000000000034,
+          0.3374999999999998
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.919921875,
+        "mean_effect": 0.019999999999999928,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "first_stop_distance_to_conflict_m": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "first_stop_distance_to_designed_stop_m": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "margin_adjusted_bbox_violation_any": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -1.0,
+          -0.4
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.7,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -1.0,
+          -0.4
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.7,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "minimum_margin_adjusted_bbox_separation_m": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          0.021050388745383442,
+          1.140890342740672
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.0859375,
+        "mean_effect": 0.623904330879375,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          0.026302562865254592,
+          1.1480192662962712
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.080078125,
+        "mean_effect": 0.6307914908572829,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -0.012706696795942518,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.25,
+        "mean_effect": -0.00624295654759619,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.05438883948649427,
+          0.018809171844430067
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.49609375,
+        "mean_effect": -0.013130116525504065,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "native_collision_any": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -0.6,
+          -0.2
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.4,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -0.6,
+          -0.2
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.4,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "nominal_conflict_clear_to_actual_path_release_s": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "physical_bbox_overlap_any": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -0.8,
+          -0.3
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.55,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -0.75,
+          -0.25
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.5,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.15
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.05,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "prediction_wall_time_p50_ms": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          6.5473903506062925,
+          81.61977150244637
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.072265625,
+        "mean_effect": 38.45034670084715,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          2.342125368304551,
+          86.39275688678025
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.125,
+        "mean_effect": 39.96080216020346,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -5.560507467016577,
+          14.182855247054249
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.673828125,
+        "mean_effect": 3.0926773324608803,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -1.2001618556678295,
+          4.461848470382392
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.330078125,
+        "mean_effect": 1.5822218731045723,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "prediction_wall_time_p95_ms": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -42.765584529377485,
+          -4.3331856592558236
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.05078125,
+        "mean_effect": -23.103747377172102,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -57.34744855738241,
+          -25.14338987041262
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.00390625,
+        "mean_effect": -41.289393305778454,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -30.3883612130303,
+          3.812808966031346
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.212890625,
+        "mean_effect": -12.657847106456728,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -4.781486157560744,
+          15.530818402767181
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.330078125,
+        "mean_effect": 5.527798822149623,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "prediction_wall_time_p99_ms": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -59.74233510266064,
+          -1.631818240974189
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.08203125,
+        "mean_effect": -30.716244572773615,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -40.261294022109205,
+          7.060983668220964
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.22265625,
+        "mean_effect": -16.809070063754962,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -25.126157504832356,
+          26.20860027656897
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.923828125,
+        "mean_effect": 1.5794713459909133,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -42.94180821543552,
+          16.837279712734695
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.462890625,
+        "mean_effect": -12.32770316302774,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "stopped_duration_s": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "supervisor_authority_applied_fraction": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          0.21145380303001282,
+          0.23689953144758713
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": 0.22309347831869347,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          0.2168254827119564,
+          0.24122977305082569
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": 0.22790993002971396,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.010305514918821607,
+          0.0006729473727669158
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.134765625,
+        "mean_effect": -0.004816451711020489,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "supervisor_candidate_requested_fraction": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -0.470696869342902,
+          -0.17874340881548376
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.01171875,
+        "mean_effect": -0.3294748689656818,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -0.46627521215464174,
+          -0.17259161248888977
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.013671875,
+        "mean_effect": -0.32386089144493857,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          -0.0018648735519967373,
+          0.004185665081187428
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.75,
+        "mean_effect": 0.0007975258097227128,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          -0.010305514918821607,
+          0.0006729473727669158
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.134765625,
+        "mean_effect": -0.004816451711020489,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "trajectory_inferred_yield_rule_failure": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -0.6,
+          -0.2
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.4,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -0.6,
+          -0.2
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.015625,
+        "mean_effect": -0.4,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    },
+    "yield_rule_failure": {
+      "authority_effect_adaptive": {
+        "cluster_bootstrap_95ci": [
+          -1.0,
+          -0.85
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -0.95,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "cluster_bootstrap_95ci": [
+          -1.0,
+          -0.85
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+        "mean_effect": -0.95,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "cluster_bootstrap_95ci": [
+          0.0,
+          0.0
+        ],
+        "defined_init_clusters": 10,
+        "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+        "mean_effect": 0.0,
+        "randomisation_inference": false,
+        "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+        "total_init_clusters": 10
+      }
+    }
+  },
+  "exact_sensitivity_analysis": "all 2^10 two-sided sign flips of init-cluster effects under a symmetric cluster-effect assumption; not randomisation inference",
+  "independent_unit": "ego_init_id",
+  "outcomes": {
+    "actual_minus_nominal_accel_abs_mean_mps2": {
+      "cluster_bootstrap_95ci": [
+        -0.03879500494556034,
+        0.006176468831951666
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.275390625,
+      "mean_effect": -0.01463627313322392,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "actual_minus_nominal_accel_mean_mps2": {
+      "cluster_bootstrap_95ci": [
+        -0.00403761134635533,
+        0.03996272455088341
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.21484375,
+      "mean_effect": 0.01643785709718385,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "actual_path_release_to_sustained_resume_s": {
+      "defined_init_clusters": 3,
+      "status": "descriptive_only_missing_event_clock",
+      "total_init_clusters": 10
+    },
+    "adverse_collision_any": {
+      "cluster_bootstrap_95ci": [
+        -0.15,
+        0.0
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+      "mean_effect": -0.05,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "attempted_fallback_or_nonaccepted_fraction": {
+      "cluster_bootstrap_95ci": [
+        -0.003217456031068877,
+        0.00026153909277887744
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.234375,
+      "mean_effect": -0.00133040820360526,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "buffered_conflict_clear_to_sustained_resume_s": {
+      "defined_init_clusters": 0,
+      "status": "descriptive_only_missing_event_clock",
+      "total_init_clusters": 10
+    },
+    "candidate_minus_nominal_accel_abs_mean_mps2": {
+      "cluster_bootstrap_95ci": [
+        -0.03834836136283892,
+        0.014823131604394836
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.591796875,
+      "mean_effect": -0.009058756930884575,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "candidate_minus_nominal_accel_mean_mps2": {
+      "cluster_bootstrap_95ci": [
+        -0.012759732633947052,
+        0.039207247236407956
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.505859375,
+      "mean_effect": 0.010860340894844561,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "cautious_approach_progress_m": {
+      "defined_init_clusters": 0,
+      "status": "descriptive_only_missing_event_clock",
+      "total_init_clusters": 10
+    },
+    "completion_success": {
+      "cluster_bootstrap_95ci": [
+        0.0,
+        0.0
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+      "mean_effect": 0.0,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "ego_policy_wall_time_over_200ms_fraction": {
+      "cluster_bootstrap_95ci": [
+        -0.021698584174998807,
+        0.011371261896690112
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.896484375,
+      "mean_effect": -0.0024452525399389427,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "ego_policy_wall_time_over_500ms_fraction": {
+      "cluster_bootstrap_95ci": [
+        -0.010562466358518515,
+        0.000811388105314575
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.14453125,
+      "mean_effect": -0.004954751236160708,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "ego_policy_wall_time_over_50ms_fraction": {
+      "cluster_bootstrap_95ci": [
+        -0.004092431144399153,
+        0.02047970308524985
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.259765625,
+      "mean_effect": 0.008140436112034143,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "ego_policy_wall_time_p50_ms": {
+      "cluster_bootstrap_95ci": [
+        -12.993681207299232,
+        11.67657340876758
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.8359375,
+      "mean_effect": -1.3657220639288425,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "ego_policy_wall_time_p95_ms": {
+      "cluster_bootstrap_95ci": [
+        -50.30116251204163,
+        4.820559452520632
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.138671875,
+      "mean_effect": -24.090920491144065,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "ego_policy_wall_time_p99_ms": {
+      "cluster_bootstrap_95ci": [
+        -21.51624237373507,
+        75.9502572647295
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.330078125,
+      "mean_effect": 26.29853371903288,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "failure_penalized_completion_time_s": {
+      "cluster_bootstrap_95ci": [
+        -0.2600000000000005,
+        0.3374999999999993
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.919921875,
+      "mean_effect": 0.019999999999999574,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "first_stop_distance_to_conflict_m": {
+      "defined_init_clusters": 0,
+      "status": "descriptive_only_missing_event_clock",
+      "total_init_clusters": 10
+    },
+    "first_stop_distance_to_designed_stop_m": {
+      "defined_init_clusters": 0,
+      "status": "descriptive_only_missing_event_clock",
+      "total_init_clusters": 10
+    },
+    "margin_adjusted_bbox_violation_any": {
+      "cluster_bootstrap_95ci": [
+        0.0,
+        0.0
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+      "mean_effect": 0.0,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "minimum_margin_adjusted_bbox_separation_m": {
+      "cluster_bootstrap_95ci": [
+        -0.047253569555377836,
+        0.02697222575034532
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.763671875,
+      "mean_effect": -0.006887159977907875,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "native_collision_any": {
+      "cluster_bootstrap_95ci": [
+        0.0,
+        0.0
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+      "mean_effect": 0.0,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "nominal_conflict_clear_to_actual_path_release_s": {
+      "defined_init_clusters": 3,
+      "status": "descriptive_only_missing_event_clock",
+      "total_init_clusters": 10
+    },
+    "physical_bbox_overlap_any": {
+      "cluster_bootstrap_95ci": [
+        -0.15,
+        0.0
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+      "mean_effect": -0.05,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "prediction_wall_time_p50_ms": {
+      "cluster_bootstrap_95ci": [
+        -12.320593090262264,
+        7.5703098718076935
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.80859375,
+      "mean_effect": -1.510455459356308,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "prediction_wall_time_p95_ms": {
+      "cluster_bootstrap_95ci": [
+        -5.556326713645897,
+        43.27859153272578
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.193359375,
+      "mean_effect": 18.185645928606352,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "prediction_wall_time_p99_ms": {
+      "cluster_bootstrap_95ci": [
+        -52.37772616310967,
+        28.97755161006936
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.537109375,
+      "mean_effect": -13.907174509018654,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "stopped_duration_s": {
+      "defined_init_clusters": 0,
+      "status": "descriptive_only_missing_event_clock",
+      "total_init_clusters": 10
+    },
+    "supervisor_authority_applied_fraction": {
+      "cluster_bootstrap_95ci": [
+        -0.010305514918821607,
+        0.0006729473727669158
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.134765625,
+      "mean_effect": -0.004816451711020489,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "supervisor_candidate_requested_fraction": {
+      "cluster_bootstrap_95ci": [
+        -0.01359889937923608,
+        0.001329260645884136
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 0.201171875,
+      "mean_effect": -0.005613977520743205,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "trajectory_inferred_yield_rule_failure": {
+      "cluster_bootstrap_95ci": [
+        0.0,
+        0.0
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+      "mean_effect": 0.0,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    },
+    "yield_rule_failure": {
+      "cluster_bootstrap_95ci": [
+        0.0,
+        0.0
+      ],
+      "defined_init_clusters": 10,
+      "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+      "mean_effect": 0.0,
+      "randomisation_inference": false,
+      "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+      "total_init_clusters": 10
+    }
+  },
+  "primary_estimand": "(adaptive-fixed_medium)_on - (adaptive-fixed_medium)_off",
+  "primary_outcome": "failure_penalized_completion_time_s",
+  "schema_version": "sf4_supervisor_behavioural_authority_cluster_inference_v1",
+  "status": "pass"
+}

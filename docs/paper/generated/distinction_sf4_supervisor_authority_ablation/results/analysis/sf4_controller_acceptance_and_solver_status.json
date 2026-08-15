@@ -1,0 +1,126 @@
+{
+  "by_authority_risk_style": {
+    "off__adaptive__assertive": {
+      "controller_accepted_attempts": 3230,
+      "controller_accepted_fraction": 0.9559041136430897,
+      "factual_solver_attempts": 3379,
+      "fallback_or_nonaccepted_attempts": 149,
+      "fallback_or_nonaccepted_fraction": 0.04409588635691033,
+      "raw_solver_return_status_counts": {
+        "INF_OR_UNBD": 149,
+        "OPTIMAL": 3230
+      },
+      "raw_solver_return_status_missing_count": 0,
+      "rollouts": 10
+    },
+    "off__adaptive__reactive": {
+      "controller_accepted_attempts": 1890,
+      "controller_accepted_fraction": 0.9224011713030746,
+      "factual_solver_attempts": 2049,
+      "fallback_or_nonaccepted_attempts": 159,
+      "fallback_or_nonaccepted_fraction": 0.07759882869692533,
+      "raw_solver_return_status_counts": {
+        "INF_OR_UNBD": 159,
+        "OPTIMAL": 1890
+      },
+      "raw_solver_return_status_missing_count": 0,
+      "rollouts": 10
+    },
+    "off__fixed_medium__assertive": {
+      "controller_accepted_attempts": 3232,
+      "controller_accepted_fraction": 0.9556475458308693,
+      "factual_solver_attempts": 3382,
+      "fallback_or_nonaccepted_attempts": 150,
+      "fallback_or_nonaccepted_fraction": 0.044352454169130695,
+      "raw_solver_return_status_counts": {
+        "INF_OR_UNBD": 150,
+        "OPTIMAL": 3232
+      },
+      "raw_solver_return_status_missing_count": 0,
+      "rollouts": 10
+    },
+    "off__fixed_medium__reactive": {
+      "controller_accepted_attempts": 1888,
+      "controller_accepted_fraction": 0.9223253541768441,
+      "factual_solver_attempts": 2047,
+      "fallback_or_nonaccepted_attempts": 159,
+      "fallback_or_nonaccepted_fraction": 0.07767464582315584,
+      "raw_solver_return_status_counts": {
+        "INF_OR_UNBD": 159,
+        "OPTIMAL": 1888
+      },
+      "raw_solver_return_status_missing_count": 0,
+      "rollouts": 10
+    },
+    "on__adaptive__assertive": {
+      "controller_accepted_attempts": 1800,
+      "controller_accepted_fraction": 0.9852216748768473,
+      "factual_solver_attempts": 1827,
+      "fallback_or_nonaccepted_attempts": 27,
+      "fallback_or_nonaccepted_fraction": 0.014778325123152709,
+      "raw_solver_return_status_counts": {
+        "INF_OR_UNBD": 27,
+        "OPTIMAL": 1800
+      },
+      "raw_solver_return_status_missing_count": 0,
+      "rollouts": 10
+    },
+    "on__adaptive__reactive": {
+      "controller_accepted_attempts": 1999,
+      "controller_accepted_fraction": 0.9857001972386588,
+      "factual_solver_attempts": 2028,
+      "fallback_or_nonaccepted_attempts": 29,
+      "fallback_or_nonaccepted_fraction": 0.014299802761341223,
+      "raw_solver_return_status_counts": {
+        "INF_OR_UNBD": 29,
+        "OPTIMAL": 1999
+      },
+      "raw_solver_return_status_missing_count": 0,
+      "rollouts": 10
+    },
+    "on__fixed_medium__assertive": {
+      "controller_accepted_attempts": 1839,
+      "controller_accepted_fraction": 0.9850026780931976,
+      "factual_solver_attempts": 1867,
+      "fallback_or_nonaccepted_attempts": 28,
+      "fallback_or_nonaccepted_fraction": 0.014997321906802356,
+      "raw_solver_return_status_counts": {
+        "INF_OR_UNBD": 28,
+        "OPTIMAL": 1839
+      },
+      "raw_solver_return_status_missing_count": 0,
+      "rollouts": 10
+    },
+    "on__fixed_medium__reactive": {
+      "controller_accepted_attempts": 1944,
+      "controller_accepted_fraction": 0.9853015712113533,
+      "factual_solver_attempts": 1973,
+      "fallback_or_nonaccepted_attempts": 29,
+      "fallback_or_nonaccepted_fraction": 0.01469842878864673,
+      "raw_solver_return_status_counts": {
+        "INF_OR_UNBD": 29,
+        "OPTIMAL": 1944
+      },
+      "raw_solver_return_status_missing_count": 0,
+      "rollouts": 10
+    }
+  },
+  "denominator": "factual SMPC attempts only; effective supervisor rule-bypass steps are excluded",
+  "full_matrix": {
+    "controller_accepted_attempts": 17822,
+    "controller_accepted_fraction": 0.960651142733937,
+    "factual_solver_attempts": 18552,
+    "fallback_or_nonaccepted_attempts": 730,
+    "fallback_or_nonaccepted_fraction": 0.03934885726606296,
+    "raw_solver_return_status_counts": {
+      "INF_OR_UNBD": 730,
+      "OPTIMAL": 17822
+    },
+    "raw_solver_return_status_missing_count": 0,
+    "rollouts": 80
+  },
+  "raw_return_status_is_separately_reported": true,
+  "schema_version": "sf4_controller_acceptance_and_solver_status_v1",
+  "semantic_boundary": "applied.is_opt and solver.optimal denote controller acceptance of the returned command, including accepted SUBOPTIMAL solutions; they are not strict optimizer-optimality or feasibility flags",
+  "status": "pass"
+}

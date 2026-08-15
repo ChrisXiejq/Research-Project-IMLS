@@ -1,0 +1,67 @@
+{
+  "by_authority_rollout_means": {
+    "off": {
+      "ego_policy_wall_time_over_200ms_fraction__defined_rollouts": 40,
+      "ego_policy_wall_time_over_200ms_fraction__rollout_mean": 0.12165222689022445,
+      "ego_policy_wall_time_over_500ms_fraction__defined_rollouts": 40,
+      "ego_policy_wall_time_over_500ms_fraction__rollout_mean": 0.006720870750870317,
+      "ego_policy_wall_time_over_50ms_fraction__defined_rollouts": 40,
+      "ego_policy_wall_time_over_50ms_fraction__rollout_mean": 0.9828423080611699,
+      "ego_policy_wall_time_p50_ms__defined_rollouts": 40,
+      "ego_policy_wall_time_p50_ms__rollout_mean": 119.69660129398108,
+      "ego_policy_wall_time_p95_ms__defined_rollouts": 40,
+      "ego_policy_wall_time_p95_ms__rollout_mean": 279.3055056314915,
+      "ego_policy_wall_time_p99_ms__defined_rollouts": 40,
+      "ego_policy_wall_time_p99_ms__rollout_mean": 385.1009778287261,
+      "prediction_wall_time_p50_ms__defined_rollouts": 40,
+      "prediction_wall_time_p50_ms__rollout_mean": 165.81363212317228,
+      "prediction_wall_time_p95_ms__defined_rollouts": 40,
+      "prediction_wall_time_p95_ms__rollout_mean": 330.60724590905005,
+      "prediction_wall_time_p99_ms__defined_rollouts": 40,
+      "prediction_wall_time_p99_ms__rollout_mean": 366.82272103987634,
+      "rollouts": 40
+    },
+    "on": {
+      "ego_policy_wall_time_over_200ms_fraction__defined_rollouts": 40,
+      "ego_policy_wall_time_over_200ms_fraction__rollout_mean": 0.26813227868630707,
+      "ego_policy_wall_time_over_500ms_fraction__defined_rollouts": 40,
+      "ego_policy_wall_time_over_500ms_fraction__rollout_mean": 0.004036948606612519,
+      "ego_policy_wall_time_over_50ms_fraction__defined_rollouts": 40,
+      "ego_policy_wall_time_over_50ms_fraction__rollout_mean": 0.8769825388239738,
+      "ego_policy_wall_time_p50_ms__defined_rollouts": 40,
+      "ego_policy_wall_time_p50_ms__rollout_mean": 126.90072334371507,
+      "ego_policy_wall_time_p95_ms__defined_rollouts": 40,
+      "ego_policy_wall_time_p95_ms__rollout_mean": 315.5476758582517,
+      "ego_policy_wall_time_p99_ms__defined_rollouts": 40,
+      "ego_policy_wall_time_p99_ms__rollout_mean": 413.32917139865447,
+      "prediction_wall_time_p50_ms__defined_rollouts": 40,
+      "prediction_wall_time_p50_ms__rollout_mean": 205.0192065536976,
+      "prediction_wall_time_p95_ms__defined_rollouts": 40,
+      "prediction_wall_time_p95_ms__rollout_mean": 298.4106755675748,
+      "prediction_wall_time_p99_ms__defined_rollouts": 40,
+      "prediction_wall_time_p99_ms__rollout_mean": 343.06006372161204,
+      "rollouts": 40
+    }
+  },
+  "clock": "time.perf_counter",
+  "deployment_or_real_time_guarantee": false,
+  "formal_rollouts": 80,
+  "inferential_unit": "ego_init_id paired cluster, never simulation step",
+  "missing_or_nonfinite_timing_never_invalidates_primary_science_or_allows_replacement": true,
+  "nonfinite_and_exception_accounting": {
+    "ego_policy_active_nonfinite_samples": 0,
+    "ego_policy_exceptions": 0,
+    "prediction_active_nonfinite_samples": 0,
+    "prediction_exceptions": 0
+  },
+  "quantile_unit": "within-rollout active-planning invocations",
+  "schema_version": "sf4_server_wall_time_analysis_v1",
+  "scope": "Server-side wall time around ego policy.run_step while the ego policy remains active after the call; includes risk allocation, solver update/solve and supervisor, excludes the separately reported shared prediction pipeline and other-agent policies.",
+  "server_side_diagnostic_only": true,
+  "status": "pass",
+  "thresholds_ms": [
+    50.0,
+    200.0,
+    500.0
+  ]
+}

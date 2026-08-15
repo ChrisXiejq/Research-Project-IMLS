@@ -1,0 +1,17 @@
+{
+  "archive": "sf4_supervisor_behavioural_authority_full_raw_snapshot.tar.gz",
+  "archive_bytes": 269530771,
+  "archive_sha256": "f7f58b3f66e1937469a5038ac6d31070bf388ef6b21734de10eb47b39e57faa6",
+  "bbox_and_separation_recomputation_supported": true,
+  "controller_acceptance_and_raw_status_recomputation_supported": true,
+  "files_manifest": "sf4_supervisor_behavioural_authority_full_raw_snapshot.tar.gz.files.json",
+  "files_manifest_sha256": "fe366914a2a05191564fd935e9e5dfe57b90c18d8971044fee2f009555768ed1",
+  "full_raw_evidence": true,
+  "included_external_files": 1,
+  "included_source_files": 3096,
+  "observed_rollouts": 80,
+  "schema_version": "sf4_supervisor_behavioural_authority_full_raw_snapshot_v1",
+  "server_wall_time_recomputation_supported": true,
+  "source_files_deleted": false,
+  "status": "pass"
+}

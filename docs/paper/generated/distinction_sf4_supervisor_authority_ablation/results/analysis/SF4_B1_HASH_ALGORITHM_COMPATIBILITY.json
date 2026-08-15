@@ -1,0 +1,703 @@
+{
+  "analysis_observed_rollouts": 80,
+  "analysis_status": "pass",
+  "compatibility_wrapper": {
+    "git_commit": "2b93035c92f61919bd1949d86f3b49fe649a1cb5",
+    "path": "core/scripts/models/finalize_sf4_offline_hash_compatibility.py",
+    "sha256": "00cc6a535032c9a72cfef4ff05d617b8e0ab7ec7776e713eedfe27ec6b47e2b9"
+  },
+  "contract": {
+    "b1_model_tree": "bdececc11380329011844d99f5366239b2373b293aed7b15b57eb4bfca2bb429",
+    "path": "/root/autodl-tmp/results/give_way_transformer/distinction_v1/sf4_supervisor_behavioural_authority_v1/sf4_supervisor_behavioural_authority_run_contract.json",
+    "sha256": "62229403a94d93268c63e4707d7325f27bd62f515f975894244c37ae62e287ec"
+  },
+  "contract_modified": false,
+  "deployment_preflight": {
+    "path": "/root/autodl-tmp/results/give_way_transformer/distinction_v1/sf4_supervisor_behavioural_authority_v1/sf4_b1_deployment_preflight.json",
+    "runtime_b1_model_tree": "860e2c4513273982e26cb7ea36177029c1620a3761e631eee64818fb85ec2231",
+    "selected_seed": 37,
+    "selected_variant": "B1",
+    "sha256": "4ad21074aaa596459e50cdc0d33ed33b4fceda34dd12be0de5fa85e574ad8027"
+  },
+  "frozen_analyzer_modified": false,
+  "frozen_analyzer_sha256": "b9f53462a77239c0786ab5a1b3c8a5564f90eab44859bacacced09aba0e0df0c",
+  "frozen_execution_sources_verified": {
+    "core/scripts/carla/policies/smpc_agent.py": "1377073b9410fd21b4291757c761622e16de793f64b66a09acd0753d8af0476e",
+    "core/scripts/carla/policies/supervisor_action_filter.py": "892546c941198d2c9fb6186122ad26c52e2a69d8dfae1495de0c869d4dfffc37",
+    "core/scripts/carla/run_all_scenarios.py": "0772ed8fd5666ee991e5d6bf5f41046e2060e0282877252bc1bac08f7cff2c3c",
+    "core/scripts/carla/run_sf4_supervisor_behavioural_authority_ablation.sh": "3bdbf17e346f3c669822dfb5a3de96e7b53fc8e99e0d955b94eff4da827da4d8",
+    "core/scripts/carla/scenarios/run_intersection_scenario.py": "0367587df3cfcecd6b0a73d6e84a1d5c51366455a07d521cc0bc59d84c78a00c",
+    "core/scripts/models/analyze_sf4_supervisor_behavioural_authority.py": "b9f53462a77239c0786ab5a1b3c8a5564f90eab44859bacacced09aba0e0df0c",
+    "core/scripts/models/generate_sf4_supervisor_authority_inits.py": "9987d1b6767efddceb4ebc05cff47c84c5d2ad43231acab652f2fd99fa515e10",
+    "core/scripts/models/package_sf4_compact_evidence.py": "bb4ad8dc0959832ce85cb3ff531686f3bae2238cee6819dd70e3098fa78a6604",
+    "core/scripts/models/package_sf4_full_raw_snapshot.py": "0a3210233be664c86b756bad868c03d7c8cf25f88ef11b278367832d54803e17",
+    "core/scripts/models/preflight_sf4_supervisor_authority_inits.py": "a8014c0daf7aae88c9f3833b60499dba36f56a366e0831f3c5fcba1433c43ad0",
+    "core/scripts/models/prepare_sf4_supervisor_behavioural_authority.py": "abfb431bddc8e3fcb652668f41467b5d621b21c9b850aa70a48e61f9b89bdb95",
+    "core/scripts/models/r3_attempt_manager.py": "7bbfa8365dacb0a4bccffa94d945baa026c5685fdfbb21624b1a94408eab87db",
+    "core/scripts/models/validate_sf4_supervisor_authority_smoke.py": "7a1b6cbf97be457c4a5d6eacee1c96552330b3119a072eb3c1e8ced176fcad8c",
+    "core/scripts/models/verify_day9_deployment.py": "ea956586708c8b5d201ea8f6eaf0071fa965c45ab1695411ca4f990039b96a57",
+    "core/scripts/postcarla_trajectory_gate.py": "98ebc8d4149c4dc49ac72a55066fc685a6ef2494f648abb5edb6a8cee1e9231f"
+  },
+  "model_tree_dual_hash_proof": {
+    "bytes": 45157094,
+    "contract_newline_record_sha256_tree": "bdececc11380329011844d99f5366239b2373b293aed7b15b57eb4bfca2bb429",
+    "files": 5,
+    "path": "/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1/runs/B1/seed_37/best_model",
+    "runtime_concatenated_record_sha256_tree": "860e2c4513273982e26cb7ea36177029c1620a3761e631eee64818fb85ec2231"
+  },
+  "raw_rollouts_or_receipts_modified": false,
+  "reason": "Prospective contract and online deployment used two explicit directory-record encodings for the same B1 model tree.",
+  "rollout_deployment_manifests_verified": 80,
+  "rollouts": [
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_106_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 106,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_106_COMPLETE.json",
+      "receipt_sha256": "baaee6c10006e1ad6f0db72c7418ef68a0da4e87ad11ff3dd34a2a659d47ffeb"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_106_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 106,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_106_COMPLETE.json",
+      "receipt_sha256": "5ee56b090bd149a5740c38bc7f15663b27ac5c647edb17d1a11218735663a6ce"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_106_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 106,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_106_COMPLETE.json",
+      "receipt_sha256": "fd0894f5bee775041ffa622d322f909293443072a177099ecdb95f8cbbcb28ad"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_106_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 106,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_106_COMPLETE.json",
+      "receipt_sha256": "fc8daaf108bc9bf99c47e5e9a6c1ff1b513e194d9c7d596eedc862123eec0484"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_106_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 106,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_106_COMPLETE.json",
+      "receipt_sha256": "e5b8392ffdb5fc014b22c43e914db8bedf24b06a2758bc448f89554fe83c3c5f"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_106_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 106,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_106_COMPLETE.json",
+      "receipt_sha256": "3d37c7e073ea42d298057d575fe5f160d8811bdc6b8aed502db0359afd03d86b"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_106_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 106,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_106_COMPLETE.json",
+      "receipt_sha256": "503c3bc6f03a7c5ef8f54c8f52ed4f75a4cc0c61957caf9471c5b3a97f8669df"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_106_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 106,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_106_COMPLETE.json",
+      "receipt_sha256": "48ba5293f868f2095dd711aa8255bcbbeebcf7ebffb0a680c848f6cd86bf1efa"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_107_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 107,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_107_COMPLETE.json",
+      "receipt_sha256": "b01670f77b0b0616891c47d2da4b1c652da2e59c0701ee8e261415f1a86baec0"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_107_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 107,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_107_COMPLETE.json",
+      "receipt_sha256": "7fa5c90b74e4c07efbf9cb12114ea5707b0fa1324bab1a4499e08e7b8a096d9c"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_107_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 107,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_107_COMPLETE.json",
+      "receipt_sha256": "57615c68a6e956152e23c01142305b7dced94ab37057d5046520dcfa7cd60a83"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_107_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 107,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_107_COMPLETE.json",
+      "receipt_sha256": "58e03137874643684d343803225c5e7492c88b01df84b3b9f45abf1e55f25e43"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_107_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 107,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_107_COMPLETE.json",
+      "receipt_sha256": "b3bacf347c77532cf4b425627fedc2b1116c3dcff0bea61ed4923805451521fc"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_107_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 107,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_107_COMPLETE.json",
+      "receipt_sha256": "1df86b2f2b76394cd0570b49a8d070471c78bf3a6545e300a8e8814be8158a82"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_107_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 107,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_107_COMPLETE.json",
+      "receipt_sha256": "d82e550507c67f64bf2e85e75bff3a2eaeb9eb19c1e913997e27d9e9f7a3e720"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_107_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 107,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_107_COMPLETE.json",
+      "receipt_sha256": "e68a2e4ae38d5693c46299a1bb79a1c5a1ba65d145ffd1a41ff667c17164364c"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_108_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 108,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_108_COMPLETE.json",
+      "receipt_sha256": "693d0a9bba0d99f5d4743c34eb45ffd2ecd6b1a6db941e057c6d29377f040625"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_108_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 108,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_108_COMPLETE.json",
+      "receipt_sha256": "ee20b549c002af01967c1269218f2d4e43739dcb155641945b921a980ef55a7b"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_108_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 108,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_108_COMPLETE.json",
+      "receipt_sha256": "84feb8f6bba7999206f8e4ab3a1c91b7d65df53dd577815975114a0f0cbdae38"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_108_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 108,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_108_COMPLETE.json",
+      "receipt_sha256": "61cd81af6dae05236c38ebdc0ed3662c6cc7821dbb24a136f2997e21f0e0e31d"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_108_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 108,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_108_COMPLETE.json",
+      "receipt_sha256": "ad6b1c948acc0fc53809d283089f34cd183b1401bde4a9ceb4e3ebeba18e9173"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_108_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 108,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_108_COMPLETE.json",
+      "receipt_sha256": "53d3f88c15cb62d81055be550036528c516ecf48dd3553565d6baf20853eebcb"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_108_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 108,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_108_COMPLETE.json",
+      "receipt_sha256": "eae3e3f0c0e7e604e63fb6c5ea55a54a5349f9dded58a7b8462ed41f80b4e375"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_108_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 108,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_108_COMPLETE.json",
+      "receipt_sha256": "cba80dc6a96a789422c3c9745c599eef43a1dd7c1b2802032e1bbca6bcdd97d1"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_109_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 109,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_109_COMPLETE.json",
+      "receipt_sha256": "d7d1a465fa77b71c8b6e8ca0158c9ae0e26a8f62ae758cd2b5360753866c4ed7"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_109_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 109,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_109_COMPLETE.json",
+      "receipt_sha256": "c318e2cafc646f0136492d4df7b9297e5555b7d3be493ba7bc054904e88141d7"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_109_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 109,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_109_COMPLETE.json",
+      "receipt_sha256": "2bacc87833a1f31ef0af8d0bdd369c0389ebf6916e4a6ce3cb1b8eacccfed22b"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_109_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 109,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_109_COMPLETE.json",
+      "receipt_sha256": "8bb3ec421432cf3d6dfe0a3c36dfebf27bbe7b04c3e629d494dd00eef4623955"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_109_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 109,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_109_COMPLETE.json",
+      "receipt_sha256": "34c22c6feacdef56b5b32f18620564e935cf95cf713380c20ef8c2eb82011dd4"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_109_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 109,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_109_COMPLETE.json",
+      "receipt_sha256": "51c10f727738dc6c99486cd2e1a7a4d7d0970e410674ab4d24172e247c54bcea"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_109_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 109,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_109_COMPLETE.json",
+      "receipt_sha256": "390abb12965296d09e144f93006e54687a587f5b92182f374f4d15f6cbdd269f"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_109_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 109,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_109_COMPLETE.json",
+      "receipt_sha256": "c8ca6f3b48482634d40e1ea70cb6341eb12a6c9478dcc2d7b487d72343634775"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_110_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 110,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_110_COMPLETE.json",
+      "receipt_sha256": "1367fcf34661b179946d145e4862dc769d9ed745ffa5616c2b4a7e34d80f31e5"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_110_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 110,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_110_COMPLETE.json",
+      "receipt_sha256": "b080e6dbdd20bcd09e9d2bf8bdcc4234b015dadc13b67df5da1035b852ffb4c7"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_110_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 110,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_110_COMPLETE.json",
+      "receipt_sha256": "effccea072680028eeaf2a17d5314c5ecfc13206492ec5a9d259236141c751e8"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_110_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 110,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_110_COMPLETE.json",
+      "receipt_sha256": "16ac6496d5c99760be9a194c5571cdfdf7b4791f199bd81c853815dfd557222e"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_110_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 110,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_110_COMPLETE.json",
+      "receipt_sha256": "f2f36a56edbc3b20c72f229436a53dae60b52243459d7f6ea6cb108a9bb22a19"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_110_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 110,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_110_COMPLETE.json",
+      "receipt_sha256": "f82a33c25908258a2130b5722649111af97e43f41771c710cb02e3dcb8d00c92"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_110_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 110,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_110_COMPLETE.json",
+      "receipt_sha256": "a8d1af9a0a9bfe73efbbff631a6e15590e9cd35d5c15faf255158a7eed58cf81"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_110_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 110,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_110_COMPLETE.json",
+      "receipt_sha256": "a3adaa5c777993e51a48f9d60cff4196b55555aa1df382185ec63d5403f7512c"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_111_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 111,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_111_COMPLETE.json",
+      "receipt_sha256": "8378d2919df57b5aafeb1293730313e0e86abec6b8d0179eb68f95de97dfcf29"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_111_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 111,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_111_COMPLETE.json",
+      "receipt_sha256": "25e948078ac2880ddef48eac174487bb8f38a8057f0b546560e9819b745fe459"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_111_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 111,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_111_COMPLETE.json",
+      "receipt_sha256": "8da7691cfe465a0145ff258ee55c536dcc197e99184b2196de6f72f1e535a665"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_111_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 111,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_111_COMPLETE.json",
+      "receipt_sha256": "fc0f2b432896136bcbe6c55ca0a7d9d39c6bb9616fcd6f1253175d4513739eed"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_111_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 111,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_111_COMPLETE.json",
+      "receipt_sha256": "621772f0f720ebfc1ddca358b067eef446682594cc0d6e5aa9cbb9370cdb7ccc"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_111_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 111,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_111_COMPLETE.json",
+      "receipt_sha256": "c9ad5ad00a862127b5112e26b1ab8c452da523bdb3b016e8c1d8e03ba7929973"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_111_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 111,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_111_COMPLETE.json",
+      "receipt_sha256": "d62d8bc01137dff44ccb98e470ad02f6420086fb73c8663bf01ca718b18af44c"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_111_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 111,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_111_COMPLETE.json",
+      "receipt_sha256": "f921fdf202df0771a490229ee43f1137235962b7abfb523756fe448234c3e8d3"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_112_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 112,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_112_COMPLETE.json",
+      "receipt_sha256": "6fa20edc4912fe25eef78d4a3e0d3f9639b5e1ac357575670c1fd7f54c02c938"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_112_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 112,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_112_COMPLETE.json",
+      "receipt_sha256": "104526f5785f2bf2b4a2aaf755288ddd727ce9dac11be8fd82439a3b46f860cf"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_112_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 112,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_112_COMPLETE.json",
+      "receipt_sha256": "3df209f6a40b56bb78151093cba26702ffe6c34563b4f1fea3d1c24d41376a29"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_112_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 112,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_112_COMPLETE.json",
+      "receipt_sha256": "4cec3003e4843a8c4caa6a7848992ce5bd4406e83c9a8abab544309109f20b50"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_112_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 112,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_112_COMPLETE.json",
+      "receipt_sha256": "53121acba6e4dd664ac6fb070b1a59c6132aa21967210ff5ba95cf6354d741e6"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_112_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 112,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_112_COMPLETE.json",
+      "receipt_sha256": "4f762df73eaa2ac7a3774da6f9530d73f733fd3f3110069795e4b79e9071e8f3"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_112_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 112,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_112_COMPLETE.json",
+      "receipt_sha256": "0e16b2aecd673773a8f862c7aff846e9573552cd8fb8efcbc8ba15d2afda28f0"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_112_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 112,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_112_COMPLETE.json",
+      "receipt_sha256": "6c139a877bf872c97d2d01bbfa30c2ea86165696693545cfed836bb780db1843"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_113_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 113,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_113_COMPLETE.json",
+      "receipt_sha256": "fec09594064ebca36ca4c5764be1b21794bdad8a209bf9cd1d2a605f4d718520"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_113_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 113,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_113_COMPLETE.json",
+      "receipt_sha256": "4d62d0b7e9ab5a8a68941c1ee043a6972b6464237b9b0a68c9bd52a8c674c4d3"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_113_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 113,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_113_COMPLETE.json",
+      "receipt_sha256": "fc68c097a4419474b044729e5913d4397d649a3dd316f6ae41911859bcb2f320"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_113_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 113,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_113_COMPLETE.json",
+      "receipt_sha256": "e2c6114cce14617da8ea2ba21bc29b8ed48f5ae263ae6ae66dfcb46acfb7f555"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_113_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 113,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_113_COMPLETE.json",
+      "receipt_sha256": "9be7588b9e12035f6c04dfe77990a8eda63f4f5a681eefe9888cb43f57570204"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_113_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 113,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_113_COMPLETE.json",
+      "receipt_sha256": "f79f1cd7daebb922fedf895d282d5aecbc94f6c9d56904932ab98b08f7ffa12c"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_113_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 113,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_113_COMPLETE.json",
+      "receipt_sha256": "d075ce25932ffaac2c1639940ddd63f93d3540c3faf54b7e56637f4b73bd16a5"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_113_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 113,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_113_COMPLETE.json",
+      "receipt_sha256": "bed0d82638b6188c9b727124b1266bb3a64454c7a728efa233fb47f61aa8af49"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_114_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 114,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_114_COMPLETE.json",
+      "receipt_sha256": "09993f6e337d0cbe1497837bae901d2141542f287acd71ba1680348057f23b04"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_114_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 114,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_114_COMPLETE.json",
+      "receipt_sha256": "280716d6da807967851eae4f9cd3a126c5b8592e4f2384759d91b6aeded9b914"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_114_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 114,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_114_COMPLETE.json",
+      "receipt_sha256": "7514f06237db61f50997181e422f63e48852d1c6250a88c94a15bfe5bb15d1ba"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_114_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 114,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_114_COMPLETE.json",
+      "receipt_sha256": "e2876825413cf259f732cb662356a8a021b0a06daa0a8ec82c2688519e3ec941"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_114_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 114,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_114_COMPLETE.json",
+      "receipt_sha256": "a80ad717a123df84f4acba64c76ee40ca5f1c6de4871977c3768db740e8b85be"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_114_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 114,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_114_COMPLETE.json",
+      "receipt_sha256": "960a80f1db34d3144cf958c8f0b1cdbda9598f48b94283cd054a35f32eb4f88a"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_114_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 114,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_114_COMPLETE.json",
+      "receipt_sha256": "0a769a87c19aa64b9c8e54d2f6772fea31bcf03e3e4a18fe30bf7d657974306d"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_114_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 114,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_114_COMPLETE.json",
+      "receipt_sha256": "7d8df49c89390d20aca0002ee1aac137093a8cba521b6a64ee4720609934bc21"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_on/scenario_uk_give_way_ego_init_115_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 115,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_on/SF4_ROLLOUT_115_COMPLETE.json",
+      "receipt_sha256": "e9e24f3957bf0fd90e3ec4a05af87996a02020b83713daf12d5259360fef3a2b"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_off/scenario_uk_give_way_ego_init_115_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 115,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_off/SF4_ROLLOUT_115_COMPLETE.json",
+      "receipt_sha256": "abcc43a47024fee58d29cfa1fbaeed0b6f1278581da11956ac3ebb31dc41b1bf"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_off/scenario_uk_give_way_ego_init_115_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 115,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_off/SF4_ROLLOUT_115_COMPLETE.json",
+      "receipt_sha256": "b1f1cf795310b006a3b50059ba8c4cabab38da65a2e7b8b380386f818f3df538"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_adaptive_assertive_supervisor_on/scenario_uk_give_way_ego_init_115_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 115,
+      "receipt": "SF4_B1_adaptive_assertive_supervisor_on/SF4_ROLLOUT_115_COMPLETE.json",
+      "receipt_sha256": "0a0f13a62051b3bee1e3f5108732333c8316e7e73764efc1d402c3db553e3a95"
+    },
+    {
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_adaptive_reactive_supervisor_off/scenario_uk_give_way_ego_init_115_smpc_var_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 115,
+      "receipt": "SF4_B1_adaptive_reactive_supervisor_off/SF4_ROLLOUT_115_COMPLETE.json",
+      "receipt_sha256": "cb6f124f18f62c407c88d35e69ea7c35417f271649785db8f6b0813ad2db463d"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_assertive_supervisor_on/scenario_uk_give_way_ego_init_115_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 115,
+      "receipt": "SF4_B1_fixed_medium_assertive_supervisor_on/SF4_ROLLOUT_115_COMPLETE.json",
+      "receipt_sha256": "7cf3e1e347c13be8078ec2c9665cb48421f5ee792d9fac15d8bd8f991b90e84c"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_off/scenario_uk_give_way_ego_init_115_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 115,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_off/SF4_ROLLOUT_115_COMPLETE.json",
+      "receipt_sha256": "fde33e4bbd5fef4cfd1d6c44c50f33ef3a79a2769f3c32383dc5523092d1cbdd"
+    },
+    {
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "deployment_manifest": "SF4_B1_fixed_medium_reactive_supervisor_on/scenario_uk_give_way_ego_init_115_smpc_fixed_risk/prediction_deployment_manifest.json",
+      "deployment_manifest_sha256": "d3bab2b458be814f624b05ed8b15d44bb056c3046e8032b1eb8d58dff2e0214c",
+      "ego_init_id": 115,
+      "receipt": "SF4_B1_fixed_medium_reactive_supervisor_on/SF4_ROLLOUT_115_COMPLETE.json",
+      "receipt_sha256": "e991e50801d41c2aa3f62406704354fa37ebb747667d9b4194bd3884fcb431cc"
+    }
+  ],
+  "schema_version": "sf4_b1_hash_algorithm_compatibility_v1",
+  "scientific_treatment_or_estimand_modified": false,
+  "scope": "postcollection_analysis_compatibility_only",
+  "status": "pass",
+  "substitution": {
+    "all_other_frozen_analyzer_checks_unchanged": true,
+    "from_contract_newline_record_digest": "bdececc11380329011844d99f5366239b2373b293aed7b15b57eb4bfca2bb429",
+    "location": "in_memory_control_gate_expected_model_digest_only",
+    "to_runtime_concatenated_record_digest": "860e2c4513273982e26cb7ea36177029c1620a3761e631eee64818fb85ec2231"
+  }
+}
