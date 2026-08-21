@@ -11,11 +11,12 @@ interaction- and calibration-aware trajectory prediction
 ## 当前文档
 
 Corrected R3 和最终 supervisor-authority SF4 矩阵已经完成，项目进入证据整合与
-论文写作阶段。人类阅读只需要两个入口：
+论文写作阶段。接手项目时使用三个入口：
 
-1. `docs/paper/THESIS_EVIDENCE_GUIDE.md`：研究问题、H1--H4 结果、SF4 机制结论、
+1. `docs/CODEX_HANDOFF.md`：实验过程、当前进度、缺口和下一步 Codex 操作边界；
+2. `docs/paper/THESIS_EVIDENCE_GUIDE.md`：研究问题、H1--H4 结果、SF4 机制结论、
    claim boundaries 和机器证据位置；
-2. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、
+3. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、
    CasADi 和 Gurobi 环境说明。
 
 完整目录说明见 `docs/README.md`。提交论文只在相邻的

@@ -4,14 +4,16 @@ The human-facing documentation is intentionally small.
 
 ## Read these documents
 
-1. `paper/THESIS_EVIDENCE_GUIDE.md` — study design, final H1--H4 results,
+1. `CODEX_HANDOFF.md` — authoritative cross-repository progress, evidence,
+   limitations and next-action handoff for a new Codex session;
+2. `paper/THESIS_EVIDENCE_GUIDE.md` — study design, final H1--H4 results,
    supervisor-authority result, claim boundaries and evidence locations;
-2. `architecture/Server_CARLA_Environment_Runbook.md` — CARLA environment and
+3. `architecture/Server_CARLA_Environment_Runbook.md` — CARLA environment and
    execution conventions;
-3. `architecture/流程图与代码映射.md` — system diagrams and code mapping;
-4. `dissertation/README.md` — relationship between the submission manuscript,
+4. `architecture/流程图与代码映射.md` — system diagrams and code mapping;
+5. `dissertation/README.md` — relationship between the submission manuscript,
    the internal generated manuscript and the UCL rubric;
-5. `literature/相关文献解读_SMPC_多模态预测_自动驾驶.md` — literature notes.
+6. `literature/相关文献解读_SMPC_多模态预测_自动驾驶.md` — literature notes.
 
 ## Directories
 
