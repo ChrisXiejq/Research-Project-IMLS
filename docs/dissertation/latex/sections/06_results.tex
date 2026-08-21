@@ -1,123 +1,114 @@
 \section{Results}
 \label{sec:results}
 
-Results follow H1--H4 and separate corrected primary evidence from legacy
-mechanism diagnostics. The targeted analyses arising from supervisor feedback
-are reported through one hash-bound insertion after the corresponding raw-data,
-manipulation and provenance gates; they do not create a fifth headline
-hypothesis or reopen outcome-selected tuning.
+Results are reported in the same H1--H4 order as the experimental design. All
+200 planned prediction-data rollouts completed. Raw and merged manifests agree
+on 11,230 samples; the 160/20/20 rollout split has disjoint groups, no duplicate
+keys and no normalisation leakage. The largest descriptive split-covariate
+standardised mean difference is 0.208. The formal closed-loop experiment also
+completed all 80/80 prespecified rollouts and passed its treatment, integrity,
+stopping and archive checks.
 
-\subsection{Data and protocol integrity}
-
-% SOURCE: day7/day7_split_audit.json and distinction_v1/06_split_balance
-All 200 planned prediction-data rollouts completed. Raw and merged manifests
-agree on 11,230 samples, rollout groups are disjoint across the 160/20/20
-train/validation/test split, no duplicate keys or normalisation leakage are
-detected, and the largest descriptive split-covariate standardised mean
-difference is 0.208. The corrected R3 matrix subsequently completed all 80/80
-prespecified rollouts and passed its analysis, integrity, stop and archive
-gates.
-
-\subsection{H1: task adaptation gives a directionally consistent in-distribution gain}
+\subsection{H1: task adaptation improves in-distribution prediction}
 
 % EVIDENCE: H1_B1_MINUS_B0_TEST_NLL, H1_B1_MINUS_B0_TEST_ADE,
 % H1_B1_MINUS_B0_TEST_FDE
 % SOURCE: supervisor_feedback_v1/03_finetune_audit/FINETUNE_AUDIT_MANIFEST.json
-Across the three validation seeds, median macro NLL ranks \Bone{} first,
-followed by \BtwoD{}, \Ttwo{}, \Tone{} and \BtwoM{}. Relative to pretrained
-\Bzero{} on the frozen test, \Bone{} reduces rollout-macro top-1 ADE by
-1.183~m, FDE by 2.523~m and uncalibrated NLL by 0.314~nats/step. All three
-paired effects favour \Bone{} in each of the five held-out initialisation
-groups (the minimum attainable two-sided exact sign-flip value is
-$p=0.0625$). At that independent-unit level, the init-macro mean
-\Bone{}--\Bzero{} effects are $-0.316$~nats/step NLL, $-1.189$~m ADE and
-$-2.544$~m FDE. It also improves ADE and FDE relative to constant velocity,
-clipped constant acceleration and the train-mean prior in all five groups.
-H1 is therefore supported within the frozen Town05 distribution.
+Across the three validation seeds, median rollout-macro NLL ranks \Bone{}
+first, followed by \BtwoD{}, \Ttwo{}, \Tone{} and \BtwoM{}. On the one-shot
+frozen test, \Bone{} reduces NLL from 2.171 to 1.857~nats/step, top-1 ADE from
+1.283 to 0.100~m and FDE from 2.644 to 0.121~m relative to pretrained \Bzero{}.
+The corresponding rollout-macro differences are $-0.314$~nats/step,
+$-1.183$~m and $-2.523$~m. All three metrics favour \Bone{} in every one of
+the five held-out initialisation groups; at that independent-unit level, the
+mean paired effects are $-0.316$~nats/step NLL, $-1.189$~m ADE and
+$-2.544$~m FDE. The two-sided exact sign-flip value reaches its attainable
+minimum of $p=0.0625$, so the evidence is directionally consistent but is not
+reported as conventional $p<0.05$ significance. \Bone{} also improves ADE and
+FDE relative to constant velocity, clipped constant acceleration and the
+train-mean prior in all five groups. H1 is therefore supported for the frozen
+Town05 give-way distribution.
 
 \input{../../paper/generated/supervisor_feedback_v1/03_finetune_audit/finetune_b0_b1_rollout_macro.tex}
 
-An earlier progress report described a rise from $0.98\%$ to $100\%$.  That
-number was the fraction of prediction windows for which the top-probability
-mode matched the oracle-best mode; it was not a thresholded trajectory-accuracy
-endpoint.  We therefore withdraw the number: it is not evidence for the
-fine-tuned model's trajectory quality.  Its interpretation was particularly
-fragile because the split was narrow, the oracle-best mode was concentrated,
-and overlapping-window aggregation made many correlated windows look like a
-large headline sample.  The replacement above uses frozen-test NLL, ADE and
-FDE with a common rollout-macro aggregation for \Bzero{} and \Bone{}, and the
-five held-out initialisations as independent paired units.  This correction
-does not require retraining or reopening model selection.
+The mechanism checks narrow this conclusion. Raster shuffling increases
+\Bone{} ADE by approximately 0.270--0.293~m across seeds, whereas target-history
+shuffling changes aggregate ADE by about 0.00008~m on average; the aggregate
+gain is therefore raster-dominant. In a small response-active diagnostic,
+uncalibrated \Bone{} NLL is 2.076 versus 2.472 for \Bzero{}, but the
+validation-frozen calibration changes these values to 8.573 and 2.959. Because
+this subset contains only 15 overlapping windows from six rollouts and three
+initialisation groups, it identifies a possible calibration boundary rather
+than a confirmatory failure rate.
 
-\begin{figure}[t]
+An earlier progress report described an improvement from $0.98\%$ to $100\%$.
+That percentage measured how often the top-probability mode matched the
+oracle-best mode; it was neither a trajectory-accuracy threshold nor a valid
+independent-sample estimate. It is therefore withdrawn. The frozen-test
+NLL/ADE/FDE comparison above, using common rollout-macro aggregation and five
+paired held-out initialisations, is the evidence used for H1.
+
+\begin{center}
+  \refstepcounter{figure}
+  \label{fig:offline}
   \centering
   \includegraphics[width=0.98\linewidth]{figure03_offline_model_comparison.png}
-  \caption{Frozen offline model comparison. Points show validation seeds and
+  \smallskip
+  {\small Figure~\thefigure: Frozen offline model comparison. Points show validation seeds and
   horizontal segments their medians; test ADE/FDE include the pretrained
-  \Bzero{} control. Every NLL/ADE/FDE value uses rollout-macro aggregation;
-  overlapping windows are not independent replications. The figure is
-  generated from the frozen offline package.}
-  \label{fig:offline}
-\end{figure}
+  \Bzero{} control. NLL, ADE and FDE use rollout-macro aggregation, so
+  overlapping windows are not counted as independent replications.}
+\end{center}
 
-\subsection{H2: tested Transformer adapters add no consistent benefit}
+\subsection{H2: the tested Transformer adapters add no consistent value}
 
 % EVIDENCE: H2_T1_TEST_NLL, H2_B2_M_TEST_NLL,
 % H2_T2_TEST_NLL, H2_B2_D_TEST_NLL
 % SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
-The paired-head comparisons point in opposite directions. \Tone{} attains a
-test NLL of 2.003746 versus 2.024409 for \BtwoM{}, whereas \Ttwo{} attains
-1.878148 versus 1.872789 for \BtwoD{}. Neither configuration exceeds the
-simple \Bone{} adaptation. Sequence shuffling nevertheless worsens \Tone{} and
-\Ttwo{} NLL, so the result is not explained by complete sequence neglect.
-H2 is not supported under the tested protocol. Because the configurations are
-not parameter matched and 10/15 selections occur at the epoch ceiling, this is
-not evidence that Transformers are generally ineffective.
+The two matched-scope comparisons point in opposite directions. For the
+mean-only scope, \Tone{} reaches a frozen-test NLL of 2.003746 compared with
+2.024409 for the MLP control \BtwoM{}, an improvement of 0.020663. For the
+distributional scope, \Ttwo{} reaches 1.878148 compared with 1.872789 for
+\BtwoD{}, a degradation of 0.005359. Neither Transformer outperforms the
+simple \Bone{} result of 1.857094. H2 is therefore not supported under the
+tested architecture and optimisation budget.
 
-\subsection{R3 manipulation and nominal reliability}
+Zeroing or shuffling the valid interaction sequence worsens both Transformer
+variants, showing that they use the temporal input; sequence neglect does not
+explain the negative result. The correct interpretation is nevertheless
+bounded. \Bone{} has approximately 1.034 million trainable parameters, while
+the adapters contain approximately 77--176 thousand, and 10/15 training runs
+select a checkpoint at the 20-epoch ceiling. The experiment therefore supports
+simple adaptation as the strongest tested configuration, not a general claim
+that Transformers cannot improve interaction prediction.
 
-% SOURCE: corrected R3 r3_predictor_manipulation_checks.csv
-The deployed prediction manipulation is strong: all 40/40
-metric--policy--style checks favour \Bone{} over \Bzero{} in every paired
-initialisation group. Across these checks, \Bone{}--\Bzero{} top-1 ADE effects
-range from $-1.352$ to $-1.125$~m and FDE effects from $-3.152$ to
-$-2.315$~m. These checks verify that the predictor stacks remain distinct
-inside R3; they are not an independent offline benchmark.
+\subsection{H3: offline gain does not transfer consistently to closed loop}
 
-The adaptive solver is used on every audited step in all four adaptive cells,
-all 20 adaptive rollouts vary within rollout, and fixed settings are stable
-across initialisations. No native collision, footprint collision,
-fixed-geometry yield failure or completion failure is observed. All rollouts
-therefore completed without an observed collision or yield failure. Historical
-debug telemetry nevertheless contains non-zero logger-unaccepted rows; these
-are reclassified below rather than being called infeasible solves. Rollout
-completion is not a per-step MPC feasibility certificate. The zero
-binary-outcome counts cannot prove zero population risk or treatment
-equivalence.
+The manipulation check succeeds before closed-loop outcomes are interpreted.
+Across 40/40 prespecified metric--policy--style checks, in-loop predictions
+favour \Bone{} over \Bzero{} in all five paired initialisation groups. The
+\Bone{}--\Bzero{} top-1 ADE effects range from $-1.352$ to $-1.125$~m and FDE
+effects from $-3.152$ to $-2.315$~m. Thus the weak translation cannot be
+explained by the two deployed predictor stacks becoming indistinguishable.
 
-\input{../../paper/generated/supervisor_feedback_v1/paper_integration/supervisor_feedback_final_results.tex}
+Only two of the eight risk-policy--target-style cells jointly show faster mean
+completion and no-worse mean physical separation for \Bone{} relative to
+\Bzero{}: adaptive/reactive and fixed-aggressive/assertive. The remaining six
+fail at least one registered direction. For example, adaptive/assertive is
+0.240~s slower with 0.0067~m lower separation, whereas fixed-aggressive/
+assertive is 0.790~s faster with 0.0053~m higher separation. All Holm-adjusted
+exact tests are non-confirmatory. H3 is therefore not supported as a consistent
+offline-to-closed-loop translation claim, although the two favourable cells
+show that the adapted stack can have context-specific closed-loop value.
 
-\subsection{H3: prediction gain does not transfer uniformly}
-
-% EVIDENCE: H3_SUPPORTED_CELLS, H3_PRESPECIFIED_CELLS
-% SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
-Only two of eight policy--style cells jointly have faster mean completion and
-no-worse mean footprint separation for \Bone{} relative to \Bzero{}:
-adaptive/reactive and fixed-aggressive/assertive. The remaining six cells fail
-at least one registered direction. For example, adaptive/assertive is
-0.240~s slower with 0.0067~m lower separation, whereas
-fixed-aggressive/assertive is 0.790~s faster with 0.0053~m higher separation.
-All Holm-adjusted exact tests are non-confirmatory. H3 is therefore not
-supported as a universal translation claim; the data do not imply that the
-predictor stack has no closed-loop value.
-
-\begin{table}[t]
-  \caption{Corrected R3 predictor-stack translation. A supported direction
-  requires lower mean completion and no-worse mean separation for
-  \Bone{}--\Bzero{}. Each cell contains five paired initialisation groups.}
-  \label{tab:r3-h3}
-  \centering
+\begin{center}
+  \refstepcounter{table}
+  \label{tab:h3-translation}
   \small
+  Table~\thetable: Predictor-stack translation in the formal closed-loop experiment.
+  A supported direction requires lower mean completion time and no-worse mean
+  separation for \Bone{}--\Bzero{}. Each cell contains five paired
+  initialisation groups.\par\smallskip
   \begin{tabular}{@{}llrrl@{}}
     \toprule
     Policy & Style & Completion (s) & Separation (m) & Direction \\
@@ -131,48 +122,75 @@ predictor stack has no closed-loop value.
     Fixed medium & Assertive &  0.230 &  0.0072 & Not supported \\
     Fixed medium & Reactive & $-0.220$ & $-0.0084$ & Not supported \\
     \bottomrule
-  \end{tabular}
-\end{table}
+\end{tabular}
+\end{center}
 
-Figure~\ref{fig:r3-h3} makes the registered joint-direction criterion explicit:
-green cells require both faster completion and no-worse physical separation,
-not improvement on either outcome alone.
+Figure~\ref{fig:h3-translation} visualises the registered joint-direction
+criterion: a favourable cell must improve completion without sacrificing the
+measured physical margin, rather than improving either outcome alone.
 
-\begin{figure}[t]
+\begin{center}
+  \refstepcounter{figure}
+  \label{fig:h3-translation}
   \centering
   \includegraphics[width=0.99\linewidth]{figure_r3_h3_translation.png}
-  \caption{Corrected R3 predictor-stack translation. The presentation asset is
-  a hash-tracked PNG conversion of the canonical A2 SVG; all values resolve to
-  the 80-rollout formal analysis.}
-  \label{fig:r3-h3}
-\end{figure}
+  \smallskip
+  {\small Figure~\thefigure: Predictor-stack translation across risk policies
+  and target styles. All values are derived from the formal 80-rollout
+  closed-loop analysis.}
+\end{center}
 
-\subsection{H4: adaptive risk is conditional, not dominant}
+All adaptive cells use the adaptive solver on every audited step, every one of
+the 20 adaptive rollouts varies its risk allocation within rollout, and the
+fixed settings remain stable across initialisations. All 80 rollouts complete,
+with no observed native collision, zero-margin footprint collision,
+fixed-geometry yield failure or completion failure. These zero counts establish
+nominal reliability in the tested sample; they do not prove zero population
+risk, mathematical MPC feasibility or equivalence between treatments.
+
+\subsection{H4: adaptive risk is context dependent rather than dominant}
 
 % EVIDENCE: H4_DOMINANCE_CELLS, H4_PRESPECIFIED_CELLS
 % SOURCE: distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json
-Adaptive risk dominates its fixed comparator in only 3/12 prespecified
-predictor--style--comparator contrasts: \Bzero{}/assertive versus fixed medium,
-and \Bone{}/reactive versus fixed aggressive and fixed medium. It does not
-dominate in the other 9/12 contrasts. H4 is therefore not supported as a
-universal dominance claim. The result retains a useful role for adaptive risk
-as a context-dependent operating point rather than a universal replacement.
+Adaptive risk satisfies the prespecified empirical dominance rule in only
+3/12 predictor--style--fixed-comparator contrasts: \Bzero{}/assertive versus
+fixed medium, and \Bone{}/reactive versus fixed aggressive and fixed medium.
+It does not dominate in the remaining 9/12 contrasts. H4 is therefore not
+supported as a universal frontier-dominance claim. The positive comparisons
+retain a narrower conclusion: adaptive risk can be a useful context-dependent
+operating point, but it is not a general replacement for fixed risk.
 
-\begin{figure}[t]
+\begin{center}
+  \refstepcounter{figure}
+  \label{fig:h4-dominance}
   \centering
   \includegraphics[width=0.99\linewidth]{figure_r3_h4_dominance.png}
-  \caption{Adaptive-risk dominance across predictor, target style and fixed
-  comparator. Dominance is the prespecified empirical Pareto rule with binary
-  guards, not an equivalence test.}
-  \label{fig:r3-h4}
-\end{figure}
+  \smallskip
+  {\small Figure~\thefigure: Adaptive-risk dominance across predictor stack,
+  target style and fixed comparator. Dominance is the prespecified empirical
+  Pareto rule with binary guards, not an equivalence test.}
+\end{center}
 
-\begin{table}[t]
-  \caption{Corrected R3 hypothesis synthesis. Counts are prespecified cells or
-  comparisons, not simulation steps.}
+Solver and supervisor telemetry limits the mechanism claim. Historical
+logger-unaccepted rows comprise bypass/no-solve and attempted-but-nonaccepted
+contexts and cannot be relabelled wholesale as infeasible MPC optimisations.
+Finite CasADi solve-time and controller-acceptance rates therefore use factual
+solve attempts as their denominator, while bypass requests, raw return status
+and rollout outcome remain separate. Earlier timing diagnostics show that
+physical margin, controller acceptance/fallback and supervisor activity can
+change together; they do not identify the supervisor as the sole cause of the
+H4 pattern.
+
+\input{../../paper/generated/supervisor_feedback_v1/paper_integration/supervisor_feedback_final_results.tex}
+
+\begin{samepage}
+\begin{center}
+  \refstepcounter{table}
   \label{tab:hypotheses}
-  \centering
   \small
+  Table~\thetable: Evidence-bounded verdicts for the four headline
+  hypotheses. Counts are prespecified cells or comparisons, not simulation
+  steps.\par\smallskip
   \begin{tabular}{@{}L{0.06\linewidth}L{0.46\linewidth}L{0.20\linewidth}L{0.18\linewidth}@{}}
     \toprule
     ID & Hypothesis & Verdict & Boundary \\
@@ -182,22 +200,6 @@ as a context-dependent operating point rather than a universal replacement.
     H3 & Offline gain transfers consistently to closed loop & 2/8 cells & Universal claim not supported \\
     H4 & Adaptive risk dominates fixed controls & 3/12 comparisons & Universal dominance not supported \\
     \bottomrule
-  \end{tabular}
-\end{table}
-
-\subsection{Secondary mechanism and sensitivity evidence}
-
-Input diagnostics characterise \Bone{} as raster-dominant: raster shuffling
-increases ADE by approximately 0.270--0.293~m across seeds, whereas target
-history shuffling changes aggregate ADE by only about 0.00008~m on average.
-Legacy response-active analysis also shows that global calibration can improve
-aggregate NLL while worsening a very small shifted active tail. In that subset,
-\Bone{} uncalibrated NLL is 2.076 versus 2.472 for \Bzero{}, but
-validation-frozen calibration yields 8.573 versus 2.959. The subset contains
-only 15 overlapping windows from six rollouts and three initialisation groups,
-so it is diagnostic rather than confirmatory. Earlier arrival-timing logs show
-that separation, logger acceptance/fallback status and supervisor activity change together,
-so the supervisor cannot be identified as the single cause. Finally, a
-collision-filtered 15-run validation sensitivity preserves the architecture
-ranking. These analyses explain boundaries and alternative explanations; they
-are not pooled with corrected R3 and do not create additional hypotheses.
+\end{tabular}
+\end{center}
+\end{samepage}

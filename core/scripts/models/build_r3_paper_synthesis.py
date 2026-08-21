@@ -112,7 +112,7 @@ def svg_h3(rows: list[dict[str, Any]]) -> str:
         '<text x="50" y="432" class="head">Result: 2/8 cells support the prespecified direction; H3 is not supported as a universal closed-loop claim.</text>',
         '<text x="50" y="462" class="sub">All cells have five complete paired init groups. Holm-adjusted p-values are non-confirmatory; effects are reported as bounded descriptive evidence.</text>',
         '<text x="50" y="505" class="sub">Safety guard outcomes cannot discriminate treatments here: 0 native collisions, 0 footprint collisions, 0 yield failures and 0 completion failures in every arm.</text>',
-        '<text x="50" y="558" class="small">Source: frozen R3 corrected formal analysis (80 rollouts, init groups 101–105, Town05 nominal give-way condition).</text>',
+        '<text x="50" y="558" class="small">Source: frozen formal closed-loop analysis (80 rollouts, init groups 101–105, Town05 give-way condition).</text>',
         '</svg>',
     ])
     return "\n".join(items) + "\n"
@@ -155,7 +155,7 @@ def svg_h4(rows: list[dict[str, Any]]) -> str:
         '<text x="50" y="535" class="head">Result: adaptive dominates in 3/12 prespecified cells; H4 universal dominance is rejected.</text>',
         '<text x="50" y="565" class="sub">The pattern changes with predictor, target style and fixed comparator, supporting a coupled-system rather than component-only interpretation.</text>',
         '<text x="50" y="610" class="sub">All Holm-adjusted p-values are non-confirmatory. Dominance is a prespecified empirical Pareto rule, not an equivalence test.</text>',
-        '<text x="50" y="658" class="small">Source: frozen R3 corrected formal analysis (80 rollouts, five paired init groups per contrast).</text>',
+        '<text x="50" y="658" class="small">Source: frozen formal closed-loop analysis (80 rollouts, five paired init groups per contrast).</text>',
         '</svg>',
     ])
     return "\n".join(items) + "\n"

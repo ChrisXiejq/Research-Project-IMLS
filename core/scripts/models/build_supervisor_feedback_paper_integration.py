@@ -66,8 +66,8 @@ PROVISIONAL_DISCUSSION_WRAPPER_TEXT = """% Provisional tracked insertion. The fi
 The bounded interpretation of supervisor authority is intentionally unavailable
 in this non-submission draft. This placeholder contains no outcome estimate,
 count, percentage, probability value, effect direction, ranking or superiority
-claim. The release audit remains fail-closed until the preregistered authority
-matrix, source hashes and paper-integration build have all passed.
+claim. The release audit remains fail-closed until the prospectively specified
+authority matrix, source hashes and paper-integration build have all passed.
 """
 PROVISIONAL_CONCLUSION_SENTINEL = "% Provisional tracked Conclusion insertion."
 PROVISIONAL_CONCLUSION_WRAPPER_TEXT = f"""{PROVISIONAL_CONCLUSION_SENTINEL} The final-only evidence builder atomically
@@ -1451,7 +1451,7 @@ def build_wrapper(
     lines = [
         "% Generated final supervisor-feedback Results insertion; do not hand edit.",
         "% Evidence IDs below are locators. The following \\input commands carry the evidence.",
-        r"\subsection{Supervisor-feedback closure analyses}",
+        r"\paragraph{Supervisor, solver and authority checks.}",
         str(narrative["sf1"]["text"]),
     ]
     groups = (

@@ -579,15 +579,16 @@ def render_rollout_macro_latex(
     )
     return "\n".join(
         [
-            r"\begin{table}[t]",
-            r"\centering\small",
+            r"\begin{center}",
+            r"\refstepcounter{table}",
+            r"\label{tab:finetune-b0-b1-rollout-macro}",
+            r"\small",
             (
-                r"\caption{Frozen B0/B1 test results at one common rollout-macro "
+                r"Table~\thetable: Frozen B0/B1 test results at one common rollout-macro "
                 r"aggregation. Every metric is first averaged within rollout and "
                 r"then over 20 rollouts. The 315 overlapping windows are descriptive "
-                r"observations, not independent replications; lower is better.}"
+                r"observations, not independent replications; lower is better.\par\smallskip"
             ),
-            r"\label{tab:finetune-b0-b1-rollout-macro}",
             r"\begin{tabular}{@{}lrrrrrr@{}}",
             r"\toprule",
             "Stack/contrast & Windows & Rollouts & Init groups & NLL & ADE (m) & FDE (m) \\\\",
@@ -598,7 +599,7 @@ def render_rollout_macro_latex(
             delta_row,
             r"\bottomrule",
             r"\end{tabular}",
-            r"\end{table}",
+            r"\end{center}",
             "",
         ]
     )

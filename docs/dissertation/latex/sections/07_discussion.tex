@@ -33,7 +33,8 @@ causal claim.
 
 \subsection{Why offline gain does not imply uniform closed-loop gain}
 
-R3 first establishes that the deployed manipulation is real: B1 improves all
+The formal closed-loop experiment first establishes that the deployed
+manipulation is real: B1 improves all
 40/40 in-loop prediction checks. The failure of uniform H3 translation cannot
 therefore be dismissed as a missing predictor difference. The planner consumes
 a calibrated distribution rather than ADE alone; risk allocation transforms
@@ -56,7 +57,7 @@ The corrected result is deliberately modest: two of eight cells move both
 completion and separation in the preferred direction, and the pattern depends
 on policy and target style. Legacy response-tail and timing analyses supply
 plausible mechanisms---calibration failure and simultaneous changes in solver,
-supervisor and physical margin---but are not pooled with R3 and do not identify
+supervisor and physical margin---but are not pooled with the formal matrix and do not identify
 a single causal component.
 
 \subsection{Adaptive risk remains useful without dominance}
@@ -92,15 +93,15 @@ under the shared corrected controller and supervisor.
     Threat & Mitigation & Remaining boundary \\
     \midrule
     315 overlapping offline windows & Rollout-macro points and five init-level paired effects & Effective inferential unit is five test init groups; minimum exact $p=0.0625$ \\
-    Five corrected-R3 init groups & Paired effects, cluster intervals and exact tests & Minimum two-sided exact $p=0.0625$ \\
+    Five formal closed-loop init groups & Paired effects, cluster intervals and exact tests & Minimum two-sided exact $p=0.0625$ \\
     Single map and junction & Predictor, policy and target-style factorial & No cross-map or real-road claim \\
     Configuration fairness & Two matched adapter scopes and full parameter/epoch audit & No pure architecture causality \\
-    Predictor calibration differs & Stack-level estimand declared before R3 & No weight-only B1 effect \\
-    Coupled solver/supervisor & Preregistered corrected-supervisor application-authority on/off SF4 intervention & The DID covers adaptive versus the criticised fixed-medium pair only; estimator-to-risk path and SMPC constraints remain in both arms \\
+    Predictor calibration differs & Stack-level estimand declared before the formal experiment & No weight-only B1 effect \\
+    Coupled solver/supervisor & Prospectively specified corrected-supervisor application-authority on/off intervention & The DID covers adaptive versus the criticised fixed-medium pair only; estimator-to-risk path and SMPC constraints remain in both arms \\
     Solver bypass and acceptance & Raw classification; factual attempts alone define finite CasADi timing and controller acceptance; bypass and raw status are separate & Acceptance is not mathematical feasibility; CasADi time is not full-stack deployment latency \\
     Zero observed binary failures & Native callbacks, zero-margin physical overlap and 0.25-m-per-actor margin-adjusted separation are reported separately & No zero-risk or equivalence claim \\
     Very small active tail & Separate labelled legacy diagnostic & 15 windows/six rollouts/three groups; no stable tail estimate \\
-    Legacy implementation differs & Corrected R3 is primary; no pooling & Legacy evidence is mechanism-only \\
+    Legacy implementation differs & The formal closed-loop matrix is primary; no pooling & Legacy evidence is mechanism-only \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -108,7 +109,7 @@ under the shared corrected controller and supervisor.
 The fixed policies are three prespecified operating points rather than a dense
 continuous Pareto frontier. The implementation diagram represents information
 flow, not a causal graph. These boundaries prevent overclaiming but do not
-invalidate the frozen in-distribution and corrected R3 comparisons.
+invalidate the frozen in-distribution and formal closed-loop comparisons.
 
 \subsection{Implications and future work}
 

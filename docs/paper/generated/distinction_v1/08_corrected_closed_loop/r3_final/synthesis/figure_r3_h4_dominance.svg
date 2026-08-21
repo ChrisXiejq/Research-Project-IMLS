@@ -61,5 +61,5 @@
 <text x="50" y="535" class="head">Result: adaptive dominates in 3/12 prespecified cells; H4 universal dominance is rejected.</text>
 <text x="50" y="565" class="sub">The pattern changes with predictor, target style and fixed comparator, supporting a coupled-system rather than component-only interpretation.</text>
 <text x="50" y="610" class="sub">All Holm-adjusted p-values are non-confirmatory. Dominance is a prespecified empirical Pareto rule, not an equivalence test.</text>
-<text x="50" y="658" class="small">Source: frozen R3 corrected formal analysis (80 rollouts, five paired init groups per contrast).</text>
+<text x="50" y="658" class="small">Source: frozen formal closed-loop analysis (80 rollouts, five paired init groups per contrast).</text>
 </svg>

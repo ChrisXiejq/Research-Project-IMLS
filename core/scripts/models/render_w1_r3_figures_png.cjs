@@ -101,7 +101,7 @@ function correctWorkflowSvg(workflowSvg) {
   corrected = replaceRequired(
     corrected,
     "Primary evidence: Day8 frozen test + Day10 nominal + Day11/12 timing synthesis | Day13 is sensitivity only",
-    "Primary evidence: frozen test + corrected R3 (80 rollouts) | legacy timing and sensitivity analyses are diagnostic only"
+    "Primary evidence: frozen test + formal closed-loop experiment (80 rollouts) | legacy timing and sensitivity analyses are diagnostic only"
   );
   return corrected;
 }

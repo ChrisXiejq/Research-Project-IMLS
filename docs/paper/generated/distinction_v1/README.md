@@ -2,7 +2,7 @@
 
 This directory contains the complete post-audit, script-generated evidence
 chain. The active writing route is
-[`../../../dissertation/FINAL_TO_SUBMISSION_PLAN.md`](../../../dissertation/FINAL_TO_SUBMISSION_PLAN.md);
+[`../../../paper/THESIS_EVIDENCE_GUIDE.md`](../../../paper/THESIS_EVIDENCE_GUIDE.md);
 the execution plan is retained as its historical protocol record.
 
 Rules:

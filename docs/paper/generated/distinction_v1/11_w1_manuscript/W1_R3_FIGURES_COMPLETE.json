@@ -12,13 +12,13 @@
     "evidence_boundary": "corrected_r3_primary_legacy_day10_to_13_diagnostic"
   },
   "source_sha256": {
-    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/figure_r3_h3_translation.svg": "1ca2482f8f2b5074e7b04e25bb33757528be5af683bbfc29eda759dbe6108000",
-    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/figure_r3_h4_dominance.svg": "2fe500b1ba761db8da14b72d1c9b5c6938f6e71ce1c8b03a3154acb45db72bb3",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/figure_r3_h3_translation.svg": "1e3b41ed98265514ab49bb1a0203c5f24946f5e90646170872842c3437698b57",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/figure_r3_h4_dominance.svg": "1d0471bff24e021edb93d758cdcd8b5a3edadc88123118cd1936928f2b3841e1",
     "docs/paper/generated/paper_assets_v1/figures/figure01_research_workflow.svg": "caca67e46d6ba7fac7e7e4be58940627b329d60d78f70e8851a2ecf0ca615e76"
   },
   "artifacts": {
-    "figure_r3_h3_translation.png": "52620f20ae3cb0397521921a6010106a60b6c0bcecf19d33de0aab917ac4f30f",
-    "figure_r3_h4_dominance.png": "2fc54de3bee5d30dc9b30cdf8370902121dcf7ac3ae71d0f406df298e5d996ba",
-    "figure_w1_research_workflow.png": "079af71440d64c554f2a8bb1a6c9c12a069deb8838b7f83d438e3c36d4b6528c"
+    "figure_r3_h3_translation.png": "8fb37c88170b7899146e2662bdfc440d2fa0bef95249118754c7b842bb38b419",
+    "figure_r3_h4_dominance.png": "37c5e7bda8398bce4de0463831986b63a5399946b7cc8b6d4a079bf56d1ce05b",
+    "figure_w1_research_workflow.png": "79055e3677986f5656880ee5e50274dfcc0afd1159696daf55015373784aac7f"
   }
 }

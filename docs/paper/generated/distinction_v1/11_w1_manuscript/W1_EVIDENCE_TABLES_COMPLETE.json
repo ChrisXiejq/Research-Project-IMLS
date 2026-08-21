@@ -43,20 +43,20 @@
     "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h3_contrasts.csv": "3f291fc3c236d07391d8dc84b08d956464f41eff23c365bccf6f3cc4bdaa2598",
     "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_contrasts.csv": "862f5c3a6e4ca992b0137822ccdb9f42d7f6122383cf79e8b97c5b06599465eb",
     "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/analysis/r3_h4_dominance.csv": "5641d0500a93521f432119b3789087535fac6b0125c711047880d2611f74c7df",
-    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json": "7ebb8b926e356bc9a3e5b60e0e6b06d3e0ad65cff53befa69a852a1b37b93493",
-    "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_COMPLETE.json": "8e91432c7b7fd9a564262b7c8c311cb2a0cfb33ac2db7d4a92a0e09a334e8d7d",
-    "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json": "a3271b7331c194cf949be825663ae43f42f5d181960adda26fa18e9a7c19dffb",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/A2_COMPLETE.json": "540d9aa02267356789b41b446c4dd6cae0d104e9513c578d06cec457d35c6bd5",
+    "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_COMPLETE.json": "2d8b0b3d79a2fda13f9e26bc165791db9a9dc7242d4cb5db846f829c6205705f",
+    "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_EVIDENCE_MANIFEST.json": "152622c27da40e051a63d654722a0ffb64ee84df7681f3637993d2684d3cc183",
     "docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/M1_VALUE_AUDIT.json": "edfb361322518d3e018e0714c8315167157027532dac306c331aee6850111d7d",
-    "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/SUPERVISOR_COMMENT_3_COMPLETE.json": "59ff0e3f99dd903b9ba95f5f2e7bef13e4a5697df120739ad7805befd5509784",
+    "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/SUPERVISOR_COMMENT_3_COMPLETE.json": "e26bdec69a789016c52d7438ddee1e6542c2ef6fdb56b080951a08c1133ff590",
     "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/finetune_b0_b1_paired_init_effects.tex": "6709a3af051251f109727e90a0c2e7116d4a0edaf47a4ceff298bfa4cf1fdae1",
-    "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/finetune_b0_b1_rollout_macro.tex": "1497d9a9a835b2979e4d47be1b4bcd520db8c5b0ca73e34ca3c9b03ee3e0e6ab"
+    "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/finetune_b0_b1_rollout_macro.tex": "6e085e13d394fb271842f8a5b64966717b6fe80ce0806bddc2b40776cbb5aaea"
   },
   "status": "partial_pre_sf4",
   "supervisor_feedback_closure_checks": {
     "sf1_behaviour_80_raw_hash_bound": false,
     "sf1_sf2_source_r3_snapshot_hash_bound": false,
     "sf2_raw_taxonomy_and_deadlines_final": false,
-    "sf3_finetune_receipt_and_hashes": true,
+    "sf3_finetune_receipt_and_hashes": false,
     "sf4_80_rollouts_10_clusters_analysis": false,
     "sf4_full_raw_snapshot_and_hash_manifest": false
   },

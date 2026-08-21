@@ -1,7 +1,8 @@
-\begin{table}[t]
-\centering\small
-\caption{Frozen B0/B1 test results at one common rollout-macro aggregation. Every metric is first averaged within rollout and then over 20 rollouts. The 315 overlapping windows are descriptive observations, not independent replications; lower is better.}
+\begin{center}
+\refstepcounter{table}
 \label{tab:finetune-b0-b1-rollout-macro}
+\small
+Table~\thetable: Frozen B0/B1 test results at one common rollout-macro aggregation. Every metric is first averaged within rollout and then over 20 rollouts. The 315 overlapping windows are descriptive observations, not independent replications; lower is better.\par\smallskip
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
 Stack/contrast & Windows & Rollouts & Init groups & NLL & ADE (m) & FDE (m) \\
@@ -12,4 +13,4 @@ B1 & 315 & 20 & 5 & 1.857 & 0.100 & 0.121 \\
 B1$-$B0 & 315 & 20 & 5 & -0.314 & -1.183 & -2.523 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{center}

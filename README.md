@@ -10,15 +10,16 @@ interaction- and calibration-aware trajectory prediction
 
 ## 当前文档
 
-实验已经完成到 Day14，进入论文写作阶段：
+Corrected R3 和最终 supervisor-authority SF4 矩阵已经完成，项目进入证据整合与
+论文写作阶段。人类阅读只需要两个入口：
 
-1. `docs/paper/01_研究问题与实验方法.md`：最终 RQs、模型、数据和实验设计；
-2. `docs/paper/02_最终结果与审计结论.md`：结果、假设判定、缺陷和结论边界；
-3. `docs/paper/03_论文写作路线与章节大纲.md`：全文结构与写作步骤；
-4. `docs/paper/04_复现与证据资产索引.md`：表格、图片、result IDs 与审计入口；
-5. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、CasADi 和 Gurobi 环境说明。
+1. `docs/paper/THESIS_EVIDENCE_GUIDE.md`：研究问题、H1--H4 结果、SF4 机制结论、
+   claim boundaries 和机器证据位置；
+2. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、
+   CasADi 和 Gurobi 环境说明。
 
-完整索引见 `docs/README.md`。
+完整目录说明见 `docs/README.md`。提交论文只在相邻的
+`../Jiaqi Xie Dissertation/main.tex` 中编辑。
 
 ## 代码入口
 
@@ -44,7 +45,9 @@ give_way_reduced_clear_path_release_v13_risk_owned_yield.json
 give_way_smpc_tuning.json
 ```
 
-已完成的一次性 sweep/ablation runner、运行指南和重复 snapshots 已删除；历史版本可从 Git 恢复，最终证据保留在 `docs/paper/generated/paper_assets_v1/`。
+已完成的一次性 sweep/ablation runner、运行指南和重复 snapshots 已删除；历史版本
+可从 Git 恢复。Corrected R3、H1--H4 和 SF4 的证据入口记录在
+`docs/paper/THESIS_EVIDENCE_GUIDE.md`，不再把旧 `paper_assets_v1` 称为唯一入口。
 
 ## 运行边界
 
