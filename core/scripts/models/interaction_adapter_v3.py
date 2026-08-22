@@ -130,29 +130,26 @@ def _full_distribution_heads(
     return mean_raw, std_raw, angle_raw, logit_raw
 
 
-def build_capacity_interaction_adapter(
-    base_model: tf.keras.Model,
+def _capacity_residual_from_history(
+    base_raw,
+    sequence,
+    mask,
+    *,
     anchors: np.ndarray,
     normalization: Mapping[str, Any],
     family: str,
     capacity_tier: str,
     history_horizon_s: float,
-    *,
-    dropout: float = 0.1,
-) -> tuple[tf.keras.Model, EncoderCapacityConfig]:
-    if family not in {"mlp", "transformer"}:
-        raise ValueError(f"Unsupported V3 encoder family: {family}")
+    dropout: float,
+):
     config = config_for_cell(family, capacity_tier, history_horizon_s)
     assert isinstance(config, EncoderCapacityConfig)
-    num_modes, num_timesteps = _infer_multipath_dimensions(base_model, anchors)
-    base_model.trainable = False
-    image_shape = tuple(base_model.inputs[0].shape[1:])
-    state_shape = tuple(base_model.inputs[1].shape[1:])
-    image = tf.keras.Input(image_shape, name="image_input_v3")
-    past = tf.keras.Input(state_shape, name="state_input_v3")
-    sequence = tf.keras.Input((6, 12), name="interaction_sequence")
-    mask = tf.keras.Input((6,), name="interaction_sequence_mask")
-    base_raw = base_model([image, past], training=False)
+    num_modes = int(np.asarray(anchors).shape[0])
+    output_dim = int(base_raw.shape[-1])
+    per_mode = output_dim - num_modes
+    if per_mode <= 0 or per_mode % (num_modes * 5) != 0:
+        raise ValueError("Cached/full base output is incompatible with MultiPath dimensions")
+    num_timesteps = per_mode // (num_modes * 5)
     horizon_sequence, horizon_mask = FixedHistoryHorizon(
         history_horizon_s, name="fixed_history_horizon"
     )([sequence, mask])
@@ -215,6 +212,82 @@ def build_capacity_interaction_adapter(
         True,
         name="structured_residual_merge",
     )([base_raw, mean_raw, std_raw, angle_raw, logit_raw])
+    return output, config
+
+
+def build_cached_capacity_interaction_adapter(
+    base_output_dim: int,
+    anchors: np.ndarray,
+    normalization: Mapping[str, Any],
+    family: str,
+    capacity_tier: str,
+    history_horizon_s: float,
+    *,
+    dropout: float = 0.1,
+) -> tuple[tf.keras.Model, EncoderCapacityConfig]:
+    """Build the trainable adapter over cached frozen-B0 outputs."""
+
+    base_raw = tf.keras.Input((int(base_output_dim),), name="cached_base_raw")
+    sequence = tf.keras.Input((6, 12), name="interaction_sequence")
+    mask = tf.keras.Input((6,), name="interaction_sequence_mask")
+    output, config = _capacity_residual_from_history(
+        base_raw,
+        sequence,
+        mask,
+        anchors=anchors,
+        normalization=normalization,
+        family=family,
+        capacity_tier=capacity_tier,
+        history_horizon_s=history_horizon_s,
+        dropout=dropout,
+    )
+    return (
+        tf.keras.Model(
+            [base_raw, sequence, mask],
+            output,
+            name=(
+                f"cached_multipath_{family}_{capacity_tier}_"
+                f"h{history_horizon_s:.1f}_v3".replace(".", "p")
+            ),
+        ),
+        config,
+    )
+
+
+def build_capacity_interaction_adapter(
+    base_model: tf.keras.Model,
+    anchors: np.ndarray,
+    normalization: Mapping[str, Any],
+    family: str,
+    capacity_tier: str,
+    history_horizon_s: float,
+    *,
+    dropout: float = 0.1,
+) -> tuple[tf.keras.Model, EncoderCapacityConfig]:
+    if family not in {"mlp", "transformer"}:
+        raise ValueError(f"Unsupported V3 encoder family: {family}")
+    config = config_for_cell(family, capacity_tier, history_horizon_s)
+    assert isinstance(config, EncoderCapacityConfig)
+    num_modes, num_timesteps = _infer_multipath_dimensions(base_model, anchors)
+    base_model.trainable = False
+    image_shape = tuple(base_model.inputs[0].shape[1:])
+    state_shape = tuple(base_model.inputs[1].shape[1:])
+    image = tf.keras.Input(image_shape, name="image_input_v3")
+    past = tf.keras.Input(state_shape, name="state_input_v3")
+    sequence = tf.keras.Input((6, 12), name="interaction_sequence")
+    mask = tf.keras.Input((6,), name="interaction_sequence_mask")
+    base_raw = base_model([image, past], training=False)
+    output, config = _capacity_residual_from_history(
+        base_raw,
+        sequence,
+        mask,
+        anchors=anchors,
+        normalization=normalization,
+        family=family,
+        capacity_tier=capacity_tier,
+        history_horizon_s=history_horizon_s,
+        dropout=dropout,
+    )
     model = tf.keras.Model(
         [image, past, sequence, mask],
         output,

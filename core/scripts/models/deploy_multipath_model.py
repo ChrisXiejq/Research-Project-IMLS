@@ -102,7 +102,7 @@ class DeployMultiPath:
                 calibration = json.load(handle)
         if not isinstance(calibration, dict):
             raise TypeError("calibration must be None, a dict, or a JSON path")
-        if calibration.get("fit_split") != "val":
+        if calibration.get("fit_split") not in {"val", "validation"}:
             raise ValueError(
                 "Deployment calibration must be frozen on validation; "
                 f"got fit_split={calibration.get('fit_split')!r}"

@@ -1,0 +1,119 @@
+{
+  "claims": [],
+  "methods_text": "The V3 study separates three questions. Capacity is tested by changing trainable parameter count within each family; Information is tested by training identical-capacity models on fixed 0.0, 0.4, and 1.0 s masks over the same complete six-token examples; Architecture is tested by matched MLP/Transformer contrasts and a difference-in-differences of their history gains. Matched runs use AdamW with weight decay 1e-5, gradient-norm clipping at 10, deterministic data order, and encoder dropout 0.1. Learning rates and checkpoints are selected on validation rollout-macro NLL with patience 12; the 80-to-120-epoch common-extension gate covers both core and matched data-fraction comparisons. Formal completion requires disjoint group splits, complete group/cell support, unique sample keys, finite inputs/losses/weights, and live source/data/model hashes; debug-limited runs are smoke-only. Fresh groups are opened once after convergence, capacity, calibration, and latency gates pass. The final CARLA study crosses B1 and P* with four risk policies, two target styles, and ten paired held-out groups.",
+  "numeric_prose_allowed": false,
+  "planned_outputs": [
+    {
+      "artifact_id": "capacity_curves",
+      "axis": "Capacity",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "trainable parameters",
+      "y_or_columns": "rollout-macro NLL"
+    },
+    {
+      "artifact_id": "history_horizon_curves",
+      "axis": "Information",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "trained horizon (s)",
+      "y_or_columns": "rollout-macro NLL"
+    },
+    {
+      "artifact_id": "matched_architecture_table",
+      "axis": "Architecture",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "matched capacity/horizon",
+      "y_or_columns": "MLP vs Transformer"
+    },
+    {
+      "artifact_id": "history_gain_interaction",
+      "axis": "Architecture",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "encoder family",
+      "y_or_columns": "full-minus-snapshot gain"
+    },
+    {
+      "artifact_id": "response_stratified_mechanisms",
+      "axis": "Information",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "response stratum",
+      "y_or_columns": "task metrics"
+    },
+    {
+      "artifact_id": "b1_allocation_table",
+      "axis": "Adaptation allocation",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "capacity tier",
+      "y_or_columns": "B1 performance"
+    },
+    {
+      "artifact_id": "data_efficiency_curves",
+      "axis": "Adaptation allocation",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "rollout-group fraction",
+      "y_or_columns": "NLL"
+    },
+    {
+      "artifact_id": "calibration_summary",
+      "axis": "Calibration",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "model cell",
+      "y_or_columns": "temperature/covariance scale"
+    },
+    {
+      "artifact_id": "latency_pareto",
+      "axis": "Deployment",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "warmed batch-one latency (ms)",
+      "y_or_columns": "NLL"
+    },
+    {
+      "artifact_id": "closed_loop_cells",
+      "axis": "Predictor-risk",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "160 frozen cells",
+      "y_or_columns": "outcomes"
+    },
+    {
+      "artifact_id": "model_by_risk_interaction",
+      "axis": "Predictor-risk",
+      "source_artifact": null,
+      "source_field": null,
+      "status": "RESULT_PENDING",
+      "unit": null,
+      "x_or_rows": "risk policy",
+      "y_or_columns": "P* minus B1"
+    }
+  ],
+  "schema_version": "capacity_history_dissertation_evidence_v3",
+  "status": "planned"
+}

@@ -147,6 +147,38 @@ class CapacityKerasModelsV3Test(unittest.TestCase):
             self.assertEqual(len(gradients), len(model.trainable_weights))
             self.assertTrue(any(value is not None for value in gradients))
 
+    def test_cached_b1_head_is_explicitly_trainable_after_base_freeze(self):
+        from train_thesis_core_cached_v3 import _cached_head_model, gradient_audit
+
+        self.base.trainable = False
+        model, _ = _cached_head_model(self.base, 512)
+        self.assertEqual(len(model.trainable_weights), 2)
+        inputs = np.ones((2, 512), dtype=np.float32)
+        labels = np.zeros((2, 2016), dtype=np.float32)
+        report = gradient_audit(
+            model,
+            inputs,
+            labels,
+            lambda truth, prediction: tf.reduce_mean(tf.square(truth - prediction), axis=-1),
+        )
+        self.assertEqual(report["status"], "pass")
+        self.assertGreater(report["gradient_global_norm"], 0.0)
+
+    def test_cached_adapter_inputs_form_a_tensorflow_multi_input_structure(self):
+        from train_thesis_core_cached_v3 import cached_inputs, make_dataset
+
+        spec = {"family": "transformer", "seed": 11}
+        arrays = {
+            "base_raw": np.zeros((3, 2016), dtype=np.float32),
+            "sequence": np.zeros((3, 6, 12), dtype=np.float32),
+            "mask": np.ones((3, 6), dtype=np.float32),
+            "labels": np.zeros((3, 10, 3), dtype=np.float32),
+        }
+        self.assertIsInstance(cached_inputs(spec, arrays), tuple)
+        inputs, labels = next(iter(make_dataset(spec, arrays, 2, shuffle=False)))
+        self.assertEqual(len(inputs), 3)
+        self.assertEqual(tuple(labels.shape), (2, 10, 3))
+
     def test_all_encoder_cells_match_formula_and_zero_residual(self):
         from interaction_adapter_v3 import build_capacity_interaction_adapter
 

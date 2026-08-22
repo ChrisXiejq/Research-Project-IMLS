@@ -52,19 +52,43 @@ def nuisance_fixture():
     }
 
 
+def thesis_core_freeze_fixture():
+    payload = {
+        "schema_version": "capacity_history_thesis_core_selection_freeze_v3",
+        "status": "pass",
+        "evidence_status": "retrospective_held_out",
+        "heldout_access_authorized": True,
+        "B1": {"model_cell_id": "head-large", "representative_run_id": "b1"},
+        "P_star": {
+            "model_cell_id": "transformer-h1p0-large",
+            "representative_run_id": "pstar",
+        },
+    }
+    payload["freeze_sha256"] = sha256_payload(payload)
+    return payload
+
+
 class CapacityStudyV3ClosedLoopTests(unittest.TestCase):
-    def test_exact_160_matrix_and_selection_binding(self) -> None:
+    def test_thesis_core_selection_freeze_drives_exact_80_matrix(self) -> None:
+        freeze = thesis_core_freeze_fixture()
+        manifest = build_closed_loop_manifest(
+            freeze, build_group_registry(), nuisance_settings=nuisance_fixture()
+        )
+        self.assertEqual(validate_closed_loop_manifest(manifest, freeze)["rollouts"], 80)
+        self.assertEqual(manifest["risk_policies"], ["fixed_medium", "adaptive"])
+
+    def test_exact_80_matrix_and_selection_binding(self) -> None:
         freeze = freeze_fixture()
         manifest = build_closed_loop_manifest(
             freeze, build_group_registry(), nuisance_settings=nuisance_fixture()
         )
-        self.assertEqual(validate_closed_loop_manifest(manifest, freeze)["rollouts"], 160)
+        self.assertEqual(validate_closed_loop_manifest(manifest, freeze)["rollouts"], 80)
         altered = copy.deepcopy(manifest)
         altered["rollouts"].pop()
         altered["manifest_sha256"] = sha256_payload(
             {key: value for key, value in altered.items() if key != "manifest_sha256"}
         )
-        with self.assertRaisesRegex(ValueError, "160-cell"):
+        with self.assertRaisesRegex(ValueError, "80-cell"):
             validate_closed_loop_manifest(altered, freeze)
 
     def test_preflight_accepts_mlp_or_transformer_and_rejects_parity_failure(self) -> None:
@@ -101,12 +125,7 @@ class CapacityStudyV3ClosedLoopTests(unittest.TestCase):
 
     def test_known_model_by_risk_interaction_is_recovered(self) -> None:
         rows = []
-        risk_effect = {
-            "fixed_aggressive": 3.0,
-            "fixed_medium": 1.0,
-            "fixed_conservative": 0.0,
-            "adaptive": -1.0,
-        }
+        risk_effect = {"fixed_medium": 1.0, "adaptive": -1.0}
         for group in range(81, 91):
             for risk in RISK_POLICIES:
                 for style in TARGET_STYLES:
@@ -131,12 +150,12 @@ class CapacityStudyV3ClosedLoopTests(unittest.TestCase):
             row["contrast_id"]: row["effect_P_star_minus_B1"]
             for row in report["model_by_risk_interactions"]
         }
-        self.assertEqual(within["failure_rate__P_star_minus_B1__fixed_aggressive"], 3.0)
+        self.assertEqual(within["failure_rate__P_star_minus_B1__fixed_medium"], 1.0)
         self.assertEqual(
             interaction[
-                "failure_rate__model_by_risk__fixed_aggressive_minus_fixed_medium"
+                "failure_rate__model_by_risk__adaptive_minus_fixed_medium"
             ],
-            2.0,
+            -2.0,
         )
         rows[0]["undefined_metric"] = None
         guarded = analyze_predictor_by_risk(rows, ["undefined_metric"])

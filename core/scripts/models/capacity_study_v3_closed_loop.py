@@ -28,14 +28,12 @@ from capacity_study_v3_protocol import (
 )
 
 
-RISK_POLICIES = (
-    "fixed_aggressive",
-    "fixed_medium",
-    "fixed_conservative",
-    "adaptive",
-)
+RISK_POLICIES = ("fixed_medium", "adaptive")
 TARGET_STYLES = ("assertive_constant_speed", "defensive_reactive")
 PREDICTORS = ("B1", "P_star")
+EXPECTED_ROLLOUTS = (
+    len(PREDICTORS) * len(RISK_POLICIES) * len(TARGET_STYLES) * len(CLOSED_LOOP_GROUPS)
+)
 
 
 def build_closed_loop_manifest(
@@ -96,7 +94,7 @@ def build_closed_loop_manifest(
         "target_styles": list(TARGET_STYLES),
         "ego_init_ids": list(CLOSED_LOOP_GROUPS),
         "nuisance_settings": dict(nuisance_settings),
-        "expected_rollouts": 160,
+        "expected_rollouts": EXPECTED_ROLLOUTS,
         "rollouts": records,
     }
     payload["manifest_sha256"] = sha256_payload(payload)
@@ -132,13 +130,19 @@ def validate_closed_loop_manifest(
         )
         for row in manifest["rollouts"]
     }
-    if observed != expected or len(manifest["rollouts"]) != 160:
-        raise ValueError("Closed-loop matrix is not the exact 160-cell design")
+    if observed != expected or len(manifest["rollouts"]) != EXPECTED_ROLLOUTS:
+        raise ValueError(
+            f"Closed-loop matrix is not the exact {EXPECTED_ROLLOUTS}-cell design"
+        )
     if set(CLOSED_LOOP_GROUPS).intersection(range(1, 81)):
         raise ValueError("Closed-loop groups overlap offline groups")
     if manifest["nuisance_settings"].get("supervisor_authority") != "enabled":
         raise ValueError("Supervisor authority drift")
-    return {"status": "pass", "rollouts": 160, "independent_groups": 10}
+    return {
+        "status": "pass",
+        "rollouts": EXPECTED_ROLLOUTS,
+        "independent_groups": len(CLOSED_LOOP_GROUPS),
+    }
 
 
 def validate_dual_predictor_preflight(
@@ -230,7 +234,7 @@ def audit_closed_loop_outputs(
     return {
         "schema_version": "capacity_history_closed_loop_audit_v3",
         "status": "pass" if passed else "incomplete",
-        "expected_rollouts": 160,
+        "expected_rollouts": EXPECTED_ROLLOUTS,
         "observed_rollouts": len(observed),
         "duplicate_rollout_ids": duplicate,
         "missing_rollout_ids": missing,
@@ -241,12 +245,15 @@ def audit_closed_loop_outputs(
 
 
 def _representative_seed_record(freeze: Mapping[str, Any], run_id: str) -> dict[str, Any]:
-    matches = [
-        dict(seed)
-        for cell in freeze["cells"]
-        for seed in cell["retained_seeds"]
-        if seed["run_id"] == run_id
-    ]
+    if "runs" in freeze:
+        matches = [dict(seed) for seed in freeze["runs"] if seed["run_id"] == run_id]
+    else:
+        matches = [
+            dict(seed)
+            for cell in freeze["cells"]
+            for seed in cell["retained_seeds"]
+            if seed["run_id"] == run_id
+        ]
     if len(matches) != 1:
         raise ValueError(f"Frozen representative is not unique: {run_id}")
     return matches[0]
@@ -324,7 +331,16 @@ def materialize_carla_rollout_completions(
             problems.append("calibration_source")
         else:
             calibration_payload = json.loads(Path(calibration_source).read_text(encoding="utf-8"))
-            if sha256_payload(calibration_payload) != frozen_seed["calibration_sha256"]:
+            calibration_value = dict(calibration_payload)
+            embedded_calibration_hash = calibration_value.pop("calibration_sha256", None)
+            embedded_hash_valid = (
+                embedded_calibration_hash is not None
+                and embedded_calibration_hash == sha256_payload(calibration_value)
+            )
+            accepted_calibration_hashes = {sha256_payload(calibration_payload)}
+            if embedded_hash_valid:
+                accepted_calibration_hashes.add(str(embedded_calibration_hash))
+            if frozen_seed["calibration_sha256"] not in accepted_calibration_hashes:
                 problems.append("calibration_hash")
         supervisor = setup.get("yield_stop_supervisor") or {}
         if (
@@ -333,9 +349,7 @@ def materialize_carla_rollout_completions(
         ):
             problems.append("supervisor_authority")
         expected_profile = {
-            "fixed_aggressive": "fixed_frontier_aggressive",
             "fixed_medium": "fixed_frontier_medium",
-            "fixed_conservative": "fixed_frontier_conservative",
             "adaptive": "adaptive_interaction_severity",
         }[planned["risk_policy"]]
         if setup.get("risk_profile") != expected_profile:
@@ -388,7 +402,11 @@ def materialize_carla_rollout_completions(
         completed.append(planned["rollout_id"])
     return {
         "schema_version": "capacity_history_carla_materialization_v3",
-        "status": "pass" if len(completed) == 160 and not failures else "incomplete",
+        "status": (
+            "pass"
+            if len(completed) == EXPECTED_ROLLOUTS and not failures
+            else "incomplete"
+        ),
         "completed_rollouts": len(completed),
         "failures": failures,
     }
@@ -445,7 +463,9 @@ def extract_carla_outcome_rows(
 ) -> list[dict[str, Any]]:
     audit = audit_closed_loop_outputs(manifest, freeze, results_dir)
     if audit["status"] != "pass":
-        raise ValueError("Closed-loop outcome extraction requires all 160 completion gates")
+        raise ValueError(
+            f"Closed-loop outcome extraction requires all {EXPECTED_ROLLOUTS} completion gates"
+        )
     root = Path(results_dir)
     rows = []
     for planned in manifest["rollouts"]:
@@ -517,8 +537,10 @@ def extract_carla_outcome_rows(
             **_prediction_diagnostics(labeled),
         }
         rows.append(row)
-    if len(rows) != 160:
-        raise ValueError("Closed-loop outcome table must contain 160 rows")
+    if len(rows) != EXPECTED_ROLLOUTS:
+        raise ValueError(
+            f"Closed-loop outcome table must contain {EXPECTED_ROLLOUTS} rows"
+        )
     return rows
 
 

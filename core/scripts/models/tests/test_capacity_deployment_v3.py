@@ -88,7 +88,7 @@ class CapacityDeploymentV3Tests(unittest.TestCase):
                     path,
                     anchors,
                     calibration={
-                        "fit_split": "val",
+                        "fit_split": "validation" if family == "transformer" else "val",
                         "parameters": {"temperature": 1.0, "covariance_scale": 1.0},
                     },
                 )

@@ -1,0 +1,12 @@
+artifact_id,axis,x_or_rows,y_or_columns,status,source_artifact,source_field,unit
+capacity_curves,Capacity,trainable parameters,rollout-macro NLL,RESULT_PENDING,,,
+history_horizon_curves,Information,trained horizon (s),rollout-macro NLL,RESULT_PENDING,,,
+matched_architecture_table,Architecture,matched capacity/horizon,MLP vs Transformer,RESULT_PENDING,,,
+history_gain_interaction,Architecture,encoder family,full-minus-snapshot gain,RESULT_PENDING,,,
+response_stratified_mechanisms,Information,response stratum,task metrics,RESULT_PENDING,,,
+b1_allocation_table,Adaptation allocation,capacity tier,B1 performance,RESULT_PENDING,,,
+data_efficiency_curves,Adaptation allocation,rollout-group fraction,NLL,RESULT_PENDING,,,
+calibration_summary,Calibration,model cell,temperature/covariance scale,RESULT_PENDING,,,
+latency_pareto,Deployment,warmed batch-one latency (ms),NLL,RESULT_PENDING,,,
+closed_loop_cells,Predictor-risk,160 frozen cells,outcomes,RESULT_PENDING,,,
+model_by_risk_interaction,Predictor-risk,risk policy,P* minus B1,RESULT_PENDING,,,

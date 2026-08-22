@@ -22,6 +22,8 @@ from capacity_study_v3_protocol import (  # noqa: E402
     conflict_zone_entry_time_s,
     expected_core_run_count,
     expected_model_cells,
+    THESIS_CORE_CELL_IDS,
+    THESIS_CORE_RUN_COUNT,
     first_deceleration_onset_s,
     load_protocol,
     require_stage_gates,
@@ -44,6 +46,9 @@ class CapacityStudyV3ProtocolTest(unittest.TestCase):
         self.assertEqual(sum(row["family"] == "head" for row in cells), 3)
         self.assertEqual(sum(row["family"] == "mlp" for row in cells), 9)
         self.assertEqual(sum(row["family"] == "transformer" for row in cells), 9)
+        self.assertEqual(THESIS_CORE_RUN_COUNT, 27)
+        self.assertEqual(protocol["thesis_core"]["model_cell_ids"], list(THESIS_CORE_CELL_IDS))
+        self.assertEqual(protocol["thesis_core"]["planned_closed_loop_rollouts"], 80)
 
     def test_protocol_rejects_missing_or_changed_preregistered_fields(self):
         protocol = load_protocol()
@@ -63,6 +68,10 @@ class CapacityStudyV3ProtocolTest(unittest.TestCase):
         changed_regularization["optimization_protocol"]["weight_decay"] = 0.0
         with self.assertRaisesRegex(ValueError, "optimization_protocol"):
             validate_protocol(changed_regularization)
+        changed_thesis = copy.deepcopy(protocol)
+        changed_thesis["thesis_core"]["planned_training_runs"] = 21
+        with self.assertRaisesRegex(ValueError, "thesis_core"):
+            validate_protocol(changed_thesis)
 
     def test_group_registry_is_deterministic_disjoint_and_bounded(self):
         first = build_group_registry()

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# Formal 160-rollout matrix: B1/P* x four risk policies x two target styles
+# Formal 80-rollout matrix: B1/P* x fixed-medium/adaptive x two target styles
 # x held-out groups 81--90. P* is read only from the validation-only freeze.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,9 +10,9 @@ REPO_DIR="$(cd "${CORE_DIR}/.." && pwd)"
 MODELS_DIR="${CORE_DIR}/scripts/models"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 V3_ROOT="${V3_ROOT:-${CORE_DIR}/results/capacity_history_v3}"
-SELECTION_FREEZE="${SELECTION_FREEZE:-${V3_ROOT}/selection/SELECTION_FREEZE.json}"
+SELECTION_FREEZE="${SELECTION_FREEZE:-${V3_ROOT}/postprocess/selection_freeze.json}"
 TRAINING_ROOT="${TRAINING_ROOT:-${V3_ROOT}/training}"
-CALIBRATION_ROOT="${CALIBRATION_ROOT:-${V3_ROOT}/calibration}"
+CALIBRATION_ROOT="${CALIBRATION_ROOT:-${V3_ROOT}/postprocess/calibration}"
 MERGED_DIR="${MERGED_DIR:?Set MERGED_DIR to the frozen groups-1--45 dataset}"
 ANCHORS="${ANCHORS:-${MODELS_DIR}/l5kit_clusters_16.npy}"
 TUNING_CONFIG="${TUNING_CONFIG:-${SCRIPT_DIR}/scenarios/tuning_configs/give_way_reduced_clear_path_release_v13_risk_owned_yield.json}"
@@ -23,6 +23,16 @@ MANIFEST="${RESULTS_DIR}/CLOSED_LOOP_MANIFEST.json"
 PREFLIGHT="${RESULTS_DIR}/DEPLOYMENT_PREFLIGHT.json"
 REACTIVE_CONFIG_JSON="${REACTIVE_CONFIG_JSON:?Set REACTIVE_CONFIG_JSON to the prospectively frozen reactive-policy JSON}"
 ADAPTIVE_CONFIG='{"variant_name":"floor_weak","approach_preclearance_floor":1.66,"critical_preclearance_floor":1.72,"near_preclearance_floor":1.78}'
+PREFLIGHT_ONLY=0
+
+if [[ "${1:-}" == "--preflight-only" ]]; then
+  PREFLIGHT_ONLY=1
+  shift
+fi
+if (($#)); then
+  echo "Usage: $0 [--preflight-only]" >&2
+  exit 2
+fi
 
 : "${CARLA_ROOT:?Set CARLA_ROOT to the CARLA 0.9.14 directory}"
 for required in "${SELECTION_FREEZE}" "${MERGED_DIR}/train.jsonl" "${ANCHORS}" \
@@ -67,6 +77,11 @@ PY
   --merged-dir "${MERGED_DIR}" --anchors "${ANCHORS}" \
   --solver-preflight-json "${SOLVER_PREFLIGHT}" --output-json "${PREFLIGHT}"
 
+if ((PREFLIGHT_ONLY)); then
+  echo "V3 closed-loop preflight complete: ${PREFLIGHT}"
+  exit 0
+fi
+
 readarray -t SELECTED_RUNS < <("${PYTHON_BIN}" - "${SELECTION_FREEZE}" <<'PY'
 import json,sys
 f=json.load(open(sys.argv[1])); print(f["B1"]["representative_run_id"]); print(f["P_star"]["representative_run_id"])
@@ -92,9 +107,7 @@ run_cell() {
   model="${TRAINING_ROOT}/${run_id}/best_model"
   calibration="${CALIBRATION_ROOT}/${run_id}/calibration.json"
   case "${risk}" in
-    fixed_aggressive) policy_name=smpc_fixed_risk; risk_profile=fixed_frontier_aggressive ;;
     fixed_medium) policy_name=smpc_fixed_risk; risk_profile=fixed_frontier_medium ;;
-    fixed_conservative) policy_name=smpc_fixed_risk; risk_profile=fixed_frontier_conservative ;;
     adaptive)
       policy_name=smpc_var_risk; risk_profile=adaptive_interaction_severity
       adaptive_args=(--adaptive_risk_config_json "${ADAPTIVE_CONFIG}")
@@ -123,7 +136,7 @@ run_cell() {
 }
 
 for predictor in B1 P_star; do
-  for risk in fixed_aggressive fixed_medium fixed_conservative adaptive; do
+  for risk in fixed_medium adaptive; do
     for style in assertive_constant_speed defensive_reactive; do
       run_cell "${predictor}" "${risk}" "${style}"
     done
@@ -139,7 +152,7 @@ done
 "${PYTHON_BIN}" - "${RESULTS_DIR}/CLOSED_LOOP_AUDIT.json" <<'PY'
 import json,sys
 report=json.load(open(sys.argv[1]))
-if report.get("status") != "pass" or report.get("observed_rollouts") != 160:
+if report.get("status") != "pass" or report.get("observed_rollouts") != 80:
     raise SystemExit("formal V3 closed-loop completion gate failed")
 PY
 "${PYTHON_BIN}" "${MODELS_DIR}/capacity_study_v3_closed_loop.py" synthesize-carla \
@@ -152,7 +165,7 @@ import sys
 from pathlib import Path
 from capacity_study_v3_protocol import sha256_file, write_immutable_manifest
 root=Path(sys.argv[1])
-payload={"schema_version":"capacity_history_closed_loop_complete_v3","status":"pass","formal_evidence":True,"observed_rollouts":160,"artifact_sha256":{"manifest":sha256_file(root/"CLOSED_LOOP_MANIFEST.json"),"preflight":sha256_file(root/"DEPLOYMENT_PREFLIGHT.json"),"audit":sha256_file(root/"CLOSED_LOOP_AUDIT.json"),"rows":sha256_file(root/"closed_loop_rows.json"),"synthesis":sha256_file(root/"PREDICTOR_BY_RISK_SYNTHESIS.json")}}
+payload={"schema_version":"capacity_history_closed_loop_complete_v3","status":"pass","formal_evidence":True,"observed_rollouts":80,"artifact_sha256":{"manifest":sha256_file(root/"CLOSED_LOOP_MANIFEST.json"),"preflight":sha256_file(root/"DEPLOYMENT_PREFLIGHT.json"),"audit":sha256_file(root/"CLOSED_LOOP_AUDIT.json"),"rows":sha256_file(root/"closed_loop_rows.json"),"synthesis":sha256_file(root/"PREDICTOR_BY_RISK_SYNTHESIS.json")}}
 write_immutable_manifest(root/"CLOSED_LOOP_COMPLETE.json",payload)
 PY
 echo "V3 formal closed-loop matrix complete: ${RESULTS_DIR}"

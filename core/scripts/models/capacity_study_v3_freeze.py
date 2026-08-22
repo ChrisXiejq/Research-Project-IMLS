@@ -306,6 +306,18 @@ def build_selection_freeze(
 
 def validate_selection_freeze(payload: Mapping[str, Any]) -> None:
     _validate_checksum(payload, "freeze_sha256")
+    if payload.get("schema_version") == "capacity_history_thesis_core_selection_freeze_v3":
+        if payload.get("status") != "pass" or payload.get("heldout_access_authorized") is not True:
+            raise ValueError("Thesis-core selection freeze does not unlock evaluation")
+        if payload.get("evidence_status") != "retrospective_held_out":
+            raise ValueError("Thesis-core evidence-status drift")
+        p_star = payload.get("P_star", {})
+        cell_id = str(p_star.get("model_cell_id", ""))
+        if not cell_id.startswith(("mlp-", "transformer-")):
+            raise ValueError("P_star must be a selection-frozen sequence model")
+        if not p_star.get("representative_run_id"):
+            raise ValueError("P_star lacks a representative deployment run")
+        return
     if payload.get("status") != "pass" or not payload.get("fresh_test_access_allowed"):
         raise ValueError("Selection freeze does not unlock fresh evaluation")
     if payload.get("selection_uses_fresh_test") is not False:

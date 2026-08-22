@@ -39,6 +39,7 @@ ENCODER_FAMILIES = ("mlp", "transformer")
 HEAD_FAMILY = "head"
 SEEDS = (11, 23, 37)
 LEARNING_RATES = (3.0e-5, 1.0e-4, 3.0e-4)
+THESIS_CORE_LEARNING_RATE = 1.0e-4
 CORE_EPOCHS = 80
 EXTENDED_EPOCHS = 120
 EARLY_STOPPING_PATIENCE = 12
@@ -55,6 +56,22 @@ CLOSED_LOOP_GROUPS = tuple(range(81, 91))
 TRAIN_GROUPS = tuple(range(1, 41))
 VALIDATION_GROUPS = tuple(range(41, 46))
 RETROSPECTIVE_TEST_GROUPS = tuple(range(46, 51))
+THESIS_FIT_GROUPS = tuple(range(1, 36))
+THESIS_SELECTION_GROUPS = tuple(range(36, 41))
+THESIS_HELDOUT_GROUPS = tuple(range(41, 46))
+THESIS_CORE_CELL_IDS = (
+    "head-large",
+    "mlp-h0p0-large",
+    "mlp-h0p4-large",
+    "mlp-h1p0-large",
+    "transformer-h0p0-large",
+    "transformer-h0p4-large",
+    "transformer-h1p0-small",
+    "transformer-h1p0-medium",
+    "transformer-h1p0-large",
+)
+THESIS_CORE_RUN_COUNT = len(THESIS_CORE_CELL_IDS) * len(SEEDS)
+THESIS_RISK_POLICIES = ("fixed_medium", "adaptive")
 COLLECTION_CELLS = (
     "S0_FIXED",
     "S0_ADAPTIVE",
@@ -69,6 +86,12 @@ RISK_POLICIES = (
 )
 TARGET_STYLES = ("assertive", "reactive")
 PREDICTOR_ROLES = ("B1", "P_star")
+THESIS_CLOSED_LOOP_RUN_COUNT = (
+    len(PREDICTOR_ROLES)
+    * len(THESIS_RISK_POLICIES)
+    * len(TARGET_STYLES)
+    * len(CLOSED_LOOP_GROUPS)
+)
 
 # The band is inclusive so boundary samples have deterministic membership.
 RESPONSE_ONSET_HALF_WIDTH_S = 0.6
@@ -188,6 +211,28 @@ def validate_protocol(payload: Mapping[str, Any]) -> dict[str, Any]:
     _require_equal(payload, "history_horizons_s", list(HISTORY_HORIZONS_S))
     _require_equal(payload, "seeds", list(SEEDS))
     _require_equal(payload, "learning_rates", list(LEARNING_RATES))
+    _require_equal(
+        payload,
+        "thesis_core",
+        {
+            "evidence_status": "retrospective_held_out",
+            "model_cell_ids": list(THESIS_CORE_CELL_IDS),
+            "seeds": list(SEEDS),
+            "learning_rate": THESIS_CORE_LEARNING_RATE,
+            "fit_groups": list(THESIS_FIT_GROUPS),
+            "selection_groups": list(THESIS_SELECTION_GROUPS),
+            "heldout_groups": list(THESIS_HELDOUT_GROUPS),
+            "planned_training_runs": THESIS_CORE_RUN_COUNT,
+            "endpoint_runs": 21,
+            "dose_response_runs": 6,
+            "risk_policies": list(THESIS_RISK_POLICIES),
+            "planned_closed_loop_rollouts": THESIS_CLOSED_LOOP_RUN_COUNT,
+            "maximum_parallel_workers": 6,
+            "frozen_backbone_cache_required": True,
+            "cached_full_parity_atol": 1.0e-5,
+            "cached_full_parity_rtol": 1.0e-5,
+        },
+    )
     _require_equal(payload, "core_epochs", CORE_EPOCHS)
     _require_equal(payload, "extended_epochs", EXTENDED_EPOCHS)
     _require_equal(payload, "early_stopping_patience", EARLY_STOPPING_PATIENCE)

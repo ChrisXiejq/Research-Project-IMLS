@@ -23,12 +23,17 @@ from prediction_input_contract import load_logged_raster
 
 
 def _frozen_model_identity(freeze: dict, run_id: str) -> str:
-    matches = [
-        seed["model_identity"]
-        for cell in freeze["cells"]
-        for seed in cell["retained_seeds"]
-        if seed["run_id"] == run_id
-    ]
+    if "runs" in freeze:
+        matches = [
+            seed["model_identity"] for seed in freeze["runs"] if seed["run_id"] == run_id
+        ]
+    else:
+        matches = [
+            seed["model_identity"]
+            for cell in freeze["cells"]
+            for seed in cell["retained_seeds"]
+            if seed["run_id"] == run_id
+        ]
     if len(matches) != 1:
         raise ValueError(f"Representative run is not uniquely hash-bound: {run_id}")
     return str(matches[0])
@@ -170,8 +175,11 @@ def main() -> None:  # pragma: no cover - requires the server TensorFlow/CARLA s
     solver = json.loads(args.solver_preflight_json.read_text(encoding="utf-8"))
     validate_selection_freeze(freeze)
     anchors = np.load(args.anchors).astype(np.float32)
+    sample_jsonl = args.merged_dir / "train.jsonl"
+    if not sample_jsonl.is_file():
+        sample_jsonl = args.merged_dir / "fit.jsonl"
     iterator = load_samples(
-        str(args.merged_dir / "train.jsonl"),
+        str(sample_jsonl),
         str(args.merged_dir.parent),
         10,
         max_samples=1,
