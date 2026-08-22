@@ -71,11 +71,33 @@ if payload["status"] != "pass": raise SystemExit("Gurobi solver preflight failed
 PY
 "${PYTHON_BIN}" -c 'import carla; c=carla.Client("127.0.0.1",2000); c.set_timeout(10.0); print("CARLA map:",c.get_world().get_map().name)'
 "${PYTHON_BIN}" -c 'import tensorflow as tf,sys; g=tf.config.list_physical_devices("GPU"); print("TensorFlow GPUs:",g); sys.exit(0 if g else 3)'
-"${PYTHON_BIN}" "${MODELS_DIR}/verify_capacity_history_v3_deployment.py" \
-  --selection-freeze "${SELECTION_FREEZE}" --closed-loop-manifest "${MANIFEST}" \
-  --training-root "${TRAINING_ROOT}" --calibration-root "${CALIBRATION_ROOT}" \
-  --merged-dir "${MERGED_DIR}" --anchors "${ANCHORS}" \
-  --solver-preflight-json "${SOLVER_PREFLIGHT}" --output-json "${PREFLIGHT}"
+if [[ -f "${PREFLIGHT}" ]]; then
+  "${PYTHON_BIN}" - "${PREFLIGHT}" "${SELECTION_FREEZE}" "${MANIFEST}" <<'PY'
+import json,sys
+from capacity_study_v3_closed_loop import (
+    validate_closed_loop_manifest,
+    validate_dual_predictor_preflight,
+)
+from capacity_study_v3_freeze import validate_selection_freeze
+preflight,freeze,manifest=(json.load(open(path)) for path in sys.argv[1:])
+validate_selection_freeze(freeze)
+validate_closed_loop_manifest(manifest,freeze)
+if preflight.get("status") != "pass":
+    raise SystemExit("Existing deployment preflight is not passing")
+if preflight.get("closed_loop_manifest_sha256") != manifest["manifest_sha256"]:
+    raise SystemExit("Existing deployment preflight/manifest binding drift")
+validate_dual_predictor_preflight(
+    manifest, freeze, preflight["predictor_records"], preflight["solver"]
+)
+print("Existing pre-outcome deployment preflight revalidated")
+PY
+else
+  "${PYTHON_BIN}" "${MODELS_DIR}/verify_capacity_history_v3_deployment.py" \
+    --selection-freeze "${SELECTION_FREEZE}" --closed-loop-manifest "${MANIFEST}" \
+    --training-root "${TRAINING_ROOT}" --calibration-root "${CALIBRATION_ROOT}" \
+    --merged-dir "${MERGED_DIR}" --anchors "${ANCHORS}" \
+    --solver-preflight-json "${SOLVER_PREFLIGHT}" --output-json "${PREFLIGHT}"
+fi
 
 if ((PREFLIGHT_ONLY)); then
   echo "V3 closed-loop preflight complete: ${PREFLIGHT}"
