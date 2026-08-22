@@ -1569,7 +1569,27 @@ class RunIntersectionScenario:
                     "target_state": self._actor_state_for_prediction_log(target_actor),
                     "target_to_world_R": np.asarray(R_target_to_world, dtype=float),
                 }
-                interaction_context = interaction_context_from_sample(interaction_sample)
+                if self.pred_model.model_input_count == 4:
+                    # V2/V3 sequence predictors must receive the same six-token
+                    # feature contract used by offline evaluation.  The horizon
+                    # mask (0.0/0.4/1.0 s) is embedded in the frozen V3 graph.
+                    online_history = aligned_history_from_agent_history(
+                        self.agent_history,
+                        self.vehicle_actors[self.ego_vehicle_idx].id,
+                        target_agent_id,
+                        history_times_s=HISTORY_TIMES_S,
+                    )
+                    online_sequence = build_interaction_sequence(
+                        online_history, history_times_s=HISTORY_TIMES_S
+                    )
+                    interaction_context = (
+                        online_sequence.values,
+                        online_sequence.mask,
+                    )
+                else:
+                    interaction_context = interaction_context_from_sample(
+                        interaction_sample
+                    )
                 gmm_pred_tv = self.pred_model.predict_instance(
                     img_tv,
                     past_states_tv[:-1],

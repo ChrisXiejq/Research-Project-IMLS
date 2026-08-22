@@ -10,8 +10,10 @@ sys.path.append(scriptdir)
 from evaluation.gmm_prediction import GMMPrediction
 from models.multipath_gmm_utils import decode_multipath_raw
 from models.prediction_input_contract import preprocess_resnet_raster
-# Import registers the V2 serialisable custom layers before load_model.
+# Imports register both historical V2 and capacity/history V3 serialisable
+# custom layers before load_model. V3 P* may be either an MLP or Transformer.
 from models import interaction_adapter_v2  # noqa: F401
+from models import interaction_adapter_v3  # noqa: F401
 
 class DeployMultiPath:
     """ Class to serve a pretrained MultiPath model for online trajectory prediction.
@@ -26,6 +28,7 @@ class DeployMultiPath:
             raise RuntimeError(f"Could not load the saved model {self.model_path}: {e}") from e
         self.model_input_count = len(getattr(self.model, "inputs", []))
         self.uses_interaction_context = self.model_input_count >= 3
+        self.sequence_model_family = self._sequence_model_family()
 
         self.anchors = np.asarray(anchors, dtype=np.float32)
 
@@ -113,12 +116,23 @@ class DeployMultiPath:
             raise ValueError(f"Invalid deployment calibration parameters: {parsed}")
         return parsed, dict(calibration)
 
+    def _sequence_model_family(self):
+        layer_names = {layer.name for layer in getattr(self.model, "layers", [])}
+        if any("transformer" in name for name in layer_names):
+            return "transformer"
+        if self.model_input_count == 4 and any("mlp" in name for name in layer_names):
+            return "mlp"
+        if self.model_input_count == 4:
+            return "four_input_sequence_model"
+        return None
+
     def deployment_metadata(self):
         return {
             "schema_version": "multipath_online_deployment_v1",
             "model_artifact": self.model_artifact,
             "model_input_count": self.model_input_count,
             "uses_interaction_context": self.uses_interaction_context,
+            "sequence_model_family": self.sequence_model_family,
             "calibration_source": self.calibration_source,
             "calibration_artifact": self.calibration_artifact,
             "calibration_fit_split": self.calibration_metadata.get("fit_split"),
@@ -149,7 +163,7 @@ class DeployMultiPath:
                 interaction_context = np.expand_dims(interaction_context, 0)
             if interaction_context.shape[1:] != (6, 12):
                 raise ValueError(
-                    "V2 model requires interaction_sequence shape [batch, 6, 12], "
+                    "Sequence model requires interaction_sequence shape [batch, 6, 12], "
                     f"got {interaction_context.shape}"
                 )
             if interaction_mask is None:

@@ -46,7 +46,15 @@ def main() -> int:
     )
     item = next(iterator)
     sample, raster_path, past, _ = item
-    samples, evaluator_images, past_batch, context_batch, _ = make_batch([item])
+    (
+        samples,
+        evaluator_images,
+        past_batch,
+        context_batch,
+        sequence_batch,
+        sequence_mask_batch,
+        _,
+    ) = make_batch([item])
 
     raw_image = load_logged_raster(raster_path)
     deployment_preprocessed = preprocess_resnet_raster(raw_image)
@@ -54,11 +62,20 @@ def main() -> int:
         np.max(np.abs(evaluator_images - deployment_preprocessed))
     )
 
-    model_inputs = (
-        [evaluator_images, past_batch, context_batch]
-        if deploy.uses_interaction_context
-        else [evaluator_images, past_batch]
-    )
+    if deploy.model_input_count == 4:
+        model_inputs = [
+            evaluator_images,
+            past_batch,
+            sequence_batch,
+            sequence_mask_batch,
+        ]
+        online_context = (sequence_batch[0], sequence_mask_batch[0])
+    elif deploy.model_input_count == 3:
+        model_inputs = [evaluator_images, past_batch, context_batch]
+        online_context = context_batch[0]
+    else:
+        model_inputs = [evaluator_images, past_batch]
+        online_context = None
     raw_prediction = np.asarray(deploy.model.predict_on_batch(model_inputs))
     offline = decode_raw_predictions(
         raw_prediction,
@@ -69,7 +86,7 @@ def main() -> int:
     online = deploy.predict_instance(
         raw_image,
         past,
-        interaction_context=interaction_context_from_sample(sample),
+        interaction_context=online_context,
     )
 
     differences = {

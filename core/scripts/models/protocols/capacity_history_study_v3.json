@@ -1,0 +1,366 @@
+{
+  "schema_version": "capacity_history_study_v3.0",
+  "status": "frozen",
+  "frozen_before_fresh_test_access": true,
+  "scientific_question": "When does explicit interaction modelling add value beyond task-adapted spatial prediction, and how is that value moderated by risk policy after deployment?",
+  "hypotheses": [
+    {
+      "id": "H1_capacity",
+      "claim": "At fixed 1.0-second history, increasing Transformer task-trained capacity improves rollout-macro NLL.",
+      "scope": "Town05 give-way prediction"
+    },
+    {
+      "id": "H2_information",
+      "claim": "Older explicit ego-target tokens improve prediction beyond the current interaction token and common B0 inputs.",
+      "scope": "trained 0.0/0.4/1.0-second horizon contrasts"
+    },
+    {
+      "id": "H3_architecture",
+      "claim": "At matched capacity and history, Transformer attention extracts more incremental historical value than an MLP.",
+      "scope": "matched encoder pairs and history-gain interaction"
+    },
+    {
+      "id": "H4_model_risk_interaction",
+      "claim": "The closed-loop effect of the validation-selected best sequence model is moderated by risk policy.",
+      "scope": "B1 versus P_star under adaptive versus fixed-medium risk"
+    }
+  ],
+  "capacity_targets": {
+    "small": 170000,
+    "medium": 500000,
+    "large": 1034208
+  },
+  "capacity_tolerance_fraction": 0.05,
+  "history_times_s": [-1.0, -0.8, -0.6, -0.4, -0.2, 0.0],
+  "history_horizons_s": [0.0, 0.4, 1.0],
+  "model_cells": [
+    {
+      "cell_id": "head-small",
+      "family": "head",
+      "capacity_tier": "small",
+      "target_trainable_parameters": 170000,
+      "history_horizon_s": null,
+      "history_mask": null,
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "head-medium",
+      "family": "head",
+      "capacity_tier": "medium",
+      "target_trainable_parameters": 500000,
+      "history_horizon_s": null,
+      "history_mask": null,
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "head-large",
+      "family": "head",
+      "capacity_tier": "large",
+      "target_trainable_parameters": 1034208,
+      "history_horizon_s": null,
+      "history_mask": null,
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "mlp-h0p0-small",
+      "family": "mlp",
+      "capacity_tier": "small",
+      "target_trainable_parameters": 170000,
+      "history_horizon_s": 0.0,
+      "history_mask": [0, 0, 0, 0, 0, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "mlp-h0p0-medium",
+      "family": "mlp",
+      "capacity_tier": "medium",
+      "target_trainable_parameters": 500000,
+      "history_horizon_s": 0.0,
+      "history_mask": [0, 0, 0, 0, 0, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "mlp-h0p0-large",
+      "family": "mlp",
+      "capacity_tier": "large",
+      "target_trainable_parameters": 1034208,
+      "history_horizon_s": 0.0,
+      "history_mask": [0, 0, 0, 0, 0, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "mlp-h0p4-small",
+      "family": "mlp",
+      "capacity_tier": "small",
+      "target_trainable_parameters": 170000,
+      "history_horizon_s": 0.4,
+      "history_mask": [0, 0, 0, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "mlp-h0p4-medium",
+      "family": "mlp",
+      "capacity_tier": "medium",
+      "target_trainable_parameters": 500000,
+      "history_horizon_s": 0.4,
+      "history_mask": [0, 0, 0, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "mlp-h0p4-large",
+      "family": "mlp",
+      "capacity_tier": "large",
+      "target_trainable_parameters": 1034208,
+      "history_horizon_s": 0.4,
+      "history_mask": [0, 0, 0, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "mlp-h1p0-small",
+      "family": "mlp",
+      "capacity_tier": "small",
+      "target_trainable_parameters": 170000,
+      "history_horizon_s": 1.0,
+      "history_mask": [1, 1, 1, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "mlp-h1p0-medium",
+      "family": "mlp",
+      "capacity_tier": "medium",
+      "target_trainable_parameters": 500000,
+      "history_horizon_s": 1.0,
+      "history_mask": [1, 1, 1, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "mlp-h1p0-large",
+      "family": "mlp",
+      "capacity_tier": "large",
+      "target_trainable_parameters": 1034208,
+      "history_horizon_s": 1.0,
+      "history_mask": [1, 1, 1, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "transformer-h0p0-small",
+      "family": "transformer",
+      "capacity_tier": "small",
+      "target_trainable_parameters": 170000,
+      "history_horizon_s": 0.0,
+      "history_mask": [0, 0, 0, 0, 0, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "transformer-h0p0-medium",
+      "family": "transformer",
+      "capacity_tier": "medium",
+      "target_trainable_parameters": 500000,
+      "history_horizon_s": 0.0,
+      "history_mask": [0, 0, 0, 0, 0, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "transformer-h0p0-large",
+      "family": "transformer",
+      "capacity_tier": "large",
+      "target_trainable_parameters": 1034208,
+      "history_horizon_s": 0.0,
+      "history_mask": [0, 0, 0, 0, 0, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "transformer-h0p4-small",
+      "family": "transformer",
+      "capacity_tier": "small",
+      "target_trainable_parameters": 170000,
+      "history_horizon_s": 0.4,
+      "history_mask": [0, 0, 0, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "transformer-h0p4-medium",
+      "family": "transformer",
+      "capacity_tier": "medium",
+      "target_trainable_parameters": 500000,
+      "history_horizon_s": 0.4,
+      "history_mask": [0, 0, 0, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "transformer-h0p4-large",
+      "family": "transformer",
+      "capacity_tier": "large",
+      "target_trainable_parameters": 1034208,
+      "history_horizon_s": 0.4,
+      "history_mask": [0, 0, 0, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "transformer-h1p0-small",
+      "family": "transformer",
+      "capacity_tier": "small",
+      "target_trainable_parameters": 170000,
+      "history_horizon_s": 1.0,
+      "history_mask": [1, 1, 1, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "transformer-h1p0-medium",
+      "family": "transformer",
+      "capacity_tier": "medium",
+      "target_trainable_parameters": 500000,
+      "history_horizon_s": 1.0,
+      "history_mask": [1, 1, 1, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    },
+    {
+      "cell_id": "transformer-h1p0-large",
+      "family": "transformer",
+      "capacity_tier": "large",
+      "target_trainable_parameters": 1034208,
+      "history_horizon_s": 1.0,
+      "history_mask": [1, 1, 1, 1, 1, 1],
+      "output_scope": "full_distribution",
+      "foundation": "pretrained_B0"
+    }
+  ],
+  "seeds": [11, 23, 37],
+  "learning_rates": [0.00003, 0.0001, 0.0003],
+  "core_epochs": 80,
+  "extended_epochs": 120,
+  "early_stopping_patience": 12,
+  "optimization_protocol": {
+    "optimizer": "adamw",
+    "weight_decay": 0.00001,
+    "gradient_clip_norm": 10.0,
+    "encoder_dropout": 0.1,
+    "checkpoint_metric": "validation_rollout_macro_trajectory_mixture_NLL_per_step",
+    "checkpoint_unit": "rollout",
+    "early_stopping_patience": 12,
+    "terminate_on_non_finite_loss_or_weights": true,
+    "debug_sample_limits_allowed_in_formal_runs": false
+  },
+  "training_integrity_gates": {
+    "train_validation_group_disjoint": true,
+    "expected_group_and_four_cell_support_required": true,
+    "duplicate_sample_keys_forbidden": true,
+    "missing_rasters_forbidden": true,
+    "non_finite_inputs_or_labels_forbidden": true,
+    "dataset_and_source_hashes_bound_to_completion": true,
+    "training_health_report_required": true
+  },
+  "convergence_boundary": {
+    "last_epochs": 5,
+    "maximum_fraction_at_boundary": 0.2,
+    "action": "extend every affected matched condition to 120 epochs"
+  },
+  "core_run_count": 189,
+  "data_fractions": [0.25, 0.5, 0.75, 1.0],
+  "fraction_grid_run_count": 108,
+  "fraction_grid_nonduplicate_runs": 81,
+  "general_test_groups": [51, 52, 53, 54, 55, 56, 57, 58, 59, 60],
+  "challenge_test_groups": [61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80],
+  "closed_loop_groups": [81, 82, 83, 84, 85, 86, 87, 88, 89, 90],
+  "collection_cells": ["S0_FIXED", "S0_ADAPTIVE", "S1_FIXED", "S1_ADAPTIVE"],
+  "primary_metric": "rollout_macro_nll",
+  "supporting_metrics": [
+    "top1_ADE",
+    "top1_FDE",
+    "oracle_ADE",
+    "oracle_FDE",
+    "probability_calibration",
+    "covariance_coverage",
+    "target_speed_profile_RMSE",
+    "response_onset_timing_error",
+    "conflict_zone_entry_time_error",
+    "conflict_zone_probability_mass",
+    "warmed_batch_one_latency"
+  ],
+  "primary_estimands": [
+    {
+      "id": "capacity_transformer_full_history_small_minus_large",
+      "formula": "NLL(T,1.0s,small)-NLL(T,1.0s,large)",
+      "favourable_direction": "positive"
+    },
+    {
+      "id": "information_mlp_large_snapshot_minus_full",
+      "formula": "NLL(MLP,0.0s,large)-NLL(MLP,1.0s,large)",
+      "favourable_direction": "positive"
+    },
+    {
+      "id": "information_transformer_large_snapshot_minus_full",
+      "formula": "NLL(T,0.0s,large)-NLL(T,1.0s,large)",
+      "favourable_direction": "positive"
+    },
+    {
+      "id": "architecture_large_transformer_minus_mlp_history_gain",
+      "formula": "[NLL(T,0.0s,large)-NLL(T,1.0s,large)]-[NLL(MLP,0.0s,large)-NLL(MLP,1.0s,large)]",
+      "favourable_direction": "positive"
+    },
+    {
+      "id": "model_risk_adaptive_minus_fixed_medium_difference_in_differences",
+      "formula": "[(Y_Pstar-Y_B1)_adaptive]-[(Y_Pstar-Y_B1)_fixed_medium]",
+      "favourable_direction": "negative completion time and positive separation"
+    }
+  ],
+  "multiplicity": {
+    "method": "holm",
+    "family": "four offline headline contrasts plus two closed-loop co-primary outcomes",
+    "alpha": 0.05
+  },
+  "deployment_selection": {
+    "candidate_families": ["mlp", "transformer"],
+    "metric": "median_validation_rollout_macro_nll",
+    "eligibility": ["converged", "capacity_audit_pass", "calibration_complete", "latency_gate_pass"],
+    "maximum_warmed_batch_one_latency_ms": 50.0,
+    "tie_breakers": ["trainable_parameters", "warmed_batch_one_latency", "model_cell_id"],
+    "fresh_test_access_forbidden": true
+  },
+  "response_strata": {
+    "assertive": "all assertive target samples",
+    "reactive_pre_response": "reactive samples outside onset band before active response",
+    "response_onset": "inclusive +/-0.6 seconds around frozen trigger time",
+    "response_active": "reactive-active samples later than trigger+0.6 seconds"
+  },
+  "result_branches": [
+    "capacity_positive_history_positive_attention_positive",
+    "capacity_positive_history_positive_attention_null",
+    "capacity_positive_history_null",
+    "capacity_null_history_positive",
+    "capacity_null_history_null",
+    "generic_encoder_advantage_without_history_interaction",
+    "mlp_matches_or_beats_transformer",
+    "b1_stronger_adaptation_allocation",
+    "offline_gain_closed_loop_amplified_by_adaptive_risk",
+    "offline_gain_closed_loop_suppressed_or_reversed",
+    "null_or_mixed_results_retained"
+  ],
+  "claim_boundaries": [
+    "B1 contrasts are adaptation-allocation comparisons, not pure architecture effects.",
+    "Zero/shuffle perturbations are appendix sensitivity evidence only.",
+    "Transformer advantage at one and six tokens without a history-gain interaction is a generic encoder effect.",
+    "Lower offline error alone does not license a safety claim.",
+    "Challenge-set evidence is mechanism/stress-test evidence; overall claims remain anchored to the general set."
+  ]
+}

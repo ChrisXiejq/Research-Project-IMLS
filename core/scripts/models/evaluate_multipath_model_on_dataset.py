@@ -26,6 +26,18 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(SCRIPT_DIR)
 # Import registers the V2 custom Keras layers before SavedModel restoration.
 import interaction_adapter_v2  # noqa: F401,E402
+import interaction_adapter_v3  # noqa: F401,E402
+from interaction_sequence_v3 import has_complete_interaction_history  # noqa: E402
+from capacity_study_v3_analysis import (  # noqa: E402
+    conflict_zone_probability_mass,
+    response_onset_timing_error_s,
+    target_speed_profile_rmse,
+)
+from capacity_study_v3_protocol import (  # noqa: E402
+    classify_response_stratum,
+    conflict_zone_entry_time_s,
+    sha256_payload,
+)
 from interaction_context_ablation import prepare_interaction_ablation  # noqa: E402
 from multipath_gmm_utils import (
     COVARIANCE_SCALE_SEMANTICS,
@@ -146,6 +158,11 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument("--ablation-seed", type=int, default=20260802)
+    parser.add_argument(
+        "--require-complete-interaction-history",
+        action="store_true",
+        help="Use the identical complete six-token sample set required by V3 horizon contrasts.",
+    )
     return parser.parse_args()
 
 
@@ -216,6 +233,7 @@ def load_samples(
     max_samples: Optional[int] = None,
     no_image: bool = False,
     subset: str = "all",
+    require_complete_interaction_history: bool = False,
 ):
     count = 0
     for sample in read_jsonl(jsonl_path):
@@ -232,6 +250,10 @@ def load_samples(
             and bool(diagnostics.get("active")),
         }[subset]
         if not include:
+            continue
+        if require_complete_interaction_history and not has_complete_interaction_history(
+            sample.get("interaction_sequence_mask") or []
+        ):
             continue
         if not has_full_horizon(sample, horizon=horizon):
             continue
@@ -418,6 +440,7 @@ def evaluate_decoded(
     per_horizon_total = [0 for _ in range(horizon)]
     rollout_rows: Dict[str, List[Dict[str, float]]] = collections.defaultdict(list)
     init_group_rows: Dict[str, List[Dict[str, float]]] = collections.defaultdict(list)
+    sample_metrics: List[Dict[str, Any]] = []
 
     for sample_index, sample in enumerate(samples):
         probs = probabilities[sample_index].astype(np.float64)
@@ -485,6 +508,74 @@ def evaluate_decoded(
         rollout_rows[rollout_group_key(sample)].append(row)
         init_group_rows[init_group_key(sample)].append(row)
 
+        diagnostics = sample.get("target_reactive_diagnostics") or {}
+        sample_time = float(
+            sample.get(
+                "sim_time_s",
+                sample.get("simulation_time_s", sample.get("timestamp_s", 0.0)),
+            )
+        )
+        trigger_time = diagnostics.get("trigger_time_s")
+        if trigger_time is None and diagnostics.get("triggered_this_step"):
+            trigger_time = sample_time
+        target_style = str(sample.get("target_style", ""))
+        stratum = (
+            classify_response_stratum(
+                target_style=target_style,
+                sample_time_s=sample_time,
+                trigger_time_s=(
+                    float(trigger_time) if trigger_time is not None else None
+                ),
+                reactive_active=bool(diagnostics.get("active")),
+            )
+            if target_style
+            in {
+                "assertive",
+                "assertive_constant_speed",
+                "reactive",
+                "defensive_reactive",
+            }
+            else "unclassified_legacy"
+        )
+        times = sample.get("future_times_s")
+        if not times or len(times) < horizon:
+            dt = float(sample.get("dt_s", sample.get("dt", 0.2)))
+            times = [sample_time + (index + 1) * dt for index in range(horizon)]
+        times = [float(value) for value in times[:horizon]]
+        rotation = np.asarray(sample["target_to_world_R"], dtype=np.float64)
+        translation = np.asarray(sample["target_to_world_t"], dtype=np.float64)
+        mode_world = mus @ rotation.T + translation[None, None, :]
+        truth_world = label @ rotation.T + translation[None, :]
+        predicted_entry = conflict_zone_entry_time_s(times, mode_world[top])
+        true_entry = conflict_zone_entry_time_s(times, truth_world)
+        sample_metrics.append(
+            {
+                "sample_id": sample.get("sample_id"),
+                "rollout_id": rollout_group_key(sample),
+                "ego_init_id": (
+                    int(init_group_key(sample).split("_")[-1])
+                    if init_group_key(sample) != "<missing-init>"
+                    else None
+                ),
+                "response_stratum": stratum,
+                **row,
+                "target_speed_profile_RMSE_mps": target_speed_profile_rmse(
+                    mus[top], label, times
+                ),
+                "response_onset_timing_error_s": response_onset_timing_error_s(
+                    mus[top], label, times
+                ),
+                "conflict_zone_entry_time_error_s": (
+                    float(predicted_entry - true_entry)
+                    if predicted_entry is not None and true_entry is not None
+                    else None
+                ),
+                "conflict_zone_probability_mass": conflict_zone_probability_mass(
+                    mode_world, probs
+                ),
+            }
+        )
+
     coverage = {}
     coverage_errors = []
     for name, specification in CHI2_THRESHOLDS_2D.items():
@@ -535,6 +626,34 @@ def evaluate_decoded(
         ),
         "pointwise_mixture_NLL_mean": finite_or_none(mean(pointwise_nll)),
     }
+    mechanism_fields = (
+        "target_speed_profile_RMSE_mps",
+        "response_onset_timing_error_s",
+        "conflict_zone_entry_time_error_s",
+        "conflict_zone_probability_mass",
+    )
+    response_strata = {}
+    for stratum in sorted({row["response_stratum"] for row in sample_metrics}):
+        members = [row for row in sample_metrics if row["response_stratum"] == stratum]
+        by_rollout: Dict[str, List[Dict[str, Any]]] = collections.defaultdict(list)
+        for row in members:
+            by_rollout[row["rollout_id"]].append(row)
+        metric_macro = {}
+        for field in mechanism_fields:
+            rollout_values = []
+            for rows in by_rollout.values():
+                values = [float(row[field]) for row in rows if row[field] is not None]
+                if values:
+                    rollout_values.append(float(np.mean(values)))
+            metric_macro[field] = finite_or_none(mean(rollout_values))
+        response_strata[stratum] = {
+            "windows": len(members),
+            "independent_rollouts": len(by_rollout),
+            "independent_init_groups": len(
+                {row["ego_init_id"] for row in members if row["ego_init_id"] is not None}
+            ),
+            "rollout_macro": metric_macro,
+        }
     return {
         **flat_metrics,
         "calibration_parameters": {
@@ -600,6 +719,8 @@ def evaluate_decoded(
             "macro_mean": init_group_macro,
             "per_init_group": init_group_metrics,
         },
+        "sample_metrics_v3": sample_metrics,
+        "response_strata_v3": response_strata,
     }
 
 
@@ -780,6 +901,12 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
 
     model = tf.keras.models.load_model(args.model, compile=False)
     input_count = len(getattr(model, "inputs", []))
+    try:
+        trained_history_horizon_s = float(
+            model.get_layer("fixed_history_horizon").history_horizon_s
+        )
+    except (ValueError, AttributeError):
+        trained_history_horizon_s = None
     normalization_mean = None
     if args.interaction_ablation != "none":
         if input_count != 4:
@@ -807,6 +934,7 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         max_samples=args.max_samples,
         no_image=args.no_image,
         subset=args.subset,
+        require_complete_interaction_history=args.require_complete_interaction_history,
     ))
     sample_items, interaction_ablation = prepare_interaction_ablation(
         sample_items,
@@ -918,6 +1046,13 @@ def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
         "model_input_count": input_count,
         "uses_interaction_context": bool(input_count >= 3),
         "interaction_ablation": interaction_ablation,
+        "requires_complete_interaction_history": bool(
+            args.require_complete_interaction_history
+        ),
+        "trained_history_horizon_s": trained_history_horizon_s,
+        "sample_membership_sha256": sha256_payload(
+            [str(sample.get("sample_id")) for sample in samples]
+        ),
         "samples": len(samples),
         "independent_rollouts": len({rollout_group_key(sample) for sample in samples}),
         "independent_init_groups": len({init_group_key(sample) for sample in samples}),
