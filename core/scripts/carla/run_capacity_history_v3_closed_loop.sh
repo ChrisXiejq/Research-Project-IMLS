@@ -21,7 +21,8 @@ RESULTS_DIR="${RESULTS_DIR:-${V3_ROOT}/closed_loop}"
 INIT_DIR="${PROTOCOL_ROOT}/inits/closed_loop"
 MANIFEST="${RESULTS_DIR}/CLOSED_LOOP_MANIFEST.json"
 PREFLIGHT="${RESULTS_DIR}/DEPLOYMENT_PREFLIGHT.json"
-REACTIVE_CONFIG_JSON="${REACTIVE_CONFIG_JSON:?Set REACTIVE_CONFIG_JSON to the prospectively frozen reactive-policy JSON}"
+REACTIVE_CONFIG_JSON="${REACTIVE_CONFIG_JSON:-}"
+REACTIVE_CONFIG_SOURCE="${REACTIVE_CONFIG_SOURCE:-}"
 ADAPTIVE_CONFIG='{"variant_name":"floor_weak","approach_preclearance_floor":1.66,"critical_preclearance_floor":1.72,"near_preclearance_floor":1.78}'
 PREFLIGHT_ONLY=0
 
@@ -32,6 +33,22 @@ fi
 if (($#)); then
   echo "Usage: $0 [--preflight-only]" >&2
   exit 2
+fi
+if [[ -z "${REACTIVE_CONFIG_JSON}" ]]; then
+  test -f "${REACTIVE_CONFIG_SOURCE}" || {
+    echo "Set REACTIVE_CONFIG_JSON or REACTIVE_CONFIG_SOURCE to the prospectively frozen policy" >&2
+    exit 2
+  }
+  REACTIVE_CONFIG_JSON="$("${PYTHON_BIN}" - "${REACTIVE_CONFIG_SOURCE}" <<'PY'
+import json,sys
+payload=json.load(open(sys.argv[1]))
+source=payload.get("reactive_parameters",payload)
+keys=("caution_speed_mps","minimum_speed_mps","activation_distance_m",
+      "release_clearance_m","arrival_time_gap_s","closest_approach_time_s",
+      "closest_approach_distance_m","release_hold_s")
+print(json.dumps({key:source[key] for key in keys},separators=(",",":")))
+PY
+)"
 fi
 
 : "${CARLA_ROOT:?Set CARLA_ROOT to the CARLA 0.9.14 directory}"
