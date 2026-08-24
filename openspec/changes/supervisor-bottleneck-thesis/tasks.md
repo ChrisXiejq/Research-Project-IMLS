@@ -55,9 +55,9 @@
 
 ## 7. Produce Clean, Submission-Ready GitHub Revisions
 
-- [ ] 7.1 Run the complete relevant experiment-repository test and evidence-audit suite, and verify all failures are resolved or explicitly bounded before staging
-- [ ] 7.2 Separate completed V3 assets, exploratory implicit-filter work, post-SF4 analysis and OpenSpec artifacts into reviewable commits, and verify each commit has a single scientific role and no secrets or large reproducible caches
-- [ ] 7.3 Commit dissertation source/bibliography, generated figures and final PDF with reproducible build metadata, and verify build outputs match the committed sources
-- [ ] 7.4 Recheck both worktrees, ignored files, repository sizes, Git object integrity and upstream divergence, and verify there are no unexplained modifications or untracked submission dependencies
-- [ ] 7.5 Create a final release manifest linking experiment commit, dissertation commit, evidence markers, test summaries, PDF build and bounded limitations, and verify a fresh clone can locate every required submission artifact
+- [x] 7.1 Run the complete relevant experiment-repository test and evidence-audit suite, and verify all failures are resolved or explicitly bounded before staging
+- [x] 7.2 Separate completed V3 assets, exploratory implicit-filter work, post-SF4 analysis and OpenSpec artifacts into reviewable commits, and verify each commit has a single scientific role and no secrets or large reproducible caches
+- [x] 7.3 Commit dissertation source/bibliography, generated figures and final PDF with reproducible build metadata, and verify build outputs match the committed sources
+- [x] 7.4 Recheck both worktrees, ignored files, repository sizes, Git object integrity and upstream divergence, and verify there are no unexplained modifications or untracked submission dependencies
+- [x] 7.5 Create a final release manifest linking experiment commit, dissertation commit, evidence markers, test summaries, PDF build and bounded limitations, and verify a fresh clone can locate every required submission artifact
 - [ ] 7.6 Push the approved reviewable commits to GitHub and verify remote branches contain the expected commits without force-push or history rewriting
