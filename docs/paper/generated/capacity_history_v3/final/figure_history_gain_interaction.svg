@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="420" viewBox="0 0 760 420" role="img" aria-labelledby="title desc">
+<title id="title">History gain interaction</title>
+<desc id="desc">Both encoder history gains are positive, while the attention-specific difference-in-differences crosses zero.</desc>
+<style>
+text { font-family: Helvetica, Arial, sans-serif; fill: #1f2937; }
+.axis { stroke: #374151; stroke-width: 1.2; }
+.grid { stroke: #d1d5db; stroke-width: 0.8; }
+.label { font-size: 13px; }
+.small { font-size: 12px; }
+.title { font-size: 17px; font-weight: 600; }
+.mlp { stroke: #c2410c; fill: #c2410c; }
+.transformer { stroke: #0369a1; fill: #0369a1; }
+.neutral { stroke: #4b5563; fill: #4b5563; }
+.series-line { fill: none; }
+</style>
+<text class="title" x="380" y="28" text-anchor="middle">History gains and attention-specific interaction</text>
+<line class="grid" x1="352.6" y1="58" x2="352.6" y2="330" stroke-width="1.5"/>
+<line class="axis" x1="220" y1="330" x2="710" y2="330"/>
+<line class="axis" x1="220.0" y1="330" x2="220.0" y2="335"/>
+<text class="small" x="220.0" y="352" text-anchor="middle">-0.002</text>
+<line class="axis" x1="318.0" y1="330" x2="318.0" y2="335"/>
+<text class="small" x="318.0" y="352" text-anchor="middle">-0.000</text>
+<line class="axis" x1="416.0" y1="330" x2="416.0" y2="335"/>
+<text class="small" x="416.0" y="352" text-anchor="middle">+0.001</text>
+<line class="axis" x1="514.0" y1="330" x2="514.0" y2="335"/>
+<text class="small" x="514.0" y="352" text-anchor="middle">+0.002</text>
+<line class="axis" x1="612.0" y1="330" x2="612.0" y2="335"/>
+<text class="small" x="612.0" y="352" text-anchor="middle">+0.004</text>
+<line class="axis" x1="710.0" y1="330" x2="710.0" y2="335"/>
+<text class="small" x="710.0" y="352" text-anchor="middle">+0.005</text>
+<text class="small" x="208" y="104" text-anchor="end">MLP history gain</text>
+<line class="mlp" x1="587.4" y1="100" x2="675.3" y2="100" stroke-width="2"/>
+<line class="mlp" x1="587.4" y1="95" x2="587.4" y2="105"/>
+<line class="mlp" x1="675.3" y1="95" x2="675.3" y2="105"/>
+<circle class="mlp" cx="632.0" cy="100" r="5"/>
+<text class="small" x="632.0" y="88" text-anchor="middle">+0.0040</text>
+<text class="small" x="208" y="190" text-anchor="end">Transformer history gain</text>
+<line class="transformer" x1="548.7" y1="186" x2="666.5" y2="186" stroke-width="2"/>
+<line class="transformer" x1="548.7" y1="181" x2="548.7" y2="191"/>
+<line class="transformer" x1="666.5" y1="181" x2="666.5" y2="191"/>
+<circle class="transformer" cx="611.3" cy="186" r="5"/>
+<text class="small" x="611.3" y="174" text-anchor="middle">+0.0037</text>
+<text class="small" x="208" y="276" text-anchor="end">Attention-specific DID</text>
+<line class="neutral" x1="254.7" y1="272" x2="395.6" y2="272" stroke-width="2"/>
+<line class="neutral" x1="254.7" y1="267" x2="254.7" y2="277"/>
+<line class="neutral" x1="395.6" y1="267" x2="395.6" y2="277"/>
+<circle class="neutral" cx="331.9" cy="272" r="5"/>
+<text class="small" x="331.9" y="260" text-anchor="middle">-0.0003</text>
+<text class="label" x="465" y="392" text-anchor="middle">NLL gain (positive favours preregistered direction)</text>
+<text class="small" x="710" y="371" text-anchor="end">95% paired-group cluster intervals; 5 groups</text>
+</svg>

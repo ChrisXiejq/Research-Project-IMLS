@@ -1,0 +1,101 @@
+{
+  "closed_loop_manifest_sha256": "5606764613683765855c316172d41997bd25814ceef1f744811630c2edac36ed",
+  "predictor_records": {
+    "B1": {
+      "calibration_fit_split": "validation",
+      "calibration_identity": "ea3ef215fa1f53306430fa991fda7b186fc3e3699a084953fad2a01f3c2a9d3c",
+      "calibration_model_identity": "898a928378fb3cebcfb89980e02586f93576193b0db3f211a74c90079c7c0023",
+      "covariances_valid": true,
+      "joint_mode_mapping_valid": true,
+      "latency": {
+        "batch_size": 1,
+        "estimated_dense_multiply_add_flops": null,
+        "mean_ms": 43.178601674735546,
+        "measured_count": 100,
+        "p50_ms": 43.999651446938515,
+        "p95_ms": 46.498824656009674,
+        "platform": "Linux-5.15.0-160-generic-x86_64-with-glibc2.17",
+        "python": "3.8.20",
+        "trainable_parameters": null,
+        "warmup_count": 20
+      },
+      "latency_limit_ms": 50.0,
+      "model_identity": "898a928378fb3cebcfb89980e02586f93576193b0db3f211a74c90079c7c0023",
+      "model_input_count": 2,
+      "offline_online_differences": {
+        "covariances": 0.0,
+        "means": 0.0,
+        "probabilities": 0.0
+      },
+      "offline_online_max_abs_diff": 0.0,
+      "output_shape_valid": true,
+      "predictor_id": "B1",
+      "probabilities_valid": true,
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "sample_id": 0,
+      "sequence_model_family": null,
+      "solver_smoke_valid": true,
+      "warmed_batch_one_latency_ms": 43.178601674735546
+    },
+    "P_star": {
+      "calibration_fit_split": "validation",
+      "calibration_identity": "682e02174ba266388d4dcc4929794c6833483cae143e09703d2ed037e19d4c05",
+      "calibration_model_identity": "c253e1bdcfa88259cbe7a6f1582226dcab7ad6d8143c82013cc2f247d2935917",
+      "covariances_valid": true,
+      "joint_mode_mapping_valid": true,
+      "latency": {
+        "batch_size": 1,
+        "estimated_dense_multiply_add_flops": null,
+        "mean_ms": 49.795676954090595,
+        "measured_count": 100,
+        "p50_ms": 49.11637865006924,
+        "p95_ms": 59.69230439513922,
+        "platform": "Linux-5.15.0-160-generic-x86_64-with-glibc2.17",
+        "python": "3.8.20",
+        "trainable_parameters": null,
+        "warmup_count": 20
+      },
+      "latency_limit_ms": 50.0,
+      "model_identity": "c253e1bdcfa88259cbe7a6f1582226dcab7ad6d8143c82013cc2f247d2935917",
+      "model_input_count": 4,
+      "offline_online_differences": {
+        "covariances": 0.0,
+        "means": 0.0,
+        "probabilities": 0.0
+      },
+      "offline_online_max_abs_diff": 0.0,
+      "output_shape_valid": true,
+      "predictor_id": "P_star",
+      "probabilities_valid": true,
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "sample_id": 0,
+      "sequence_model_family": "transformer",
+      "solver_smoke_valid": true,
+      "warmed_batch_one_latency_ms": 49.795676954090595
+    }
+  },
+  "predictors": {
+    "B1": {
+      "calibration_identity": "ea3ef215fa1f53306430fa991fda7b186fc3e3699a084953fad2a01f3c2a9d3c",
+      "model_identity": "898a928378fb3cebcfb89980e02586f93576193b0db3f211a74c90079c7c0023",
+      "offline_online_max_abs_diff": 0.0,
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "warmed_batch_one_latency_ms": 43.178601674735546
+    },
+    "P_star": {
+      "calibration_identity": "682e02174ba266388d4dcc4929794c6833483cae143e09703d2ed037e19d4c05",
+      "model_identity": "c253e1bdcfa88259cbe7a6f1582226dcab7ad6d8143c82013cc2f247d2935917",
+      "offline_online_max_abs_diff": 0.0,
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "warmed_batch_one_latency_ms": 49.795676954090595
+    }
+  },
+  "preflight_sha256": "ab42197a5c37177b62d649a8d628ff76bdabfddeadd956d48915a39331b80e99",
+  "schema_version": "capacity_history_dual_predictor_preflight_v3",
+  "solver": {
+    "casadi_version": "3.7.2",
+    "gurobi": true,
+    "status": "pass"
+  },
+  "status": "pass"
+}

@@ -1,0 +1,6 @@
+{
+  "completed_rollouts": 80,
+  "failures": {},
+  "schema_version": "capacity_history_carla_materialization_v3",
+  "status": "pass"
+}

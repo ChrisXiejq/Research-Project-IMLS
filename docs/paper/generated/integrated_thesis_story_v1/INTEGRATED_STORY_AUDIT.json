@@ -1,0 +1,103 @@
+{
+  "compatibility_rules": [
+    "Do not pool historical groups 46--50, R3 groups 101--105, SF4 groups, V3 groups 41--45, or V3 CARLA groups 81--90 as a single independent sample.",
+    "Use F1 to justify B1 as a strong task-adapted reference, not as a V3 H1 capacity result.",
+    "Use F2 for the broad adaptive-versus-three-fixed frontier and F5 for the prospectively frozen best-model transfer test.",
+    "Use F3 only to test supervisor mechanism; authority-off is not a recommended controller.",
+    "All universal superiority, safety, equivalence and cross-map claims remain prohibited."
+  ],
+  "evidence_blocks": [
+    {
+      "claim_boundary": "one Town05 distribution; five independent groups; old 0.98%-to-100% mode-ranking headline withdrawn",
+      "design": "B0 versus B1; groups 46--50; 20 rollouts; 315 overlapping windows; 5 paired groups",
+      "id": "F1_foundation_adaptation",
+      "key_results": {
+        "B0_ADE_m": 1.2826716899871826,
+        "B0_FDE_m": 2.6443111896514893,
+        "B0_NLL": 2.1707117557525635,
+        "B1_ADE_m": 0.09965752065181732,
+        "B1_FDE_m": 0.12089526653289795,
+        "B1_NLL": 1.857094407081604,
+        "favourable_groups_each_metric": "5/5"
+      },
+      "role": "establishes the task-adapted B1 reference without using the withdrawn percentage accuracy",
+      "status": "pass"
+    },
+    {
+      "claim_boundary": "five paired groups; exact sign-flip sensitivity is coarse; no pooling with V3 groups 81--90",
+      "design": "B0/B1 x adaptive/fixed-aggressive/fixed-medium/fixed-conservative x two styles x groups 101--105",
+      "id": "F2_r3_broad_predictor_risk",
+      "key_results": {
+        "B1_jointly_better_cells": "2/8",
+        "adaptive_dominance_cells": "3/12"
+      },
+      "role": "broad closed-loop frontier and historical transfer boundary",
+      "rollouts": 80,
+      "status": "pass"
+    },
+    {
+      "claim_boundary": "authority-off is a mechanism stress test, not a viable deployment recommendation; no selective risk-policy masking demonstrated",
+      "design": "B1 x adaptive/fixed-medium x authority on/off x two styles x ten groups",
+      "id": "F3_sf4_supervisor_authority",
+      "key_results": {
+        "authority_off_applied_fraction": 0.0,
+        "authority_off_request_fraction": 0.6391715498853764,
+        "authority_on_applied_fraction": 0.22550170417420373,
+        "authority_on_request_fraction": 0.6082802031667568,
+        "completion_authority_effect_adaptive_s": -18.630000000000003,
+        "completion_authority_effect_fixed_s": -18.65,
+        "completion_risk_by_authority_DID_s": 0.019999999999999574,
+        "separation_authority_effect_adaptive_m": 0.623904330879375,
+        "separation_authority_effect_fixed_m": 0.6307914908572829,
+        "separation_risk_by_authority_DID_m": -0.006887159977907875
+      },
+      "role": "mechanism ablation for shared supervisor authority",
+      "rollouts": 80,
+      "status": "pass"
+    },
+    {
+      "claim_boundary": "five retrospective held-out groups; H1--H3 scalar levels are not pooled with the older groups 46--50 foundation audit",
+      "design": "9 cells x 3 seeds; groups 1--35 fit, 36--40 selection/calibration, 41--45 retrospective held-out",
+      "id": "F4_v3_offline_three_axis",
+      "role": "capacity, information and matched architecture decomposition",
+      "runs": 27,
+      "status": "pass"
+    },
+    {
+      "claim_boundary": "ten paired groups; prediction diagnostics differ, but physical interaction intervals cross zero; zero collisions are not safety proof",
+      "design": "B1/P* x fixed-medium/adaptive x two styles x groups 81--90",
+      "id": "F5_v3_selected_model_carla",
+      "role": "prospective H4a/H4b test for frozen P* and risk",
+      "rollouts": 80,
+      "status": "pass"
+    }
+  ],
+  "integrated_hypotheses": {
+    "H1": "At 1.0 s history, greater Transformer trainable capacity reduces held-out rollout-macro NLL with a coherent capacity trend.",
+    "H2": "At matched large capacity, older explicit interaction tokens add predictive information beyond the current interaction state for both encoder families.",
+    "H3": "At matched capacity and information, attention extracts more history value than an MLP, requiring a favourable history-gain interaction in addition to direct model gaps.",
+    "H4": "Closed-loop utility: (a) validation-selected P* retains its prediction advantage and improves CARLA completion/separation relative to B1; (b) adaptive risk offers a better efficiency-separation operating point than fixed risk in the give-way task."
+  },
+  "schema_version": "integrated_thesis_story_audit_v1",
+  "scientific_scope": "right-hand-traffic Town05 left-turn give-way; ego yields to an opposing straight-through target",
+  "source_hashes": {
+    "foundation_cells": "5cf7675ab9a5a2a25c7d7431ccc3ca9b03b3655b65350f9d351c3e33229f638c",
+    "foundation_gate": "e26bdec69a789016c52d7438ddee1e6542c2ef6fdb56b080951a08c1133ff590",
+    "foundation_pairs": "933460a49ba5917805a6e767df0984c78af5f25a3be898aee93d6903a4941527",
+    "r3_analysis_gate": "e12f894cac4b52a6a4a3768f927cfa1a47b0b8d937413ca15d673bd5200ad46d",
+    "r3_cells": "6f504a29a158748d66e21e6b0590cb682525bd56195c391f693bb68bfb779429",
+    "r3_dominance": "5641d0500a93521f432119b3789087535fac6b0125c711047880d2611f74c7df",
+    "r3_gate": "790a5e337e2877b4a36a6e380340e42f537f42e21f2ef46f5b6e28183a9ce9d3",
+    "sf4_analysis_gate": "201415b8924f14039567d2ea8ff814200926b68fcf60fb2a2ee92aa90e206591",
+    "sf4_gate": "7f68762360dcff54c8c11b7e9b0846452cc67c21ea1ae5c6087286e1bae7776b",
+    "sf4_inference": "86582d320389a39a52c38038bdf90161744f2a10ce19562db96a6cf8665321f4",
+    "v3_closed": "60be56c22b5ff1e07ee7b1075d25f05c9ca73bbdafeca255a78720b5070b4c1a",
+    "v3_closed_audit": "5c3f2f36228ac7bf4c4b22571e4218ae04b9d21e6612c59c34af1763b5817222",
+    "v3_closed_gate": "69020499294d7da081266bafd17c41435e6d13e710bda89dd7432e1030b564ff",
+    "v3_freeze": "26b34ee5dd862cfbb9b248f71d7d035e421119f8ab59a9ecd22292d42d6df7d1",
+    "v3_offline": "1b9dd179087b58317942a90ac6b0b77749778000c0b4cf5fb8cc9fcf608324fe",
+    "v3_rows": "aa137f1dd5551b6b3fa1a13306c874997de02571df125485f92442d6c9998e1f",
+    "v3_training": "27e22b4890c944fe8b90a6c149657e8b8177b7cf36e0439b8d2b16a8192c4da3"
+  },
+  "status": "pass"
+}

@@ -1,0 +1,306 @@
+{
+  "collection_cells": [
+    "S0_FIXED",
+    "S0_ADAPTIVE",
+    "S1_FIXED",
+    "S1_ADAPTIVE"
+  ],
+  "generated_without_candidate_model_outputs": true,
+  "geometry_bounds": {
+    "init_speed_mps": [
+      8.0,
+      10.0
+    ],
+    "start_longitudinal_offset_m": [
+      -2.5,
+      2.5
+    ]
+  },
+  "payload_sha256": "f35d58a7215ff1111ddb85b3ccac5e347a6ef0059277685d6669eb41edeb82d3",
+  "records": [
+    {
+      "ego_init_id": 51,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 8.255799064,
+      "start_longitudinal_offset_m": 0.13685659
+    },
+    {
+      "ego_init_id": 52,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 8.288220274,
+      "start_longitudinal_offset_m": 1.342298452
+    },
+    {
+      "ego_init_id": 53,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 8.680908168,
+      "start_longitudinal_offset_m": -2.490464364
+    },
+    {
+      "ego_init_id": 54,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 8.143911503,
+      "start_longitudinal_offset_m": 1.562722073
+    },
+    {
+      "ego_init_id": 55,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 9.353671485,
+      "start_longitudinal_offset_m": 0.034030029
+    },
+    {
+      "ego_init_id": 56,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 9.831373927,
+      "start_longitudinal_offset_m": -2.398688482
+    },
+    {
+      "ego_init_id": 57,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 8.086237603,
+      "start_longitudinal_offset_m": -0.616844272
+    },
+    {
+      "ego_init_id": 58,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 8.687016787,
+      "start_longitudinal_offset_m": -1.873378952
+    },
+    {
+      "ego_init_id": 59,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 9.984155936,
+      "start_longitudinal_offset_m": -1.240895168
+    },
+    {
+      "ego_init_id": 60,
+      "generation_seed": 20260822,
+      "group_set": "general_test",
+      "init_speed_mps": 8.03677181,
+      "start_longitudinal_offset_m": 0.058177404
+    },
+    {
+      "ego_init_id": 61,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.057832761,
+      "start_longitudinal_offset_m": -2.5
+    },
+    {
+      "ego_init_id": 62,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.653766328,
+      "start_longitudinal_offset_m": -2.25
+    },
+    {
+      "ego_init_id": 63,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.093381258,
+      "start_longitudinal_offset_m": -2.0
+    },
+    {
+      "ego_init_id": 64,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.272914547,
+      "start_longitudinal_offset_m": -1.75
+    },
+    {
+      "ego_init_id": 65,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.71714021,
+      "start_longitudinal_offset_m": -1.5
+    },
+    {
+      "ego_init_id": 66,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.508663548,
+      "start_longitudinal_offset_m": -1.25
+    },
+    {
+      "ego_init_id": 67,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.07150497,
+      "start_longitudinal_offset_m": -1.0
+    },
+    {
+      "ego_init_id": 68,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.274119963,
+      "start_longitudinal_offset_m": -0.75
+    },
+    {
+      "ego_init_id": 69,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.031224997,
+      "start_longitudinal_offset_m": -0.5
+    },
+    {
+      "ego_init_id": 70,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.061442672,
+      "start_longitudinal_offset_m": -0.25
+    },
+    {
+      "ego_init_id": 71,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.104864708,
+      "start_longitudinal_offset_m": 0.25
+    },
+    {
+      "ego_init_id": 72,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.8580069,
+      "start_longitudinal_offset_m": 0.5
+    },
+    {
+      "ego_init_id": 73,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.754603508,
+      "start_longitudinal_offset_m": 0.75
+    },
+    {
+      "ego_init_id": 74,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.43416357,
+      "start_longitudinal_offset_m": 1.0
+    },
+    {
+      "ego_init_id": 75,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.815144051,
+      "start_longitudinal_offset_m": 1.25
+    },
+    {
+      "ego_init_id": 76,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.675055402,
+      "start_longitudinal_offset_m": 1.5
+    },
+    {
+      "ego_init_id": 77,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.403835924,
+      "start_longitudinal_offset_m": 1.75
+    },
+    {
+      "ego_init_id": 78,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.009657251,
+      "start_longitudinal_offset_m": 2.0
+    },
+    {
+      "ego_init_id": 79,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 9.651990777,
+      "start_longitudinal_offset_m": 2.25
+    },
+    {
+      "ego_init_id": 80,
+      "generation_seed": 20260822,
+      "group_set": "interaction_challenge",
+      "init_speed_mps": 8.903734301,
+      "start_longitudinal_offset_m": 2.5
+    },
+    {
+      "ego_init_id": 81,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 9.855848982,
+      "start_longitudinal_offset_m": 0.763074433
+    },
+    {
+      "ego_init_id": 82,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 8.624607862,
+      "start_longitudinal_offset_m": -1.230291329
+    },
+    {
+      "ego_init_id": 83,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 9.484969936,
+      "start_longitudinal_offset_m": -0.8869526
+    },
+    {
+      "ego_init_id": 84,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 8.568870643,
+      "start_longitudinal_offset_m": 1.955899724
+    },
+    {
+      "ego_init_id": 85,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 9.531308351,
+      "start_longitudinal_offset_m": 2.432016472
+    },
+    {
+      "ego_init_id": 86,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 9.114951262,
+      "start_longitudinal_offset_m": 0.65278724
+    },
+    {
+      "ego_init_id": 87,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 8.101424607,
+      "start_longitudinal_offset_m": 2.241125104
+    },
+    {
+      "ego_init_id": 88,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 9.713589067,
+      "start_longitudinal_offset_m": 2.294664489
+    },
+    {
+      "ego_init_id": 89,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 9.429055016,
+      "start_longitudinal_offset_m": -0.315197547
+    },
+    {
+      "ego_init_id": 90,
+      "generation_seed": 20260822,
+      "group_set": "closed_loop",
+      "init_speed_mps": 8.664331812,
+      "start_longitudinal_offset_m": -0.522817165
+    }
+  ],
+  "registry_sha256": "c01fc977bca275a4d4c6ba20f5e2cd141db2c33337b7a84e29d834bac9df483c",
+  "schema_version": "capacity_history_group_registry_v1",
+  "seed": 20260822,
+  "status": "frozen"
+}

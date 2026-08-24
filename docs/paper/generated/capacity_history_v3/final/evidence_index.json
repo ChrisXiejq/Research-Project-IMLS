@@ -1,0 +1,237 @@
+{
+  "claims": [
+    {
+      "axis": "capacity",
+      "claim_id": "C1_capacity",
+      "evidence_ids": [
+        "H1_capacity_transformer_full_small_minus_large",
+        "capacity_transformer_full_medium_minus_large"
+      ],
+      "source_fields": [
+        {
+          "artifact": "offline_synthesis.json",
+          "field": "three_axes.primary_contrasts[H1].effect",
+          "unit": "NLL per step"
+        },
+        {
+          "artifact": "table_offline_model_cells.csv",
+          "field": "Transformer tier means",
+          "unit": "NLL per step"
+        }
+      ],
+      "status": "directional_but_not_confirmed",
+      "text": "At 1.0 s history, small-to-large Transformer scaling changed rollout-macro NLL by 0.000413 in the preregistered direction, but the tier ordering was non-monotonic and the Holm-adjusted p value was 0.364. The data therefore do not support a strong capacity-limitation explanation."
+    },
+    {
+      "axis": "information",
+      "claim_id": "C2_information",
+      "evidence_ids": [
+        "H2_information_mlp_snapshot_minus_full",
+        "H2_information_transformer_snapshot_minus_full",
+        "trained_horizon_0p4_support"
+      ],
+      "source_fields": [
+        {
+          "artifact": "offline_synthesis.json",
+          "field": "three_axes.primary_contrasts[H2]",
+          "unit": "NLL per step"
+        },
+        {
+          "artifact": "figure_history_architecture.svg",
+          "field": "trained horizon curves",
+          "unit": "NLL per step"
+        }
+      ],
+      "status": "consistent_directional_retrospective_evidence",
+      "text": "Training with 1.0 s rather than current-token-only interaction input improved NLL by 0.004026 for the MLP and 0.003728 for the Transformer. All five paired groups had the preregistered direction, while exact multiplicity-adjusted tests remained underpowered; the 0.4 s condition captured nearly all of the gain."
+    },
+    {
+      "axis": "architecture",
+      "claim_id": "C3_architecture",
+      "evidence_ids": [
+        "architecture_direct_mlp_minus_transformer__h0p0__large",
+        "architecture_direct_mlp_minus_transformer__h1p0__large",
+        "H3_attention_history_gain_difference_in_differences"
+      ],
+      "source_fields": [
+        {
+          "artifact": "offline_synthesis.json",
+          "field": "direct_architecture_contrasts",
+          "unit": "NLL per step"
+        },
+        {
+          "artifact": "offline_synthesis.json",
+          "field": "three_axes.primary_contrasts[H3]",
+          "unit": "NLL per step"
+        }
+      ],
+      "status": "generic_encoder_advantage_not_attention_specific",
+      "text": "The matched Transformer reduced NLL relative to the MLP at both 0.0 s (0.007006) and 1.0 s (0.006708). However, its history gain was not larger (difference-in-differences -0.000298, 95% interval -0.001411 to 0.000620), so the evidence supports a bounded encoder-family advantage, not an attention-specific extraction advantage."
+    },
+    {
+      "axis": "adaptation_allocation",
+      "claim_id": "C4_adaptation_allocation",
+      "evidence_ids": [
+        "B1_minus_transformer_full_large"
+      ],
+      "source_fields": [
+        {
+          "artifact": "offline_synthesis.json",
+          "field": "supporting_contrasts[B1_minus_transformer_full_large]",
+          "unit": "NLL per step"
+        }
+      ],
+      "status": "complete_configuration_result",
+      "text": "Large B1 had higher retrospective held-out NLL than the matched full-history Transformer by 0.026988. This compares complete task-adaptation allocations and is not a pure architecture effect."
+    },
+    {
+      "axis": "predictor_risk",
+      "claim_id": "C5_predictor_risk",
+      "evidence_ids": [
+        "model_by_risk_interactions",
+        "within_risk_contrasts"
+      ],
+      "source_fields": [
+        {
+          "artifact": "PREDICTOR_BY_RISK_SYNTHESIS.json",
+          "field": "model_by_risk_interactions",
+          "unit": "seconds or metres"
+        },
+        {
+          "artifact": "PREDICTOR_BY_RISK_SYNTHESIS.json",
+          "field": "within_risk_contrasts[inloop_top1_ADE_m]",
+          "unit": "metres"
+        }
+      ],
+      "status": "no_demonstrated_physical_moderation",
+      "text": "The model-by-risk interaction was -0.313 s for completion time and 0.027 m for minimum separation; both paired-group intervals crossed zero. P* improved in-loop top-1 ADE under fixed-medium risk by 0.037 m, but this predictive difference did not produce a demonstrated change in the co-primary physical outcomes."
+    }
+  ],
+  "evidence_status": {
+    "closed_loop": "formal_closed_loop",
+    "offline": "retrospective_held_out"
+  },
+  "generated_artifacts": {
+    "b1_allocation": {
+      "path": "docs/paper/generated/capacity_history_v3/final/table_b1_adaptation_allocation.csv",
+      "sha256": "fcf6387a856a25c929dc489eb57d22afcd69115a21747f584db7da5714bfadb8"
+    },
+    "calibration": {
+      "path": "docs/paper/generated/capacity_history_v3/final/table_calibration_summary.csv",
+      "sha256": "6068c2dddc87ca0e0afa9ace1d8f99e0993330c21c4eea223f4589b8ea9afeee"
+    },
+    "capacity": {
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_capacity_curve.svg",
+      "sha256": "82f313ba7fd13bdb3231c3d8fe23c71b5afb54a58b499e0a671b4e21904309cb"
+    },
+    "capacity_png": {
+      "derived_from": "capacity",
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_capacity_curve.png",
+      "sha256": "11de7a1f6978f7309dcccc22d05a14ceea8fa07cfe6c2a22413782a03d8a686b"
+    },
+    "closed_loop_cells": {
+      "path": "docs/paper/generated/capacity_history_v3/final/table_closed_loop_cells.csv",
+      "sha256": "92c68fdc60a281e3ceb6ed8c3b9a9a54e185064fbdcd66d0441ff180cc58e40c"
+    },
+    "closed_loop_contrasts": {
+      "path": "docs/paper/generated/capacity_history_v3/final/table_model_by_risk_contrasts.csv",
+      "sha256": "2be1960603ec9807de1d5de3bf8ade6e30fe4073e2724eb9d987f8be576317a2"
+    },
+    "history_architecture": {
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_history_architecture.svg",
+      "sha256": "fea32bb1217077e3be2f2d26e0b73efe6f55d4f032cbfcc1b9394e119eaf93c4"
+    },
+    "history_architecture_png": {
+      "derived_from": "history_architecture",
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_history_architecture.png",
+      "sha256": "7c4df98ab55c7f0334343611083f07ba62f372234bad3c744c78c580a243892d"
+    },
+    "history_gain_interaction": {
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_history_gain_interaction.svg",
+      "sha256": "e43577a6b25aec74e5ad13965a19d61528c14805e93b67888ef72624c044251a"
+    },
+    "history_gain_interaction_png": {
+      "derived_from": "history_gain_interaction",
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_history_gain_interaction.png",
+      "sha256": "d8e6978be6c4dd01ce14f2f39e39c82b1a0028920b45b8c5e70e0be1819f1c78"
+    },
+    "latency": {
+      "path": "docs/paper/generated/capacity_history_v3/final/table_latency_summary.csv",
+      "sha256": "07c29311962ba04f5520f4e761f96caac170c1d24ffa7854cdcfaa26edd51ef8"
+    },
+    "latency_pareto": {
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_latency_pareto.svg",
+      "sha256": "57566528e473673bfe05ff5dcfc8c22ae83ba2900bbfa0fb8344e370497e5f8f"
+    },
+    "latency_pareto_png": {
+      "derived_from": "latency_pareto",
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_latency_pareto.png",
+      "sha256": "c6edbd0012e194dfc44d6e12fb80468ec4135f18adfe38663b83bd0d21c486c3"
+    },
+    "model_by_risk": {
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_model_by_risk.svg",
+      "sha256": "c4f53ae3ba482cac29bab725faf8a730bdb08752d7f138913673d4742a7e6010"
+    },
+    "model_by_risk_png": {
+      "derived_from": "model_by_risk",
+      "path": "docs/paper/generated/capacity_history_v3/final/figure_model_by_risk.png",
+      "sha256": "47a23ee6c39f56ecdc44a303d28f730b692edcb9d6d2370cd968ffdfc081bf00"
+    },
+    "offline_cells": {
+      "path": "docs/paper/generated/capacity_history_v3/final/table_offline_model_cells.csv",
+      "sha256": "58a90cbd95cdbd7ef3c711f87a6de68748d2b79449aec0a51fc99e94dfd86441"
+    },
+    "offline_contrasts": {
+      "path": "docs/paper/generated/capacity_history_v3/final/table_three_axis_contrasts.csv",
+      "sha256": "f194d2cae6d73b8c796b266ab9f412551649cf2743962e72ae2a897d000fb9e4"
+    },
+    "response_strata": {
+      "path": "docs/paper/generated/capacity_history_v3/final/table_response_strata.csv",
+      "sha256": "5b695863cc20c1002cab627a5e4ca2ded7cf85af4790bd0c0c460aeb636a9ebc"
+    },
+    "results_markdown": {
+      "path": "docs/paper/generated/capacity_history_v3/final/RESULTS_AND_CLAIMS.md",
+      "sha256": "728ec55bf61e47573f9999a0cb1b2eca027684a7a755ad3650cfd528b110e6b1"
+    },
+    "scalar_provenance": {
+      "path": "docs/paper/generated/capacity_history_v3/final/scalar_provenance_index.csv",
+      "sha256": "0a02b99198d887213f37fad667ba697e4c258432af63d75d29fab7a26397f832"
+    }
+  },
+  "limitations": [
+    "Offline inference has five independent groups and is retrospective held-out evidence.",
+    "The 0.4 s condition captures most history gain; 1.0 s is not uniformly best.",
+    "Direct Transformer advantages do not identify attention-specific history use without a favourable history-gain interaction.",
+    "Completion rate was undefined in the closed-loop export, so completion time and minimum separation remain the co-primary estimable outcomes.",
+    "Zero observed collisions do not establish equality or generalize beyond the 80-rollout matrix."
+  ],
+  "numeric_prose_allowed": true,
+  "schema_version": "capacity_history_dissertation_evidence_v3_final",
+  "source_artifacts": {
+    "closed_loop_gate": {
+      "path": "docs/paper/generated/capacity_history_v3/results/closed_loop/CLOSED_LOOP_COMPLETE.json",
+      "sha256": "69020499294d7da081266bafd17c41435e6d13e710bda89dd7432e1030b564ff"
+    },
+    "closed_loop_rows": {
+      "path": "docs/paper/generated/capacity_history_v3/results/closed_loop/closed_loop_rows.json",
+      "sha256": "aa137f1dd5551b6b3fa1a13306c874997de02571df125485f92442d6c9998e1f"
+    },
+    "closed_loop_synthesis": {
+      "path": "docs/paper/generated/capacity_history_v3/results/closed_loop/PREDICTOR_BY_RISK_SYNTHESIS.json",
+      "sha256": "60be56c22b5ff1e07ee7b1075d25f05c9ca73bbdafeca255a78720b5070b4c1a"
+    },
+    "offline_synthesis": {
+      "path": "docs/paper/generated/capacity_history_v3/results/postprocess/offline_synthesis.json",
+      "sha256": "1b9dd179087b58317942a90ac6b0b77749778000c0b4cf5fb8cc9fcf608324fe"
+    },
+    "selection_freeze": {
+      "path": "docs/paper/generated/capacity_history_v3/results/postprocess/selection_freeze.json",
+      "sha256": "26b34ee5dd862cfbb9b248f71d7d035e421119f8ab59a9ecd22292d42d6df7d1"
+    },
+    "training_audit": {
+      "path": "docs/paper/generated/capacity_history_v3/results/postprocess/training_audit.json",
+      "sha256": "27e22b4890c944fe8b90a6c149657e8b8177b7cf36e0439b8d2b16a8192c4da3"
+    }
+  },
+  "status": "pass"
+}

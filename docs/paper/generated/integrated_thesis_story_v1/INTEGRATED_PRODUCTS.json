@@ -1,0 +1,15 @@
+{
+  "audit_sha256": "d93bfc8376fd7d3433b32a9badf8a774288ae73d8b4d9d8c1278cb262c6abbb4",
+  "products": {
+    "figure_integrated_evidence_chain.png": "e938b973c696fd37389d004c599b26175fe754dbf202c31ea80e107db566906d",
+    "figure_integrated_evidence_chain.svg": "cbb72f928f72962324a9aae5ba503b9df1d3769a0917571f4a34f2baf5cb6621",
+    "figure_offline_factor_landscape.png": "39968e72e14da8f62df840592f8a5389c40540c5c6043bb52507ebb7a0376d1e",
+    "figure_offline_factor_landscape.svg": "05f10818d4eee13c95a074448bc0a8ebcde04f19285c53685e65a3d750458420",
+    "figure_r3_risk_frontier.png": "5fbbda37ba9967cde776122a699908ff17b157125c0e7c9b06597b8f10f3bb63",
+    "figure_r3_risk_frontier.svg": "20ac1187b2a79ffaab07b6b554542f7518edf486ed74a3baad5741c4cff862dc",
+    "figure_v3_closed_loop_factorial.png": "63d125fa4b366bcae4c2604cf299677620a6264ca43ca1f2bf29684d0efa7c55",
+    "figure_v3_closed_loop_factorial.svg": "9c3039b4bcc0944a141382b55e88af9aeacead7f96711241bc589cca62b517a7"
+  },
+  "schema_version": "integrated_thesis_story_products_v1",
+  "status": "pass"
+}

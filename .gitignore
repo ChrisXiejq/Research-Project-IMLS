@@ -69,6 +69,11 @@ runs/
 # versioned under docs/paper/generated/day10/.
 docs/paper/generated/day10/day10_formal_snapshot.tar.gz
 docs/paper/generated/day10/day10_df_full.tar.gz
+# Per-seed V3 held-out/calibration JSONs are retained locally and on the
+# persistent server, but their compact audited summaries are versioned.
+docs/paper/generated/capacity_history_v3/results/postprocess/heldout/
+docs/paper/generated/capacity_history_v3/results/postprocess/calibration/
+docs/paper/generated/capacity_history_v3/results/postprocess/latency/
 *.ckpt
 *.h5
 *.pb
@@ -92,3 +97,7 @@ core/scripts/models/*_carla_finetuned*_training_log.csv
 .env
 .env.local
 *.local.yml
+
+# Local diagnostic extracts from smoke tests; canonical summaries live under
+# docs/paper/generated and the server-side raw archives remain external.
+tmp/

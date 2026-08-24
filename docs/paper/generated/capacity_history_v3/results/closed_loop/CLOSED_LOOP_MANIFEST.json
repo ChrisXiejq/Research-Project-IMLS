@@ -1,0 +1,846 @@
+{
+  "ego_init_ids": [
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90
+  ],
+  "expected_rollouts": 80,
+  "formal_evidence": true,
+  "group_registry_sha256": "c01fc977bca275a4d4c6ba20f5e2cd141db2c33337b7a84e29d834bac9df483c",
+  "manifest_sha256": "5606764613683765855c316172d41997bd25814ceef1f744811630c2edac36ed",
+  "nuisance_settings": {
+    "anchors_sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982",
+    "scenario": "scenario_uk_give_way.json",
+    "supervisor_authority": "enabled",
+    "target_offset_m": 0.0,
+    "target_speed_mps": 9.0,
+    "town": "Town05",
+    "tuning_sha256": "f297a84672f62ef1a178457285a03b8e9881608b7abc9ee86c0045a46b27f4b8"
+  },
+  "payload_sha256": "9e926f987ad6e75c9e17cf3b032214674303b8d71e2e5661f2b819af14ef06af",
+  "predictors": [
+    "B1",
+    "P_star"
+  ],
+  "risk_policies": [
+    "fixed_medium",
+    "adaptive"
+  ],
+  "rollouts": [
+    {
+      "ego_init_id": 81,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init81",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 82,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init82",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 83,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init83",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 84,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init84",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 85,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init85",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 86,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init86",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 87,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init87",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 88,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init88",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 89,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init89",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 90,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__assertive_constant_speed__init90",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 81,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init81",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 82,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init82",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 83,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init83",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 84,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init84",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 85,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init85",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 86,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init86",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 87,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init87",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 88,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init88",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 89,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init89",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 90,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__b1__fixed_medium__defensive_reactive__init90",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 81,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init81",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 82,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init82",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 83,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init83",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 84,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init84",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 85,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init85",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 86,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init86",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 87,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init87",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 88,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init88",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 89,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init89",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 90,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__assertive_constant_speed__init90",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 81,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init81",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 82,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init82",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 83,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init83",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 84,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init84",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 85,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init85",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 86,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init86",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 87,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init87",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 88,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init88",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 89,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init89",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 90,
+      "model_cell_id": "head-large",
+      "predictor": "B1",
+      "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__b1__adaptive__defensive_reactive__init90",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 81,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init81",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 82,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init82",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 83,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init83",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 84,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init84",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 85,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init85",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 86,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init86",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 87,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init87",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 88,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init88",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 89,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init89",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 90,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__assertive_constant_speed__init90",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 81,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init81",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 82,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init82",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 83,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init83",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 84,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init84",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 85,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init85",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 86,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init86",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 87,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init87",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 88,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init88",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 89,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init89",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 90,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "fixed_medium",
+      "rollout_id": "v3_online__p_star__fixed_medium__defensive_reactive__init90",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 81,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init81",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 82,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init82",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 83,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init83",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 84,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init84",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 85,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init85",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 86,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init86",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 87,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init87",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 88,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init88",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 89,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init89",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 90,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__assertive_constant_speed__init90",
+      "status": "planned",
+      "target_style": "assertive_constant_speed"
+    },
+    {
+      "ego_init_id": 81,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init81",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 82,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init82",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 83,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init83",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 84,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init84",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 85,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init85",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 86,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init86",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 87,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init87",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 88,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init88",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 89,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init89",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    },
+    {
+      "ego_init_id": 90,
+      "model_cell_id": "transformer-h1p0-large",
+      "predictor": "P_star",
+      "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+      "risk_policy": "adaptive",
+      "rollout_id": "v3_online__p_star__adaptive__defensive_reactive__init90",
+      "status": "planned",
+      "target_style": "defensive_reactive"
+    }
+  ],
+  "schema_version": "capacity_history_predictor_risk_manifest_v3",
+  "selection_freeze_sha256": "26053340000fb75981ee71c1d74779a028b08bd15b5d2778a26774aa5404039d",
+  "selection_uses_fresh_or_closed_loop_outcomes": false,
+  "status": "frozen",
+  "target_styles": [
+    "assertive_constant_speed",
+    "defensive_reactive"
+  ]
+}

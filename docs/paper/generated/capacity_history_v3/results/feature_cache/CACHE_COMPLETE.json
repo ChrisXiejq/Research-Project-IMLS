@@ -1,0 +1,60 @@
+{
+  "base_model": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_multipath_10",
+  "base_model_artifact": {
+    "bytes": 37832101,
+    "files": 4,
+    "path": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_multipath_10",
+    "sha256_tree": "369c09a7aab28a721983f0baa50e7611b3cfc93803b73e600a0b44188d06f8bb"
+  },
+  "batch_size": 32,
+  "cache_manifest_sha256": "dad5f099f4d6ff30665808400f0baea4dce6b1500531988b8e46cb75b5d6fc2c",
+  "dataset_manifest": "/root/autodl-tmp/results/capacity_history_thesis_core_v3/dataset_35_5_5/THESIS_CORE_DATASET_COMPLETE.json",
+  "dataset_manifest_sha256": "4d6fbfec2c6ab3ed026ce087e29c77845edaaa06d91fc3106bc4255aa329d877",
+  "deterministic_extraction": true,
+  "extraction_seed": 20260822,
+  "label_horizon": 10,
+  "schema_version": "capacity_history_thesis_core_feature_cache_v3",
+  "source_sha256": {
+    "build_thesis_core_feature_cache_v3.py": "7f645df818287914b80333e7da79a4eed90509844a784717f5e2d0ced60d655d",
+    "capacity_study_v3_protocol.py": "a1798be4f6f703c5c4c56b212a6b2c5638f6ee54a64a9edf02915054b25199b1",
+    "prediction_dataset_utils.py": "db662181f708900cfa2fd0f8b89e3c864b5ef3d9978dc1855c3e37e838c187e9",
+    "prepare_thesis_core_v3_dataset.py": "cc448603234d53bd00c186c027342d2148e20582b324381c86ea0c15170c9b1f",
+    "train_prediction_model_v3.py": "3b8e8c613bb268ac9e6e62e59278d1bd063e6e093c64ca859d42c50ba814c917"
+  },
+  "splits": {
+    "fit": {
+      "base_output_dim": 2016,
+      "head_feature_dim": 512,
+      "label_shape": [
+        10,
+        3
+      ],
+      "path": "/root/autodl-tmp/results/capacity_history_thesis_core_v3/feature_cache/fit.npz",
+      "samples": 3526,
+      "sha256": "53dac95166c7852f209e0178706ecfd0d8393e5c974ae7c973cb2048b916f0e4"
+    },
+    "heldout": {
+      "base_output_dim": 2016,
+      "head_feature_dim": 512,
+      "label_shape": [
+        10,
+        3
+      ],
+      "path": "/root/autodl-tmp/results/capacity_history_thesis_core_v3/feature_cache/heldout.npz",
+      "samples": 506,
+      "sha256": "f2b5b9fc1aecbf7084579d156ccf7893414388ed29a69c168fc1c995fc7022da"
+    },
+    "selection": {
+      "base_output_dim": 2016,
+      "head_feature_dim": 512,
+      "label_shape": [
+        10,
+        3
+      ],
+      "path": "/root/autodl-tmp/results/capacity_history_thesis_core_v3/feature_cache/selection.npz",
+      "samples": 510,
+      "sha256": "3c1361a2681f391e19a98c30674405a9baa9b386221cce7e0eba4760fbbd6363"
+    }
+  },
+  "status": "pass"
+}

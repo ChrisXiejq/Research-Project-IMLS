@@ -1,0 +1,10 @@
+model_cell_id,retained_seeds,mean_latency_ms,p50_latency_ms,p95_latency_ms,trainable_parameters,warmup_count,measured_count,heldout_rollout_macro_nll_mean,pareto_member,evidence_status
+mlp-h1p0-large,3,37.13173275192579,36.80442335704962,39.535741259654365,1035312,20,100,3.9230475743611657,True,validation_latency_and_retrospective_heldout_accuracy
+mlp-h0p4-large,3,39.51431474337975,38.259273394942284,49.566470893720776,1035312,20,100,3.923324282964071,False,validation_latency_and_retrospective_heldout_accuracy
+transformer-h1p0-small,3,40.20205773413181,39.727540065844856,43.48868913948536,167384,20,100,3.9167527516682945,True,validation_latency_and_retrospective_heldout_accuracy
+transformer-h1p0-medium,3,41.48392880956332,39.94906942049662,51.12152447303135,497840,20,100,3.915355491638184,True,validation_latency_and_retrospective_heldout_accuracy
+transformer-h0p0-large,3,41.605261440078415,40.66804796457291,47.33082869400581,1026816,20,100,3.9200677553812664,False,validation_latency_and_retrospective_heldout_accuracy
+mlp-h0p0-large,3,41.63828852276007,40.2524167050918,49.68724176287651,1035312,20,100,3.927073987325033,False,validation_latency_and_retrospective_heldout_accuracy
+head-large,3,42.73865143458048,42.58571440974871,48.51611331105232,1034208,20,100,3.943328189849854,False,validation_latency_and_retrospective_heldout_accuracy
+transformer-h0p4-large,3,45.69594564537207,45.08958011865616,53.89338315774997,1026816,20,100,3.9158212502797447,False,validation_latency_and_retrospective_heldout_accuracy
+transformer-h1p0-large,3,45.921627221008144,45.39593433340391,53.44453708579143,1026816,20,100,3.916339747111003,False,validation_latency_and_retrospective_heldout_accuracy

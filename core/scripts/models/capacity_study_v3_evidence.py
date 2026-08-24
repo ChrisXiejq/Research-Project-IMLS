@@ -23,7 +23,7 @@ AXIS_REQUIREMENTS = {
         "H3_attention_history_gain_difference_in_differences",
         "architecture_direct_full_mlp_minus_transformer",
     },
-    "adaptation_allocation": {"B1_head_capacity_curve", "B1_data_efficiency_curve"},
+    "adaptation_allocation": {"B1_minus_mlp_full_large", "B1_minus_transformer_full_large"},
     "predictor_risk": {"model_by_risk_interactions", "within_risk_contrasts"},
 }
 
@@ -41,11 +41,10 @@ PLANNED_OUTPUTS = (
     ("matched_architecture_table", "Architecture", "matched capacity/horizon", "MLP vs Transformer"),
     ("history_gain_interaction", "Architecture", "encoder family", "full-minus-snapshot gain"),
     ("response_stratified_mechanisms", "Information", "response stratum", "task metrics"),
-    ("b1_allocation_table", "Adaptation allocation", "capacity tier", "B1 performance"),
-    ("data_efficiency_curves", "Adaptation allocation", "rollout-group fraction", "NLL"),
+    ("b1_allocation_table", "Adaptation allocation", "matched large configuration", "B1 versus history encoders"),
     ("calibration_summary", "Calibration", "model cell", "temperature/covariance scale"),
     ("latency_pareto", "Deployment", "warmed batch-one latency (ms)", "NLL"),
-    ("closed_loop_cells", "Predictor-risk", "160 frozen cells", "outcomes"),
+    ("closed_loop_cells", "Predictor-risk", "80 frozen cells", "outcomes"),
     ("model_by_risk_interaction", "Predictor-risk", "risk policy", "P* minus B1"),
 )
 
@@ -107,16 +106,16 @@ def build_placeholder_package() -> dict[str, Any]:
         "training identical-capacity models on fixed 0.0, 0.4, and 1.0 s masks over "
         "the same complete six-token examples; Architecture is tested by matched "
         "MLP/Transformer contrasts and a difference-in-differences of their history "
-        "gains. Matched runs use AdamW with weight decay 1e-5, gradient-norm clipping "
-        "at 10, deterministic data order, and encoder dropout 0.1. Learning rates and "
-        "checkpoints are selected on validation rollout-macro NLL with patience 12; "
-        "the 80-to-120-epoch common-extension gate covers both core and matched "
-        "data-fraction comparisons. Formal completion requires disjoint group splits, "
+        "gains. The nine cells use a common learning rate of 1e-4, AdamW with weight "
+        "decay 1e-5, gradient-norm clipping at 10, deterministic data order, encoder "
+        "dropout 0.1, an 80-epoch maximum, and patience 12. Checkpoints are selected "
+        "on validation rollout-macro NLL. Formal completion requires disjoint group splits, "
         "complete group/cell support, unique sample keys, finite inputs/losses/weights, "
-        "and live source/data/model hashes; debug-limited runs are smoke-only. Fresh "
-        "groups are opened once after convergence, capacity, calibration, and "
-        "latency gates pass. The final CARLA study crosses B1 and P* with four risk "
-        "policies, two target styles, and ten paired held-out groups."
+        "and live source/data/model hashes; debug-limited runs are smoke-only. Groups "
+        "41--45 are opened once after convergence, capacity, calibration, and latency "
+        "gates pass and are labelled retrospective held-out evidence. The final CARLA "
+        "study crosses B1 and P* with fixed-medium and adaptive risk, two target styles, "
+        "and ten paired groups, yielding 80 rollouts."
     )
     return {
         "schema_version": "capacity_history_dissertation_evidence_v3",
@@ -136,7 +135,11 @@ def write_placeholder_package(output_dir: str | Path) -> dict[str, Any]:
     atomic_json(json_path, package)
     csv_path = root / "planned_outputs.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(package["planned_outputs"][0]))
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=list(package["planned_outputs"][0]),
+            lineterminator="\n",
+        )
         writer.writeheader()
         writer.writerows(package["planned_outputs"])
     markdown_path = root / "METHODS_AND_RESULT_PLACEHOLDERS.md"

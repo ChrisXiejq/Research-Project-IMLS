@@ -1,0 +1,9 @@
+{
+  "anchors_sha256": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982",
+  "scenario": "scenario_uk_give_way.json",
+  "supervisor_authority": "enabled",
+  "target_offset_m": 0.0,
+  "target_speed_mps": 9.0,
+  "town": "Town05",
+  "tuning_sha256": "f297a84672f62ef1a178457285a03b8e9881608b7abc9ee86c0045a46b27f4b8"
+}

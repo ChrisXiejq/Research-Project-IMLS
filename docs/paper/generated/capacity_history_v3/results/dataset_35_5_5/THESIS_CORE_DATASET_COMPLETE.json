@@ -1,0 +1,414 @@
+{
+  "audit": {
+    "sample_overlaps": {
+      "fit_heldout": 0,
+      "fit_selection": 0,
+      "selection_heldout": 0
+    },
+    "splits": {
+      "fit": {
+        "cells_by_group": {
+          "1": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "10": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "11": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "12": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "13": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "14": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "15": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "16": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "17": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "18": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "19": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "2": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "20": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "21": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "22": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "23": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "24": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "25": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "26": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "27": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "28": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "29": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "3": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "30": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "31": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "32": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "33": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "34": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "35": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "4": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "5": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "6": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "7": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "8": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "9": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ]
+        },
+        "groups": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35
+        ],
+        "samples": 3526,
+        "support_by_group": {
+          "1": 102,
+          "10": 102,
+          "11": 102,
+          "12": 102,
+          "13": 102,
+          "14": 102,
+          "15": 102,
+          "16": 96,
+          "17": 102,
+          "18": 102,
+          "19": 102,
+          "2": 102,
+          "20": 102,
+          "21": 102,
+          "22": 102,
+          "23": 102,
+          "24": 102,
+          "25": 96,
+          "26": 102,
+          "27": 102,
+          "28": 96,
+          "29": 102,
+          "3": 96,
+          "30": 102,
+          "31": 98,
+          "32": 96,
+          "33": 96,
+          "34": 102,
+          "35": 102,
+          "4": 98,
+          "5": 102,
+          "6": 102,
+          "7": 102,
+          "8": 102,
+          "9": 102
+        }
+      },
+      "heldout": {
+        "cells_by_group": {
+          "41": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "42": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "43": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "44": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "45": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ]
+        },
+        "groups": [
+          41,
+          42,
+          43,
+          44,
+          45
+        ],
+        "samples": 506,
+        "support_by_group": {
+          "41": 102,
+          "42": 102,
+          "43": 102,
+          "44": 102,
+          "45": 98
+        }
+      },
+      "selection": {
+        "cells_by_group": {
+          "36": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "37": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "38": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "39": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ],
+          "40": [
+            "S0_ADAPTIVE",
+            "S0_FIXED",
+            "S1_ADAPTIVE",
+            "S1_FIXED"
+          ]
+        },
+        "groups": [
+          36,
+          37,
+          38,
+          39,
+          40
+        ],
+        "samples": 510,
+        "support_by_group": {
+          "36": 102,
+          "37": 102,
+          "38": 102,
+          "39": 102,
+          "40": 102
+        }
+      }
+    },
+    "status": "pass"
+  },
+  "evidence_status": "retrospective_held_out",
+  "manifest_sha256": "a108a3a826fedcd01ffa1ef48df119c347537cd3dff631bf8d273e09a5ef5e82",
+  "normalization_sha256": "56c59a6a1416d2bfb88d9fc27379cb13587e07dd677d61a5ef630284501d6d34",
+  "schema_version": "capacity_history_thesis_core_dataset_v3",
+  "source_dir": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1",
+  "source_sha256": {
+    "train_jsonl": "b09e02e735b022ad42df274559e91e6cf4a42e46f55e23e4a2caf68e2073d55b",
+    "val_jsonl": "5ad6210b44b83f5c2ea3a8e64eaae32413bc73bdd337189999d2778b20c993ed"
+  },
+  "split_sha256": {
+    "fit": "0f8826fca61b84cd6c828ebddb9aabe44405f3c589341d0ba1284b3a67673069",
+    "heldout": "79bf4240ae0bb461d404e483f8919acba28d18dceb6e81609e79da4d1ea3689c",
+    "selection": "3564bd8e4e68f390ce24c2b4a7c3c0df6c4a790c1fe2ae84121be7871fc4e2ae"
+  },
+  "status": "pass"
+}
