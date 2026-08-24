@@ -1,0 +1,7 @@
+limitation_id,scope,evidence,paper_boundary
+L1,single controlled scenario distribution,Town05 right-hand-traffic left-turn give-way,"No cross-map, real-road or population safety generalisation."
+L2,retrospective offline held-out groups,Capacity--Information--Architecture groups 41--45,"Treat H1--H3 as controlled retrospective evidence, not a new prospective benchmark."
+L3,authority-off floor saturation,0/40 completion under authority off,Common authority effect is identified; selective masking is not.
+L4,incomplete phase clocks,Some release/resume contrasts have fewer than 10 paired groups,Undefined events remain missing and descriptive only.
+L5,controller acceptance semantics,18552 attempts; 730 fallback/nonaccepted,Controller acceptance is not a proof of strict feasibility or recursive feasibility.
+L6,rule-based supervisor bundle,Seven behavioural channels and rule bypass are jointly toggled,"The experiment attributes effects to complete authority, not to a single rule."

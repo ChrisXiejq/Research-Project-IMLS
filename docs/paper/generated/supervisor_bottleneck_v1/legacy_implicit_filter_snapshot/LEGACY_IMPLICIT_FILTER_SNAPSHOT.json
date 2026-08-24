@@ -1,0 +1,36 @@
+{
+  "schema_version": "legacy_implicit_filter_snapshot_v1",
+  "archived_at_utc": "2026-08-24T19:00:07Z",
+  "remote_results_dir": "/root/autodl-tmp/results/implicit_smpc_safety_filter/smoke_hardtube_progressref_h4_10hz_20260825_0242",
+  "scientific_role": "excluded_exploratory_smoke_not_used_for_headline_thesis_evidence",
+  "runner_state_before_cleanup": "finished",
+  "carla_state_before_cleanup": "idle_server_without_active_runner",
+  "cleanup_action": "stopped_exact_screen_then_sent_SIGTERM_to_four_verified_orphan_processes",
+  "carla_state_after_cleanup": "stopped_and_absent_from_process_name_and_gpu_compute_lists",
+  "remote_result_deletion": false,
+  "local_snapshot_status": "complete",
+  "outcome": {
+    "overall_status": "FAIL",
+    "ego_enter_time_s": 29.824103262275457,
+    "target_exit_time_s": 33.224103312939405,
+    "target_clears_before_ego_enters": false,
+    "completion_valid": false,
+    "solver_failure_fraction": 0.9766666666666667,
+    "native_collision": false,
+    "footprint_collision": false,
+    "three_phase_failures": [
+      "phase1_ego_did_not_continue_before_target_arrival",
+      "phase2_ego_did_not_slow_and_yield_to_target",
+      "phase3_ego_did_not_resume_and_complete_after_target_clearance",
+      "solver_failure_fraction_missing_or_above_limit"
+    ]
+  },
+  "files": {
+    "batch_subruns.json": "58a16a81c72b0272454e1ecbc2a701fe76f4aab4ed99964c86f7119ae318958c",
+    "experiment_run.log": "57ce72db35d43766bf722e6220d62f433531d09fe8211a40a38837c1a1ec38b9",
+    "implicit_smpc_three_phase_report.json": "58debf1567836b29601529ff6112c57dba4519be20d8037398e002a1dbebbb78",
+    "online_runner.log": "a11b1bbedc0db98c7fa11199f6410f7050be04be78e0b34f4f6b18d0a1fe1871",
+    "postcarla_trajectory_gate.json": "2ae18b11ce46fbad08b4322c7cd1103fdcb3bbdcebfc7eb0158143878e4a98a4"
+  },
+  "boundary": "This failed single-rollout smoke is preserved only as engineering provenance. It is not pooled with F1, V3, R3 or SF4 and does not support a population-level controller claim."
+}

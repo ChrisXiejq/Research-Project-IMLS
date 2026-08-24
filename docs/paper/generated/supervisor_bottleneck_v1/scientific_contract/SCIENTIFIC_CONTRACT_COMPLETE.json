@@ -1,0 +1,29 @@
+{
+  "claims": 7,
+  "completion_hashes_unique": true,
+  "evidence_blocks": 5,
+  "population_signatures_unique": true,
+  "products": {
+    "THESIS_CONTRACT.md": "d2b636ef30036e5cb67e99cf7e29048bc551526281b1a28e3ef76b6032e35b54",
+    "claim_evidence_boundary.csv": "d86968f537882b7fe2a6205bc4b676f8bf0f309781bb69bc4c83a2b46267ab4f",
+    "claim_evidence_boundary.json": "13b8df540369d10aed82759a1813fbb48a06d0253e13c0ae893e5e8e46ca3b0c",
+    "evidence_blocks.json": "205ba47f69148b0180e3bd4564c4bd6f69045d70016e9c1bfbcffae733f87cd4",
+    "terminology_ledger.csv": "fb9b236febfc7bbfc59add2264131183a56eeb0d1fa90009af6fea173d906d76",
+    "thesis_contract.json": "286b95605019ae7bafd815e5d88308f25f483e83aaaeede9fe6254f4f5642c63"
+  },
+  "schema_version": "supervisor_bottleneck_scientific_contract_complete_v1",
+  "source_files": {
+    "docs/paper/generated/capacity_history_v3/results/closed_loop/CLOSED_LOOP_COMPLETE.json": "69020499294d7da081266bafd17c41435e6d13e710bda89dd7432e1030b564ff",
+    "docs/paper/generated/capacity_history_v3/results/closed_loop/CLOSED_LOOP_MANIFEST.json": "b848a7e1419fe7f6db6d1fca73b8b8b42a2731391b6566fea292876c548af4d3",
+    "docs/paper/generated/capacity_history_v3/results/postprocess/selection_freeze.json": "26b34ee5dd862cfbb9b248f71d7d035e421119f8ab59a9ecd22292d42d6df7d1",
+    "docs/paper/generated/capacity_history_v3/results/postprocess/training_audit.json": "27e22b4890c944fe8b90a6c149657e8b8177b7cf36e0439b8d2b16a8192c4da3",
+    "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/results/SF4_COMPLETE.json": "7f68762360dcff54c8c11b7e9b0846452cc67c21ea1ae5c6087286e1bae7776b",
+    "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/results/sf4_supervisor_behavioural_authority_run_contract.json": "62229403a94d93268c63e4707d7325f27bd62f515f975894244c37ae62e287ec",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/R3_COMPLETE.json": "790a5e337e2877b4a36a6e380340e42f537f42e21f2ef46f5b6e28183a9ce9d3",
+    "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/server_runs/r3_corrected_formal_v3/r3_run_contract.json": "2db210f1cf2313d6a9d18debe2f95dca24aba49de1fc636f4c5ff97d3a41d11e",
+    "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/FINETUNE_AUDIT_MANIFEST.json": "d62bbe161987e3b64f8e7165ab8f1453240fd1ee9bb550338ad888f19f691d43",
+    "docs/paper/generated/supervisor_feedback_v1/03_finetune_audit/frozen_test_population_contract.json": "0d59083c3b3f62a4a4a892f52d3e862a6020ad165c01c781a3fe0dfe320a618a"
+  },
+  "status": "pass",
+  "terminology_entries": 20
+}

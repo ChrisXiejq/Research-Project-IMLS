@@ -1,0 +1,163 @@
+{
+  "boundary": "A paired contrast is confirmatory only when its required treatment cells are defined for the same initialization group; otherwise the canonical descriptive-only status is retained.",
+  "independent_unit": "ego_init_id",
+  "metrics": {
+    "actual_path_release_to_sustained_resume_s": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "buffered_conflict_clear_to_sustained_resume_s": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "cautious_approach_progress_m": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "first_stop_distance_to_conflict_m": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "first_stop_distance_to_designed_stop_m": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "nominal_conflict_clear_to_actual_path_release_s": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 3,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    },
+    "stopped_duration_s": {
+      "authority_effect_adaptive": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "authority_effect_fixed_medium": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_off": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      },
+      "risk_effect_authority_on": {
+        "defined_init_clusters": 0,
+        "status": "descriptive_only_missing_event_clock",
+        "total_init_clusters": 10
+      }
+    }
+  },
+  "missing_values_imputed": false,
+  "schema_version": "supervisor_bottleneck_phase_contrast_availability_v1",
+  "status": "pass"
+}

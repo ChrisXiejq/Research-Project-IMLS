@@ -1,0 +1,1022 @@
+{
+  "floor_saturation": {
+    "authority_off_completion": 0,
+    "authority_off_rollouts": 40,
+    "authority_on_completion": 40,
+    "authority_on_rollouts": 40
+  },
+  "identified_estimands": {
+    "authority_and_risk_DID": {
+      "actual_minus_nominal_accel_abs_mean_mps2": {
+        "authority_effect_adaptive": {
+          "cluster_bootstrap_95ci": [
+            0.6329197136090633,
+            0.8806944134443605
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+          "mean_effect": 0.7476207603590919,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "authority_effect_fixed_medium": {
+          "cluster_bootstrap_95ci": [
+            0.6435995017204615,
+            0.8981411055076192
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+          "mean_effect": 0.7622570334923158,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "risk_effect_authority_off": {
+          "cluster_bootstrap_95ci": [
+            0.0,
+            0.0
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+          "mean_effect": 0.0,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "risk_effect_authority_on": {
+          "cluster_bootstrap_95ci": [
+            -0.03879500494556034,
+            0.006176468831951666
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.275390625,
+          "mean_effect": -0.01463627313322392,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        }
+      },
+      "candidate_minus_nominal_accel_abs_mean_mps2": {
+        "authority_effect_adaptive": {
+          "cluster_bootstrap_95ci": [
+            -1.6324683035836651,
+            -0.37482379495147267
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.017578125,
+          "mean_effect": -0.9614999317085001,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "authority_effect_fixed_medium": {
+          "cluster_bootstrap_95ci": [
+            -1.6393988964401067,
+            -0.3594421827955927
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.017578125,
+          "mean_effect": -0.9524411747776155,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "risk_effect_authority_off": {
+          "cluster_bootstrap_95ci": [
+            -0.01759107031393953,
+            0.005069213120697862
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.396484375,
+          "mean_effect": -0.005577516202339289,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "risk_effect_authority_on": {
+          "cluster_bootstrap_95ci": [
+            -0.03879500494556034,
+            0.006176468831951666
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.275390625,
+          "mean_effect": -0.01463627313322392,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        }
+      },
+      "failure_penalized_completion_time_s": {
+        "authority_effect_adaptive": {
+          "cluster_bootstrap_95ci": [
+            -19.490000000000002,
+            -17.6125
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+          "mean_effect": -18.630000000000003,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "authority_effect_fixed_medium": {
+          "cluster_bootstrap_95ci": [
+            -19.365062500000004,
+            -17.7775
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.001953125,
+          "mean_effect": -18.65,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "risk_effect_authority_off": {
+          "cluster_bootstrap_95ci": [
+            0.0,
+            0.0
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 1.0,
+          "mean_effect": 0.0,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "risk_effect_authority_on": {
+          "cluster_bootstrap_95ci": [
+            -0.26000000000000034,
+            0.3374999999999998
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.919921875,
+          "mean_effect": 0.019999999999999928,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        }
+      },
+      "minimum_margin_adjusted_bbox_separation_m": {
+        "authority_effect_adaptive": {
+          "cluster_bootstrap_95ci": [
+            0.021050388745383442,
+            1.140890342740672
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.0859375,
+          "mean_effect": 0.623904330879375,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "authority_effect_fixed_medium": {
+          "cluster_bootstrap_95ci": [
+            0.026302562865254592,
+            1.1480192662962712
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.080078125,
+          "mean_effect": 0.6307914908572829,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "risk_effect_authority_off": {
+          "cluster_bootstrap_95ci": [
+            -0.012706696795942518,
+            0.0
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.25,
+          "mean_effect": -0.00624295654759619,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        },
+        "risk_effect_authority_on": {
+          "cluster_bootstrap_95ci": [
+            -0.05438883948649427,
+            0.018809171844430067
+          ],
+          "defined_init_clusters": 10,
+          "exact_two_sided_sign_flip_sensitivity_value": 0.49609375,
+          "mean_effect": -0.013130116525504065,
+          "randomisation_inference": false,
+          "sign_flip_assumption": "symmetric distribution of init-cluster effects",
+          "total_init_clusters": 10
+        }
+      }
+    },
+    "authority_manipulation": "nominal-to-candidate and nominal-to-executed acceleration deltas within factual rollout summaries"
+  },
+  "permitted_claim": "SF4 identifies a large common authority effect and verifies command intervention; it does not identify selective masking of one predictor or risk policy.",
+  "rollout_channel_records": [
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 1.025833423407225,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.025833423407225,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 106,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 4.183868976127625,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 106,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 4.218472247581997,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 106,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.852830210508671,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.852830210508671,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 106,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 4.220210305216953,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 106,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.8494952094158879,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.8494952094158879,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 106,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 1.022410928329693,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.022410928329693,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 106,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 4.2692566639874645,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 106,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.7605470097086848,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.7605470097086848,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 107,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9319756302504014,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 107,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.0805512908371044,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 107,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.084314650964642,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 107,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5431192218589438,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5431192218589438,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 107,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5111760499518636,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5111760499518636,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 107,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9337120077907178,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 107,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.7605152313830015,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.7605152313830015,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 107,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.086822548518257,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 108,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.6370922940503466,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.6370922940503466,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 108,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5278591777675564,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5278591777675564,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 108,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.0230161009213494,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 108,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.0884410826553754,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 108,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5811665172539477,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5811665172539477,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 108,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.0226095375975535,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 108,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5285788932467098,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5285788932467098,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 108,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.6508655097547117,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.6508655097547117,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 109,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9765432480352964,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 109,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5698275822141946,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5698275822141946,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 109,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5178113450662853,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5178113450662853,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 109,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.0187806728333817,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 109,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5111978350958446,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5111978350958446,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 109,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.070773411498386,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 109,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.0861558526841195,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 109,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.47870149941035123,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 110,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.6915148945209632,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.6915148945209632,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 110,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.30700623770876423,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 110,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5634523374336243,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5634523374336243,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 110,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.595068554119706,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.595068554119706,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 110,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.30423026417179455,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 110,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.4953911561628958,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 110,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.591489040596868,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.591489040596868,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 110,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.3511242246832955,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 111,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.46156447302886583,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 111,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.6496662602036668,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.6496662602036668,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 111,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5921578831586276,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5921578831586276,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 111,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.46038126619290715,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 111,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.6544240334397652,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.6544240334397652,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 111,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.6327262640394284,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.6327262640394284,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 111,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.3248554147382227,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 111,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.8250640835180214,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 112,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.9248068540501143,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9248068540501143,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 112,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.0390404800649495,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 112,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.7220641845417384,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.7220641845417384,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 112,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.0032565418068904,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 112,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 1.109022584650087,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.109022584650087,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 112,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.7286244640511438,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.7286244640511438,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 112,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9071977493162563,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 112,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9544786754824324,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 113,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 1.3197070273031073,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.3197070273031073,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 113,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 1.034849592923033,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.034849592923033,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 113,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.4242315855632435,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 113,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 3.4272197868821976,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 113,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 1.0245789992558667,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.0245789992558667,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 113,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 1.3192784003391353,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.3192784003391353,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 113,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9692964143877464,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 113,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 2.6541241417468737,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 114,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.9072649327195296,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9072649327195296,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 114,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 2.6549025308534886,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 114,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.9916040199918907,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9916040199918907,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 114,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 1.017178935609411,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 1.017178935609411,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 114,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.26600761040533594,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 114,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.9705716649073779,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.9705716649073779,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 114,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.2603662290214144,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 114,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5653989280598053,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5653989280598053,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_on",
+      "ego_init_id": 115,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.33116929953642227,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_off",
+      "ego_init_id": 115,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.33844979210764425,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_off",
+      "ego_init_id": 115,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5887302972393449,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5887302972393449,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_adaptive_assertive_supervisor_on",
+      "ego_init_id": 115,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.47307177456615856,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_adaptive_reactive_supervisor_off",
+      "ego_init_id": 115,
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5859935059047873,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5859935059047873,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_assertive_supervisor_on",
+      "ego_init_id": 115,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.0,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.4697425478936719,
+      "candidate_to_executed_transmission_ratio": 0.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_off",
+      "ego_init_id": 115,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "actual_minus_nominal_accel_abs_mean_mps2": 0.5670557789555647,
+      "candidate_minus_nominal_accel_abs_mean_mps2": 0.5670557789555647,
+      "candidate_to_executed_transmission_ratio": 1.0,
+      "cell_id": "SF4_B1_fixed_medium_reactive_supervisor_on",
+      "ego_init_id": 115,
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    }
+  ],
+  "same_state_alternative_predictor_commands_available": false,
+  "same_state_alternative_risk_commands_available": false,
+  "schema_version": "supervisor_bottleneck_attenuation_claim_audit_v1",
+  "selective_masking_claim_status": "refused_missing_identifying_comparison_and_authority_off_floor_saturation",
+  "selective_masking_identified": false,
+  "status": "pass"
+}

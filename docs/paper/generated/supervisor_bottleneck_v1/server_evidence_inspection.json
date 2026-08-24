@@ -1,0 +1,21 @@
+{
+  "schema_version": "server_evidence_inspection_v1",
+  "status": "pass",
+  "checked_at_utc": "2026-08-24T19:10:00+00:00",
+  "server_scope": "/root/autodl-tmp/results",
+  "checks": {
+    "sf4_completion_marker_found": false,
+    "sf4_full_raw_archive_found": false,
+    "v3_result_root_found": true,
+    "remote_state_mutated": false
+  },
+  "local_full_raw_manifest": {
+    "archive_sha256": "f7f58b3f66e1937469a5038ac6d31070bf388ef6b21734de10eb47b39e57faa6",
+    "files_manifest_sha256": "fe366914a2a05191564fd935e9e5dfe57b90c18d8971044fee2f009555768ed1",
+    "observed_rollouts": 80,
+    "included_source_files": 3096
+  },
+  "decision": "no_remote_pull_required",
+  "reason": "The frozen local SF4 rollout table and inference products contain every field required for the current init-cluster estimands. The only headline-identification gap is same-state alternative predictor/risk commands, which were not collected by the SF4 design and cannot be recovered by copying the archived factual traces. The historical SF4 raw directory/archive is no longer present under the current server results root; V3 remains online but its required canonical rows and completion hashes are already local.",
+  "claim_boundary": "Absence of a remote raw copy does not license reconstruction or imputation; the local full-raw manifest and frozen derived products remain the provenance boundary."
+}

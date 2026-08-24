@@ -1,0 +1,76 @@
+{
+  "evaluations": [
+    {
+      "ego_key": "ego_3",
+      "errors": [
+        "phase1_ego_did_not_continue_before_target_arrival",
+        "phase2_ego_did_not_slow_and_yield_to_target",
+        "phase3_ego_did_not_resume_and_complete_after_target_clearance",
+        "solver_failure_fraction_missing_or_above_limit"
+      ],
+      "phase1_proceed_before_target": {
+        "duration_s": 0.3323190965210081,
+        "ego_peak_speed_mps": 9.189901354435785,
+        "ego_progress_m": 3.0047550756511563,
+        "pass": false,
+        "target_arrival_time_s": 30.156422358796465
+      },
+      "phase2_slow_and_yield": {
+        "ego_conflict_enter_time_s": null,
+        "ego_conflict_exit_time_s": null,
+        "interaction_min_speed_mps": 6.255585842386285,
+        "pass": false,
+        "speed_drop_mps": 2.9343155120494995,
+        "target_cleared_before_ego_entry": false,
+        "target_conflict_enter_time_s": 31.169830299830107,
+        "target_conflict_exit_time_s": 32.014176623405824
+      },
+      "phase3_resume_after_target": {
+        "completion_valid": false,
+        "pass": false,
+        "post_clear_progress_m": 30.61133085026355,
+        "resume_speed_gain_mps": 0.0
+      },
+      "safety_and_integrity": {
+        "contract_valid": true,
+        "ego_lateral_error_limit_m": null,
+        "ego_max_absolute_lateral_error_m": 30.86448220709276,
+        "ego_route_adherence_pass": true,
+        "footprint_collision": false,
+        "native_collision": false,
+        "pass": false,
+        "runtime_control_integrity": {
+          "errors": [],
+          "intervention_norm_max": 4.940027120962803,
+          "intervention_norm_mean": 1.6771949839618372,
+          "pass": true,
+          "step_count": 300
+        },
+        "solver_failure_fraction": 0.9766666666666667,
+        "target_straight_line_max_deviation_m": 0.4942058163446323,
+        "target_straight_pass": true
+      },
+      "scenario_dir": "/root/autodl-tmp/results/implicit_smpc_safety_filter/smoke_hardtube_progressref_h4_10hz_20260825_0242/scenario_implicit_smpc_give_way_ego_init_01_smpc_var_risk",
+      "settings": {
+        "clearance_tolerance_s": 0.2,
+        "conflict_radius_m": 4.0,
+        "max_solver_failure_fraction": 0.0,
+        "maximum_absolute_lateral_error_m": null,
+        "minimum_interaction_speed_drop_mps": 1.0,
+        "minimum_post_clear_progress_m": 5.0,
+        "minimum_pre_arrival_duration_s": 0.5,
+        "minimum_pre_arrival_progress_m": 1.0,
+        "minimum_resume_speed_gain_mps": 1.0,
+        "require_no_native_collision": true,
+        "require_valid_completion": true,
+        "target_arrival_radius_m": 12.0
+      },
+      "status": "FAIL",
+      "target_key": "target_2"
+    }
+  ],
+  "generated_at": "2026-08-25T02:43:53",
+  "overall_status": "FAIL",
+  "results_dir": "/root/autodl-tmp/results/implicit_smpc_safety_filter/smoke_hardtube_progressref_h4_10hz_20260825_0242",
+  "schema_version": "implicit_smpc_three_phase_report_v1"
+}

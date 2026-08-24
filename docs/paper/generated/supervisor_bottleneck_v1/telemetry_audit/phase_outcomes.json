@@ -1,0 +1,1287 @@
+{
+  "missing_values_imputed": false,
+  "rows": [
+    {
+      "ci95_defined_only": [
+        8.0,
+        12.6
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 10.2,
+      "phase_field": "yield_entry_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_sustained_stop_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.55555555555556
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 43.22222222222222,
+      "phase_field": "nominal_conflict_clear_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.55555555555556
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 43.22222222222222,
+      "phase_field": "actual_path_release_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        46.44444444444444,
+        47.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 46.77777777777778,
+      "phase_field": "buffered_conflict_clear_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.55555555555556
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 43.22222222222222,
+      "phase_field": "sustained_resume_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "cautious_approach_progress_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_stop_distance_to_conflict_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_stop_distance_to_designed_stop_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "stopped_duration_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 0.0,
+      "phase_field": "nominal_conflict_clear_to_actual_path_release_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 0.0,
+      "phase_field": "actual_path_release_to_sustained_resume_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "buffered_conflict_clear_to_sustained_resume_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        7.8,
+        12.3
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 10.1,
+      "phase_field": "yield_entry_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_sustained_stop_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        54.0,
+        55.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 54.333333333333336,
+      "phase_field": "nominal_conflict_clear_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        54.0,
+        55.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 54.333333333333336,
+      "phase_field": "actual_path_release_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        57.0,
+        58.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 57.666666666666664,
+      "phase_field": "buffered_conflict_clear_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        54.0,
+        55.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 54.333333333333336,
+      "phase_field": "sustained_resume_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "cautious_approach_progress_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_stop_distance_to_conflict_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_stop_distance_to_designed_stop_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "stopped_duration_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 0.0,
+      "phase_field": "nominal_conflict_clear_to_actual_path_release_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 0.0,
+      "phase_field": "actual_path_release_to_sustained_resume_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "buffered_conflict_clear_to_sustained_resume_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        8.0,
+        12.6
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 10.2,
+      "phase_field": "yield_entry_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_sustained_stop_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.55555555555556
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 43.22222222222222,
+      "phase_field": "nominal_conflict_clear_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.55555555555556
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 43.22222222222222,
+      "phase_field": "actual_path_release_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        46.44444444444444,
+        47.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 46.77777777777778,
+      "phase_field": "buffered_conflict_clear_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.55555555555556
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 43.22222222222222,
+      "phase_field": "sustained_resume_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "cautious_approach_progress_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_stop_distance_to_conflict_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_stop_distance_to_designed_stop_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "stopped_duration_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 0.0,
+      "phase_field": "nominal_conflict_clear_to_actual_path_release_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 0.0,
+      "phase_field": "actual_path_release_to_sustained_resume_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "buffered_conflict_clear_to_sustained_resume_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        7.8,
+        12.3
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 10.1,
+      "phase_field": "yield_entry_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_sustained_stop_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        54.0,
+        56.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 54.666666666666664,
+      "phase_field": "nominal_conflict_clear_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        54.0,
+        56.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 54.666666666666664,
+      "phase_field": "actual_path_release_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        57.0,
+        59.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 58.0,
+      "phase_field": "buffered_conflict_clear_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        54.0,
+        56.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 54.666666666666664,
+      "phase_field": "sustained_resume_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "cautious_approach_progress_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_stop_distance_to_conflict_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "first_stop_distance_to_designed_stop_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "stopped_duration_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 0.0,
+      "phase_field": "nominal_conflict_clear_to_actual_path_release_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 3,
+      "mean_defined_only": 0.0,
+      "phase_field": "actual_path_release_to_sustained_resume_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": null,
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 0,
+      "mean_defined_only": null,
+      "phase_field": "buffered_conflict_clear_to_sustained_resume_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "off",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        8.7,
+        13.4
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 11.2,
+      "phase_field": "yield_entry_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        31.333333333333332,
+        35.5
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 6,
+      "mean_defined_only": 33.333333333333336,
+      "phase_field": "first_sustained_stop_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.5
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 43.2,
+      "phase_field": "nominal_conflict_clear_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.5
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 43.2,
+      "phase_field": "actual_path_release_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        46.4,
+        47.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 46.7,
+      "phase_field": "buffered_conflict_clear_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        47.4,
+        53.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 50.2,
+      "phase_field": "sustained_resume_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        5.885334141760156,
+        7.281941668097204
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 6,
+      "mean_defined_only": 6.599890722450326,
+      "phase_field": "cautious_approach_progress_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        4.229278037681608,
+        4.608798879460899
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 6,
+      "mean_defined_only": 4.417293675003191,
+      "phase_field": "first_stop_distance_to_conflict_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.22927803768160823,
+        0.6181226566843817
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 6,
+      "mean_defined_only": 0.4172936750031913,
+      "phase_field": "first_stop_distance_to_designed_stop_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.7333333333333333,
+        1.1416666666666666
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 6,
+      "mean_defined_only": 0.9416666666666667,
+      "phase_field": "stopped_duration_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 0.0,
+      "phase_field": "nominal_conflict_clear_to_actual_path_release_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.205,
+        0.49
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 0.35,
+      "phase_field": "actual_path_release_to_sustained_resume_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.17142857142857143,
+        0.40714285714285714
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 7,
+      "mean_defined_only": 0.30714285714285716,
+      "phase_field": "buffered_conflict_clear_to_sustained_resume_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        8.8,
+        13.4
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 11.2,
+      "phase_field": "yield_entry_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        32.75,
+        41.5
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 8,
+      "mean_defined_only": 36.75,
+      "phase_field": "first_sustained_stop_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        51.4,
+        53.9
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 52.9,
+      "phase_field": "nominal_conflict_clear_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        51.4,
+        53.9
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 52.9,
+      "phase_field": "actual_path_release_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        55.0,
+        57.1
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 56.3,
+      "phase_field": "buffered_conflict_clear_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        59.2,
+        64.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 61.7,
+      "phase_field": "sustained_resume_step",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        5.831050771754952,
+        6.990121451951909
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 8,
+      "mean_defined_only": 6.40127385904484,
+      "phase_field": "cautious_approach_progress_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        4.240580498800004,
+        4.547239809277183
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 8,
+      "mean_defined_only": 4.38230864953325,
+      "phase_field": "first_stop_distance_to_conflict_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.2402690181567282,
+        0.5434602124092651
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 8,
+      "mean_defined_only": 0.38230864953325017,
+      "phase_field": "first_stop_distance_to_designed_stop_m",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        1.025,
+        1.56875
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 8,
+      "mean_defined_only": 1.31875,
+      "phase_field": "stopped_duration_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 0.0,
+      "phase_field": "nominal_conflict_clear_to_actual_path_release_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.36,
+        0.525
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 0.44,
+      "phase_field": "actual_path_release_to_sustained_resume_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.185,
+        0.36
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 0.27,
+      "phase_field": "buffered_conflict_clear_to_sustained_resume_s",
+      "risk_policy": "adaptive",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        8.7,
+        13.4
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 11.2,
+      "phase_field": "yield_entry_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        30.8,
+        34.6
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 5,
+      "mean_defined_only": 32.6,
+      "phase_field": "first_sustained_stop_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.6
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 43.3,
+      "phase_field": "nominal_conflict_clear_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        43.0,
+        43.6
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 43.3,
+      "phase_field": "actual_path_release_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        46.4,
+        47.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 46.7,
+      "phase_field": "buffered_conflict_clear_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        48.3,
+        53.5
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 51.0,
+      "phase_field": "sustained_resume_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        5.960285719285636,
+        7.4465310874124055
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 5,
+      "mean_defined_only": 6.788502055289241,
+      "phase_field": "cautious_approach_progress_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        4.182552190455258,
+        4.591558996011255
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 5,
+      "mean_defined_only": 4.35915904263399,
+      "phase_field": "first_stop_distance_to_conflict_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.18255219045525806,
+        0.5915589960112552
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 5,
+      "mean_defined_only": 0.3591590426339895,
+      "phase_field": "first_stop_distance_to_designed_stop_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.7999999999999999,
+        1.19
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 5,
+      "mean_defined_only": 1.01,
+      "phase_field": "stopped_duration_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 0.0,
+      "phase_field": "nominal_conflict_clear_to_actual_path_release_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.25,
+        0.51
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 0.385,
+      "phase_field": "actual_path_release_to_sustained_resume_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        0.20625,
+        0.41250000000000003
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 8,
+      "mean_defined_only": 0.30625,
+      "phase_field": "buffered_conflict_clear_to_sustained_resume_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "assertive"
+    },
+    {
+      "ci95_defined_only": [
+        8.8,
+        13.4
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 11.2,
+      "phase_field": "yield_entry_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        33.55555555555556,
+        42.44444444444444
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 37.888888888888886,
+      "phase_field": "first_sustained_stop_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        52.8,
+        53.8
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 53.3,
+      "phase_field": "nominal_conflict_clear_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        52.8,
+        53.8
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 53.3,
+      "phase_field": "actual_path_release_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        56.2,
+        57.2
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 56.7,
+      "phase_field": "buffered_conflict_clear_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        60.3,
+        64.2
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 62.3,
+      "phase_field": "sustained_resume_step",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        5.881956545599075,
+        6.9266197650549035
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 6.394373306645308,
+      "phase_field": "cautious_approach_progress_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        4.242451312216341,
+        4.518523367826525
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 4.367714713277531,
+      "phase_field": "first_stop_distance_to_conflict_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.24067928817633877,
+        0.5205763416682928
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 0.36771471327753047,
+      "phase_field": "first_stop_distance_to_designed_stop_m",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.9555555555555556,
+        1.5055555555555555
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 1.238888888888889,
+      "phase_field": "stopped_duration_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.0,
+        0.0
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 0.0,
+      "phase_field": "nominal_conflict_clear_to_actual_path_release_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.35,
+        0.54
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 10,
+      "mean_defined_only": 0.45,
+      "phase_field": "actual_path_release_to_sustained_resume_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    },
+    {
+      "ci95_defined_only": [
+        0.25,
+        0.38333333333333336
+      ],
+      "claim_boundary": "defined cases only; missing event clocks were not imputed",
+      "defined_init_groups": 9,
+      "mean_defined_only": 0.31666666666666665,
+      "phase_field": "buffered_conflict_clear_to_sustained_resume_s",
+      "risk_policy": "fixed_medium",
+      "supervisor_authority_mode": "on",
+      "target_style": "reactive"
+    }
+  ],
+  "schema_version": "supervisor_bottleneck_phase_outcomes_v1",
+  "status": "pass"
+}

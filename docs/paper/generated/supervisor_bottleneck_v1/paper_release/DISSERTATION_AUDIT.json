@@ -1,0 +1,51 @@
+{
+  "checks": {
+    "bibliography": {
+      "cited_count": 39,
+      "entry_count": 39,
+      "missing_entries": [],
+      "pass": true,
+      "uncited_entries": []
+    },
+    "claim_boundaries": {
+      "matches": [],
+      "pass": true
+    },
+    "compiled_pdf": {
+      "bytes": 235183,
+      "page_count": 18,
+      "pass": true,
+      "unresolved_references": false
+    },
+    "controller_attribution": {
+      "pass": true
+    },
+    "python_generated_release_figures": {
+      "missing": [],
+      "pass": true
+    },
+    "required_evidence_scalars": {
+      "missing": [],
+      "pass": true
+    },
+    "required_section_order": {
+      "pass": true,
+      "positions": {
+        "Conclusion": 41408,
+        "Experimental Design": 23183,
+        "Introduction": 2979,
+        "Literature Survey": 8651,
+        "Methodology": 17342,
+        "Problem Formulation": 14209,
+        "Result Analysis": 27783
+      }
+    },
+    "scenario_and_limitations": {
+      "missing": [],
+      "pass": true
+    }
+  },
+  "pass": true,
+  "schema_version": "supervisor_bottleneck_dissertation_audit_v1",
+  "thesis_root": "/Users/xiejiaqi/Personal Projects/Dissertation/Jiaqi-Xie-Dissertation"
+}

@@ -1,0 +1,272 @@
+{
+  "datasets": {
+    "SF4": {
+      "fields": [
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "candidate_minus_nominal_accel_mean_mps2",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "candidate_minus_nominal_accel_abs_mean_mps2",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "actual_minus_nominal_accel_mean_mps2",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "actual_minus_nominal_accel_abs_mean_mps2",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "supervisor_candidate_requested_fraction",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "supervisor_authority_applied_fraction",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "supervisor_any_channel_requested_fraction",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "upstream_reference_requested_fraction",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "upstream_reference_linearization_requested_fraction",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "rule_smpc_bypass_requested_fraction",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "rule_smpc_bypass_applied_fraction",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "yield_entry_step",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "partial",
+          "column_present": true,
+          "field": "first_sustained_stop_step",
+          "nonmissing_rows": 28,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "partial",
+          "column_present": true,
+          "field": "nominal_conflict_clear_step",
+          "nonmissing_rows": 64,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "partial",
+          "column_present": true,
+          "field": "actual_path_release_step",
+          "nonmissing_rows": 64,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "partial",
+          "column_present": true,
+          "field": "buffered_conflict_clear_step",
+          "nonmissing_rows": 64,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "partial",
+          "column_present": true,
+          "field": "sustained_resume_step",
+          "nonmissing_rows": 64,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "minimum_margin_adjusted_bbox_separation_m",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "risk_policy",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "factual_solver_attempt_count",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "attempted_controller_accepted_count",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "attempted_fallback_or_nonaccepted_count",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "factual_solver_return_status_counts_json",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        }
+      ],
+      "rows": 80
+    },
+    "V3_closed_loop": {
+      "fields": [
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "predictor",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "risk_policy",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "target_style",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "inloop_top1_ADE_m",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "completion_time_s",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "min_footprint_separation_m",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "supervisor_active_fraction",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        },
+        {
+          "availability": "complete",
+          "column_present": true,
+          "field": "solver_failure_fraction",
+          "nonmissing_rows": 80,
+          "representation": "rollout aggregate",
+          "total_rows": 80
+        }
+      ],
+      "rows": 80
+    }
+  },
+  "schema_version": "supervisor_bottleneck_field_availability_v1",
+  "semantic_fields": {
+    "executed_command": "SF4 rollout-level actual-minus-nominal acceleration summaries available",
+    "nominal_solver_command_vector": "not_materialized_locally; only aligned acceleration deltas are canonical",
+    "phase_events": "partially_available_and_never_imputed",
+    "raw_per_step_debug": "manifested_in_full_raw_snapshot_but_not_required_for_current_rollout_estimands",
+    "same_state_alternative_predictor_or_risk_commands": "absent_by_design",
+    "supervisor_candidate": "SF4 rollout-level candidate-minus-nominal acceleration summaries available"
+  },
+  "status": "pass"
+}
