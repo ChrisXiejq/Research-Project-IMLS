@@ -1,0 +1,70 @@
+{
+  "config_name": "give_way_implicit_smpc_h4_corridor_125",
+  "version": 1,
+  "description": "Supervisor-free four-second multimodal SMPC with a 1.25 m nominal route-corridor constraint.",
+  "vehicle_role_overrides": {
+    "ego": {
+      "nominal_speed": 6.0,
+      "N": 20,
+      "dt": 0.2,
+      "num_modes": 3,
+      "collision_d_min": 0.5,
+      "collision_ellipse_half_length": 3.8,
+      "collision_ellipse_half_width": 1.8,
+      "reference_regen_max_lateral_error": 1.5,
+      "route_goal_extension_m": 20.0,
+      "exit_alignment_path_enabled": true,
+      "exit_alignment_path_length": 10.0,
+      "implicit_safety_filter_enabled": true,
+      "implicit_safety_filter_min_horizon_s": 4.0,
+      "implicit_route_corridor_half_width_m": 1.25,
+      "yield_stop_enabled": false,
+      "yield_stop_line_creep_enabled": false,
+      "yield_observed_caution_enabled": false,
+      "yield_emergency_brake_enabled": false,
+      "yield_recovery_enabled": false,
+      "yield_rule_smpc_bypass_enabled": false,
+      "yield_post_solver_action_filter_mode": "monitor_only",
+      "yield_supervisor_behavioural_authority_mode": "off",
+      "smpc_intersection_approach_speed_shaping_enabled": false,
+      "yield_planner_ownership_stress_enabled": false,
+      "yield_risk_owned_yield_enabled": false,
+      "lane_entry_heading_cost_enabled": false
+    },
+    "target": {
+      "nominal_speed": 9.0,
+      "init_speed": 9.0,
+      "target_style": "assertive_constant_speed"
+    }
+  },
+  "postcarla_gate": {
+    "required_policies": ["smpc_var_risk"],
+    "footprint_margin_m": 0.25,
+    "sensitivity_footprint_margins_m": [0.0, 0.25, 0.35, 0.5],
+    "conflict_radius_m": 4.0,
+    "clearance_tolerance_s": 0.2,
+    "max_solver_failure_frac": 0.0,
+    "require_completion_valid": true,
+    "require_collision_envelope_log": true,
+    "require_turning_gives_way": true
+  },
+  "implicit_filter_evaluation": {
+    "target_arrival_radius_m": 12.0,
+    "conflict_radius_m": 4.0,
+    "clearance_tolerance_s": 0.2,
+    "minimum_pre_arrival_duration_s": 0.5,
+    "minimum_pre_arrival_progress_m": 1.0,
+    "minimum_interaction_speed_drop_mps": 1.0,
+    "minimum_post_clear_progress_m": 5.0,
+    "minimum_resume_speed_gain_mps": 1.0,
+    "max_solver_failure_fraction": 0.0,
+    "require_valid_completion": true,
+    "require_no_native_collision": true
+  },
+  "tuning_rationale": {
+    "horizon": "N=20 and dt=0.2 expose four seconds of the exogenous target prediction.",
+    "corridor": "Every nominal SMPC branch is constrained to remain within 1.25 m laterally of the static mapped route. The constraint is independent of target state and prevents collision avoidance by leaving the intended lane.",
+    "causal_authority": "Longitudinal yielding remains an emergent result of the same multimodal chance constraints and objective; no rule detects arrival, clearance or phase and no action is replaced after the solve.",
+    "selection": "Development candidate; acceptable only if the unchanged footprint, target-first, three-phase, completion and zero-fallback gates pass."
+  }
+}

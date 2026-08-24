@@ -23,6 +23,10 @@ from policies.mpc_agent import MPCAgent
 from policies.straight_line_agent import StraightLineAgent
 from policies.defensive_reactive_agent import DefensiveReactiveAgent
 from policies.bl_smpc_agent import BLSMPCAgent
+from policies.exogenous_straight_prediction import (
+    build_exogenous_straight_gmm,
+    route_line_conflict_geometry,
+)
 
 from rasterizer.agent_history import AgentHistory
 from rasterizer.sem_box_rasterizer import SemBoxRasterizer
@@ -31,7 +35,6 @@ from utils.vehicle_geometry_utils import vehicle_name_to_lf_lr, resolve_vehicle_
 
 scriptdir = os.path.abspath(__file__).split('scripts')[0] + 'scripts/'
 sys.path.append(scriptdir)
-from models.deploy_multipath_model import DeployMultiPath
 from models.prediction_dataset_utils import interaction_context_from_sample
 from models.interaction_sequence import (
     FEATURE_SCHEMA_ID,
@@ -175,6 +178,19 @@ class VehicleParams:
     collision_ellipse_half_length : float = 3.8
     collision_ellipse_half_width : float = 1.8
     reference_regen_max_lateral_error : float = 1.5
+    implicit_route_corridor_half_width_m : Optional[float] = None
+    implicit_route_corridor_slack_weight : Optional[float] = None
+    smpc_state_weights : Optional[List[float]] = None
+    smpc_correct_path_frame_cost_rotation : bool = False
+    smpc_accel_min_mps2 : Optional[float] = None
+    smpc_accel_max_mps2 : float = 2.0
+    smpc_jerk_min_mps3 : float = -1.5
+    smpc_jerk_max_mps3 : float = 1.5
+    smpc_conflict_zone_filter_enabled : bool = False
+    smpc_conflict_zone_ego_buffer_m : float = 3.0
+    smpc_conflict_zone_target_half_length_m : float = 4.0
+    smpc_conflict_zone_sigma_scale : Optional[float] = None
+    smpc_conflict_zone_inactive_bound_m : float = 1000.0
     yield_stop_enabled : bool = True
     yield_stop_speed : float = 0.2
     yield_caution_speed : float = 3.5
@@ -231,6 +247,10 @@ class VehicleParams:
     yield_rule_smpc_bypass_enabled : bool = True
     yield_post_solver_action_filter_mode : str = "apply"
     yield_supervisor_behavioural_authority_mode : str = "on"
+    supervisor_free_smpc_enabled : bool = False
+    implicit_safety_filter_enabled : bool = False
+    implicit_safety_filter_min_horizon_s : float = 4.0
+    smpc_terminal_collision_constraint_enabled : Optional[bool] = None
     completion_s_margin : float = 6.0
     completion_goal_dist : float = 8.0
     completion_lateral_error : float = 4.0
@@ -276,6 +296,16 @@ class PredictionParams:
     model_weights         : str = "l5kit_multipath_10/"
     model_anchors         : str = "l5kit_clusters_16.npy"
     model_calibration     : Optional[str] = None
+
+    # The implicit-SMPC experiment uses an exogenous straight-motion GMM so
+    # the priority target's prediction cannot contain an ego-dependent yield.
+    target_prediction_mode : str = "model_gmm"
+    straight_gmm_speed_offsets_mps : tuple = (-0.75, 0.0, 0.75)
+    straight_gmm_mode_probabilities : tuple = (0.2, 0.6, 0.2)
+    straight_gmm_initial_longitudinal_std_m : float = 0.35
+    straight_gmm_initial_lateral_std_m : float = 0.25
+    straight_gmm_longitudinal_std_growth_mps : float = 0.20
+    straight_gmm_lateral_std_growth_mps : float = 0.08
 
     # Flag to render traffic lights on rasterized image for prediction.
     render_traffic_lights : bool = False
@@ -431,6 +461,23 @@ def get_vehicle_policy(
                             yield_rule_smpc_bypass_enabled=vehicle_params.yield_rule_smpc_bypass_enabled,
                             yield_post_solver_action_filter_mode=vehicle_params.yield_post_solver_action_filter_mode,
                             yield_supervisor_behavioural_authority_mode=vehicle_params.yield_supervisor_behavioural_authority_mode,
+                            supervisor_free_smpc_enabled=vehicle_params.supervisor_free_smpc_enabled,
+                            implicit_safety_filter_enabled=vehicle_params.implicit_safety_filter_enabled,
+                            implicit_safety_filter_min_horizon_s=vehicle_params.implicit_safety_filter_min_horizon_s,
+                            smpc_terminal_collision_constraint_enabled=vehicle_params.smpc_terminal_collision_constraint_enabled,
+                            implicit_route_corridor_half_width_m=vehicle_params.implicit_route_corridor_half_width_m,
+                            implicit_route_corridor_slack_weight=vehicle_params.implicit_route_corridor_slack_weight,
+                            smpc_state_weights=vehicle_params.smpc_state_weights,
+                            smpc_correct_path_frame_cost_rotation=vehicle_params.smpc_correct_path_frame_cost_rotation,
+                            smpc_accel_min_mps2=vehicle_params.smpc_accel_min_mps2,
+                            smpc_accel_max_mps2=vehicle_params.smpc_accel_max_mps2,
+                            smpc_jerk_min_mps3=vehicle_params.smpc_jerk_min_mps3,
+                            smpc_jerk_max_mps3=vehicle_params.smpc_jerk_max_mps3,
+                            smpc_conflict_zone_filter_enabled=vehicle_params.smpc_conflict_zone_filter_enabled,
+                            smpc_conflict_zone_ego_buffer_m=vehicle_params.smpc_conflict_zone_ego_buffer_m,
+                            smpc_conflict_zone_target_half_length_m=vehicle_params.smpc_conflict_zone_target_half_length_m,
+                            smpc_conflict_zone_sigma_scale=vehicle_params.smpc_conflict_zone_sigma_scale,
+                            smpc_conflict_zone_inactive_bound_m=vehicle_params.smpc_conflict_zone_inactive_bound_m,
                             completion_s_margin=vehicle_params.completion_s_margin,
                             completion_goal_dist=vehicle_params.completion_goal_dist,
                             completion_lateral_error=vehicle_params.completion_lateral_error,
@@ -523,6 +570,23 @@ def get_vehicle_policy(
                             yield_rule_smpc_bypass_enabled=vehicle_params.yield_rule_smpc_bypass_enabled,
                             yield_post_solver_action_filter_mode=vehicle_params.yield_post_solver_action_filter_mode,
                             yield_supervisor_behavioural_authority_mode=vehicle_params.yield_supervisor_behavioural_authority_mode,
+                            supervisor_free_smpc_enabled=vehicle_params.supervisor_free_smpc_enabled,
+                            implicit_safety_filter_enabled=vehicle_params.implicit_safety_filter_enabled,
+                            implicit_safety_filter_min_horizon_s=vehicle_params.implicit_safety_filter_min_horizon_s,
+                            smpc_terminal_collision_constraint_enabled=vehicle_params.smpc_terminal_collision_constraint_enabled,
+                            implicit_route_corridor_half_width_m=vehicle_params.implicit_route_corridor_half_width_m,
+                            implicit_route_corridor_slack_weight=vehicle_params.implicit_route_corridor_slack_weight,
+                            smpc_state_weights=vehicle_params.smpc_state_weights,
+                            smpc_correct_path_frame_cost_rotation=vehicle_params.smpc_correct_path_frame_cost_rotation,
+                            smpc_accel_min_mps2=vehicle_params.smpc_accel_min_mps2,
+                            smpc_accel_max_mps2=vehicle_params.smpc_accel_max_mps2,
+                            smpc_jerk_min_mps3=vehicle_params.smpc_jerk_min_mps3,
+                            smpc_jerk_max_mps3=vehicle_params.smpc_jerk_max_mps3,
+                            smpc_conflict_zone_filter_enabled=vehicle_params.smpc_conflict_zone_filter_enabled,
+                            smpc_conflict_zone_ego_buffer_m=vehicle_params.smpc_conflict_zone_ego_buffer_m,
+                            smpc_conflict_zone_target_half_length_m=vehicle_params.smpc_conflict_zone_target_half_length_m,
+                            smpc_conflict_zone_sigma_scale=vehicle_params.smpc_conflict_zone_sigma_scale,
+                            smpc_conflict_zone_inactive_bound_m=vehicle_params.smpc_conflict_zone_inactive_bound_m,
                             completion_s_margin=vehicle_params.completion_s_margin,
                             completion_goal_dist=vehicle_params.completion_goal_dist,
                             completion_lateral_error=vehicle_params.completion_lateral_error,
@@ -613,6 +677,23 @@ def get_vehicle_policy(
                             yield_rule_smpc_bypass_enabled=vehicle_params.yield_rule_smpc_bypass_enabled,
                             yield_post_solver_action_filter_mode=vehicle_params.yield_post_solver_action_filter_mode,
                             yield_supervisor_behavioural_authority_mode=vehicle_params.yield_supervisor_behavioural_authority_mode,
+                            supervisor_free_smpc_enabled=vehicle_params.supervisor_free_smpc_enabled,
+                            implicit_safety_filter_enabled=vehicle_params.implicit_safety_filter_enabled,
+                            implicit_safety_filter_min_horizon_s=vehicle_params.implicit_safety_filter_min_horizon_s,
+                            smpc_terminal_collision_constraint_enabled=vehicle_params.smpc_terminal_collision_constraint_enabled,
+                            implicit_route_corridor_half_width_m=vehicle_params.implicit_route_corridor_half_width_m,
+                            implicit_route_corridor_slack_weight=vehicle_params.implicit_route_corridor_slack_weight,
+                            smpc_state_weights=vehicle_params.smpc_state_weights,
+                            smpc_correct_path_frame_cost_rotation=vehicle_params.smpc_correct_path_frame_cost_rotation,
+                            smpc_accel_min_mps2=vehicle_params.smpc_accel_min_mps2,
+                            smpc_accel_max_mps2=vehicle_params.smpc_accel_max_mps2,
+                            smpc_jerk_min_mps3=vehicle_params.smpc_jerk_min_mps3,
+                            smpc_jerk_max_mps3=vehicle_params.smpc_jerk_max_mps3,
+                            smpc_conflict_zone_filter_enabled=vehicle_params.smpc_conflict_zone_filter_enabled,
+                            smpc_conflict_zone_ego_buffer_m=vehicle_params.smpc_conflict_zone_ego_buffer_m,
+                            smpc_conflict_zone_target_half_length_m=vehicle_params.smpc_conflict_zone_target_half_length_m,
+                            smpc_conflict_zone_sigma_scale=vehicle_params.smpc_conflict_zone_sigma_scale,
+                            smpc_conflict_zone_inactive_bound_m=vehicle_params.smpc_conflict_zone_inactive_bound_m,
                             completion_s_margin=vehicle_params.completion_s_margin,
                             completion_goal_dist=vehicle_params.completion_goal_dist,
                             completion_lateral_error=vehicle_params.completion_lateral_error,
@@ -811,11 +892,16 @@ class RunIntersectionScenario:
             self.terminate_on_collision = bool(carla_params.terminate_on_collision)
             self._setup_carla_world(carla_params)
             self._setup_vehicles(vehicle_params_list, carla_params)
+            self._validate_implicit_safety_filter_experiment(
+                vehicle_params_list,
+                prediction_params,
+            )
             self._setup_collision_sensors()
             self.use_camera = drone_viz_params.visualize_opencv or drone_viz_params.save_avi
             if self.use_camera:
                 self._setup_camera(drone_viz_params)
             self._setup_predictions(prediction_params)
+            self._write_implicit_safety_filter_contract(prediction_params)
         except Exception as e:
             self._destroy_created_actors()
             print("Failed to setup the scenario!")
@@ -844,6 +930,139 @@ class RunIntersectionScenario:
             return str(traffic_light.get_state()).split(".")[-1]
         except Exception:
             return "unknown"
+
+    def _validate_implicit_safety_filter_experiment(
+        self,
+        vehicle_params_list,
+        prediction_params,
+    ):
+        supervisor_free_egos = [
+            value
+            for value in vehicle_params_list
+            if value.role == "ego" and (
+                value.supervisor_free_smpc_enabled
+                or value.implicit_safety_filter_enabled
+            )
+        ]
+        if not supervisor_free_egos:
+            return
+        if len(supervisor_free_egos) != 1:
+            raise ValueError("Supervisor-free SMPC experiment requires exactly one ego")
+        if str(self.traffic_control).strip().lower() != "unsignalised":
+            raise ValueError("Implicit SMPC give-way experiment must be unsignalised")
+        targets = [value for value in vehicle_params_list if value.role == "target"]
+        if len(targets) != 1:
+            raise ValueError("Implicit SMPC experiment requires exactly one target")
+        target = targets[0]
+        ego = supervisor_free_egos[0]
+        if ego.obey_traffic_lights or target.obey_traffic_lights:
+            raise ValueError(
+                "Implicit SMPC experiment must not use traffic-light control overrides"
+            )
+        if target.policy_type != "straight":
+            raise ValueError(
+                "Implicit SMPC target must use the ego-independent straight policy"
+            )
+        if target.target_style != "assertive_constant_speed":
+            raise ValueError(
+                "Implicit SMPC target must not use a defensive/reactive style"
+            )
+        if (
+            str(prediction_params.target_prediction_mode).strip().lower()
+            != "exogenous_straight_gmm"
+        ):
+            raise ValueError(
+                "Implicit SMPC experiment requires exogenous_straight_gmm predictions"
+            )
+        if prediction_params.prediction_logging_enabled:
+            raise ValueError(
+                "Dataset logging is not supported for the analytic straight GMM; "
+                "use solver/scenario telemetry for this experiment"
+            )
+        if len(prediction_params.straight_gmm_mode_probabilities) != ego.num_modes:
+            raise ValueError(
+                "Straight-GMM probability count must match ego num_modes"
+            )
+        if len(prediction_params.straight_gmm_speed_offsets_mps) != ego.num_modes:
+            raise ValueError(
+                "Straight-GMM speed-offset count must match ego num_modes"
+            )
+
+    def _write_implicit_safety_filter_contract(self, prediction_params):
+        supervisor_free_egos = [
+            value
+            for value in self.vehicle_params_list
+            if value.role == "ego" and (
+                value.supervisor_free_smpc_enabled
+                or value.implicit_safety_filter_enabled
+            )
+        ]
+        if not supervisor_free_egos:
+            return
+        ego = supervisor_free_egos[0]
+        target = next(
+            value for value in self.vehicle_params_list if value.role == "target"
+        )
+        payload = {
+            "schema_version": "implicit_smpc_safety_filter_contract_v1",
+            "experiment": "supervisor_free_smpc_give_way",
+            "experimental_arm": (
+                "implicit_safety_filter"
+                if ego.implicit_safety_filter_enabled
+                else "paper_equivalent_baseline"
+            ),
+            "ego_control_source": "multimodal_chance_constrained_smpc",
+            "ego_policy": {
+                "smpc_config": ego.smpc_config,
+                "risk_profile": ego.risk_profile,
+                "horizon_steps": int(ego.N),
+                "dt_s": float(ego.dt),
+                "horizon_s": float(ego.N * ego.dt),
+                "terminal_collision_constraint": bool(
+                    ego.smpc_terminal_collision_constraint_enabled
+                    if ego.smpc_terminal_collision_constraint_enabled is not None
+                    else ego.implicit_safety_filter_enabled
+                ),
+            },
+            "supervisor_authority": {
+                "yield_state_machine": bool(ego.yield_stop_enabled),
+                "rule_solver_bypass": bool(ego.yield_rule_smpc_bypass_enabled),
+                "post_solver_action_filter": False,
+                "post_solver_configured_mode": ego.yield_post_solver_action_filter_mode,
+                "behavioural_authority_mode": ego.yield_supervisor_behavioural_authority_mode,
+                "rule_reference_shaping": False,
+                "rule_risk_mapping": False,
+            },
+            "target_controller": {
+                "policy": target.policy_type,
+                "style": target.target_style,
+                "uses_ego_state": False,
+                "nominal_speed_mps": float(target.nominal_speed),
+            },
+            "target_predictor": {
+                "mode": str(prediction_params.target_prediction_mode),
+                "uses_ego_state": False,
+                "speed_offsets_mps": list(
+                    prediction_params.straight_gmm_speed_offsets_mps
+                ),
+                "mode_probabilities": list(
+                    prediction_params.straight_gmm_mode_probabilities
+                ),
+            },
+            "evaluation_geometry": self._implicit_filter_conflict_geometry,
+            "evaluation_only": True,
+            "evaluation_geometry_is_controller_input": bool(
+                ego.smpc_conflict_zone_filter_enabled
+            ),
+            "evaluation_thresholds_are_controller_input": False,
+        }
+        path = os.path.join(
+            self.savedir,
+            "implicit_safety_filter_contract.json",
+        )
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump(self._json_safe(payload), handle, indent=2, sort_keys=True)
+            handle.write("\n")
 
     def _apply_optional_traffic_light_rule(self, actor, control, vehicle_params):
         """Optional red/yellow stop override for explicitly signalised scenarios."""
@@ -1547,6 +1766,43 @@ class RunIntersectionScenario:
             # TODO: clean up and generalize this to many target vehicles.
             target_actor = self.vehicle_actors[self.tv_vehicle_idxs[0]]
             target_agent_id = target_actor.id
+            if self.target_prediction_mode == "exogenous_straight_gmm":
+                target_tf = target_actor.get_transform()
+                target_velocity = target_actor.get_velocity()
+                position = get_actor_position_rhs(target_actor)
+                velocity = np.asarray(
+                    [float(target_velocity.x), float(-target_velocity.y)],
+                    dtype=float,
+                )
+                probabilities, means, covariances = build_exogenous_straight_gmm(
+                    position,
+                    velocity,
+                    horizon_steps=self.ego_N,
+                    dt_s=self.vehicle_params_list[self.ego_vehicle_idx].dt,
+                    speed_offsets_mps=self._straight_gmm_config["speed_offsets_mps"],
+                    mode_probabilities=self._straight_gmm_config["mode_probabilities"],
+                    initial_longitudinal_std_m=self._straight_gmm_config[
+                        "initial_longitudinal_std_m"
+                    ],
+                    initial_lateral_std_m=self._straight_gmm_config[
+                        "initial_lateral_std_m"
+                    ],
+                    longitudinal_std_growth_mps=self._straight_gmm_config[
+                        "longitudinal_std_growth_mps"
+                    ],
+                    lateral_std_growth_mps=self._straight_gmm_config[
+                        "lateral_std_growth_mps"
+                    ],
+                    fallback_heading_rad=-float(
+                        np.radians(target_tf.rotation.yaw)
+                    ),
+                )
+                return (
+                    [np.asarray(position, dtype=float)],
+                    [probabilities],
+                    [[means], [covariances]],
+                    [True],
+                )
             past_states_tv, R_target_to_world, t_target_to_world = \
                 get_target_agent_history(self.agent_history, target_agent_id)
 
@@ -1944,14 +2200,103 @@ class RunIntersectionScenario:
         self.ego_N           = vehicle_params_list[self.ego_vehicle_idx].N
         self.ego_num_modes   = vehicle_params_list[self.ego_vehicle_idx].num_modes
 
+        self._implicit_filter_conflict_geometry = None
+        ego_params = vehicle_params_list[self.ego_vehicle_idx]
+        if (
+            ego_params.supervisor_free_smpc_enabled
+            or ego_params.implicit_safety_filter_enabled
+        ):
+            target_idx = tv_vehicle_idxs[0]
+            target_start, target_goal = route_transforms[target_idx]
+            ego_reference = getattr(
+                self.vehicle_policies[self.ego_vehicle_idx],
+                "reference",
+                None,
+            )
+            if ego_reference is None:
+                raise RuntimeError(
+                    "Implicit SMPC evaluation requires the generated ego route"
+                )
+            ego_reference = np.asarray(ego_reference, dtype=float)
+            if ego_reference.ndim != 2 or ego_reference.shape[1] < 3:
+                raise RuntimeError("Generated ego route has an invalid shape")
+            # ``reference`` stores [time, x, y, yaw, speed] on the CARLA
+            # waypoint route.  Do not derive fixed geometry from
+            # ``feas_ref_states``: the trajectory generator can temporarily
+            # deviate from the mapped route during initialization, which is
+            # unsuitable for defining an intersection conflict point.
+            ego_route = ego_reference[:, 1:3]
+            self._implicit_filter_conflict_geometry = route_line_conflict_geometry(
+                ego_route,
+                [target_start.location.x, -target_start.location.y],
+                [target_goal.location.x, -target_goal.location.y],
+            )
+            if (
+                self._implicit_filter_conflict_geometry[
+                    "route_line_separation_m"
+                ]
+                > 1.0
+            ):
+                raise RuntimeError(
+                    "Mapped ego route and target route do not define a valid "
+                    "conflict point within 1 m"
+                )
+            if ego_params.smpc_conflict_zone_filter_enabled:
+                ego_policy = self.vehicle_policies[self.ego_vehicle_idx]
+                if not hasattr(ego_policy, "set_smpc_conflict_geometry"):
+                    raise RuntimeError(
+                        "Enabled SMPC conflict-zone filter has no geometry interface"
+                    )
+                ego_policy.set_smpc_conflict_geometry(
+                    self._implicit_filter_conflict_geometry
+                )
+                self._implicit_filter_conflict_geometry["controller_input"] = True
+
         # Note: this can be empty, as checked in the _make_predictions code.
         self.tv_vehicle_idxs = tv_vehicle_idxs
 
     def _setup_predictions(self, prediction_params):
+        self.target_prediction_mode = str(
+            prediction_params.target_prediction_mode
+        ).strip().lower()
+        if self.target_prediction_mode not in {
+            "model_gmm",
+            "exogenous_straight_gmm",
+        }:
+            raise ValueError(
+                "target_prediction_mode must be model_gmm or "
+                f"exogenous_straight_gmm, got {prediction_params.target_prediction_mode!r}"
+            )
+        self._straight_gmm_config = {
+            "speed_offsets_mps": tuple(
+                float(value)
+                for value in prediction_params.straight_gmm_speed_offsets_mps
+            ),
+            "mode_probabilities": tuple(
+                float(value)
+                for value in prediction_params.straight_gmm_mode_probabilities
+            ),
+            "initial_longitudinal_std_m": float(
+                prediction_params.straight_gmm_initial_longitudinal_std_m
+            ),
+            "initial_lateral_std_m": float(
+                prediction_params.straight_gmm_initial_lateral_std_m
+            ),
+            "longitudinal_std_growth_mps": float(
+                prediction_params.straight_gmm_longitudinal_std_growth_mps
+            ),
+            "lateral_std_growth_mps": float(
+                prediction_params.straight_gmm_lateral_std_growth_mps
+            ),
+        }
         traffic_light_actors = list(self.world.get_actors().filter('*traffic_light*'))
         self.agent_history = AgentHistory(list(self.vehicle_actors) + traffic_light_actors)
-        self.rasterizer    = SemBoxRasterizer(self.world.get_map().get_topology(), render_traffic_lights=\
-                                                 prediction_params.render_traffic_lights)
+        self.rasterizer = None
+        if self.target_prediction_mode == "model_gmm":
+            self.rasterizer = SemBoxRasterizer(
+                self.world.get_map().get_topology(),
+                render_traffic_lights=prediction_params.render_traffic_lights,
+            )
         prefix             = os.path.abspath(__file__).split('carla')[0] + 'models/'
         self._prediction_model_weights = prediction_params.model_weights
         self._prediction_model_anchors = prediction_params.model_anchors
@@ -1996,9 +2341,40 @@ class RunIntersectionScenario:
                         "feature_schema_id": FEATURE_SCHEMA_ID,
                         "history_times_s": list(HISTORY_TIMES_S),
                     },
-                    f,
+                        f,
+                        indent=2,
+                    )
+        if self.target_prediction_mode == "exogenous_straight_gmm":
+            self.pred_model = None
+            deployment_manifest = {
+                "schema_version": "exogenous_straight_target_gmm_v1",
+                "status": "pass",
+                "predictor": "ego_independent_straight_speed_mode_gmm",
+                "uses_ego_state": False,
+                "horizon_steps": int(self.ego_N),
+                "dt_s": float(
+                    self.vehicle_params_list[self.ego_vehicle_idx].dt
+                ),
+                **self._straight_gmm_config,
+            }
+            with open(
+                os.path.join(self.savedir, "prediction_deployment_manifest.json"),
+                "w",
+                encoding="utf-8",
+            ) as handle:
+                json.dump(
+                    self._json_safe(deployment_manifest),
+                    handle,
                     indent=2,
+                    sort_keys=True,
                 )
+                handle.write("\n")
+            return
+        # TensorFlow and the learned MultiPath artifact are needed only for the
+        # legacy/model-prediction path.  The analytic implicit-SMPC experiment
+        # intentionally has no learned-model dependency.
+        from models.deploy_multipath_model import DeployMultiPath
+
         self.pred_model = DeployMultiPath(
             self._prediction_model_weights_resolved,
             np.load(self._prediction_model_anchors_resolved),

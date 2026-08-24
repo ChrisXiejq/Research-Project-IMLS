@@ -42,6 +42,11 @@ from policies.supervisor_action_filter import (
     verify_complete_behavioural_authority_manifest,
     verify_supervisor_candidate_application,
 )
+from policies.conflict_zone_safety_filter import conflict_zone_filter_bounds
+from policies.route_corridor import (
+    project_points_to_route_segments,
+    reference_index_from_route_progress,
+)
 
 class SMPCAgent(object):
     """ Implementation of an agent using multimodal predictions and stochastic MPC for control. """
@@ -120,6 +125,23 @@ class SMPCAgent(object):
                  yield_rule_smpc_bypass_enabled=True,
                  yield_post_solver_action_filter_mode="apply",
                  yield_supervisor_behavioural_authority_mode="on",
+                 supervisor_free_smpc_enabled=False,
+                 implicit_safety_filter_enabled=False,
+                 implicit_safety_filter_min_horizon_s=4.0,
+                 smpc_terminal_collision_constraint_enabled=None,
+                 implicit_route_corridor_half_width_m=None,
+                 implicit_route_corridor_slack_weight=None,
+                 smpc_state_weights=None,
+                 smpc_correct_path_frame_cost_rotation=False,
+                 smpc_accel_min_mps2=None,
+                 smpc_accel_max_mps2=2.0,
+                 smpc_jerk_min_mps3=-1.5,
+                 smpc_jerk_max_mps3=1.5,
+                 smpc_conflict_zone_filter_enabled=False,
+                 smpc_conflict_zone_ego_buffer_m=3.0,
+                 smpc_conflict_zone_target_half_length_m=4.0,
+                 smpc_conflict_zone_sigma_scale=None,
+                 smpc_conflict_zone_inactive_bound_m=1000.0,
                  completion_s_margin=6.0,
                  completion_goal_dist=8.0,
                  completion_lateral_error=4.0,
@@ -246,6 +268,143 @@ class SMPCAgent(object):
             )
             else ACTION_FILTER_MONITOR_ONLY
         )
+        self.implicit_safety_filter_enabled = bool(implicit_safety_filter_enabled)
+        # Keep causal isolation orthogonal to the proposed safety-filter
+        # augmentation.  This permits a paper-equivalent SMPC baseline with no
+        # supervisor, followed by a controlled baseline+filter comparison.
+        self.supervisor_free_smpc_enabled = bool(
+            supervisor_free_smpc_enabled or self.implicit_safety_filter_enabled
+        )
+        self.implicit_safety_filter_min_horizon_s = float(
+            implicit_safety_filter_min_horizon_s
+        )
+        self.smpc_terminal_collision_constraint_enabled = bool(
+            self.implicit_safety_filter_enabled
+            if smpc_terminal_collision_constraint_enabled is None
+            else smpc_terminal_collision_constraint_enabled
+        )
+        self.implicit_route_corridor_half_width_m = (
+            None
+            if implicit_route_corridor_half_width_m is None
+            else float(implicit_route_corridor_half_width_m)
+        )
+        if (
+            self.implicit_route_corridor_half_width_m is not None
+            and self.implicit_route_corridor_half_width_m <= 0.0
+        ):
+            raise ValueError(
+                "implicit_route_corridor_half_width_m must be positive when enabled, "
+                f"got {self.implicit_route_corridor_half_width_m}"
+            )
+        self.implicit_route_corridor_slack_weight = (
+            None
+            if implicit_route_corridor_slack_weight is None
+            else float(implicit_route_corridor_slack_weight)
+        )
+        if (
+            self.implicit_route_corridor_slack_weight is not None
+            and (
+                not np.isfinite(self.implicit_route_corridor_slack_weight)
+                or self.implicit_route_corridor_slack_weight <= 0.0
+            )
+        ):
+            raise ValueError(
+                "implicit_route_corridor_slack_weight must be positive and finite"
+            )
+        if (
+            self.implicit_route_corridor_slack_weight is not None
+            and self.implicit_route_corridor_half_width_m is None
+        ):
+            raise ValueError(
+                "route-corridor slack requires a configured corridor width"
+            )
+        if smpc_state_weights is None:
+            smpc_state_weights = [5.0, 2.5, 10.0, 1.0]
+        self.smpc_state_weights = np.asarray(
+            smpc_state_weights, dtype=float
+        ).reshape(-1)
+        if self.smpc_state_weights.shape != (4,):
+            raise ValueError(
+                "smpc_state_weights must contain [longitudinal, lateral, "
+                "heading, speed] weights"
+            )
+        if (
+            not np.all(np.isfinite(self.smpc_state_weights))
+            or np.any(self.smpc_state_weights < 0.0)
+        ):
+            raise ValueError(
+                "smpc_state_weights must be finite and non-negative, "
+                f"got {self.smpc_state_weights.tolist()}"
+            )
+        self.smpc_correct_path_frame_cost_rotation = bool(
+            smpc_correct_path_frame_cost_rotation
+        )
+        self.smpc_accel_min_mps2 = (
+            None
+            if smpc_accel_min_mps2 is None
+            else float(smpc_accel_min_mps2)
+        )
+        self.smpc_accel_max_mps2 = float(smpc_accel_max_mps2)
+        self.smpc_jerk_min_mps3 = float(smpc_jerk_min_mps3)
+        self.smpc_jerk_max_mps3 = float(smpc_jerk_max_mps3)
+        if not (
+            np.isfinite(self.smpc_accel_max_mps2)
+            and np.isfinite(self.smpc_jerk_min_mps3)
+            and np.isfinite(self.smpc_jerk_max_mps3)
+        ):
+            raise ValueError("SMPC acceleration and jerk bounds must be finite")
+        if (
+            self.smpc_accel_min_mps2 is not None
+            and (
+                not np.isfinite(self.smpc_accel_min_mps2)
+                or self.smpc_accel_min_mps2 >= 0.0
+            )
+        ):
+            raise ValueError("smpc_accel_min_mps2 must be finite and negative")
+        if self.smpc_accel_max_mps2 <= 0.0:
+            raise ValueError("smpc_accel_max_mps2 must be positive")
+        if self.smpc_jerk_min_mps3 >= 0.0 or self.smpc_jerk_max_mps3 <= 0.0:
+            raise ValueError("SMPC jerk bounds must straddle zero")
+        self.smpc_conflict_zone_filter_enabled = bool(
+            smpc_conflict_zone_filter_enabled
+        )
+        self.smpc_conflict_zone_ego_buffer_m = float(
+            smpc_conflict_zone_ego_buffer_m
+        )
+        self.smpc_conflict_zone_target_half_length_m = float(
+            smpc_conflict_zone_target_half_length_m
+        )
+        self.smpc_conflict_zone_sigma_scale = float(
+            smpc.PAPER_INTERSECTION_TIGHTENING
+            if smpc_conflict_zone_sigma_scale is None
+            else smpc_conflict_zone_sigma_scale
+        )
+        self.smpc_conflict_zone_inactive_bound_m = float(
+            smpc_conflict_zone_inactive_bound_m
+        )
+        self._smpc_conflict_geometry = None
+        self._smpc_conflict_filter_status = {
+            "enabled": self.smpc_conflict_zone_filter_enabled,
+            "active_count": 0,
+            "reason": "geometry_not_set",
+        }
+        self._smpc_route_corridor_status = {
+            "enabled": self.implicit_route_corridor_half_width_m is not None,
+            "half_width_m": self.implicit_route_corridor_half_width_m,
+            "source": "carla_route_segment_projection",
+        }
+        conflict_filter_scalars = (
+            self.smpc_conflict_zone_ego_buffer_m,
+            self.smpc_conflict_zone_target_half_length_m,
+            self.smpc_conflict_zone_sigma_scale,
+            self.smpc_conflict_zone_inactive_bound_m,
+        )
+        if not all(
+            np.isfinite(value) and value > 0.0 for value in conflict_filter_scalars
+        ):
+            raise ValueError(
+                "SMPC conflict-zone filter parameters must be positive and finite"
+            )
         self.completion_s_margin = float(completion_s_margin)
         self.completion_goal_dist = float(completion_goal_dist)
         self.completion_lateral_error = float(completion_lateral_error)
@@ -566,14 +725,85 @@ class SMPCAgent(object):
         else:
             raise ValueError(f"Invalid SMPC config: {smpc_config}")
 
+        if self.supervisor_free_smpc_enabled:
+            violations = []
+            if self.yield_stop_enabled:
+                violations.append("yield_stop_enabled must be false")
+            if self.yield_stop_line_creep_enabled:
+                violations.append("yield_stop_line_creep_enabled must be false")
+            if self.yield_emergency_brake_enabled:
+                violations.append("yield_emergency_brake_enabled must be false")
+            if self.yield_observed_caution_enabled:
+                violations.append("yield_observed_caution_enabled must be false")
+            if self.yield_recovery_enabled:
+                violations.append("yield_recovery_enabled must be false")
+            if self.yield_rule_smpc_bypass_enabled:
+                violations.append("yield_rule_smpc_bypass_enabled must be false")
+            if supervisor_authority_enabled(
+                self.yield_supervisor_behavioural_authority_mode
+            ):
+                violations.append("supervisor behavioural authority must be off")
+            if (
+                self.yield_post_solver_action_filter_configured_mode
+                != ACTION_FILTER_MONITOR_ONLY
+            ):
+                violations.append("post-solver action filter must be monitor_only")
+            if self.smpc_intersection_approach_speed_shaping_enabled:
+                violations.append("intersection approach speed shaping must be false")
+            if self.yield_planner_ownership_stress_enabled:
+                violations.append("planner ownership stress must be false")
+            if self.yield_risk_owned_yield_enabled:
+                violations.append("risk-owned rule yielding must be false")
+            if self.lane_entry_heading_cost_enabled:
+                violations.append("lane-entry supervisor heading cost must be false")
+            if (self.risk_profile or "").lower().startswith("adaptive_"):
+                violations.append("adaptive supervisor-derived risk mapping must be disabled")
+            if self.implicit_safety_filter_enabled:
+                if smpc_config != "var_risk":
+                    violations.append("smpc_config must be var_risk")
+                if self.risk_profile != "paper_eps_002":
+                    violations.append("risk_profile must be paper_eps_002")
+                if self.implicit_safety_filter_min_horizon_s <= 0.0:
+                    violations.append("minimum horizon must be positive")
+                if self.N * self.dt < self.implicit_safety_filter_min_horizon_s:
+                    violations.append(
+                        "N*dt must cover at least "
+                        f"{self.implicit_safety_filter_min_horizon_s:.3f}s"
+                    )
+            if (
+                self.smpc_conflict_zone_filter_enabled
+                and not self.implicit_safety_filter_enabled
+            ):
+                violations.append(
+                    "conflict-zone filter requires implicit_safety_filter_enabled"
+                )
+            if violations:
+                raise ValueError(
+                    "Supervisor-free SMPC configuration is invalid: "
+                    + "; ".join(violations)
+                )
+
         # R1 corrected-v1 freezes the same acceleration bounds for the reference
         # generator and the SMPC solver in every fixed/adaptive comparison.
         # Legacy split bounds remain available only through the explicit version.
-        self._ref_gen_a_min = (
+        default_ref_a_min = (
             -4.0 if self._legacy_control_implementation and self.fixed_risk else -3.0
         )
-        self._solver_a_min = -4.0 if self._legacy_control_implementation else -3.0
-        self._ref_gen_a_max = 2.0
+        default_solver_a_min = (
+            -4.0 if self._legacy_control_implementation else -3.0
+        )
+        self._ref_gen_a_min = (
+            default_ref_a_min
+            if self.smpc_accel_min_mps2 is None
+            else self.smpc_accel_min_mps2
+        )
+        self._solver_a_min = (
+            default_solver_a_min
+            if self.smpc_accel_min_mps2 is None
+            else self.smpc_accel_min_mps2
+        )
+        self._ref_gen_a_max = self.smpc_accel_max_mps2
+        self._solver_a_max = self.smpc_accel_max_mps2
 
 
 
@@ -597,6 +827,17 @@ class SMPCAgent(object):
             "_rule_yield_phase": "idle",
         }
         self._observed_target_tracks = {}
+        self._reference_generator_max_cpu_time_s = (
+            5.0 if self.supervisor_free_smpc_enabled else 0.2
+        )
+        self._reference_generation_status = {
+            "solve_count": 0,
+            "max_cpu_time_s": self._reference_generator_max_cpu_time_s,
+            "last_context": None,
+            "last_optimal": None,
+            "last_return_status": None,
+            "last_solve_time_s": None,
+        }
         self.reference_regeneration()
 
         self.warm_start={}
@@ -652,8 +893,30 @@ class SMPCAgent(object):
                 self.SMPC=smpc.SMPC_MMPreds(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag, fixed_risk=self.fixed_risk,
                                     L_F=self.lf, L_R=self.lr, fps=self.fps, N_TV_MAX=n_tv_mpc,
                                     A_MIN=self._solver_a_min,
+                                    A_MAX=self._solver_a_max,
+                                    A_DOT_MIN=self.smpc_jerk_min_mps3,
+                                    A_DOT_MAX=self.smpc_jerk_max_mps3,
+                                    Q=self.smpc_state_weights.tolist(),
                                     risk_profile=solver_risk_profile,
-                                    legacy_mode_indexing=self._legacy_control_implementation)
+                                    legacy_mode_indexing=self._legacy_control_implementation,
+                                    enforce_terminal_collision_constraint=(
+                                        self.smpc_terminal_collision_constraint_enabled
+                                    ),
+                                    route_corridor_half_width_m=(
+                                        self.implicit_route_corridor_half_width_m
+                                    ),
+                                    route_corridor_slack_weight=(
+                                        self.implicit_route_corridor_slack_weight
+                                    ),
+                                    correct_path_frame_cost_rotation=(
+                                        self.smpc_correct_path_frame_cost_rotation
+                                    ),
+                                    conflict_zone_filter_enabled=(
+                                        self.smpc_conflict_zone_filter_enabled
+                                    ),
+                                    conflict_zone_inactive_bound_m=(
+                                        self.smpc_conflict_zone_inactive_bound_m
+                                    ))
             else:
                 self.SMPC=smpc.SMPC_MMPreds_OBCA(N=self.N, DT=self.dt, N_modes_MAX=self.N_modes, NS_BL_FLAG=self.ns_bl_flag,
                                         L_F=self.lf, L_R=self.lr, fps=self.fps, pol_mode=self.obca_mode, N_TV_MAX=n_tv_mpc)
@@ -671,6 +934,41 @@ class SMPCAgent(object):
         self.debug_savedir = savedir
         if label is not None:
             self.debug_label = label
+
+    def set_smpc_conflict_geometry(self, geometry):
+        """Install static route geometry for the optimisation-internal filter."""
+
+        if not self.smpc_conflict_zone_filter_enabled:
+            return
+        required = (
+            "ego_conflict_point_xy",
+            "target_conflict_point_xy",
+            "ego_tangent_xy",
+            "target_tangent_xy",
+        )
+        missing = [key for key in required if key not in geometry]
+        if missing:
+            raise ValueError(
+                "Conflict-zone filter geometry missing fields: " + ", ".join(missing)
+            )
+        parsed = {
+            key: np.asarray(geometry[key], dtype=float).reshape(-1)
+            for key in required
+        }
+        for key, value in parsed.items():
+            if value.shape != (2,) or not np.isfinite(value).all():
+                raise ValueError(f"Invalid conflict-zone geometry field {key}")
+        for key in ("ego_tangent_xy", "target_tangent_xy"):
+            norm = float(np.linalg.norm(parsed[key]))
+            if norm <= 1.0e-8:
+                raise ValueError(f"Degenerate conflict-zone tangent {key}")
+            parsed[key] = parsed[key] / norm
+        self._smpc_conflict_geometry = parsed
+        self._smpc_conflict_filter_status = {
+            "enabled": True,
+            "active_count": 0,
+            "reason": "geometry_ready_waiting_for_prediction",
+        }
 
     def _reference_generator_accel_bounds(self):
         return self._ref_gen_a_min, self._ref_gen_a_max
@@ -899,6 +1197,85 @@ class SMPCAgent(object):
             "fps": self.fps,
             "dt": self.dt,
             "n_tv_max_ol": self._n_tv_max_ol,
+            "implicit_safety_filter": {
+                "enabled": self.implicit_safety_filter_enabled,
+                "supervisor_free_smpc_enabled": self.supervisor_free_smpc_enabled,
+                "experimental_arm": (
+                    "implicit_safety_filter"
+                    if self.implicit_safety_filter_enabled
+                    else (
+                        "paper_equivalent_baseline"
+                        if self.supervisor_free_smpc_enabled
+                        else "configured_full_stack"
+                    )
+                ),
+                "control_source": (
+                    "multimodal_chance_constrained_smpc_only"
+                    if self.supervisor_free_smpc_enabled
+                    else "configured_full_stack"
+                ),
+                "horizon_s": float(self.N * self.dt),
+                "minimum_horizon_s": self.implicit_safety_filter_min_horizon_s,
+                "terminal_collision_constraint": bool(
+                    getattr(
+                        self.SMPC,
+                        "enforce_terminal_collision_constraint",
+                        False,
+                    )
+                ),
+                "route_corridor_half_width_m": (
+                    self.implicit_route_corridor_half_width_m
+                ),
+                "route_corridor_semantics": (
+                    "nominal path-aligned SMPC constraint; target-independent; "
+                    "optional optimisation slack; no post-solver authority"
+                    if self.implicit_route_corridor_half_width_m is not None
+                    else "disabled"
+                ),
+                "route_corridor_slack_weight": (
+                    self.implicit_route_corridor_slack_weight
+                ),
+                "state_tracking_weights": {
+                    "frame": "path_aligned_longitudinal_lateral_heading_speed",
+                    "error": "absolute_prediction_minus_route_reference",
+                    "values": self.smpc_state_weights.tolist(),
+                    "target_dependent": False,
+                },
+                "longitudinal_actuation_bounds": {
+                    "accel_min_mps2": self._solver_a_min,
+                    "accel_max_mps2": self._solver_a_max,
+                    "jerk_min_mps3": self.smpc_jerk_min_mps3,
+                    "jerk_max_mps3": self.smpc_jerk_max_mps3,
+                    "reference_and_solver_accel_bounds_matched": bool(
+                        self._ref_gen_a_min == self._solver_a_min
+                        and self._ref_gen_a_max == self._solver_a_max
+                    ),
+                },
+                "correct_path_frame_cost_rotation": (
+                    self.smpc_correct_path_frame_cost_rotation
+                ),
+                "path_frame_cost_transform": (
+                    "R_transpose_Q_R"
+                    if self.smpc_correct_path_frame_cost_rotation
+                    else "source_R_Q_R_transpose"
+                ),
+                "conflict_zone_filter": {
+                    "enabled": self.smpc_conflict_zone_filter_enabled,
+                    "implementation": "time_varying_solver_half_space",
+                    "ego_buffer_m": self.smpc_conflict_zone_ego_buffer_m,
+                    "target_conflict_half_length_m": (
+                        self.smpc_conflict_zone_target_half_length_m
+                    ),
+                    "sigma_scale": self.smpc_conflict_zone_sigma_scale,
+                    "inactive_bound_m": self.smpc_conflict_zone_inactive_bound_m,
+                    "uses_all_prediction_modes": True,
+                    "post_solver_action_override": False,
+                    "state_machine": False,
+                    "distance_trigger_m": None,
+                },
+                "rule_reference_shaping": False,
+                "rule_post_solver_action": False,
+            },
             "vehicle_type": self.vehicle.type_id,
             "lf": self.lf,
             "lr": self.lr,
@@ -1061,10 +1438,22 @@ class SMPCAgent(object):
                 "target_prob": getattr(self.SMPC, "target_prob", None),
                 "A_MIN": getattr(self.SMPC, "A_MIN", None),
                 "A_MAX": getattr(self.SMPC, "A_MAX", None),
+                "A_DOT_MIN": getattr(self.SMPC, "A_DOT_MIN", None),
+                "A_DOT_MAX": getattr(self.SMPC, "A_DOT_MAX", None),
                 "V_MIN": getattr(self.SMPC, "V_MIN", None),
                 "V_MAX": getattr(self.SMPC, "V_MAX", None),
                 "DF_MIN": getattr(self.SMPC, "DF_MIN", None),
                 "DF_MAX": getattr(self.SMPC, "DF_MAX", None),
+                "route_corridor_half_width_m": getattr(
+                    self.SMPC, "route_corridor_half_width_m", None
+                ),
+                "route_corridor_slack_weight": getattr(
+                    self.SMPC, "route_corridor_slack_weight", None
+                ),
+                "state_tracking_weights": self.smpc_state_weights.tolist(),
+                "correct_path_frame_cost_rotation": (
+                    self.smpc_correct_path_frame_cost_rotation
+                ),
             },
             "reference_generator": {
                 "A_MIN": self._reference_generator_accel_bounds()[0],
@@ -1372,6 +1761,42 @@ class SMPCAgent(object):
 
 
         self.reference = np.column_stack((t_disc, x_disc, y_disc, yaw_disc, v_disc))
+        self.reference_route_s = np.asarray(s_disc, dtype=float)
+
+
+    def _solve_reference_or_raise(self, context):
+        """Solve and audit the dynamically feasible route reference.
+
+        The upstream generator historically swallowed Ipopt timeouts and
+        exposed ``opti.debug`` values as if they were a valid world-frame
+        reference.  Supervisor-free experiments fail closed instead: an
+        invalid reference must never become SMPC input.
+        """
+
+        result = self.feas_ref_gen.solve()
+        self._reference_generation_status = {
+            "solve_count": int(
+                self._reference_generation_status.get("solve_count", 0) + 1
+            ),
+            "max_cpu_time_s": self._reference_generator_max_cpu_time_s,
+            "last_context": str(context),
+            "last_optimal": bool(result.get("optimal", False)),
+            "last_return_status": result.get("return_status"),
+            "last_solve_time_s": float(result.get("solve_time", np.nan)),
+        }
+        arrays_finite = all(
+            np.isfinite(np.asarray(result[key], dtype=float)).all()
+            for key in ("z_opt", "u_opt")
+        )
+        if self.supervisor_free_smpc_enabled and (
+            not result.get("optimal", False) or not arrays_finite
+        ):
+            raise RuntimeError(
+                "Supervisor-free SMPC requires a valid feasible reference; "
+                f"context={context}, status={result.get('return_status')}, "
+                f"solve_time={result.get('solve_time')}, finite={arrays_finite}"
+            )
+        return result
 
 
     def reference_regeneration(self, *state):
@@ -1426,9 +1851,10 @@ class SMPCAgent(object):
                 L_R=self.lr,
                 A_MIN=ref_a_min,
                 A_MAX=ref_a_max,
+                MAX_CPU_TIME=self._reference_generator_max_cpu_time_s,
             )
             self.feas_ref_gen.update(self.ref_dict)
-            self.feas_ref_dict=self.feas_ref_gen.solve()
+            self.feas_ref_dict=self._solve_reference_or_raise("initial_global_route")
             self.feas_ref_states=self.feas_ref_dict['z_opt']
 
             self.feas_ref_states=np.vstack((self.feas_ref_states, np.array([self.feas_ref_states[-1,:]]*(self.N+1))))
@@ -1436,10 +1862,15 @@ class SMPCAgent(object):
             self.feas_ref_inputs=np.vstack((self.feas_ref_inputs, np.array([self.feas_ref_inputs[-1,:]]*(self.N+1))))
             self.feas_ref_states_new=self.feas_ref_states
             self.feas_ref_inputs_new=self.feas_ref_inputs
+            self.feas_ref_route_s = np.concatenate((
+                self.reference_route_s,
+                np.full(self.N + 1, self.reference_route_s[-1], dtype=float),
+            ))
+            self.feas_ref_route_s_new = self.feas_ref_route_s.copy()
 
         else:
 
-            x,y,psi,speed=state
+            x,y,psi,speed,current_s=state
             self.feas_ref_states_new=[]
             self.feas_ref_inputs_new=[]
 
@@ -1453,6 +1884,7 @@ class SMPCAgent(object):
                 L_R=self.lr,
                 A_MIN=ref_a_min,
                 A_MAX=ref_a_max,
+                MAX_CPU_TIME=self._reference_generator_max_cpu_time_s,
             )
 
             self.ref_dict={'x_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,0], 'y_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,1], 'psi_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,2], 'v_ref':self.feas_ref_states[self.t_ref+1:self.ref_horizon,3],
@@ -1461,11 +1893,26 @@ class SMPCAgent(object):
             self.ref_dict['warm_start']={'z_ws': np.vstack((np.array([[x,y,psi,speed]]),self.feas_ref_states[self.t_ref+1:self.ref_horizon,:])),
                                          'u_ws': np.array([[self.control_prev[0],self.control_prev[1]]]*self.feas_ref_gen.N) }
             self.feas_ref_gen.update(self.ref_dict)
-            self.feas_ref_dict=self.feas_ref_gen.solve()
+            self.feas_ref_dict=self._solve_reference_or_raise(
+                "closed_loop_regeneration"
+            )
             self.feas_ref_states_new=self.feas_ref_dict['z_opt']
 
             self.feas_ref_states_new=np.vstack((self.feas_ref_states_new, np.array([self.feas_ref_states_new[-1,:]]*(self.N+1))))
             self.feas_ref_inputs_new=self.feas_ref_dict['u_opt']
+            local_route_s = np.concatenate((
+                np.asarray([current_s], dtype=float),
+                self.reference_route_s[self.t_ref + 1:self.ref_horizon],
+            ))
+            if local_route_s.shape[0] != self.feas_ref_dict['z_opt'].shape[0]:
+                raise RuntimeError(
+                    "Regenerated reference progress is not aligned with states: "
+                    f"{local_route_s.shape[0]} vs {self.feas_ref_dict['z_opt'].shape[0]}"
+                )
+            self.feas_ref_route_s_new = np.concatenate((
+                local_route_s,
+                np.full(self.N + 1, local_route_s[-1], dtype=float),
+            ))
 
             if len(self.feas_ref_inputs_new.shape)!=1:
                 self.feas_ref_inputs_new=np.vstack((self.feas_ref_inputs_new, np.array([self.feas_ref_inputs_new[-1,:]]*(self.N+1)))).reshape((-1,2))
@@ -3430,7 +3877,9 @@ class SMPCAgent(object):
 
 
 
-        self.t_ref=np.argmin(np.linalg.norm(self.feas_ref_states[:,:2]-np.hstack((x,y)), axis=1))
+        self.t_ref = reference_index_from_route_progress(
+            self.feas_ref_route_s[: self.ref_horizon + 1], s
+        )
 
 
 
@@ -3528,19 +3977,23 @@ class SMPCAgent(object):
                 else self.reference_regen_max_lateral_error
             )
             reference_status["active_lateral_error_guard"] = active_reference_guard
-            should_regenerate_reference = (
-                recovery_active_for_reference
-                and self.time % self.yield_recovery_regen_period == 0
-            ) or self.time % 5 == 0
+            should_regenerate_reference = self.time > 0 and (
+                (
+                    recovery_active_for_reference
+                    and self.time % self.yield_recovery_regen_period == 0
+                )
+                or self.time % 5 == 0
+            )
             if abs(ey) > active_reference_guard:
                 # Do not let a large lateral deviation become the new reference.
                 self.feas_ref_states_new = self.feas_ref_states.copy()
                 self.feas_ref_inputs_new = self.feas_ref_inputs.copy()
+                self.feas_ref_route_s_new = self.feas_ref_route_s.copy()
                 reference_status["restored_global_reference"] = True
                 reference_status["forced_reference_linearization"] = True
                 reference_status["skip_reason"] = "lateral_error_too_large"
             elif should_regenerate_reference and self.ref_horizon>self.t_ref+1:
-                self.reference_regeneration(x,y,psi,speed)
+                self.reference_regeneration(x,y,psi,speed,s)
                 reference_status["regenerated"] = True
                 if recovery_active_for_reference:
                     reference_status["skip_reason"] = "post_yield_recovery_regen"
@@ -3550,7 +4003,20 @@ class SMPCAgent(object):
 
 
 
-            t_ref_new=np.argmin(np.linalg.norm(self.feas_ref_states_new[:,:2]-np.hstack((x,y)), axis=1))
+            t_ref_new = reference_index_from_route_progress(
+                self.feas_ref_route_s_new, s
+            )
+            reference_status["index_source"] = "frenet_route_progress"
+            reference_status["ego_route_s"] = float(s)
+            reference_status["global_reference_route_s"] = float(
+                self.feas_ref_route_s[self.t_ref]
+            )
+            reference_status["active_reference_route_s"] = float(
+                self.feas_ref_route_s_new[t_ref_new]
+            )
+            reference_status["feasible_reference_generator"] = dict(
+                self._reference_generation_status
+            )
             nominal_reference_states = np.asarray(
                 self.feas_ref_states_new, dtype=float
             ).copy()
@@ -3560,17 +4026,26 @@ class SMPCAgent(object):
             nominal_forced_reference_linearization = bool(
                 reference_status["forced_reference_linearization"]
             )
-            pre_solve_yield_status = self._rule_aware_yield_decision(
-                x,
-                y,
-                speed,
-                t_ref_new,
-                target_vehicle_gmm_preds,
-                target_vehicle_mode_probs,
-                target_vehicle_positions,
-                target_vehicle_valid_pred,
-                N_TV,
-            )
+            if self.supervisor_free_smpc_enabled:
+                pre_solve_yield_status = {
+                    "enabled": False,
+                    "active": False,
+                    "reason": "implicit_smpc_supervisor_not_executed",
+                    "target_index": None,
+                    "target_mode": None,
+                }
+            else:
+                pre_solve_yield_status = self._rule_aware_yield_decision(
+                    x,
+                    y,
+                    speed,
+                    t_ref_new,
+                    target_vehicle_gmm_preds,
+                    target_vehicle_mode_probs,
+                    target_vehicle_positions,
+                    target_vehicle_valid_pred,
+                    N_TV,
+                )
             # Reconstruct the solver/reference inputs that would exist without
             # *any* behavioural supervisor authority.  This is deliberately
             # computed before reference shaping so that the authority-off arm
@@ -3611,6 +4086,17 @@ class SMPCAgent(object):
                 shadow_reference_inputs = np.asarray(
                     self.feas_ref_inputs_new, dtype=float
                 ).copy()
+            elif self.supervisor_free_smpc_enabled:
+                shadow_reference_status = {
+                    "mode": "implicit_smpc_supervisor_not_executed",
+                    "yield_active": False,
+                    "recovery_active": False,
+                    "force_reference_linearization": False,
+                    "authority_applied": False,
+                }
+                reference_status["rule_aware_reference"] = dict(
+                    shadow_reference_status
+                )
             else:
                 def _shadow_reference_candidate():
                     status = self._apply_rule_aware_reference_profile(
@@ -3816,6 +4302,89 @@ class SMPCAgent(object):
                          'df_lin': l_inputs[:,1].T,
                          'mus'  : [target_vehicle_gmm_preds[0][k] for k in range(N_TV)],     'sigmas' : [target_vehicle_gmm_preds[1][k] for k in range(N_TV)], 'acc_prev' : self.control_prev[0], 'df_prev' : self.control_prev[1],       'tv_shapes': tv_shape_matrices, 'Rs_ev': Rs_ev }
 
+            if self.implicit_route_corridor_half_width_m is not None:
+                route_xy = np.asarray(
+                    self.frenet_traj.trajectory[:, 1:3], dtype=float
+                )
+                corridor_points, corridor_normals, segment_indices, distances = (
+                    project_points_to_route_segments(
+                        route_xy,
+                        np.asarray(l_states[1 : self.N + 1, :2], dtype=float),
+                        anchor_xy=np.asarray([x, y], dtype=float),
+                    )
+                )
+                update_dict.update(
+                    {
+                        "route_corridor_points_xy": corridor_points,
+                        "route_corridor_normals_xy": corridor_normals,
+                    }
+                )
+                self._smpc_route_corridor_status = {
+                    "enabled": True,
+                    "half_width_m": self.implicit_route_corridor_half_width_m,
+                    "source": "forward_only_segment_projection_of_carla_route",
+                    "target_dependent": False,
+                    "query_source": "current_nominal_linearization_horizon",
+                    "anchor_source": "current_ego_pose",
+                    "segment_indices": segment_indices.astype(int).tolist(),
+                    "max_query_to_route_distance_m": float(np.max(distances)),
+                    "points_xy": corridor_points.tolist(),
+                    "normals_xy": corridor_normals.tolist(),
+                }
+
+            if self.smpc_conflict_zone_filter_enabled:
+                if self._smpc_conflict_geometry is None:
+                    raise RuntimeError(
+                        "SMPC conflict-zone filter enabled without route geometry"
+                    )
+                geometry = self._smpc_conflict_geometry
+                # The benchmark has one priority target.  All of its GMM modes
+                # participate in a union occupancy test at every prediction
+                # step, so a low-probability but geometrically plausible
+                # straight-speed mode cannot be silently ignored.
+                conflict_bounds, conflict_status = conflict_zone_filter_bounds(
+                    target_vehicle_gmm_preds[0][0],
+                    target_vehicle_gmm_preds[1][0],
+                    target_conflict_point_xy=geometry[
+                        "target_conflict_point_xy"
+                    ],
+                    target_tangent_xy=geometry["target_tangent_xy"],
+                    ego_buffer_m=self.smpc_conflict_zone_ego_buffer_m,
+                    target_conflict_half_length_m=(
+                        self.smpc_conflict_zone_target_half_length_m
+                    ),
+                    sigma_scale=self.smpc_conflict_zone_sigma_scale,
+                    inactive_bound_m=self.smpc_conflict_zone_inactive_bound_m,
+                    horizon_steps=self.N,
+                )
+                update_dict.update(
+                    {
+                        "conflict_zone_normal_xy": geometry["ego_tangent_xy"],
+                        "conflict_zone_point_xy": geometry[
+                            "ego_conflict_point_xy"
+                        ],
+                        "conflict_zone_bounds_m": conflict_bounds,
+                    }
+                )
+                conflict_status.update(
+                    {
+                        "ego_conflict_point_xy": geometry[
+                            "ego_conflict_point_xy"
+                        ].tolist(),
+                        "target_conflict_point_xy": geometry[
+                            "target_conflict_point_xy"
+                        ].tolist(),
+                        "bounds_m": conflict_bounds.tolist(),
+                    }
+                )
+                self._smpc_conflict_filter_status = conflict_status
+            else:
+                self._smpc_conflict_filter_status = {
+                    "enabled": False,
+                    "active_count": 0,
+                    "reason": "disabled",
+                }
+
             if supervisor_authority_on:
                 shadow_heading_cost_weights, shadow_heading_cost_status = (
                     self._lane_entry_heading_cost_profile(
@@ -3829,6 +4398,18 @@ class SMPCAgent(object):
                 ).copy()
                 heading_cost_status = dict(shadow_heading_cost_status)
                 heading_cost_status["authority_applied"] = True
+            elif self.supervisor_free_smpc_enabled:
+                shadow_heading_cost_weights = np.zeros(self.N, dtype=float)
+                shadow_heading_cost_status = {
+                    "enabled": False,
+                    "active": False,
+                    "reason": "implicit_smpc_supervisor_not_executed",
+                    "authority_applied": False,
+                    "active_count": 0,
+                    "max_weight": 0.0,
+                }
+                heading_cost_weights = shadow_heading_cost_weights.copy()
+                heading_cost_status = dict(shadow_heading_cost_status)
             else:
                 def _shadow_heading_candidate():
                     self.feas_ref_states_new = np.asarray(
@@ -4003,7 +4584,14 @@ class SMPCAgent(object):
                         joint_probs = np.outer(joint_probs, mode_probs).reshape(-1)
                     update_dict["probs"] = joint_probs / np.sum(joint_probs)
 
-            adaptive_risk = self._adaptive_risk_allocation(pre_solve_yield_status)
+            adaptive_risk = (
+                {
+                    "enabled": False,
+                    "reason": "implicit_smpc_uses_static_paper_risk",
+                }
+                if self.supervisor_free_smpc_enabled
+                else self._adaptive_risk_allocation(pre_solve_yield_status)
+            )
             solver_uses_adaptive_risk = bool(
                 adaptive_risk.get("enabled")
                 and not self.fixed_risk
@@ -4062,6 +4650,9 @@ class SMPCAgent(object):
                 shadow_bypass_reason = self._rule_yield_smpc_bypass_reason(
                     pre_solve_yield_status, speed
                 )
+                bypass_shadow_isolated = True
+            elif self.supervisor_free_smpc_enabled:
+                shadow_bypass_reason = None
                 bypass_shadow_isolated = True
             else:
                 isolated_bypass = run_isolated_supervisor_shadow(
@@ -4150,11 +4741,17 @@ class SMPCAgent(object):
                 "schema_version": "supervisor_behavioural_authority_step_v1",
                 "mode": self.yield_supervisor_behavioural_authority_mode,
                 "authority_enabled": bool(supervisor_authority_on),
-                "interaction_estimator_computed": True,
-                "adaptive_risk_only_solver_influence_allowed_when_off": True,
-                "allowed_solver_influence_when_off": [
-                    "adaptive_risk_allocation"
-                ],
+                "interaction_estimator_computed": bool(
+                    not self.supervisor_free_smpc_enabled
+                ),
+                "adaptive_risk_only_solver_influence_allowed_when_off": bool(
+                    not self.supervisor_free_smpc_enabled
+                ),
+                "allowed_solver_influence_when_off": (
+                    []
+                    if self.supervisor_free_smpc_enabled
+                    else ["adaptive_risk_allocation"]
+                ),
                 "rule_smpc_bypass_configured": bool(
                     self.yield_rule_smpc_bypass_enabled
                 ),
@@ -4194,12 +4791,16 @@ class SMPCAgent(object):
                 ),
                 "implementation_manipulation_gate": {
                     "status": "pass",
-                    "candidate_channels_computed": [
-                        "reference",
-                        "reference_linearization",
-                        "heading_cost",
-                        "rule_smpc_bypass",
-                    ],
+                    "candidate_channels_computed": (
+                        []
+                        if self.supervisor_free_smpc_enabled
+                        else [
+                            "reference",
+                            "reference_linearization",
+                            "heading_cost",
+                            "rule_smpc_bypass",
+                        ]
+                    ),
                     "authority_off_nonrisk_solver_channels_neutral": bool(
                         supervisor_authority_on
                         or solver_input_authority_audit.get("status") == "pass"
@@ -4262,6 +4863,8 @@ class SMPCAgent(object):
                 },
                 "completion": completion_metrics,
                 "lane_entry_heading_cost": heading_cost_status,
+                "smpc_conflict_zone_filter": self._smpc_conflict_filter_status,
+                "smpc_route_corridor": self._smpc_route_corridor_status,
                 "supervisor_behavioural_authority": supervisor_authority_record,
                 "prediction": self._debug_prediction_summary(
                     target_vehicle_positions,
@@ -4405,6 +5008,13 @@ class SMPCAgent(object):
             v_des=v_next
             nominal_solver_u0 = np.asarray(u0, dtype=float).reshape(-1).copy()
             nominal_solver_v_des = float(np.asarray(v_des, dtype=float).reshape(-1)[0])
+            nominal_reference_u0 = np.asarray(
+                [update_dict["a_ref"][0], update_dict["df_ref"][0]],
+                dtype=float,
+            ).reshape(-1)
+            implicit_filter_delta_u0 = (
+                nominal_solver_u0 - nominal_reference_u0
+            )
             if supervisor_authority_on:
                 (
                     filter_candidate_u0,
@@ -4431,6 +5041,18 @@ class SMPCAgent(object):
                         self._yield_last_applied_accel
                     ),
                     "_rule_yield_phase": copy.deepcopy(self._rule_yield_phase),
+                }
+                post_shadow_isolated = True
+            elif self.supervisor_free_smpc_enabled:
+                filter_candidate_u0 = nominal_solver_u0.copy()
+                filter_candidate_v_des = nominal_solver_v_des
+                yield_status = dict(pre_solve_yield_status)
+                shadow_post_state = {
+                    "_yield_stop_seen": False,
+                    "_yield_stop_active_prev": False,
+                    "_yield_recovery_steps_remaining": 0,
+                    "_yield_last_applied_accel": None,
+                    "_rule_yield_phase": "free_drive",
                 }
                 post_shadow_isolated = True
             else:
@@ -4587,12 +5209,16 @@ class SMPCAgent(object):
                     )
                 ) > 1.0e-9
             )
+            # The legacy authority audit requires a complete seven-channel
+            # placeholder.  Implicit mode overwrites its report immediately
+            # below as not applicable; no supervisor candidate function ran.
+            supervisor_candidates_computed = True
             complete_authority_manifest = (
                 verify_complete_behavioural_authority_manifest(
                     mode=self.yield_supervisor_behavioural_authority_mode,
                     channels={
                         "reference_shaping": {
-                            "candidate_computed": True,
+                            "candidate_computed": supervisor_candidates_computed,
                             "requested": bool(
                                 upstream_shadow_requests[
                                     "reference_requested"
@@ -4612,7 +5238,7 @@ class SMPCAgent(object):
                             ),
                         },
                         "supervisor_forced_reference_linearization": {
-                            "candidate_computed": True,
+                            "candidate_computed": supervisor_candidates_computed,
                             "requested": bool(
                                 upstream_shadow_requests[
                                     "reference_linearization_requested"
@@ -4632,7 +5258,7 @@ class SMPCAgent(object):
                             ),
                         },
                         "lane_entry_heading_cost": {
-                            "candidate_computed": True,
+                            "candidate_computed": supervisor_candidates_computed,
                             "requested": bool(
                                 upstream_shadow_requests[
                                     "heading_cost_requested"
@@ -4652,7 +5278,7 @@ class SMPCAgent(object):
                             ),
                         },
                         "rule_smpc_bypass": {
-                            "candidate_computed": True,
+                            "candidate_computed": supervisor_candidates_computed,
                             "requested": bool(shadow_bypass_reason is not None),
                             "applied": bool(bypass_smpc_for_rule_yield),
                             "authority_assignment_consistent": bool(
@@ -4668,7 +5294,7 @@ class SMPCAgent(object):
                             ),
                         },
                         "post_solver_action_and_desired_speed": {
-                            "candidate_computed": True,
+                            "candidate_computed": supervisor_candidates_computed,
                             "requested": post_action_requested,
                             "applied": bool(
                                 action_filter_record.get(
@@ -4691,7 +5317,7 @@ class SMPCAgent(object):
                             ),
                         },
                         "release_recovery_state": {
-                            "candidate_computed": True,
+                            "candidate_computed": supervisor_candidates_computed,
                             "requested": release_recovery_requested,
                             "applied": bool(
                                 factual_behaviour_state_after_action
@@ -4716,7 +5342,7 @@ class SMPCAgent(object):
                             ),
                         },
                         "next_control_history": {
-                            "candidate_computed": True,
+                            "candidate_computed": supervisor_candidates_computed,
                             "requested": next_control_requested,
                             "applied": next_control_applied,
                             "authority_assignment_consistent": bool(
@@ -4735,6 +5361,16 @@ class SMPCAgent(object):
                     },
                 )
             )
+            if self.supervisor_free_smpc_enabled:
+                complete_authority_manifest = {
+                    "schema_version": "implicit_smpc_no_supervisor_manifest_v1",
+                    "mode": "off",
+                    "authority_enabled": False,
+                    "status": "not_applicable",
+                    "reason": "supervisor_candidate_pipeline_not_executed",
+                    "expected_channels": [],
+                    "channels": {},
+                }
             supervisor_authority_record.update({
                 "shadow_state_isolated": bool(
                     supervisor_authority_record["shadow_state_isolated"]
@@ -4776,15 +5412,19 @@ class SMPCAgent(object):
                 "scientific_outcome_not_integrity_gate": True,
             }
             supervisor_authority_record["implementation_manipulation_gate"].update({
-                "candidate_channels_computed": [
-                    "reference_shaping",
-                    "supervisor_forced_reference_linearization",
-                    "lane_entry_heading_cost",
-                    "rule_smpc_bypass",
-                    "post_solver_action_and_desired_speed",
-                    "release_recovery_state",
-                    "next_control_history",
-                ],
+                "candidate_channels_computed": (
+                    []
+                    if self.supervisor_free_smpc_enabled
+                    else [
+                        "reference_shaping",
+                        "supervisor_forced_reference_linearization",
+                        "lane_entry_heading_cost",
+                        "rule_smpc_bypass",
+                        "post_solver_action_and_desired_speed",
+                        "release_recovery_state",
+                        "next_control_history",
+                    ]
+                ),
                 "post_action_and_next_state_neutral_when_off": bool(
                     supervisor_authority_on
                     or post_action_authority_audit.get("status") == "pass"
@@ -4814,6 +5454,11 @@ class SMPCAgent(object):
                 "v_des": v_des,
                 "nominal_solver_u0": nominal_solver_u0,
                 "nominal_solver_v_des": nominal_solver_v_des,
+                "nominal_reference_u0": nominal_reference_u0,
+                "implicit_filter_delta_u0": implicit_filter_delta_u0,
+                "implicit_filter_intervention_norm": float(
+                    np.linalg.norm(implicit_filter_delta_u0)
+                ),
                 "post_solver_action_filter": action_filter_record,
                 "control_prev_after": self.control_prev,
             }

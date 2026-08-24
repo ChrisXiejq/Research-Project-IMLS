@@ -1,0 +1,120 @@
+{
+  "scenario_description": {
+    "name": "Supervisor-free implicit-SMPC give-way intersection",
+    "purpose": "Test whether multimodal chance-constrained SMPC alone produces proceed, yield and resume behaviour for a left-turning ego facing an ego-independent priority target.",
+    "traffic_control": "unsignalised",
+    "side_of_road": "right",
+    "priority_rule": "left-turning vehicle should give way to oncoming straight-going vehicle",
+    "enforcement": "No rule-based supervisor has behavioural authority. The ego tracks its nominal route and speed subject only to the SMPC dynamics, input limits and multimodal collision chance constraints. The target follows its straight route without reading ego state."
+  },
+  "tuning_config": "tuning_configs/give_way_implicit_smpc.json",
+  "carla_params": {
+    "map_str": "Town05",
+    "weather_str": "ClearNoon",
+    "fps": 20,
+    "intersection_csv_loc": "intersection_01.csv",
+    "side_of_road": "right",
+    "traffic_control": "unsignalised",
+    "priority_rule": "turning_gives_way_to_oncoming_straight"
+  },
+  "prediction_params": {
+    "target_prediction_mode": "exogenous_straight_gmm",
+    "straight_gmm_speed_offsets_mps": [-0.75, 0.0, 0.75],
+    "straight_gmm_mode_probabilities": [0.2, 0.6, 0.2],
+    "straight_gmm_initial_longitudinal_std_m": 0.35,
+    "straight_gmm_initial_lateral_std_m": 0.25,
+    "straight_gmm_longitudinal_std_growth_mps": 0.2,
+    "straight_gmm_lateral_std_growth_mps": 0.08,
+    "prediction_logging_enabled": false,
+    "render_traffic_lights": false
+  },
+  "drone_viz_params": {
+    "attach_to_ego": false,
+    "ego_cam_height_m": 25.0,
+    "ego_cam_pitch_deg": -90.0,
+    "ego_cam_yaw_deg": 0.0,
+    "ego_cam_x_offset_m": 0.0,
+    "ego_cam_y_offset_m": 0.0,
+    "img_width": 1280,
+    "img_height": 720,
+    "fov": 90,
+    "z": 80.0,
+    "x": 30.0,
+    "y": -20.0,
+    "visualize_opencv": false,
+    "save_avi": true,
+    "overlay_gmm": false,
+    "overlay_ego_info": true,
+    "overlay_mode_probs": false,
+    "overlay_traj_hist": false
+  },
+  "ego_init_jsons": [
+    "ego_init_01.json"
+  ],
+  "viz_topdown": {
+    "road_half_width_m": 3.7,
+    "dash_len_m": 4.0,
+    "dash_gap_m": 3.5,
+    "road_arm_extend_m": 16.0
+  },
+  "vehicle_params": [
+    {
+      "role": "static",
+      "vehicle_type": "vehicle.audi.tt",
+      "vehicle_color": "246, 246, 246",
+      "policy_type": "static",
+      "intersection_start_node_idx": 1,
+      "intersection_goal_node_idx": 1,
+      "start_left_offset": 0.0,
+      "goal_left_offset": 0.0,
+      "start_longitudinal_offset": 0.0,
+      "goal_longitudinal_offset": 0.0,
+      "nominal_speed": 0.0,
+      "init_speed": 0.0
+    },
+    {
+      "role": "static",
+      "vehicle_type": "vehicle.audi.tt",
+      "vehicle_color": "246, 246, 246",
+      "policy_type": "static",
+      "intersection_start_node_idx": 3,
+      "intersection_goal_node_idx": 3,
+      "start_left_offset": 0.0,
+      "goal_left_offset": 0.0,
+      "start_longitudinal_offset": 0.0,
+      "goal_longitudinal_offset": 0.0,
+      "nominal_speed": 0.0,
+      "init_speed": 0.0
+    },
+    {
+      "role": "target",
+      "vehicle_type": "vehicle.mercedes-benz.coupe",
+      "vehicle_color": "186, 0, 0",
+      "policy_type": "straight",
+      "target_style": "assertive_constant_speed",
+      "traffic_role": "priority_oncoming_straight",
+      "obey_traffic_lights": false,
+      "intersection_start_node_idx": 2,
+      "intersection_goal_node_idx": 2,
+      "start_left_offset": 1.5,
+      "goal_left_offset": 1.5,
+      "start_longitudinal_offset": -2.0,
+      "goal_longitudinal_offset": 25.0,
+      "nominal_speed": 9.0,
+      "init_speed": 9.0
+    },
+    {
+      "role": "ego",
+      "vehicle_type": "vehicle.mercedes-benz.coupe",
+      "vehicle_color": "0, 128, 0",
+      "traffic_role": "turning_give_way_vehicle",
+      "obey_traffic_lights": false,
+      "intersection_start_node_idx": 0,
+      "intersection_goal_node_idx": 3,
+      "start_left_offset": 2.75,
+      "goal_left_offset": 1.85,
+      "goal_longitudinal_offset": 20.0,
+      "nominal_speed": 6.0
+    }
+  ]
+}

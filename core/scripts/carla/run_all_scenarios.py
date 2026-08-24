@@ -455,6 +455,23 @@ if __name__ == '__main__':
                         help="Glob pattern under scenarios/inits/. Use paper_intersection_50/ego_init_*.json for the full 50-init batch.")
     parser.add_argument("--results_dir", default=None,
                         help="Optional absolute/relative output directory. Default: <core>/results")
+    parser.add_argument(
+        "--carla_host",
+        default=None,
+        help=(
+            "Override carla_params.ip_addr from the scenario JSON. This is used "
+            "to isolate parallel CARLA workers without changing the scientific scenario."
+        ),
+    )
+    parser.add_argument(
+        "--carla_port",
+        type=int,
+        default=None,
+        help=(
+            "Override carla_params.port from the scenario JSON. Each parallel "
+            "worker must use a distinct CARLA RPC port."
+        ),
+    )
     parser.add_argument("--policies", nargs="+",
                         default=["smpc_var_risk", "smpc_open_loop", "smpc_fixed_risk"],
                         help="Policies to run.")
@@ -598,6 +615,8 @@ if __name__ == '__main__':
             "scenario_glob": args.scenario_glob,
             "init_glob": args.init_glob,
             "policies": list(args.policies),
+            "carla_host_override": args.carla_host,
+            "carla_port_override": args.carla_port,
             "solver_backend": "gurobi",
             "risk_profile": args.risk_profile,
             "adaptive_risk_config": adaptive_risk_config,
@@ -643,6 +662,13 @@ if __name__ == '__main__':
             scenario_dict, tuning_metadata = apply_tuning_config(scenario_dict, scenario_path=scenario, tuning_config_path=None)
         else:
             scenario_dict, tuning_metadata = load_scenario_with_tuning(scenario, args.tuning_config)
+        carla_params = scenario_dict.setdefault("carla_params", {})
+        if args.carla_host is not None:
+            carla_params["ip_addr"] = str(args.carla_host)
+        if args.carla_port is not None:
+            if not 1 <= int(args.carla_port) <= 65535:
+                raise ValueError(f"Invalid CARLA RPC port: {args.carla_port}")
+            carla_params["port"] = int(args.carla_port)
         scenario_name = scenario.split("/")[-1].split('.json')[0]
         applied_tuning_configs[scenario_name] = tuning_metadata
         exp_log.write_json(

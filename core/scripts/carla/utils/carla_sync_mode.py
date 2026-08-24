@@ -1,4 +1,5 @@
 import queue
+import math
 
 
 class CarlaSyncMode:
@@ -17,6 +18,26 @@ class CarlaSyncMode:
         settings = self.world.get_settings()
         settings.synchronous_mode = True
         settings.fixed_delta_seconds = self.delta_seconds
+        # CARLA requires fixed_delta_seconds <=
+        # max_substep_delta_time * max_substeps.  Preserve a fine 10 ms
+        # physics substep and increase the count when the controller runs at
+        # the paper-aligned 5 Hz (0.2 s), rather than accepting a simulator
+        # warning and non-deterministic time deltas.
+        settings.substepping = True
+        max_substep_delta = float(
+            getattr(settings, "max_substep_delta_time", 0.01) or 0.01
+        )
+        if not math.isfinite(max_substep_delta) or max_substep_delta <= 0.0:
+            max_substep_delta = 0.01
+        max_substep_delta = min(max_substep_delta, 0.01)
+        settings.max_substep_delta_time = max_substep_delta
+        required_substeps = int(
+            math.ceil(self.delta_seconds / max_substep_delta - 1.0e-12)
+        )
+        settings.max_substeps = max(
+            int(getattr(settings, "max_substeps", 10) or 10),
+            required_substeps,
+        )
         self.frame = self.world.apply_settings(settings)
 
         def make_queue(register_event):

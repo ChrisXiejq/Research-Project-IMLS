@@ -97,7 +97,15 @@ class CorrectedControlContractTests(unittest.TestCase):
             'control_implementation_version : str = "corrected_joint_modes_shared_amin_v1"',
             scenario,
         )
-        self.assertIn("self._solver_a_min = -4.0 if self._legacy_control_implementation else -3.0", agent)
+        self.assertIn("default_solver_a_min = (", agent)
+        self.assertIn(
+            "-4.0 if self._legacy_control_implementation else -3.0",
+            agent,
+        )
+        self.assertIn(
+            "default_solver_a_min\n            if self.smpc_accel_min_mps2 is None",
+            agent,
+        )
         self.assertIn("A_MIN=self._solver_a_min", agent)
         self.assertIn("return self._ref_gen_a_min, self._ref_gen_a_max", agent)
 

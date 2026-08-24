@@ -1,0 +1,77 @@
+{
+  "config_name": "give_way_upstream_equivalent_smpc_baseline",
+  "version": 1,
+  "description": "CARLA 0.9.14 API adaptation of the published SMPC_MMPreds intersection controller. The mathematical horizon, costs, risk tightening, legacy mode handling and non-terminal collision horizon are preserved, while all rule-based supervisor channels are disabled and the target remains ego-independent.",
+  "vehicle_role_overrides": {
+    "ego": {
+      "nominal_speed": 10.0,
+      "N": 10,
+      "dt": 0.2,
+      "num_modes": 3,
+      "risk_profile": "upstream_code",
+      "control_implementation_version": "legacy_single_tv_mode0_split_amin_v0",
+      "smpc_state_weights": [5.0, 2.5, 10.0, 1.0],
+      "smpc_correct_path_frame_cost_rotation": false,
+      "smpc_terminal_collision_constraint_enabled": false,
+      "implicit_route_corridor_half_width_m": null,
+      "route_goal_extension_m": 20.0,
+      "exit_alignment_path_enabled": true,
+      "exit_alignment_path_length": 10.0,
+      "supervisor_free_smpc_enabled": true,
+      "implicit_safety_filter_enabled": false,
+      "yield_stop_enabled": false,
+      "yield_stop_line_creep_enabled": false,
+      "yield_observed_caution_enabled": false,
+      "yield_emergency_brake_enabled": false,
+      "yield_recovery_enabled": false,
+      "yield_rule_smpc_bypass_enabled": false,
+      "yield_post_solver_action_filter_mode": "monitor_only",
+      "yield_supervisor_behavioural_authority_mode": "off",
+      "smpc_intersection_approach_speed_shaping_enabled": false,
+      "yield_planner_ownership_stress_enabled": false,
+      "yield_risk_owned_yield_enabled": false,
+      "lane_entry_heading_cost_enabled": false
+    },
+    "target": {
+      "nominal_speed": 10.0,
+      "init_speed": 12.0,
+      "target_style": "assertive_constant_speed"
+    }
+  },
+  "postcarla_gate": {
+    "required_policies": ["smpc_var_risk"],
+    "footprint_margin_m": 0.25,
+    "sensitivity_footprint_margins_m": [0.0, 0.25, 0.35, 0.5],
+    "conflict_radius_m": 4.0,
+    "clearance_tolerance_s": 0.2,
+    "max_solver_failure_frac": 0.0,
+    "require_completion_valid": true,
+    "require_collision_envelope_log": true,
+    "require_turning_gives_way": true
+  },
+  "implicit_filter_evaluation": {
+    "target_arrival_radius_m": 12.0,
+    "conflict_radius_m": 4.0,
+    "clearance_tolerance_s": 0.2,
+    "minimum_pre_arrival_duration_s": 0.5,
+    "minimum_pre_arrival_progress_m": 1.0,
+    "minimum_interaction_speed_drop_mps": 1.0,
+    "minimum_post_clear_progress_m": 5.0,
+    "minimum_resume_speed_gain_mps": 1.0,
+    "max_solver_failure_fraction": 0.0,
+    "require_valid_completion": true,
+    "require_no_native_collision": true
+  },
+  "reproduction_contract": {
+    "carla_version": "0.9.14",
+    "api_adaptation_only": true,
+    "controller_horizon": "N=10, dt=0.2 s",
+    "state_cost_Q": [5.0, 2.5, 10.0, 1.0],
+    "input_cost_R": [10.0, 1000.0],
+    "risk_tightening": 1.64,
+    "terminal_collision_constraint": false,
+    "cost_transform": "source_R_Q_R_transpose",
+    "target_causality_change": "straight exogenous target ignores ego; shared by all proposed-method comparisons",
+    "supervisor": "not executed"
+  }
+}

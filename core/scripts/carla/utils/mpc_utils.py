@@ -122,7 +122,8 @@ class RefTrajGenerator():
                  DF_DOT_MIN = -0.5,   # min/max front steer angle rate constraint (rad/s)
                  DF_DOT_MAX =  0.5,
                  Q = [10., .10, 5000., 0.1], # weights on x, y, and v.
-                 R = [0.001*10, 0.1*100.]):        # weights on inputs
+                 R = [0.001*10, 0.1*100.],
+                 MAX_CPU_TIME = 0.2):        # weights on inputs
 
         for key in list(locals()):
             if key == 'self':
@@ -136,6 +137,8 @@ class RefTrajGenerator():
 
         self.opti = ca.Opti()
         self.first=True
+        if not np.isfinite(self.MAX_CPU_TIME) or self.MAX_CPU_TIME <= 0.0:
+            raise ValueError("MAX_CPU_TIME must be positive and finite")
 
         '''
         (1) Parameters
@@ -200,7 +203,7 @@ class RefTrajGenerator():
 
         # Ipopt with custom options: https://web.ca.org/docs/ -> see sec 9.1 on Opti stack.
         p_opts = {'expand': False, 'verbose': False}
-        s_opts = { "max_cpu_time": .2, 'print_level': 0}
+        s_opts = {"max_cpu_time": self.MAX_CPU_TIME, 'print_level': 0}
         # s_opts = { 'print_level': 0, 'sb': 'yes'}
         self.opti.solver('ipopt', p_opts, s_opts)
 
@@ -266,6 +269,7 @@ class RefTrajGenerator():
 
     def solve(self):
         st = time.time()
+        exception = None
         try:
             sol = self.opti.solve()
             # Optimal solution.
@@ -274,8 +278,9 @@ class RefTrajGenerator():
 #           sl_mpc = sol.value(self.sl_dv)
             wp_ref  = sol.value(self.wp_ref)
             is_opt = True
-        except:
+        except Exception as exc:
             # Suboptimal solution (e.g. timed out).
+            exception = repr(exc)
             u_opt  = self.opti.debug.value(self.u_dv)
             z_opt  = self.opti.debug.value(self.z_dv)
 #           sl_mpc = self.opti.debug.value(self.sl_dv)
@@ -292,6 +297,8 @@ class RefTrajGenerator():
         sol_dict['z_opt']      = z_opt       # solution states (N+1 by 4, see self.z_dv above)
 #       sol_dict['sl_mpc']     = sl_mpc      # solution slack vars (N by 2, see self.sl_dv above)
         sol_dict['wp_ref']     = wp_ref      # waypoints  (N by 4, see self.wp_ref above)
+        sol_dict['return_status'] = self.opti.stats().get('return_status')
+        sol_dict['exception'] = exception
 
         return sol_dict
 
@@ -356,6 +363,12 @@ class SMPC_MMPreds():
                 fps = 20,
                 risk_profile = "upstream_code",
                 legacy_mode_indexing = False,
+                enforce_terminal_collision_constraint = False,
+                route_corridor_half_width_m = None,
+                route_corridor_slack_weight = None,
+                correct_path_frame_cost_rotation = False,
+                conflict_zone_filter_enabled = False,
+                conflict_zone_inactive_bound_m = 1000.0,
                 ):
         self.N=N
         self.DT=DT
@@ -377,6 +390,59 @@ class SMPC_MMPreds():
         self.t_bar_max=T_BAR_MAX
         self.risk_profile = risk_profile
         self.legacy_mode_indexing = bool(legacy_mode_indexing)
+        self.enforce_terminal_collision_constraint = bool(
+            enforce_terminal_collision_constraint
+        )
+        self.route_corridor_half_width_m = (
+            None
+            if route_corridor_half_width_m is None
+            else float(route_corridor_half_width_m)
+        )
+        if (
+            self.route_corridor_half_width_m is not None
+            and self.route_corridor_half_width_m <= 0.0
+        ):
+            raise ValueError(
+                "route_corridor_half_width_m must be positive when enabled, "
+                f"got {self.route_corridor_half_width_m}"
+            )
+        self.route_corridor_slack_weight = (
+            None
+            if route_corridor_slack_weight is None
+            else float(route_corridor_slack_weight)
+        )
+        if (
+            self.route_corridor_slack_weight is not None
+            and (
+                not np.isfinite(self.route_corridor_slack_weight)
+                or self.route_corridor_slack_weight <= 0.0
+            )
+        ):
+            raise ValueError(
+                "route_corridor_slack_weight must be positive and finite "
+                "when enabled"
+            )
+        if (
+            self.route_corridor_slack_weight is not None
+            and self.route_corridor_half_width_m is None
+        ):
+            raise ValueError(
+                "route_corridor_slack_weight requires a route corridor"
+            )
+        self.correct_path_frame_cost_rotation = bool(
+            correct_path_frame_cost_rotation
+        )
+        self.conflict_zone_filter_enabled = bool(conflict_zone_filter_enabled)
+        self.conflict_zone_inactive_bound_m = float(
+            conflict_zone_inactive_bound_m
+        )
+        if (
+            not np.isfinite(self.conflict_zone_inactive_bound_m)
+            or self.conflict_zone_inactive_bound_m <= 0.0
+        ):
+            raise ValueError(
+                "conflict_zone_inactive_bound_m must be positive and finite"
+            )
         self.tight, self.target_prob = _risk_profile_values(risk_profile, TIGHTENING)
         self.current_tight = self.tight
         self.current_target_prob = self.target_prob
@@ -424,6 +490,12 @@ class SMPC_MMPreds():
         self.Sigma_tv_sqrt  =  []
         self.Q_tv = []
         self.heading_cost_weights = []
+        self.conflict_zone_normal = []
+        self.conflict_zone_point = []
+        self.conflict_zone_bounds = []
+        self.route_corridor_points = []
+        self.route_corridor_normals = []
+        self.route_corridor_slacks = []
 
         self.T_tv=[]
         self.c_tv=[]
@@ -525,6 +597,30 @@ class SMPC_MMPreds():
             self.z_tv_curr.append(self.opti[i].parameter(2,N_TV))
             self.rot_costs.append([self.opti[i].parameter(4,4) for t in range(self.N)])
             self.heading_cost_weights.append(self.opti[i].parameter(self.N))
+            if self.route_corridor_half_width_m is not None:
+                self.route_corridor_points.append(
+                    self.opti[i].parameter(2, self.N)
+                )
+                self.route_corridor_normals.append(
+                    self.opti[i].parameter(2, self.N)
+                )
+                self.route_corridor_slacks.append(
+                    self.opti[i].variable(self.N)
+                    if self.route_corridor_slack_weight is not None
+                    else None
+                )
+            else:
+                self.route_corridor_points.append(None)
+                self.route_corridor_normals.append(None)
+                self.route_corridor_slacks.append(None)
+            if self.conflict_zone_filter_enabled:
+                self.conflict_zone_normal.append(self.opti[i].parameter(2))
+                self.conflict_zone_point.append(self.opti[i].parameter(2))
+                self.conflict_zone_bounds.append(self.opti[i].parameter(self.N))
+            else:
+                self.conflict_zone_normal.append(None)
+                self.conflict_zone_point.append(None)
+                self.conflict_zone_bounds.append(None)
             self.policy.append(self._return_policy_class(i, N_TV, t_bar))
             self._add_constraints_and_cost(i, N_TV, t_bar)
             self.u_ref_val=np.zeros((2,1))
@@ -540,6 +636,20 @@ class SMPC_MMPreds():
             self._update_previous_input(i, 0.0, 0.0)
             self._update_tv_shapes(i, N_TV*[self.N_modes*[self.N*[0.1*np.identity(2)]]])
             self._update_heading_cost_weights(i, np.zeros(self.N))
+            self._update_route_corridor(
+                i,
+                points_xy=np.column_stack((
+                    self.DT * 5.0 * np.arange(1, self.N + 1),
+                    np.zeros(self.N),
+                )),
+                normals_xy=np.tile([0.0, 1.0], (self.N, 1)),
+            )
+            self._update_conflict_zone_filter(
+                i,
+                normal_xy=[1.0, 0.0],
+                point_xy=[0.0, 0.0],
+                bounds_m=np.full(self.N, self.conflict_zone_inactive_bound_m),
+            )
             self.opti[i].set_value(self.probs[i], np.ones(self.N_modes**N_TV)/(self.N_modes**N_TV))
             sol=self.solve(i)
 
@@ -714,6 +824,12 @@ class SMPC_MMPreds():
 
         slack=self.slacks[i]
         cost = 10*slack@slack
+        route_corridor_slack = self.route_corridor_slacks[i]
+        if route_corridor_slack is not None:
+            self.opti[i].subject_to(route_corridor_slack >= 0.0)
+            cost += self.route_corridor_slack_weight * ca.sumsqr(
+                route_corridor_slack
+            )
         x=0.5*(self.dz_curr[i][0]+self.x_lin[i][0]+self.x_lin[i][-1])
         y=0.5*(self.dz_curr[i][0]+self.y_lin[i][0]+self.y_lin[i][-1])
         self.opti[i].subject_to(slack>=0)
@@ -737,7 +853,11 @@ class SMPC_MMPreds():
 
         total_prob=0
 
-        self.collision_avoidance[i] = { j : {t: {k : None for k in range(N_TV)} for t in range(1,self.N)} for j in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)) }
+        collision_times = range(
+            1,
+            self.N + 1 if self.enforce_terminal_collision_constraint else self.N,
+        )
+        self.collision_avoidance[i] = { j : {t: {k : None for k in range(N_TV)} for t in collision_times} for j in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)) }
         for j in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)):
             if not self.fixed_risk:
                 self.opti[i].subject_to(self.opti[i].bounded(0.0000001, mmr_std[j],3.0))
@@ -747,7 +867,10 @@ class SMPC_MMPreds():
                     self.opti[i].subject_to(self.opti[i].bounded(0.5, mmr_p[j],1.))
 
 
-            for t in range(1,self.N):
+            for t in range(
+                1,
+                self.N + 1 if self.enforce_terminal_collision_constraint else self.N,
+            ):
 
                 # oa_ref=[self._oa_ev_ref([self.x_ref[i][t-1], self.x_ref[i][t]], [self.y_ref[i][t-1], self.y_ref[i][t]], self.x_tv_ref[i][k][mode(j,k)][t], self.y_tv_ref[i][k][mode(j,k)][t], self.Q_tv[i][k][mode(j,k)][t-1]) for k in range(N_TV)]
                 try:
@@ -771,6 +894,50 @@ class SMPC_MMPreds():
 
 
             nom_z_ev=A_block@self.dz_curr[i]+B_block@h[j]
+            if self.route_corridor_half_width_m is not None:
+                # Keep every nominal branch inside a path-aligned corridor.
+                # This is an optimisation constraint, not a target-triggered
+                # rule: target state never enters the corridor calculation and
+                # no post-solver action can replace the SMPC command.
+                for t in range(1, self.N + 1):
+                    x_abs = nom_z_ev[4 * t] + self.x_lin[i][t]
+                    y_abs = nom_z_ev[4 * t + 1] + self.y_lin[i][t]
+                    point = self.route_corridor_points[i][:, t - 1]
+                    normal = self.route_corridor_normals[i][:, t - 1]
+                    lateral_error = (
+                        normal[0] * (x_abs - point[0])
+                        + normal[1] * (y_abs - point[1])
+                    )
+                    corridor_slack = (
+                        0.0
+                        if route_corridor_slack is None
+                        else route_corridor_slack[t - 1]
+                    )
+                    self.opti[i].subject_to(
+                        lateral_error
+                        <= self.route_corridor_half_width_m + corridor_slack
+                    )
+                    self.opti[i].subject_to(
+                        lateral_error
+                        >= -self.route_corridor_half_width_m - corridor_slack
+                    )
+            if self.conflict_zone_filter_enabled:
+                # Optimisation-internal safety filter.  The time-varying upper
+                # bound is computed from multimodal target occupancy before the
+                # solve.  No state machine or post-solver action replacement is
+                # involved: every nominal policy branch must stay behind the
+                # conflict entrance while the target may occupy the zone.
+                normal = self.conflict_zone_normal[i]
+                point = self.conflict_zone_point[i]
+                bounds = self.conflict_zone_bounds[i]
+                for t in range(1, self.N + 1):
+                    x_abs = nom_z_ev[4 * t] + self.x_lin[i][t]
+                    y_abs = nom_z_ev[4 * t + 1] + self.y_lin[i][t]
+                    signed_progress = (
+                        normal[0] * (x_abs - point[0])
+                        + normal[1] * (y_abs - point[1])
+                    )
+                    self.opti[i].subject_to(signed_progress <= bounds[t - 1])
             nom_z_err=nom_z_ev[4:,:]+self.z_lin[i][:,1:].reshape((-1,1))-self.z_ref[i][:,1:].reshape((-1,1))
             nom_z_diff= ca.diff(nom_z_ev.reshape((4,-1)),1,1).reshape((-1,1))
             heading_cost = 0
@@ -797,7 +964,13 @@ class SMPC_MMPreds():
             #       RefTrajGenerator._quad_form(nom_z_diff,100*cost_matrix_z[4:,4:])+\
             #       RefTrajGenerator._quad_form(nom_diff_u,100*cost_matrix_u)
 
-            cost+=RefTrajGenerator._quad_form(nom_z_ev, 10*cost_matrix_z)+\
+            # Track the absolute route reference, not merely the previous
+            # linearisation trajectory.  ``nom_z_ev`` is a deviation from the
+            # linearisation and therefore rewards continuation of an earlier
+            # avoidance manoeuvre.  ``nom_z_err`` is the physically meaningful
+            # prediction-minus-reference error for future states; using it
+            # makes route recovery an SMPC objective after conflict release.
+            cost+=RefTrajGenerator._quad_form(nom_z_err, 10*cost_matrix_z[4:,4:])+\
                   RefTrajGenerator._quad_form(h[j],ca.kron(ca.DM.eye(self.N),ca.diag([0, 0])))+\
                   RefTrajGenerator._quad_form(nom_z_diff,100*cost_matrix_z[4:,4:])+\
                   RefTrajGenerator._quad_form(nom_diff_u,10*cost_matrix_u)+\
@@ -852,6 +1025,13 @@ class SMPC_MMPreds():
                 else CONTROL_IMPLEMENTATION_CORRECTED_V1
             ),
             "legacy_mode_indexing": bool(self.legacy_mode_indexing),
+            "terminal_collision_constraint": bool(
+                self.enforce_terminal_collision_constraint
+            ),
+            "conflict_zone_filter_enabled": bool(
+                self.conflict_zone_filter_enabled
+            ),
+            "state_tracking_error": "absolute_prediction_minus_route_reference",
             "mode_consumption_map": _mode_consumption_map(
                 self.N_modes,
                 N_TV,
@@ -883,7 +1063,10 @@ class SMPC_MMPreds():
         def _get_mode_collision_prob(value_fn, m):
             prob = float(_dense_float(value_fn(self.probs[i][m])).squeeze())
             collision_prob = 0
-            for t in range(1, self.N):
+            for t in range(
+                1,
+                self.N + 1 if self.enforce_terminal_collision_constraint else self.N,
+            ):
                 collision_prob_t = 0
                 for k in range(N_TV):
                     z = np.atleast_1d(_dense_float(value_fn(self.collision_avoidance[i][m][t][k]['z'])).squeeze())
@@ -932,6 +1115,17 @@ class SMPC_MMPreds():
                 debug_info["iter_count"] = self.opti[i].stats().get("iter_count")
             except Exception as exc:
                 debug_info["stats_error"] = repr(exc)
+            if self.route_corridor_slacks[i] is not None:
+                route_slack_value = np.asarray(
+                    sol.value(self.route_corridor_slacks[i]), dtype=float
+                ).reshape(-1)
+                debug_info["route_corridor_slack_m"] = route_slack_value.tolist()
+                debug_info["route_corridor_max_slack_m"] = float(
+                    np.max(route_slack_value)
+                )
+                debug_info["route_corridor_slack_weight"] = (
+                    self.route_corridor_slack_weight
+                )
 
 
         except Exception as exc:
@@ -1016,7 +1210,12 @@ class SMPC_MMPreds():
             sol_dict['collision_prob'] = collision_prob
 
             if i!=0:
-             sol_dict['eval_oa'] = eval_oa[:self.N-1,:]
+             collision_count = (
+                 self.N
+                 if self.enforce_terminal_collision_constraint
+                 else self.N - 1
+             )
+             sol_dict['eval_oa'] = eval_oa[:collision_count,:]
 
         return sol_dict
 
@@ -1030,6 +1229,20 @@ class SMPC_MMPreds():
         self._update_previous_input(i, *[update_dict[key] for key in ['acc_prev', 'df_prev']] )
         self._update_tv_shapes(i, update_dict['tv_shapes'])
         self._update_heading_cost_weights(i, update_dict.get("heading_cost_weights", np.zeros(self.N)))
+        self._update_route_corridor(
+            i,
+            points_xy=update_dict.get("route_corridor_points_xy"),
+            normals_xy=update_dict.get("route_corridor_normals_xy"),
+        )
+        self._update_conflict_zone_filter(
+            i,
+            normal_xy=update_dict.get("conflict_zone_normal_xy", [1.0, 0.0]),
+            point_xy=update_dict.get("conflict_zone_point_xy", [0.0, 0.0]),
+            bounds_m=update_dict.get(
+                "conflict_zone_bounds_m",
+                np.full(self.N, self.conflict_zone_inactive_bound_m),
+            ),
+        )
         self.u_ref_val=np.hstack((update_dict['a_ref'][0],update_dict['df_ref'][0]))
         self.v_curr=update_dict['dv0']+update_dict['v_ref'][0]
         self.v_next=update_dict['v_ref'][1]
@@ -1060,6 +1273,59 @@ class SMPC_MMPreds():
         self.current_heading_cost_weights = weights.copy()
         self.opti[i].set_value(self.heading_cost_weights[i], ca.DM(weights))
 
+    def _update_route_corridor(self, i, points_xy, normals_xy):
+        if self.route_corridor_half_width_m is None:
+            return
+        if points_xy is None or normals_xy is None:
+            raise ValueError(
+                "route-corridor points and normals are required when enabled"
+            )
+        points = np.asarray(points_xy, dtype=float)
+        normals = np.asarray(normals_xy, dtype=float)
+        if points.shape != (self.N, 2) or normals.shape != (self.N, 2):
+            raise ValueError(
+                "route-corridor points and normals must each have shape "
+                f"({self.N}, 2)"
+            )
+        if not np.isfinite(points).all() or not np.isfinite(normals).all():
+            raise ValueError("route-corridor geometry must be finite")
+        normal_lengths = np.linalg.norm(normals, axis=1)
+        if np.any(normal_lengths <= 1.0e-8):
+            raise ValueError("route-corridor normals must be non-zero")
+        normals = normals / normal_lengths[:, None]
+        self.opti[i].set_value(
+            self.route_corridor_points[i], ca.DM(points.T)
+        )
+        self.opti[i].set_value(
+            self.route_corridor_normals[i], ca.DM(normals.T)
+        )
+
+    def _update_conflict_zone_filter(self, i, normal_xy, point_xy, bounds_m):
+        if not self.conflict_zone_filter_enabled:
+            return
+        normal = np.asarray(normal_xy, dtype=float).reshape(-1)
+        point = np.asarray(point_xy, dtype=float).reshape(-1)
+        bounds = np.asarray(bounds_m, dtype=float).reshape(-1)
+        if normal.shape != (2,) or point.shape != (2,):
+            raise ValueError("conflict-zone normal and point must each have shape (2,)")
+        norm = float(np.linalg.norm(normal))
+        if not np.isfinite(norm) or norm <= 1.0e-8:
+            raise ValueError("conflict-zone normal must be finite and non-zero")
+        if not np.isfinite(point).all():
+            raise ValueError("conflict-zone point must be finite")
+        if bounds.size < self.N:
+            bounds = np.pad(
+                bounds,
+                (0, self.N - bounds.size),
+                constant_values=self.conflict_zone_inactive_bound_m,
+            )
+        bounds = bounds[: self.N]
+        if not np.isfinite(bounds).all():
+            raise ValueError("conflict-zone bounds must be finite")
+        self.opti[i].set_value(self.conflict_zone_normal[i], ca.DM(normal / norm))
+        self.opti[i].set_value(self.conflict_zone_point[i], ca.DM(point))
+        self.opti[i].set_value(self.conflict_zone_bounds[i], ca.DM(bounds))
+
 
     def _update_ev_initial_condition(self, i, dx0, dy0, dpsi0, dvel0):
 
@@ -1068,7 +1334,14 @@ class SMPC_MMPreds():
 
     def _update_ev_rotated_costs(self, i, Rs_ev):
         for t in range(self.N):
-            self.opti[i].set_value(self.rot_costs[i][t], ca.diagcat(Rs_ev[t]@self.Q[:2,:2]@Rs_ev[t].T, self.Q[2:,2:]))
+            if self.correct_path_frame_cost_rotation:
+                position_cost = Rs_ev[t].T @ self.Q[:2, :2] @ Rs_ev[t]
+            else:
+                position_cost = Rs_ev[t] @ self.Q[:2, :2] @ Rs_ev[t].T
+            self.opti[i].set_value(
+                self.rot_costs[i][t],
+                ca.diagcat(position_cost, self.Q[2:, 2:]),
+            )
 
 
 
