@@ -1,0 +1,305 @@
+{
+  "checks": {
+    "divergence_recorded": true,
+    "prior_release_git_objects_match_manifest": true,
+    "remotes_sanitized": true,
+    "two_repository_heads_recorded": true,
+    "worktree_inventory_recorded": true
+  },
+  "generated_at_utc": "2026-08-25T01:10:01.799368+00:00",
+  "prior_release": {
+    "all_artifacts_match": true,
+    "artifact_checks": [
+      {
+        "commit": "60e888f79611d1cdacc1e45d93d7dfbb48bdb22c",
+        "expected_sha256": "dac4a5c8f8983afa90072dd16d81bbd3f0f7ecdc9c246322d94972e627c3a843",
+        "matches": true,
+        "observed_sha256": "dac4a5c8f8983afa90072dd16d81bbd3f0f7ecdc9c246322d94972e627c3a843",
+        "path": "docs/paper/generated/capacity_history_v3/final/evidence_index.json",
+        "repository": "experiment"
+      },
+      {
+        "commit": "60e888f79611d1cdacc1e45d93d7dfbb48bdb22c",
+        "expected_sha256": "69020499294d7da081266bafd17c41435e6d13e710bda89dd7432e1030b564ff",
+        "matches": true,
+        "observed_sha256": "69020499294d7da081266bafd17c41435e6d13e710bda89dd7432e1030b564ff",
+        "path": "docs/paper/generated/capacity_history_v3/results/closed_loop/CLOSED_LOOP_COMPLETE.json",
+        "repository": "experiment"
+      },
+      {
+        "commit": "60e888f79611d1cdacc1e45d93d7dfbb48bdb22c",
+        "expected_sha256": "73f023147fad22d5e3ffb3e154e9d30ef1a145e2fbe93cddbd31fbc97ad669bc",
+        "matches": true,
+        "observed_sha256": "73f023147fad22d5e3ffb3e154e9d30ef1a145e2fbe93cddbd31fbc97ad669bc",
+        "path": "docs/paper/generated/supervisor_bottleneck_v1/scientific_contract/SCIENTIFIC_CONTRACT_COMPLETE.json",
+        "repository": "experiment"
+      },
+      {
+        "commit": "60e888f79611d1cdacc1e45d93d7dfbb48bdb22c",
+        "expected_sha256": "e4192e6b468df4b4b4b49483f58170fe04110600d32d638eb290be02eb9569eb",
+        "matches": true,
+        "observed_sha256": "e4192e6b468df4b4b4b49483f58170fe04110600d32d638eb290be02eb9569eb",
+        "path": "docs/paper/generated/supervisor_bottleneck_v1/telemetry_audit/TELEMETRY_AUDIT_COMPLETE.json",
+        "repository": "experiment"
+      },
+      {
+        "commit": "60e888f79611d1cdacc1e45d93d7dfbb48bdb22c",
+        "expected_sha256": "7c5fc19a31b001f74ec207e96f4f863ead6ef4144070c9bc11af430044b560eb",
+        "matches": true,
+        "observed_sha256": "7c5fc19a31b001f74ec207e96f4f863ead6ef4144070c9bc11af430044b560eb",
+        "path": "docs/paper/generated/supervisor_bottleneck_v1/paper_release/PAPER_EVIDENCE_COMPLETE.json",
+        "repository": "experiment"
+      },
+      {
+        "commit": "60e888f79611d1cdacc1e45d93d7dfbb48bdb22c",
+        "expected_sha256": "fe2ab1f2b846d7fc112481d61d3a72c1a05597297b1c3ddc98d198a9e9502425",
+        "matches": true,
+        "observed_sha256": "fe2ab1f2b846d7fc112481d61d3a72c1a05597297b1c3ddc98d198a9e9502425",
+        "path": "docs/paper/generated/supervisor_bottleneck_v1/paper_release/DISSERTATION_AUDIT.json",
+        "repository": "experiment"
+      },
+      {
+        "commit": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+        "expected_sha256": "3f7af6c63cfaa4b0f67b3c22c8d41850d2305d7ab4ac6a34f72f3084ce0fb06c",
+        "matches": true,
+        "observed_sha256": "3f7af6c63cfaa4b0f67b3c22c8d41850d2305d7ab4ac6a34f72f3084ce0fb06c",
+        "path": "main.tex",
+        "repository": "dissertation"
+      },
+      {
+        "commit": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+        "expected_sha256": "dce60b88f98e75d63b616c8caeaf0a7be16cd32174d504f2b2cb36ce220f7741",
+        "matches": true,
+        "observed_sha256": "dce60b88f98e75d63b616c8caeaf0a7be16cd32174d504f2b2cb36ce220f7741",
+        "path": "main.bib",
+        "repository": "dissertation"
+      },
+      {
+        "commit": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+        "expected_sha256": "f521f9a9f2ed8b05cd29bf03996415712ac23c747f470bc477f65bf048dd3734",
+        "matches": true,
+        "observed_sha256": "f521f9a9f2ed8b05cd29bf03996415712ac23c747f470bc477f65bf048dd3734",
+        "path": "main.pdf",
+        "repository": "dissertation"
+      },
+      {
+        "commit": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+        "expected_sha256": "5abb852aff526158696863b54d673108f7c5ceba3e67716dccce0fbb3676562b",
+        "matches": true,
+        "observed_sha256": "5abb852aff526158696863b54d673108f7c5ceba3e67716dccce0fbb3676562b",
+        "path": "BUILD.md",
+        "repository": "dissertation"
+      },
+      {
+        "commit": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+        "expected_sha256": "a829f0ce70cc8b40594582c904e07a9f74b0bf45d126ac1834864452f6799709",
+        "matches": true,
+        "observed_sha256": "a829f0ce70cc8b40594582c904e07a9f74b0bf45d126ac1834864452f6799709",
+        "path": "figures/supervisor_bottleneck_v1/figure01_cross_layer_system.pdf",
+        "repository": "dissertation"
+      },
+      {
+        "commit": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+        "expected_sha256": "16181c0b3e9fd2c6733d5f035177ca67382b52cbe22338916cf6a2eb2926e8e0",
+        "matches": true,
+        "observed_sha256": "16181c0b3e9fd2c6733d5f035177ca67382b52cbe22338916cf6a2eb2926e8e0",
+        "path": "figures/supervisor_bottleneck_v1/figure02_capacity_information_architecture.pdf",
+        "repository": "dissertation"
+      },
+      {
+        "commit": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+        "expected_sha256": "d8a04e3519a696d9109f2cc3ba728ecbc405a5a41abdc51067f6da22695c93a5",
+        "matches": true,
+        "observed_sha256": "d8a04e3519a696d9109f2cc3ba728ecbc405a5a41abdc51067f6da22695c93a5",
+        "path": "figures/supervisor_bottleneck_v1/figure03_predictor_risk_transfer.pdf",
+        "repository": "dissertation"
+      },
+      {
+        "commit": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+        "expected_sha256": "9a59915bbf12dd029374b5079f1f6b04b1ee1a2799b51f16332e6e42ff1d649d",
+        "matches": true,
+        "observed_sha256": "9a59915bbf12dd029374b5079f1f6b04b1ee1a2799b51f16332e6e42ff1d649d",
+        "path": "figures/supervisor_bottleneck_v1/figure04_supervisor_authority.pdf",
+        "repository": "dissertation"
+      }
+    ],
+    "frozen_commits": {
+      "dissertation": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+      "experiment": "60e888f79611d1cdacc1e45d93d7dfbb48bdb22c"
+    },
+    "manifest": {
+      "locator": "/",
+      "path": "docs/paper/generated/supervisor_bottleneck_v1/SUBMISSION_RELEASE_MANIFEST.json",
+      "sha256": "38d61da2bf6473e2c2538c72d5a9f481eccf8901fce6bc7050f71d233a1cd0c4"
+    },
+    "mutation_boundary": "supervisor_bottleneck_v1 is read only; hashes are verified from frozen Git objects rather than from a later manuscript worktree."
+  },
+  "repositories": [
+    {
+      "ahead": 0,
+      "behind": 0,
+      "branch": "main",
+      "head": "07af9e3c951fdf1e360a3d722cb0c96e50fb451e",
+      "head_tree": "b93ded64583484d8be5018e66f2da9d0b24c906f",
+      "name": "experiment",
+      "remotes": {
+        "origin": "https://github.com/ChrisXiejq/Research-Project-IMLS.git"
+      },
+      "root_name": "Research-Project-IMLS",
+      "upstream": "origin/main",
+      "worktree_dirty_count": 19,
+      "worktree_inventory": [
+        {
+          "bytes": 10638,
+          "old_path": null,
+          "path": "core/scripts/models/analyze_shadow_command_transmission.py",
+          "sha256": "9379c153c191c6ad51a32406f1c1a3e683de247f10734c291e27b28584a09762",
+          "status": "??"
+        },
+        {
+          "bytes": 48877,
+          "old_path": null,
+          "path": "core/scripts/models/analyze_supervisor_masking_evidence.py",
+          "sha256": "3921c30c95bcd2bbbea388a4a5625688a504408935195b5103efc37f7db075f9",
+          "status": "??"
+        },
+        {
+          "bytes": 53651,
+          "old_path": null,
+          "path": "core/scripts/models/build_supervisor_masking_contract.py",
+          "sha256": "9a6665f807f0281bb29bf897bfb8aadb13b38ad9d315ea6138f40f58b0742b12",
+          "status": "??"
+        },
+        {
+          "bytes": 10190,
+          "old_path": null,
+          "path": "core/scripts/models/build_supervisor_shadow_protocol.py",
+          "sha256": "87021c82d650fd7cd29995d44896ad47d4045dd4450a6e6f82350b1fa48cdc7e",
+          "status": "??"
+        },
+        {
+          "bytes": 10503,
+          "old_path": null,
+          "path": "core/scripts/models/summarize_v3_server_command_transmission.py",
+          "sha256": "1e98b36d9326593640e17baee98d43c1c15d3b13e6e127ae2ac36c88cfac8644",
+          "status": "??"
+        },
+        {
+          "bytes": 3987,
+          "old_path": null,
+          "path": "core/scripts/models/tests/test_analyze_shadow_command_transmission.py",
+          "sha256": "0a0e05c5b2025279a08e591f30a63885f498ff323cff51c371cc977791af7c75",
+          "status": "??"
+        },
+        {
+          "bytes": 8720,
+          "old_path": null,
+          "path": "core/scripts/models/tests/test_analyze_supervisor_masking_evidence.py",
+          "sha256": "944a59543a4b95e70f5370fa6511b0b56d1601dc928806f612d0652ac8e2d5a8",
+          "status": "??"
+        },
+        {
+          "bytes": 10195,
+          "old_path": null,
+          "path": "core/scripts/models/tests/test_build_supervisor_masking_contract.py",
+          "sha256": "b08789036a06967f0dc12594376402ffb31f8ab6c3bbf58946965ba7597aa000",
+          "status": "??"
+        },
+        {
+          "bytes": 1371,
+          "old_path": null,
+          "path": "core/scripts/models/tests/test_build_supervisor_shadow_protocol.py",
+          "sha256": "e65aaf6d06d2918a0d16ce671e63dbbc43c3d01a83290b671bdbf306cde18aee",
+          "status": "??"
+        },
+        {
+          "bytes": 3020,
+          "old_path": null,
+          "path": "core/scripts/models/tests/test_summarize_v3_server_command_transmission.py",
+          "sha256": "414dc40c11bc3d744721051e2a701522e9b841e58e1b7d2aeb17a2be072ef211",
+          "status": "??"
+        },
+        {
+          "bytes": 7163,
+          "old_path": null,
+          "path": "docs/paper/generated/supervisor_masking_v2/protocol/SAME_STATE_SHADOW_PROTOCOL.json",
+          "sha256": "b32e7dd5fbaa42b40e584a44dfdac261d77b17292f63a82b1b71688078cbf61c",
+          "status": "??"
+        },
+        {
+          "bytes": 96735,
+          "old_path": null,
+          "path": "docs/paper/generated/supervisor_masking_v2/server_evidence/v3_risk_command_transmission.json",
+          "sha256": "1c1714e8c06d6425242dcb7a74d155a946e0b0f94e1e3a0065be2a008d57eccd",
+          "status": "??"
+        },
+        {
+          "bytes": 23583,
+          "old_path": null,
+          "path": "docs/paper/generated/supervisor_masking_v2/server_evidence/v3_rollout_command_summary.csv",
+          "sha256": "e449f24608fb84cbdd9fad846b33bef273f8279860561fad9d4e928bd3330351",
+          "status": "??"
+        },
+        {
+          "bytes": 40,
+          "old_path": null,
+          "path": "openspec/changes/supervisor-masking-thesis-reframe/.openspec.yaml",
+          "sha256": "2722d733de6305f7dbd2c1c069cebb0c319f7cdcbc249e6da8b5422b6bb689d9",
+          "status": "??"
+        },
+        {
+          "bytes": 10360,
+          "old_path": null,
+          "path": "openspec/changes/supervisor-masking-thesis-reframe/design.md",
+          "sha256": "47cb4c47ed37981af9ed2bee60a7d7b96d6e7a2a430021dc4d688dfb06b1d38c",
+          "status": "??"
+        },
+        {
+          "bytes": 3185,
+          "old_path": null,
+          "path": "openspec/changes/supervisor-masking-thesis-reframe/proposal.md",
+          "sha256": "7155df7130fd499d7bb89425f34478a5ae85cdea10e76ac24748f5bba8e88c4f",
+          "status": "??"
+        },
+        {
+          "bytes": 7372,
+          "old_path": null,
+          "path": "openspec/changes/supervisor-masking-thesis-reframe/specs/supervisor-masking-evidence/spec.md",
+          "sha256": "ef72090ff56914228eba5ccbabcb67ee749ae3b4a0194f17a67dae6b16006e92",
+          "status": "??"
+        },
+        {
+          "bytes": 5879,
+          "old_path": null,
+          "path": "openspec/changes/supervisor-masking-thesis-reframe/specs/supervisor-masking-thesis-release/spec.md",
+          "sha256": "809b35ba9d9e0cb1aadcb7249858c89370398c9603268e776a257b1b7bdafe45",
+          "status": "??"
+        },
+        {
+          "bytes": 10913,
+          "old_path": null,
+          "path": "openspec/changes/supervisor-masking-thesis-reframe/tasks.md",
+          "sha256": "d859144ecf84dd570dc58c7319bceaeeba48b2a90dfc8973b2ef2ce424ac1565",
+          "status": "??"
+        }
+      ]
+    },
+    {
+      "ahead": 0,
+      "behind": 0,
+      "branch": "main",
+      "head": "8477c2625c23291d4c2ea8c26e7bdcab8250b73a",
+      "head_tree": "00783a71e80f47c3ae15ff1194b14beeef45a313",
+      "name": "dissertation",
+      "remotes": {
+        "origin": "git@github.com:ChrisXiejq/Jiaqi-Xie-Dissertation.git"
+      },
+      "root_name": "Jiaqi-Xie-Dissertation",
+      "upstream": "origin/main",
+      "worktree_dirty_count": 0,
+      "worktree_inventory": []
+    }
+  ],
+  "schema_version": "supervisor_masking_immutable_baseline_v2",
+  "status": "pass"
+}

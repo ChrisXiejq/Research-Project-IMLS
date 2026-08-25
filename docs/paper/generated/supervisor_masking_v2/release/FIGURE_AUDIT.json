@@ -1,0 +1,45 @@
+{
+  "checks": {
+    "all_assets_nonempty": true,
+    "explicit_legend_each_figure": true,
+    "explicit_units_each_figure": true,
+    "four_required_figures": true,
+    "pdf_and_png_for_every_figure": true,
+    "population_separation_declared": true,
+    "raster_width_at_least_manuscript_width": true,
+    "restrained_colour_palette": true,
+    "single_declared_font_family": true,
+    "vector_font_embedding_requested": true
+  },
+  "font_family": "DejaVu Sans",
+  "minimum_required_width_px": 2332,
+  "palette": [
+    "#0072B2",
+    "#D55E00",
+    "#009E73",
+    "#7B61A8",
+    "#56B4E9",
+    "#E69F00",
+    "#6B7280",
+    "#1F2937"
+  ],
+  "png_dimensions_px": {
+    "figure01_project_operator_chain.png": [
+      2395,
+      1305
+    ],
+    "figure02_h1_authority_effect.png": [
+      2634,
+      1931
+    ],
+    "figure03_h2_predictor_transfer.png": [
+      2633,
+      1895
+    ],
+    "figure04_h3_risk_transfer.png": [
+      2678,
+      1913
+    ]
+  },
+  "status": "pass"
+}

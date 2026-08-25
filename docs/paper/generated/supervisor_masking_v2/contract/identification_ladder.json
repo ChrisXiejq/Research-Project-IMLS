@@ -1,0 +1,76 @@
+{
+  "levels": [
+    {
+      "does_not_license": "Any claim about candidate commands, executed controls or masking.",
+      "level": 1,
+      "licensed_claim": "The upstream policies remain distinguishable at the measured layer.",
+      "required_evidence": [
+        "provenance-aligned upstream policy contrast"
+      ],
+      "verdict": "retained_upstream_difference"
+    },
+    {
+      "does_not_license": "Attribution of that contraction to supervisor authority.",
+      "level": 2,
+      "licensed_claim": "The upstream distinction contracts by the SMPC candidate-command layer.",
+      "required_evidence": [
+        "same-state upstream evaluations",
+        "aligned candidate commands",
+        "non-degenerate pre-layer contrast"
+      ],
+      "verdict": "attenuated_candidate_difference"
+    },
+    {
+      "does_not_license": "Long-horizon counterfactual trajectory masking.",
+      "level": 3,
+      "licensed_claim": "Executed command separation is smaller than candidate separation.",
+      "required_evidence": [
+        "aligned candidate and executed commands",
+        "declared command-distance metric"
+      ],
+      "verdict": "compressed_executed_difference"
+    },
+    {
+      "does_not_license": "Equivalence, uselessness, or a unique masking mechanism.",
+      "level": 4,
+      "licensed_claim": "No uniform physical advantage was detected in the tested population.",
+      "required_evidence": [
+        "declared upstream difference",
+        "matched physical outcome contrast with uncertainty"
+      ],
+      "verdict": "no_detected_physical_transfer"
+    },
+    {
+      "does_not_license": "A causal or selective masking conclusion.",
+      "level": 5,
+      "licensed_claim": "The observed chain is consistent with supervisor masking.",
+      "required_evidence": [
+        "upstream difference",
+        "downstream compression or non-transfer",
+        "documented active supervisor intervention",
+        "explicit unresolved rival mechanisms"
+      ],
+      "verdict": "consistent_with_masking"
+    },
+    {
+      "does_not_license": "Universal safety, isolated-rule attribution, or counterfactual trajectory effects beyond the estimand.",
+      "level": 6,
+      "licensed_claim": "Supervisor authority causally attenuates the immediate command distinction under the declared state distribution.",
+      "required_evidence_any_of": [
+        [
+          "aligned same-state candidate-to-executed mappings",
+          "enabled and monitor-only complete supervisor mappings",
+          "paired attenuation uncertainty"
+        ],
+        [
+          "joint upstream-policy-by-authority factorial",
+          "comparable non-saturated units",
+          "policy-by-authority interaction uncertainty"
+        ]
+      ],
+      "verdict": "causally_identified_masking"
+    }
+  ],
+  "schema_version": "supervisor_masking_identification_ladder_v2",
+  "status": "pass"
+}

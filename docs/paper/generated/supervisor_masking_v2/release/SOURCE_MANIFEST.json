@@ -1,0 +1,63 @@
+{
+  "policy": "Only audited evidence and hash-verified source files; no cross-population pooling.",
+  "schema_version": "supervisor_masking_v2_source_manifest_v1",
+  "sources": [
+    {
+      "bytes": 1715,
+      "locator": "all held-out cells",
+      "path": "docs/paper/generated/capacity_history_v3/final/table_offline_model_cells.csv",
+      "role": "H2 CIA model cells",
+      "sha256": "27d64149084138ac61aa5e4cfcfa845690373782961217860a1c9c1b5c562379"
+    },
+    {
+      "bytes": 2236,
+      "locator": "capacity/information/architecture rows",
+      "path": "docs/paper/generated/capacity_history_v3/final/table_three_axis_contrasts.csv",
+      "role": "H2 CIA contrasts",
+      "sha256": "a4ee8b0492a33c6eb6e55a110d0e8bd901461ab108667a884b04c3416023ef8c"
+    },
+    {
+      "bytes": 1933,
+      "locator": "/products/hypothesis_registry.json",
+      "path": "docs/paper/generated/supervisor_masking_v2/contract/SUPERVISOR_MASKING_CONTRACT_COMPLETE.json",
+      "role": "frozen hypothesis registry completion marker",
+      "sha256": "50bf5f2d9946d8df61ec1029e2b645d77e22e25cb444132b57f44e80cf27d981"
+    },
+    {
+      "bytes": 7201,
+      "locator": "/hypotheses",
+      "path": "docs/paper/generated/supervisor_masking_v2/contract/hypothesis_registry.json",
+      "role": "frozen hypothesis registry",
+      "sha256": "de7fb4bd0e84d2c59df2fd1ea7fe6681a6ed161b7f425400088841b4773bbb59"
+    },
+    {
+      "bytes": 48908,
+      "locator": "$",
+      "path": "docs/paper/generated/supervisor_masking_v2/evidence/supervisor_masking_evidence.json",
+      "role": "audited synthesis",
+      "sha256": "327e6b265c12e87a202be7c369850df6a3e6fa270136416e9dd3587f5badd5c0"
+    },
+    {
+      "bytes": 553,
+      "locator": "/artifacts_sha256/formula_to_code.csv",
+      "path": "docs/paper/generated/supervisor_masking_v2/method_audit/METHOD_AUDIT_COMPLETE.json",
+      "role": "formula-to-code audit completion marker",
+      "sha256": "c867ece1c2a6fdd87c7596a325749ce89c2c7e71a70a4c5e52929c12adecea38"
+    },
+    {
+      "bytes": 9718,
+      "locator": "all rows",
+      "path": "docs/paper/generated/supervisor_masking_v2/method_audit/formula_to_code.csv",
+      "role": "formula-to-code audit",
+      "sha256": "65c3585085f00f1c15e634e342fc6f5946dfcfc2d1b60bb9d268fa046efdf8bc"
+    },
+    {
+      "bytes": 4338,
+      "locator": "all rows",
+      "path": "docs/paper/generated/supervisor_masking_v2/method_audit/seven_channel_contract.csv",
+      "role": "seven supervisor channels",
+      "sha256": "4fbe7350c76c07c427c4b8e98339fa4c02edb081d922b37453eade52dac6de73"
+    }
+  ],
+  "status": "pass"
+}

@@ -1,0 +1,159 @@
+{
+  "schema_version": "supervisor_method_audit_v1",
+  "status": "pass",
+  "supervisor_channels": [
+    {
+      "channel": "reference_shaping",
+      "trigger": "rule-aware yield or release-recovery profile requests a different reference",
+      "position": "before linearisation and SMPC solve",
+      "action": "changes feasible reference states/inputs, including speed and acceleration profile",
+      "telemetry": "debug_payload.supervisor_behavioural_authority.complete_candidate_channel_manifest.channels.reference_shaping plus reference.status.rule_aware_reference",
+      "code": [
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "4038-4155",
+          "landmark": "yield decision and _apply_rule_aware_reference_profile"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5220-5239",
+          "landmark": "channel manifest"
+        }
+      ]
+    },
+    {
+      "channel": "supervisor_forced_reference_linearization",
+      "trigger": "yield/recovery/reference guard requests reference-based linearisation",
+      "position": "after reference shaping, before SMPC update",
+      "action": "replaces previous-solution linearisation with a reference-horizon slice",
+      "telemetry": "debug_payload.supervisor_behavioural_authority.complete_candidate_channel_manifest.channels.supervisor_forced_reference_linearization plus reference.status.forced_reference_linearization",
+      "code": [
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "4195-4245",
+          "landmark": "linearisation selection"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5240-5259",
+          "landmark": "channel manifest"
+        }
+      ]
+    },
+    {
+      "channel": "lane_entry_heading_cost",
+      "trigger": "lane-entry heading cost enabled and ego lies inside configured goal window/error guard",
+      "position": "before SMPC solve during cost-profile construction",
+      "action": "adds horizon-varying heading-error weights to each active branch cost",
+      "telemetry": "debug_payload.supervisor_behavioural_authority.complete_candidate_channel_manifest.channels.lane_entry_heading_cost plus debug_payload.lane_entry_heading_cost",
+      "code": [
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "1609-1655",
+          "landmark": "_lane_entry_heading_cost_profile"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "4864-4866",
+          "landmark": "debug payload"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5260-5279",
+          "landmark": "channel manifest"
+        }
+      ]
+    },
+    {
+      "channel": "rule_smpc_bypass",
+      "trigger": "_rule_yield_smpc_bypass_reason returns a reason and authority is enabled",
+      "position": "immediately before solver execution",
+      "action": "skips the SMPC solve and uses the rule-yield candidate path",
+      "telemetry": "debug_payload.supervisor_behavioural_authority.complete_candidate_channel_manifest.channels.rule_smpc_bypass plus supervisor_behavioural_authority.rule_smpc_bypass_channel",
+      "code": [
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "4650-4678",
+          "landmark": "authority-gated bypass reason"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "4765-4772",
+          "landmark": "bypass telemetry"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5280-5295",
+          "landmark": "channel manifest"
+        }
+      ]
+    },
+    {
+      "channel": "post_solver_action_and_desired_speed",
+      "trigger": "rule-aware post-solver candidate differs from nominal solver command/speed",
+      "position": "after solver or bypass candidate, before low-level control",
+      "action": "selects nominal or rule candidate acceleration, steering and desired speed according to action-filter mode",
+      "telemetry": "debug_payload.supervisor_behavioural_authority.complete_candidate_channel_manifest.channels.post_solver_action_and_desired_speed plus applied.post_solver_action_filter and nominal_solver_u0/v_des",
+      "code": [
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5020-5110",
+          "landmark": "candidate and integrate_post_solver_action_filter"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5296-5318",
+          "landmark": "channel manifest"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5448-5463",
+          "landmark": "applied telemetry"
+        }
+      ]
+    },
+    {
+      "channel": "release_recovery_state",
+      "trigger": "post-action supervisor state differs from neutral free-drive state",
+      "position": "after action arbitration, persisted across control steps",
+      "action": "updates seen/active/recovery-count/last-acceleration state used by later release and recovery decisions",
+      "telemetry": "debug_payload.supervisor_behavioural_authority.complete_candidate_channel_manifest.channels.release_recovery_state plus factual_behaviour_state_after_action and shadow_behaviour_state_after_action",
+      "code": [
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5114-5199",
+          "landmark": "factual and shadow recovery state"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5319-5343",
+          "landmark": "channel manifest"
+        }
+      ]
+    },
+    {
+      "channel": "next_control_history",
+      "trigger": "executed command differs from the nominal solver command",
+      "position": "after action arbitration, before the next SMPC update",
+      "action": "writes executed u0 to control_prev, changing next-step rate constraints and warm-history semantics",
+      "telemetry": "debug_payload.supervisor_behavioural_authority.complete_candidate_channel_manifest.channels.next_control_history plus applied.control_prev_after",
+      "code": [
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5109-5113",
+          "landmark": "control_prev receives executed command"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5200-5211",
+          "landmark": "requested/applied deltas"
+        },
+        {
+          "path": "core/scripts/carla/policies/smpc_agent.py",
+          "lines": "5344-5360",
+          "landmark": "channel manifest"
+        }
+      ]
+    }
+  ]
+}

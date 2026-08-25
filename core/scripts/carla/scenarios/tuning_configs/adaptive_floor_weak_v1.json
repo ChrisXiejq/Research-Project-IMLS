@@ -1,0 +1,6 @@
+{
+  "approach_preclearance_floor": 1.66,
+  "critical_preclearance_floor": 1.72,
+  "near_preclearance_floor": 1.78,
+  "variant_name": "floor_weak"
+}

@@ -1,0 +1,218 @@
+{
+  "candidate_ids": [
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135
+  ],
+  "formal_use_condition": "Candidates remain unexecuted until the frozen shadow protocol and its pre-outcome integrity/spawn gates pass; generation does not authorise CARLA.",
+  "generated_before_shadow_outcomes": true,
+  "generation_order": "reproduce/discard original 50 speeds, original 50 offsets, R3 five speeds, R3 five offsets, SF4 ten speeds and SF4 ten offsets; then draw 20 prospective speeds followed by 20 prospective offsets",
+  "no_id_overlap_with": {
+    "original": [
+      1,
+      50
+    ],
+    "r3": [
+      101,
+      102,
+      103,
+      104,
+      105
+    ],
+    "sf4": [
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114,
+      115
+    ]
+  },
+  "numpy_bit_generator": "PCG64",
+  "numpy_generator": "default_rng/PCG64",
+  "offset_distribution": "Uniform(-2.5, 2.5) m",
+  "records": [
+    {
+      "ego_init_id": 116,
+      "init_speed": 9.00784217438446,
+      "sha256": "c72f2e73830d3fae9f46b52b3773f559b9639d1840d5abd5e8af525a56f10d03",
+      "start_longitudinal_offset": -2.4235337515379363
+    },
+    {
+      "ego_init_id": 117,
+      "init_speed": 9.31927669681739,
+      "sha256": "cb1540704e2dcab6e690cda854bcd4d733cf4bab4490d8929dde88ae930cfc42",
+      "start_longitudinal_offset": -0.7541315743444926
+    },
+    {
+      "ego_init_id": 118,
+      "init_speed": 8.457508906844534,
+      "sha256": "0ea91b2b320f3a508a9bf2ed7e8cd693266792dc1c19bc94d5ff745bf828af19",
+      "start_longitudinal_offset": 0.7965500944348414
+    },
+    {
+      "ego_init_id": 119,
+      "init_speed": 8.436836461727468,
+      "sha256": "66118fa57d3d034b1007cec3675e6aec185dc3573c79b9cbeae9767cd4b1af25",
+      "start_longitudinal_offset": -1.173919339033237
+    },
+    {
+      "ego_init_id": 120,
+      "init_speed": 9.90979811792603,
+      "sha256": "cad49d75e9645a7c2e8a18eb316756581b427f2f199944252003b07bbe9338eb",
+      "start_longitudinal_offset": 0.7600941922047233
+    },
+    {
+      "ego_init_id": 121,
+      "init_speed": 9.449785868328478,
+      "sha256": "a8d072ed33f9fdef6231c0df2faaa9c4658bf9a1771d48c04c789716543d5d9b",
+      "start_longitudinal_offset": 2.1374009831176197
+    },
+    {
+      "ego_init_id": 122,
+      "init_speed": 8.068673696517296,
+      "sha256": "a848ad9a2574ce091c4d10a795220f320c6dfd37275f57f3fe2bf5341a7a3e3a",
+      "start_longitudinal_offset": -0.16930620707782895
+    },
+    {
+      "ego_init_id": 123,
+      "init_speed": 9.963234068383265,
+      "sha256": "c976a47a3e0f6e153720eb93ceb8fb81ad841522eca72e1e74ed476b10349fa7",
+      "start_longitudinal_offset": -1.464452196672335
+    },
+    {
+      "ego_init_id": 124,
+      "init_speed": 8.016992332583778,
+      "sha256": "18d75656dfd1468bcbe43e254578fac1810efb26207cc590f543c66bfa81a24f",
+      "start_longitudinal_offset": 2.1135712231988886
+    },
+    {
+      "ego_init_id": 125,
+      "init_speed": 8.529923763302582,
+      "sha256": "1e0f057f5af69701f167c6266d21b409954add53508532754d40c510905a7ff6",
+      "start_longitudinal_offset": 2.229283054712993
+    },
+    {
+      "ego_init_id": 126,
+      "init_speed": 9.834648303069205,
+      "sha256": "91530a6964952280116ad83c1a01843a60c3956dc5cf96a30b9f402616ccdc32",
+      "start_longitudinal_offset": -1.8254717304050727
+    },
+    {
+      "ego_init_id": 127,
+      "init_speed": 8.160775432779605,
+      "sha256": "91d7a44cc1fa49590c3934a866e9af81bd52e885034d5f4e54acaa758499ea17",
+      "start_longitudinal_offset": 1.9981926688404101
+    },
+    {
+      "ego_init_id": 128,
+      "init_speed": 9.709431408440656,
+      "sha256": "5f406979dd05913890e351151e58113e613c285206347cb5435c3ee19119763d",
+      "start_longitudinal_offset": -1.0392541658079462
+    },
+    {
+      "ego_init_id": 129,
+      "init_speed": 8.289354794742726,
+      "sha256": "1e2563eb46091cb280b0687b86b8c002df231a833ffd29b076b43d60e852078c",
+      "start_longitudinal_offset": -1.8591227838987705
+    },
+    {
+      "ego_init_id": 130,
+      "init_speed": 8.358482155458335,
+      "sha256": "a773a19be8cab946ad7c476913b04800e15a717f2ec950226e304e3b476b6c7e",
+      "start_longitudinal_offset": -1.909616548833755
+    },
+    {
+      "ego_init_id": 131,
+      "init_speed": 9.569346946598449,
+      "sha256": "5d1f599e839929858aad838e2eb64868af4a448b096e18a67f405683b8fb6e84",
+      "start_longitudinal_offset": 1.297250385425902
+    },
+    {
+      "ego_init_id": 132,
+      "init_speed": 9.79084811322419,
+      "sha256": "8c0e2ecaf881e412601b3853441a565db56f74c60b90ab48752484959604ddf8",
+      "start_longitudinal_offset": -2.057787427905799
+    },
+    {
+      "ego_init_id": 133,
+      "init_speed": 8.921468652144595,
+      "sha256": "b1ad0c52842157b3848b3a69a34ed3dbde09203024b1f5c83a4d1345bcb4c64e",
+      "start_longitudinal_offset": 1.315758718031688
+    },
+    {
+      "ego_init_id": 134,
+      "init_speed": 8.07696736440444,
+      "sha256": "74bc839eb42b4fcf343b04a40783a6ac5458cce2930095b04c303a8c4b14af8d",
+      "start_longitudinal_offset": -1.3019072300690582
+    },
+    {
+      "ego_init_id": 135,
+      "init_speed": 8.630610520425076,
+      "sha256": "77335ef52f91234bda3dd2265d335b63feb9e7c7bc16aa8a6309438c7530c200",
+      "start_longitudinal_offset": -0.4060810503853973
+    }
+  ],
+  "schema_version": "supervisor_masking_shadow_init_candidates_v2",
+  "seed": 123,
+  "speed_distribution": "Uniform(8.0, 10.0) m/s",
+  "status": "frozen_candidates_require_protocol_preflight",
+  "stream_counts_before_shadow": {
+    "original_offsets": 50,
+    "original_speeds": 50,
+    "r3_offsets": 5,
+    "r3_speeds": 5,
+    "sf4_offsets": 10,
+    "sf4_speeds": 10
+  },
+  "stream_predecessors": {
+    "r3": {
+      "ids": [
+        101,
+        102,
+        103,
+        104,
+        105
+      ],
+      "path": "core/scripts/carla/scenarios/inits/distinction_r3_new/R3_INIT_GENERATION_MANIFEST.json",
+      "sha256": "85ec9738373f986347668a6495c8eb717883d70a3a8383174b0066f770a631d4"
+    },
+    "sf4": {
+      "ids": [
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115
+      ],
+      "path": "core/scripts/carla/scenarios/inits/distinction_sf4_supervisor_authority_ablation/SF4_INIT_CANDIDATE_MANIFEST.json",
+      "sha256": "5b50e5af0f35f083ea106e38cb197c20c8062c1553a8458ccd590c51aad04cc0"
+    }
+  }
+}

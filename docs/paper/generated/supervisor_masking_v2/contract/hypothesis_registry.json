@@ -1,0 +1,117 @@
+{
+  "hypotheses": {
+    "H1": {
+      "candidate_control_outcome": "supervisor request, bypass/fallback path and candidate-minus-nominal command magnitude",
+      "claimable_conclusion": "Complete authority achieved nominal yielding and completion in all tested authority-on SF4 rollouts if canonical reconciliation passes.",
+      "current_verdict_vocabulary": [
+        "supported_in_tested_sample",
+        "mixed",
+        "refuted"
+      ],
+      "executed_outcome": "completion, yield-rule compliance, collisions, minimum footprint separation and executed-command replacement",
+      "falsification_rule": "Refute the tested-sample effectiveness claim if authority-on rollouts do not consistently yield and complete, or exhibit adverse collisions/yield-order failures incompatible with the claim.",
+      "independent_unit": "SF4 ego_init_id cluster",
+      "name": "Nominal physical yielding under complete supervisor authority",
+      "population_boundary": "Town05 right-hand-traffic ego-left-turn versus opposing-straight target; 10 paired SF4 initialisation groups and the complete channel bundle only.",
+      "prohibited_overclaims": [
+        "formal safety guarantee",
+        "general or real-road safety",
+        "attribution to one individual rule"
+      ],
+      "sources": [
+        {
+          "locator": "/",
+          "path": "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/results/analysis/sf4_inference.json",
+          "sha256": "86582d320389a39a52c38038bdf90161744f2a10ce19562db96a6cf8665321f4"
+        }
+      ],
+      "treatment": "complete seven-channel supervisor authority on versus monitor-only off",
+      "upstream_outcome": "not_applicable_authority_is_the_downstream_treatment"
+    },
+    "H2": {
+      "candidate_control_outcome": "aligned nominal SMPC command separation when available",
+      "claimable_conclusion": "Capacity, Information and Architecture change bounded prediction, while current evidence tests whether rather than presumes supervisor-specific masking.",
+      "current_verdict_vocabulary": [
+        "retained_upstream_difference",
+        "attenuated_candidate_difference",
+        "compressed_executed_difference",
+        "no_detected_physical_transfer",
+        "consistent_with_masking",
+        "causally_identified_masking"
+      ],
+      "executed_outcome": "supervisor intervention, executed command and completion/separation outcomes",
+      "falsification_rule": "Refute supervisor-induced masking if predictor distinctions transfer without additional authority-linked attenuation; treat absent aligned or non-saturated authority contrasts as unidentified rather than confirmation.",
+      "independent_unit": "offline ego initialisation group for CIA; V3 paired ego_init_id for deployed transfer",
+      "name": "Predictor advantage transfer through the supervised stack",
+      "population_boundary": "CIA and V3 are separate populations; only actually deployed matched policies license physical-transfer statements.",
+      "prohibited_overclaims": [
+        "all predictor improvements are masked",
+        "attention is generally ineffective",
+        "non-significance proves equality"
+      ],
+      "sources": [
+        {
+          "locator": "/",
+          "path": "docs/paper/generated/capacity_history_v3/final/table_three_axis_contrasts.csv",
+          "sha256": "a4ee8b0492a33c6eb6e55a110d0e8bd901461ab108667a884b04c3416023ef8c"
+        },
+        {
+          "locator": "/P_star_minus_B1 contrasts",
+          "path": "docs/paper/generated/capacity_history_v3/final/table_model_by_risk_contrasts.csv",
+          "sha256": "c38a28bc3d1d2055b7959a66bedaa62c29ed90a98116905019aa39608508e938"
+        }
+      ],
+      "subquestions": {
+        "Architecture": "matched MLP versus Transformer direct gap and history-gain interaction",
+        "Capacity": "small, medium and large Transformer tiers at fixed full history",
+        "Information": "0.0, 0.4 and 1.0 second histories within matched families"
+      },
+      "treatment": "matched predictor contrasts, including B1 versus validation-frozen P* where deployed",
+      "upstream_outcome": "rollout-macro mixture NLL, top-1 ADE/FDE and in-loop prediction error"
+    },
+    "H3": {
+      "candidate_control_outcome": "aligned nominal SMPC command separation and solver/fallback status",
+      "claimable_conclusion": "Adaptive risk is evaluated across the full fixed frontier and any physical similarity is decomposed before masking language is used.",
+      "current_verdict_vocabulary": [
+        "retained_constraint_difference",
+        "controller_compression",
+        "compressed_executed_difference",
+        "no_detected_physical_transfer",
+        "consistent_with_masking",
+        "causally_identified_masking"
+      ],
+      "executed_outcome": "supervisor intervention, executed command, completion and minimum footprint separation",
+      "falsification_rule": "Refute supervisor-induced masking if risk-policy candidate distinctions pass through authority unchanged; if constraint or nominal-command differences are already absent, attribute no unique supervisor mechanism.",
+      "independent_unit": "R3 ego_init_cluster; V3/SF4 ego_init_id, reported separately",
+      "name": "Risk-allocation distinction transfer through the supervised stack",
+      "population_boundary": "R3 full fixed frontier, V3 selected-model cells, SF4 authority cells and licensed legacy timing evidence remain unpooled.",
+      "prohibited_overclaims": [
+        "adaptive risk is universally superior",
+        "the supervisor alone causes all risk-policy similarity",
+        "non-significance proves equality"
+      ],
+      "sources": [
+        {
+          "locator": "/",
+          "path": "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv",
+          "sha256": "3aa0960d32509e10c5ceaba23ec3ee198c71424cd1b6cac1e11869eddafa8e03"
+        },
+        {
+          "locator": "/model_by_risk contrasts",
+          "path": "docs/paper/generated/capacity_history_v3/final/table_model_by_risk_contrasts.csv",
+          "sha256": "c38a28bc3d1d2055b7959a66bedaa62c29ed90a98116905019aa39608508e938"
+        },
+        {
+          "locator": "/risk-by-authority interaction",
+          "path": "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/results/analysis/sf4_inference.json",
+          "sha256": "86582d320389a39a52c38038bdf90161744f2a10ce19562db96a6cf8665321f4"
+        }
+      ],
+      "treatment": "adaptive allocation versus every declared fixed-risk frontier comparator",
+      "upstream_outcome": "per-mode allocation, target probability, tightening and constraint activity where logged"
+    }
+  },
+  "paper_argument": "In the tested Town05 right-hand-traffic left-turn give-way task, complete rule-based supervisor authority achieved nominal physical yielding, while predictor and risk-allocation distinctions did not uniformly transfer to executed behaviour; causal masking is reserved for aligned or non-saturated intervention contrasts that identify the supervisor mechanism.",
+  "schema_version": "supervisor_masking_hypothesis_registry_v2",
+  "status": "pass"
+}

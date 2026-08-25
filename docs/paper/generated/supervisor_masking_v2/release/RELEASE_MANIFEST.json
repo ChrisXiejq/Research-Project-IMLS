@@ -1,0 +1,211 @@
+{
+  "checks": {
+    "all_scalars_have_source_and_aggregation": true,
+    "figure_audit_pass": true,
+    "four_figures": true,
+    "h3_all_12_comparators_visible": true,
+    "seven_required_tables": true,
+    "shadow_figure_omitted_without_aligned_evidence": true,
+    "source_hashes_verified": true
+  },
+  "figures": [
+    {
+      "caption": "The ego turns left across an opposing priority vehicle whose motion line defines a dynamic route conflict point. MultiPath supplies mode probabilities, means and per-step covariances; risk allocation parameterises the multimodal SMPC; the complete rule bundle can intervene through seven audited channels before and after optimisation. Measurements are attached to their identified layer.",
+      "figure_id": "Figure 1",
+      "files": [
+        {
+          "bytes": 36734,
+          "path": "figures/figure01_project_operator_chain.pdf",
+          "sha256": "db56c4cebbd557d8fd972a55554225ebe8ca3249d8753e3a98dd5fc8f8552f73"
+        },
+        {
+          "bytes": 229617,
+          "path": "figures/figure01_project_operator_chain.png",
+          "sha256": "36bc2e7649f3572fa6c4bb094a057653b6378ee0284f22f5069684aff393afa5"
+        }
+      ],
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "legend_count": 1,
+      "populations": [],
+      "sources": [
+        "docs/paper/generated/supervisor_masking_v2/method_audit/seven_channel_contract.csv"
+      ],
+      "stem": "figure01_project_operator_chain",
+      "title": "Right-hand-traffic give-way task and cross-layer operator chain",
+      "units": [
+        "m",
+        "s",
+        "m s^-2"
+      ]
+    },
+    {
+      "caption": "SF4 toggles the complete seven-channel bundle across 10 initialization groups. Authority enabled completed 40/40 rollouts with no yield failure or adverse collision; monitor only completed 0/40 and is outcome-floor saturated. Requests remained observable when actuation was blocked, while command replacement and rule bypass occurred only with authority enabled. These are nominal tested-sample outcomes, not a formal safety guarantee or a channel-specific causal effect.",
+      "figure_id": "Figure 2",
+      "files": [
+        {
+          "bytes": 27463,
+          "path": "figures/figure02_h1_authority_effect.pdf",
+          "sha256": "8c22e7380e87cb7f787c0a4a55fc8dabffdff4b0df35c5b6132e73cd5adaab73"
+        },
+        {
+          "bytes": 306702,
+          "path": "figures/figure02_h1_authority_effect.png",
+          "sha256": "a83a8f7f62ef583417c9e90a45627c10d7b138bea067c3abccff7a91b77ec4df"
+        }
+      ],
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "legend_count": 3,
+      "populations": [
+        "F3_sf4_supervisor_authority"
+      ],
+      "sources": [
+        "docs/paper/generated/supervisor_masking_v2/evidence/supervisor_masking_evidence.json#/H1_authority"
+      ],
+      "stem": "figure02_h1_authority_effect",
+      "title": "Complete supervisor authority is active and decisive in the tested task",
+      "units": [
+        "fraction",
+        "m s^-2"
+      ]
+    },
+    {
+      "caption": "Foundation adaptation (F1), the Capacity\u2013Information\u2013Architecture study (F4), and deployed closed-loop transfer (F5) are visually separated and not pooled. P* retains an in-loop ADE advantage under fixed risk, while completion and clearance contrasts show no uniform physical advantage. CIA candidates were not all deployed, and the factual trajectories are not same-state counterfactuals; the result is consistent with, but does not identify, supervisor-specific masking.",
+      "figure_id": "Figure 3",
+      "files": [
+        {
+          "bytes": 29155,
+          "path": "figures/figure03_h2_predictor_transfer.pdf",
+          "sha256": "83d0255310fd3cfed33cacdef4d5decd68517f7631bc8b3c911d1b7c80c5ff0d"
+        },
+        {
+          "bytes": 446124,
+          "path": "figures/figure03_h2_predictor_transfer.png",
+          "sha256": "17c0fa78be0f8c819bce9c39f28d17ddfa4675a2fa7f730ee33fbf1ce80dc888"
+        }
+      ],
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "legend_count": 6,
+      "populations": [
+        "F1_foundation_adaptation",
+        "F4_capacity_information_architecture_v3",
+        "F5_v3_selected_model_closed_loop"
+      ],
+      "sources": [
+        "docs/paper/generated/supervisor_masking_v2/evidence/supervisor_masking_evidence.json#/H2_predictor_transfer",
+        "docs/paper/generated/capacity_history_v3/final/table_offline_model_cells.csv",
+        "docs/paper/generated/capacity_history_v3/final/table_three_axis_contrasts.csv"
+      ],
+      "stem": "figure03_h2_predictor_transfer",
+      "title": "Predictor distinctions are retained upstream but do not transfer uniformly",
+      "units": [
+        "%",
+        "nats step^-1",
+        "s",
+        "m"
+      ]
+    },
+    {
+      "caption": "All 12 declared adaptive-versus-fixed frontier comparisons are retained in R3 (F2); adaptive dominates three. In V3 (F5), adaptive allocation changes tightening by about 0.26 while nominal and executed mean-acceleration contrasts are much smaller. SF4 (F3) supplies an authority interaction, but the monitor-only arm completes 0/40 and is floor saturated. Populations are juxtaposed, not pooled; these factual trajectories do not identify supervisor-specific attenuation.",
+      "figure_id": "Figure 4",
+      "files": [
+        {
+          "bytes": 30790,
+          "path": "figures/figure04_h3_risk_transfer.pdf",
+          "sha256": "1f139fb629c0a8c714e099baf045dbb15a7526f0a61743495afc9d5fa736a2e9"
+        },
+        {
+          "bytes": 492169,
+          "path": "figures/figure04_h3_risk_transfer.png",
+          "sha256": "9c17e91e1b94b1db077b003db5a44d3fca4553d120cdd53416355d2669b17312"
+        }
+      ],
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "legend_count": 6,
+      "populations": [
+        "F2_r3_predictor_risk",
+        "F5_v3_selected_model_closed_loop",
+        "F3_sf4_supervisor_authority"
+      ],
+      "sources": [
+        "docs/paper/generated/supervisor_masking_v2/evidence/supervisor_masking_evidence.json#/H3_risk_transfer"
+      ],
+      "stem": "figure04_h3_risk_transfer",
+      "title": "Risk allocation is active, context dependent and progressively compressed",
+      "units": [
+        "s",
+        "m",
+        "m s^-2",
+        "dimensionless tightening"
+      ]
+    }
+  ],
+  "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+  "identification_boundary": "H1 is bounded to nominal outcomes in the tested geometry. H2/H3 use causal masking only when aligned command evidence identifies it; otherwise non-transfer, compression and non-identification remain distinct.",
+  "schema_version": "supervisor_masking_v2_release_manifest_v1",
+  "status": "pass",
+  "tables": [
+    {
+      "bytes": 1716,
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "path": "tables/table_hypothesis_verdicts.csv",
+      "rows": 3,
+      "scalar_rows": 0,
+      "sha256": "e4f473700ef2d5cf4170caeb2cae2d804a4e8c9dca5877d7e6056bc6cb750096",
+      "table": "table_hypothesis_verdicts.csv"
+    },
+    {
+      "bytes": 5350,
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "path": "tables/table_supervisor_channels.csv",
+      "rows": 7,
+      "scalar_rows": 0,
+      "sha256": "3bf78be6ada200ca7008b59a5fd8a241bdfb8a7491eaa543a35fe3166a07ead1",
+      "table": "table_supervisor_channels.csv"
+    },
+    {
+      "bytes": 11395,
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "path": "tables/table_formula_to_code.csv",
+      "rows": 13,
+      "scalar_rows": 0,
+      "sha256": "dbdedc106ba64902f3a4c4366718bf9ba89880a16c6a59645d0f78de2f7329f7",
+      "table": "table_formula_to_code.csv"
+    },
+    {
+      "bytes": 6828,
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "path": "tables/table_predictor_transfer.csv",
+      "rows": 21,
+      "scalar_rows": 21,
+      "sha256": "083f258dfa895200aabc0a3aa56085177c8c32332112ccf6c35246297c6fab03",
+      "table": "table_predictor_transfer.csv"
+    },
+    {
+      "bytes": 15097,
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "path": "tables/table_risk_transfer.csv",
+      "rows": 42,
+      "scalar_rows": 42,
+      "sha256": "9c13653676399a4c67758a7262fb1b889c10711b7ee07757a052c53734ca0202",
+      "table": "table_risk_transfer.csv"
+    },
+    {
+      "bytes": 1112,
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "path": "tables/table_solver_paths.csv",
+      "rows": 4,
+      "scalar_rows": 4,
+      "sha256": "36befb1182eef5652290dc8c01c931f269eac4b46c1a52dd2d03653e51dae18b",
+      "table": "table_solver_paths.csv"
+    },
+    {
+      "bytes": 1893,
+      "generator": "core/scripts/models/plot_supervisor_masking_v2_figures.py",
+      "path": "tables/table_limitations.csv",
+      "rows": 5,
+      "scalar_rows": 0,
+      "sha256": "33fcc3927b4fce2bd9b4201851315b7079e69d92190010586901c27b59efb50d",
+      "table": "table_limitations.csv"
+    }
+  ]
+}

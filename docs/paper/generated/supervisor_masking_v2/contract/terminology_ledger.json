@@ -1,0 +1,114 @@
+{
+  "schema_version": "supervisor_masking_terminology_ledger_v2",
+  "status": "pass",
+  "terms": [
+    {
+      "canonical_term": "MultiPath",
+      "code_or_evidence_locator": "core/scripts/models/deploy_multipath_model.py",
+      "definition": "A fixed-anchor multimodal trajectory predictor that emits mode probabilities and per-mode future Gaussian states.",
+      "do_not_conflate_with": "a deterministic single-trajectory regressor",
+      "measurement_layer": "upstream_prediction",
+      "symbol": "p(Y|X)=sum_k pi_k p_k(Y|X)",
+      "term_id": "multipath_predictor"
+    },
+    {
+      "canonical_term": "multimodal SMPC",
+      "code_or_evidence_locator": "core/scripts/carla/utils/mpc_utils.py",
+      "definition": "A receding-horizon stochastic controller that consumes multimodal target predictions and applies chance-constraint tightening.",
+      "do_not_conflate_with": "the post-solver rule-based supervisor",
+      "measurement_layer": "candidate_control",
+      "symbol": "u_nom=pi_SMPC(x,Y_hat,delta)",
+      "term_id": "multimodal_smpc"
+    },
+    {
+      "canonical_term": "fixed risk allocation",
+      "code_or_evidence_locator": "core/scripts/carla/policies/smpc_agent.py",
+      "definition": "A declared time-invariant risk/tightening policy used by the stochastic collision constraints.",
+      "do_not_conflate_with": "constant physical clearance",
+      "measurement_layer": "risk_constraint",
+      "symbol": "delta_t=delta_fixed",
+      "term_id": "fixed_risk_allocation"
+    },
+    {
+      "canonical_term": "adaptive risk allocation",
+      "code_or_evidence_locator": "core/scripts/carla/policies/smpc_agent.py",
+      "definition": "An interaction-state-dependent allocation that changes per-mode target probability or tightening within a rollout.",
+      "do_not_conflate_with": "the supervisor brake rule",
+      "measurement_layer": "risk_constraint",
+      "symbol": "delta_t=rho(x_t,Y_hat_t)",
+      "term_id": "adaptive_risk_allocation"
+    },
+    {
+      "canonical_term": "candidate command",
+      "code_or_evidence_locator": "core/scripts/carla/policies/supervisor_action_filter.py",
+      "definition": "The nominal first SMPC command before post-solver supervisor arbitration.",
+      "do_not_conflate_with": "the rule-proposed supervisor candidate",
+      "measurement_layer": "candidate_control",
+      "symbol": "u_nom",
+      "term_id": "controller_candidate_command"
+    },
+    {
+      "canonical_term": "supervisor candidate command",
+      "code_or_evidence_locator": "core/scripts/carla/policies/supervisor_action_filter.py",
+      "definition": "A rule-proposed replacement command computed whether or not behavioural authority permits application.",
+      "do_not_conflate_with": "the nominal solver command or executed command",
+      "measurement_layer": "supervisor_intervention",
+      "symbol": "u_sup",
+      "term_id": "supervisor_candidate_command"
+    },
+    {
+      "canonical_term": "executed command",
+      "code_or_evidence_locator": "core/scripts/carla/policies/supervisor_action_filter.py",
+      "definition": "The command on the factual vehicle-control path after authority arbitration.",
+      "do_not_conflate_with": "an unactuated shadow command",
+      "measurement_layer": "executed_control",
+      "symbol": "u_exec",
+      "term_id": "executed_command"
+    },
+    {
+      "canonical_term": "supervisor authority",
+      "code_or_evidence_locator": "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/results/sf4_supervisor_behavioural_authority_run_contract.json",
+      "definition": "The complete seven-channel behavioural bundle controlling reference shaping, linearisation/cost changes, bypass, post-solver replacement and recovery state.",
+      "do_not_conflate_with": "one isolated safety-filter rule",
+      "measurement_layer": "cross_layer_intervention",
+      "symbol": "A in {on,off}",
+      "term_id": "supervisor_authority"
+    },
+    {
+      "canonical_term": "attenuation",
+      "code_or_evidence_locator": "docs/paper/generated/supervisor_bottleneck_v1/telemetry_audit/attenuation_claim_audit.json",
+      "definition": "A quantified reduction in an aligned policy contrast between two adjacent measurement layers.",
+      "do_not_conflate_with": "causal supervisor masking without an identifying contrast",
+      "measurement_layer": "aligned_cross_layer_estimand",
+      "symbol": "rho=d_after/(d_before+epsilon)",
+      "term_id": "attenuation"
+    },
+    {
+      "canonical_term": "compression",
+      "code_or_evidence_locator": "docs/paper/generated/supervisor_bottleneck_v1/telemetry_audit/attenuation_claim_audit.json",
+      "definition": "A descriptive contraction of policy separation downstream; by itself it does not identify which component caused the contraction.",
+      "do_not_conflate_with": "causally identified masking",
+      "measurement_layer": "descriptive_cross_layer",
+      "symbol": "d_downstream<d_upstream",
+      "term_id": "compression"
+    },
+    {
+      "canonical_term": "not transferred",
+      "code_or_evidence_locator": "docs/paper/generated/supervisor_bottleneck_v1/scientific_contract/claim_evidence_boundary.json",
+      "definition": "An upstream difference whose declared downstream outcome contrast is not detected at the available precision and population.",
+      "do_not_conflate_with": "proof of equivalence or uselessness",
+      "measurement_layer": "cross_population_verdict",
+      "symbol": "Delta_upstream!=0; Delta_outcome not detected",
+      "term_id": "not_transferred"
+    },
+    {
+      "canonical_term": "masking",
+      "code_or_evidence_locator": "docs/paper/generated/supervisor_bottleneck_v1/telemetry_audit/attenuation_claim_audit.json",
+      "definition": "A causal supervisor effect that reduces an upstream-policy distinction, licensed only by aligned same-state mappings or a non-saturated policy-by-authority interaction.",
+      "do_not_conflate_with": "similar final trajectories under shared supervision",
+      "measurement_layer": "identified_intervention_effect",
+      "symbol": "Delta_policy x authority",
+      "term_id": "masking"
+    }
+  ]
+}

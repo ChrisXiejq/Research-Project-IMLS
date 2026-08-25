@@ -846,6 +846,8 @@ class SMPCAgent(object):
         self._debug_setup_written = False
         self._debug_first_failure_written = False
         self._debug_completion_written = False
+        self._last_debug_payload = None
+        self._same_state_shadow_identity = None
 
         # Debugging: see the reference solution.
 
@@ -934,6 +936,206 @@ class SMPCAgent(object):
         self.debug_savedir = savedir
         if label is not None:
             self.debug_label = label
+
+    def configure_same_state_shadow_only(
+        self, *, predictor, risk_policy, supervisor_mapping
+    ):
+        """Mark this policy as a non-actuating same-state branch evaluator.
+
+        The method does not create or apply a CARLA ``VehicleControl``.  It
+        only records the immutable branch identity checked by
+        :meth:`run_same_state_shadow_step`.
+        """
+
+        mapping = str(supervisor_mapping).strip().lower()
+        if mapping not in {"enabled", "monitor_only"}:
+            raise ValueError(f"Invalid shadow supervisor mapping: {mapping!r}")
+        expected_authority = "on" if mapping == "enabled" else "off"
+        if self.yield_supervisor_behavioural_authority_mode != expected_authority:
+            raise ValueError(
+                "Shadow agent authority configuration does not match mapping: "
+                f"mapping={mapping}, authority="
+                f"{self.yield_supervisor_behavioural_authority_mode}"
+            )
+        self._same_state_shadow_identity = {
+            "predictor": str(predictor),
+            "risk_policy": str(risk_policy),
+            "supervisor_mapping": mapping,
+        }
+
+    def capture_same_state_shadow_snapshot(self):
+        """Deep-copy mutable planning state before the factual branch runs."""
+
+        fields = (
+            "time",
+            "control_prev",
+            "prev_opt",
+            "prev_nom_inputs",
+            "warm_start",
+            "t_ref",
+            "feas_ref_states_new",
+            "feas_ref_inputs_new",
+            "feas_ref_route_s_new",
+            "_yield_stop_seen",
+            "_yield_stop_active_prev",
+            "_yield_recovery_steps_remaining",
+            "_yield_clear_path_release_steps_remaining",
+            "_yield_last_applied_accel",
+            "_rule_yield_phase",
+            "_yield_shadow_behavior_state",
+            "_observed_target_tracks",
+            "_reference_generation_status",
+            "goal_reached",
+        )
+        missing = [name for name in fields if not hasattr(self, name)]
+        if missing:
+            raise AttributeError(
+                "Missing same-state snapshot fields: " + ", ".join(missing)
+            )
+        location = self.vehicle.get_location()
+        transform = self.vehicle.get_transform()
+        velocity = self.vehicle.get_velocity()
+        acceleration = self.vehicle.get_acceleration()
+        return {
+            "schema_version": "smpc_same_state_shadow_snapshot_v1",
+            "vehicle_observation": {
+                "type_id": self.vehicle.type_id,
+                "location": [location.x, location.y, location.z],
+                "rotation": [
+                    transform.rotation.pitch,
+                    transform.rotation.yaw,
+                    transform.rotation.roll,
+                ],
+                "velocity": [velocity.x, velocity.y, velocity.z],
+                "acceleration": [
+                    acceleration.x,
+                    acceleration.y,
+                    acceleration.z,
+                ],
+                "speed_limit": self.vehicle.get_speed_limit(),
+            },
+            "fields": {
+                name: copy.deepcopy(getattr(self, name)) for name in fields
+            },
+        }
+
+    def _load_same_state_shadow_snapshot(self, snapshot):
+        if self._same_state_shadow_identity is None:
+            raise RuntimeError(
+                "Only an explicitly configured shadow-only agent may load a "
+                "same-state snapshot"
+            )
+        if not isinstance(snapshot, dict) or snapshot.get("schema_version") != (
+            "smpc_same_state_shadow_snapshot_v1"
+        ):
+            raise ValueError("Invalid same-state shadow snapshot")
+        fields = snapshot.get("fields")
+        if not isinstance(fields, dict):
+            raise ValueError("Same-state shadow snapshot has no fields mapping")
+        for name, value in fields.items():
+            setattr(self, name, copy.deepcopy(value))
+
+        # Authority-off keeps the supervisor state machine in isolated shadow
+        # state.  Its factual behaviour fields must be neutral or run_step's
+        # manipulation check correctly fails closed.
+        if self._same_state_shadow_identity["supervisor_mapping"] == "monitor_only":
+            self._yield_shadow_behavior_state = {
+                "_yield_stop_seen": copy.deepcopy(fields["_yield_stop_seen"]),
+                "_yield_stop_active_prev": copy.deepcopy(
+                    fields["_yield_stop_active_prev"]
+                ),
+                "_yield_recovery_steps_remaining": copy.deepcopy(
+                    fields["_yield_recovery_steps_remaining"]
+                ),
+                "_yield_last_applied_accel": copy.deepcopy(
+                    fields["_yield_last_applied_accel"]
+                ),
+                "_rule_yield_phase": copy.deepcopy(fields["_rule_yield_phase"]),
+            }
+            self._yield_stop_seen = False
+            self._yield_stop_active_prev = False
+            self._yield_recovery_steps_remaining = 0
+            self._yield_last_applied_accel = None
+
+    def run_same_state_shadow_step(self, *, pred_dict, snapshot, branch_identity):
+        """Evaluate one branch and return debug only, never an actuatable control.
+
+        The caller owns one separately configured ``SMPCAgent`` per shadow
+        branch.  CARLA must not tick between snapshot capture, factual solve and
+        these evaluations.  Even though :meth:`run_step` internally creates a
+        low-level control, this wrapper discards it and exposes only the deep-
+        copied debug record plus an explicit zero-actuation attestation.
+        """
+
+        if self._same_state_shadow_identity is None:
+            raise RuntimeError("SMPCAgent is not configured as shadow-only")
+        expected = dict(self._same_state_shadow_identity)
+        observed = {
+            "predictor": str(branch_identity.get("predictor")),
+            "risk_policy": str(branch_identity.get("risk_policy")),
+            "supervisor_mapping": str(
+                branch_identity.get("supervisor_mapping")
+            ).strip().lower(),
+        }
+        if observed != expected:
+            raise ValueError(
+                f"Shadow branch identity mismatch: expected={expected}, "
+                f"observed={observed}"
+            )
+        self._load_same_state_shadow_snapshot(snapshot)
+        observation = snapshot.get("vehicle_observation")
+        if not isinstance(observation, dict):
+            raise ValueError("Same-state snapshot has no frozen vehicle observation")
+
+        class _FrozenVehicleObservation:
+            def __init__(self, value):
+                self.type_id = value["type_id"]
+                self._location = carla.Location(*value["location"])
+                pitch, yaw, roll = value["rotation"]
+                self._transform = carla.Transform(
+                    self._location,
+                    carla.Rotation(pitch=pitch, yaw=yaw, roll=roll),
+                )
+                self._velocity = carla.Vector3D(*value["velocity"])
+                self._acceleration = carla.Vector3D(*value["acceleration"])
+                self._speed_limit = float(value["speed_limit"])
+
+            def get_location(self):
+                return self._location
+
+            def get_transform(self):
+                return self._transform
+
+            def get_velocity(self):
+                return self._velocity
+
+            def get_acceleration(self):
+                return self._acceleration
+
+            def get_speed_limit(self):
+                return self._speed_limit
+
+        live_vehicle = self.vehicle
+        self.vehicle = _FrozenVehicleObservation(observation)
+        try:
+            self.run_step(copy.deepcopy(pred_dict))
+        finally:
+            self.vehicle = live_vehicle
+        payload = self.get_last_debug_payload()
+        if payload is None:
+            raise RuntimeError("Shadow branch produced no SMPC debug payload")
+        return {
+            "debug_payload": payload,
+            "shadow_actuated": False,
+            "actuation_interface_exposed": False,
+            "live_actor_queried_after_capture": False,
+            "branch_identity": expected,
+        }
+
+    def get_last_debug_payload(self):
+        """Return a defensive copy of the last fully assembled SMPC step log."""
+
+        return copy.deepcopy(self._last_debug_payload)
 
     def set_smpc_conflict_geometry(self, geometry):
         """Install static route geometry for the optimisation-internal filter."""
@@ -1528,6 +1730,7 @@ class SMPCAgent(object):
         return payload
 
     def _debug_record_step(self, payload, is_failure=False):
+        self._last_debug_payload = copy.deepcopy(payload)
         self._debug_append_jsonl("smpc_debug_steps.jsonl", payload)
         if is_failure:
             self._debug_write_json("smpc_debug_latest_failure.json", payload)

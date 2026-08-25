@@ -157,6 +157,22 @@ def _prepare_prediction_params(scenario_dict, args=None, dataset_metadata=None):
             pred_dict["prediction_logging_horizon"] = int(args.prediction_logging_horizon)
         if getattr(args, "prediction_logging_save_raster", False):
             pred_dict["prediction_logging_save_raster"] = True
+        if getattr(args, "enable_same_state_shadow_replay", False):
+            pred_dict.update({
+                "same_state_shadow_enabled": True,
+                "same_state_shadow_protocol": args.shadow_protocol,
+                "same_state_shadow_output_csv": args.shadow_output_csv,
+                "same_state_shadow_ego_init_id": int(args.shadow_ego_init_id),
+                "same_state_shadow_factual_rollout_id": args.shadow_factual_rollout_id or "",
+                "same_state_shadow_factual_predictor": args.shadow_factual_predictor,
+                "same_state_shadow_factual_risk_policy": args.shadow_factual_risk_policy,
+                "same_state_shadow_b1_weights": args.shadow_b1_weights,
+                "same_state_shadow_b1_anchors": args.shadow_b1_anchors,
+                "same_state_shadow_b1_calibration": args.shadow_b1_calibration,
+                "same_state_shadow_pstar_weights": args.shadow_pstar_weights,
+                "same_state_shadow_pstar_anchors": args.shadow_pstar_anchors,
+                "same_state_shadow_pstar_calibration": args.shadow_pstar_calibration,
+            })
     if dataset_metadata is not None:
         pred_dict["prediction_dataset_metadata"] = dict(dataset_metadata)
     return pred_dict
@@ -544,6 +560,20 @@ if __name__ == '__main__':
                         help="Override PredictionParams.model_anchors, relative to core/scripts/models unless absolute.")
     parser.add_argument("--prediction_model_calibration", default=None,
                         help="Validation-fitted calibration JSON; relative to core/scripts/models unless absolute.")
+    parser.add_argument("--enable_same_state_shadow_replay", action="store_true",
+                        help="Opt in to the frozen, non-actuating 2x2x2 same-state shadow experiment.")
+    parser.add_argument("--shadow_protocol", default=None)
+    parser.add_argument("--shadow_output_csv", default=None)
+    parser.add_argument("--shadow_ego_init_id", type=int, default=0)
+    parser.add_argument("--shadow_factual_rollout_id", default=None)
+    parser.add_argument("--shadow_factual_predictor", choices=["B1", "P_star"], default="B1")
+    parser.add_argument("--shadow_factual_risk_policy", choices=["fixed_medium", "adaptive"], default="fixed_medium")
+    parser.add_argument("--shadow_b1_weights", default=None)
+    parser.add_argument("--shadow_b1_anchors", default=None)
+    parser.add_argument("--shadow_b1_calibration", default=None)
+    parser.add_argument("--shadow_pstar_weights", default=None)
+    parser.add_argument("--shadow_pstar_anchors", default=None)
+    parser.add_argument("--shadow_pstar_calibration", default=None)
     parser.add_argument("--enable_prediction_logging", action="store_true",
                         help="Write per-rollout prediction dataset JSONL files for model calibration/fine-tuning.")
     parser.add_argument("--prediction_logging_stride", type=int, default=None,

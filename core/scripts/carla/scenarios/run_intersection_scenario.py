@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from typing import Any, Dict, List, Optional
 
 import carla
@@ -316,6 +316,22 @@ class PredictionParams:
     prediction_logging_horizon : int = 10
     prediction_logging_save_raster : bool = False
     prediction_dataset_metadata : Optional[Dict[str, Any]] = None
+
+    # Opt-in same-state command-transmission experiment.  Normal CARLA runs
+    # remain byte-for-byte on the legacy path unless this flag is explicit.
+    same_state_shadow_enabled : bool = False
+    same_state_shadow_protocol : Optional[str] = None
+    same_state_shadow_output_csv : Optional[str] = None
+    same_state_shadow_ego_init_id : int = 0
+    same_state_shadow_factual_rollout_id : str = ""
+    same_state_shadow_factual_predictor : str = "B1"
+    same_state_shadow_factual_risk_policy : str = "fixed_medium"
+    same_state_shadow_b1_weights : Optional[str] = None
+    same_state_shadow_b1_anchors : Optional[str] = None
+    same_state_shadow_b1_calibration : Optional[str] = None
+    same_state_shadow_pstar_weights : Optional[str] = None
+    same_state_shadow_pstar_anchors : Optional[str] = None
+    same_state_shadow_pstar_calibration : Optional[str] = None
 
     # TODO: future work includes things like how often to update preds (if not at the Carla fps).
 
@@ -885,6 +901,7 @@ class RunIntersectionScenario:
         # instrumentation can write into the scenario subrun folder.
         self.savedir = savedir
         os.makedirs(self.savedir, exist_ok=True)
+        self._same_state_shadow_configuration = None
         try:
             self.side_of_road = carla_params.side_of_road
             self.traffic_control = carla_params.traffic_control
@@ -901,6 +918,8 @@ class RunIntersectionScenario:
             if self.use_camera:
                 self._setup_camera(drone_viz_params)
             self._setup_predictions(prediction_params)
+            if prediction_params.same_state_shadow_enabled:
+                self._setup_same_state_shadow_launcher(prediction_params)
             self._write_implicit_safety_filter_contract(prediction_params)
         except Exception as e:
             self._destroy_created_actors()
@@ -918,6 +937,337 @@ class RunIntersectionScenario:
         # Needed for OpenCV/Carla world visualization.
         self.viz_params = drone_viz_params
         self.mode_rgb_colors = [(255, 0, 255), (255, 255, 0), (0, 255, 255)] # TODO: autogenerate
+
+    def configure_same_state_shadow_replay(
+        self,
+        *,
+        recorder,
+        solve_shadow,
+        ego_init_id,
+        factual_rollout_id,
+        factual_predictor,
+        factual_risk_policy,
+    ):
+        """Explicitly enable non-actuating same-state branch evaluation.
+
+        This opt-in is intentionally absent from the normal scenario
+        constructor path. ``solve_shadow`` receives a ``ShadowSolveRequest``
+        containing a deep-copied factual planning snapshot and must return
+        debug telemetry only.  Seven shadow evaluations are run before the
+        factual CARLA control is applied; their return values never enter the
+        actuation path.
+        """
+
+        if self._same_state_shadow_configuration is not None:
+            raise RuntimeError("Same-state shadow replay is already configured")
+        if not callable(solve_shadow):
+            raise TypeError("solve_shadow must be callable")
+        self._same_state_shadow_configuration = {
+            "recorder": recorder,
+            "solve_shadow": solve_shadow,
+            "ego_init_id": int(ego_init_id),
+            "factual_rollout_id": str(factual_rollout_id),
+            "factual_predictor": str(factual_predictor),
+            "factual_risk_policy": str(factual_risk_policy),
+        }
+
+    @staticmethod
+    def _shadow_artifact_sha256(path):
+        """Hash a frozen file or SavedModel directory deterministically."""
+        digest = __import__("hashlib").sha256()
+        resolved = os.path.realpath(path)
+        if os.path.isfile(resolved):
+            with open(resolved, "rb") as handle:
+                for block in iter(lambda: handle.read(1024 * 1024), b""):
+                    digest.update(block)
+            return digest.hexdigest()
+        if not os.path.isdir(resolved):
+            raise FileNotFoundError(path)
+        for root, dirs, files in os.walk(resolved):
+            dirs.sort()
+            for name in sorted(files):
+                item = os.path.join(root, name)
+                digest.update(os.path.relpath(item, resolved).encode("utf-8"))
+                with open(item, "rb") as handle:
+                    for block in iter(lambda: handle.read(1024 * 1024), b""):
+                        digest.update(block)
+        return digest.hexdigest()
+
+    def _shadow_prediction_provider(self, model):
+        def provider(replay_input):
+            if replay_input.get("mode") != "model_gmm":
+                raise ValueError("Selected shadow state must contain a valid model_gmm input")
+            interaction = tuple(
+                np.asarray(value) for value in replay_input["interaction_context"]
+            )
+            if len(interaction) == 1:
+                interaction = interaction[0]
+            gmm = model.predict_instance(
+                np.asarray(replay_input["raster_uint8"], dtype=np.uint8),
+                np.asarray(replay_input["past_states_target_local"]),
+                interaction_context=interaction,
+            )
+            gmm.transform(
+                np.asarray(replay_input["target_to_world_R"], dtype=float),
+                np.asarray(replay_input["target_to_world_t"], dtype=float),
+            )
+            gmm = gmm.get_top_k_GMM(int(replay_input["num_modes"]))
+            horizon = int(replay_input["horizon_steps"])
+            position = (
+                np.asarray(replay_input["target_to_world_R"], dtype=float)
+                @ np.asarray(replay_input["past_states_target_local"])[-1, 1:3]
+                + np.asarray(replay_input["target_to_world_t"], dtype=float)
+            )
+            return {
+                "tvs_positions": [position],
+                "tvs_mode_probs": [gmm.mode_probabilities],
+                "tvs_mode_dists": [[gmm.mus[:, :horizon, :]], [gmm.sigmas[:, :horizon, :, :]]],
+                "tvs_valid_pred": [True],
+            }
+        return provider
+
+    def _setup_same_state_shadow_launcher(self, prediction_params):
+        """Build the frozen 2x2x2 bank without granting any actuation path."""
+        from models.deploy_multipath_model import DeployMultiPath
+        from policies.same_state_shadow_replay import (
+            PREDICTORS, RISK_POLICIES, SUPERVISOR_MAPPINGS,
+            SameStateShadowRecorder, SMPCAgentShadowBank,
+        )
+
+        required = {
+            "protocol": prediction_params.same_state_shadow_protocol,
+            "B1 weights": prediction_params.same_state_shadow_b1_weights,
+            "B1 anchors": prediction_params.same_state_shadow_b1_anchors,
+            "B1 calibration": prediction_params.same_state_shadow_b1_calibration,
+            "P* weights": prediction_params.same_state_shadow_pstar_weights,
+            "P* anchors": prediction_params.same_state_shadow_pstar_anchors,
+            "P* calibration": prediction_params.same_state_shadow_pstar_calibration,
+        }
+        missing = [name for name, value in required.items() if not value]
+        if missing:
+            raise ValueError("Shadow launcher requires frozen assets: " + ", ".join(missing))
+        model_root = os.path.abspath(__file__).split("carla")[0] + "models/"
+        assets = {
+            "B1": {
+                "weights": resolve_model_asset_path(model_root, required["B1 weights"]),
+                "anchors": resolve_model_asset_path(model_root, required["B1 anchors"]),
+                "calibration": resolve_model_asset_path(model_root, required["B1 calibration"]),
+            },
+            "P_star": {
+                "weights": resolve_model_asset_path(model_root, required["P* weights"]),
+                "anchors": resolve_model_asset_path(model_root, required["P* anchors"]),
+                "calibration": resolve_model_asset_path(model_root, required["P* calibration"]),
+            },
+        }
+        models = {
+            label: DeployMultiPath(
+                spec["weights"], np.load(spec["anchors"]), calibration=spec["calibration"]
+            )
+            for label, spec in assets.items()
+        }
+        factual = (
+            str(prediction_params.same_state_shadow_factual_predictor),
+            str(prediction_params.same_state_shadow_factual_risk_policy),
+            "enabled",
+        )
+        if factual[0] not in PREDICTORS or factual[1] not in RISK_POLICIES:
+            raise ValueError(f"Invalid factual shadow branch: {factual}")
+        ego_idx = self.ego_vehicle_idx
+        base = self.vehicle_params_list[ego_idx]
+        expected_factual_config = (
+            "var_risk" if factual[1] == "adaptive" else "fixed_risk"
+        )
+        if base.smpc_config != expected_factual_config:
+            raise ValueError(
+                "Declared factual shadow risk does not match the factual ego "
+                f"controller: declared={factual[1]}, smpc_config={base.smpc_config}"
+            )
+        if base.yield_supervisor_behavioural_authority_mode != "on":
+            raise ValueError("The frozen factual shadow branch requires authority on")
+        if not isinstance(base.adaptive_risk_config, dict) or not base.adaptive_risk_config:
+            raise ValueError(
+                "Shadow launcher requires the frozen adaptive-risk configuration "
+                "even when the factual branch uses fixed risk"
+            )
+        factual_assets = assets[factual[0]]
+        deployed_assets = {
+            "weights": os.path.realpath(self._prediction_model_weights_resolved),
+            "anchors": os.path.realpath(self._prediction_model_anchors_resolved),
+            "calibration": os.path.realpath(
+                self._prediction_model_calibration_resolved or ""
+            ),
+        }
+        expected_assets = {
+            name: os.path.realpath(path) for name, path in factual_assets.items()
+        }
+        if deployed_assets != expected_assets:
+            raise ValueError(
+                "Declared factual predictor assets do not match the model that "
+                f"drives CARLA: deployed={deployed_assets}, expected={expected_assets}"
+            )
+        goal_transform = self._vehicle_route_transforms[ego_idx][1]
+        agents = {}
+        for predictor in PREDICTORS:
+            for risk in RISK_POLICIES:
+                for mapping in SUPERVISOR_MAPPINGS:
+                    key = (predictor, risk, mapping)
+                    if key == factual:
+                        continue
+                    vp = replace(
+                        base,
+                        smpc_config="var_risk" if risk == "adaptive" else "fixed_risk",
+                        risk_profile=(
+                            "adaptive_interaction_severity"
+                            if risk == "adaptive" else "fixed_frontier_medium"
+                        ),
+                        yield_supervisor_behavioural_authority_mode=(
+                            "on" if mapping == "enabled" else "off"
+                        ),
+                    )
+                    agent = get_vehicle_policy(
+                        vp, self.vehicle_actors[ego_idx], goal_transform,
+                        n_tv_max=self._n_tv_max_mpc,
+                    )
+                    agent.configure_same_state_shadow_only(
+                        predictor=predictor, risk_policy=risk, supervisor_mapping=mapping
+                    )
+                    if (
+                        self._implicit_filter_conflict_geometry is not None
+                        and vp.smpc_conflict_zone_filter_enabled
+                    ):
+                        agent.set_smpc_conflict_geometry(self._implicit_filter_conflict_geometry)
+                    agents[key] = agent
+        bank = SMPCAgentShadowBank(
+            factual_branch=factual,
+            agents=agents,
+            prediction_providers={
+                label: self._shadow_prediction_provider(model)
+                for label, model in models.items()
+            },
+        )
+        protocol = os.path.realpath(required["protocol"])
+        output_csv = prediction_params.same_state_shadow_output_csv or os.path.join(
+            self.savedir, "same_state_shadow_commands_v2.csv"
+        )
+        recorder = SameStateShadowRecorder(protocol_path=protocol, output_csv=output_csv)
+        self.configure_same_state_shadow_replay(
+            recorder=recorder,
+            solve_shadow=bank,
+            ego_init_id=prediction_params.same_state_shadow_ego_init_id,
+            factual_rollout_id=(prediction_params.same_state_shadow_factual_rollout_id or os.path.basename(self.savedir)),
+            factual_predictor=factual[0],
+            factual_risk_policy=factual[1],
+        )
+        code_paths = [
+            __file__,
+            os.path.join(os.path.dirname(__file__), "../policies/smpc_agent.py"),
+            os.path.join(os.path.dirname(__file__), "../policies/same_state_shadow_replay.py"),
+            os.path.join(os.path.dirname(__file__), "../run_all_scenarios.py"),
+        ]
+        contract = {
+            "schema_version": "same_state_shadow_run_contract_v1",
+            "default_off": True,
+            "protocol": {"path": protocol, "sha256": self._shadow_artifact_sha256(protocol)},
+            "factual_branch": list(factual),
+            "shadow_branch_count": len(agents),
+            "shadow_actuation_allowed": False,
+            "assets": {
+                label: {
+                    name: {"path": path, "sha256": self._shadow_artifact_sha256(path)}
+                    for name, path in spec.items()
+                }
+                for label, spec in assets.items()
+            },
+            "code": [
+                {"path": os.path.realpath(path), "sha256": self._shadow_artifact_sha256(path)}
+                for path in code_paths
+            ],
+            "output_csv": os.path.abspath(output_csv),
+        }
+        with open(os.path.join(self.savedir, "same_state_shadow_run_contract.json"), "w", encoding="utf-8") as handle:
+            json.dump(contract, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+
+    def _capture_same_state_shadow_context(self, *, policy, pred_dict, loop_step):
+        configuration = self._same_state_shadow_configuration
+        if configuration is None:
+            return None
+        if not hasattr(policy, "capture_same_state_shadow_snapshot"):
+            raise RuntimeError("Factual ego policy has no shadow snapshot interface")
+        actor_states = {
+            f"{actor.attributes.get('role_name', 'actor')}_{index}": (
+                self._actor_state_for_prediction_log(actor)
+            )
+            for index, actor in enumerate(self.vehicle_actors)
+        }
+        return {
+            "schema_version": "intersection_same_state_frozen_context_v1",
+            "loop_step": int(loop_step),
+            "sim_time_s": float(self._current_sim_time),
+            "actor_states": actor_states,
+            "prediction_replay_input": self._json_safe(
+                getattr(self, "_last_prediction_replay_input", None)
+            ),
+            "factual_prediction_output": self._json_safe(pred_dict),
+            "smpc_state": policy.capture_same_state_shadow_snapshot(),
+            "exact_replay_requirement": (
+                "Shadow agents must consume actor_states and smpc_state without "
+                "querying an actor after a CARLA tick."
+            ),
+        }
+
+    def _record_same_state_shadow_context(self, *, context, policy, loop_step):
+        if context is None:
+            return
+        configuration = self._same_state_shadow_configuration
+        factual_debug = policy.get_last_debug_payload()
+        if factual_debug is None or int(factual_debug.get("step", -1)) != int(
+            context["smpc_state"]["fields"]["time"]
+        ):
+            raise RuntimeError("Factual SMPC debug parity payload is missing or stale")
+        state_key = (
+            f"{configuration['factual_rollout_id']}:step_{int(loop_step):06d}"
+        )
+        authority = factual_debug.get("supervisor_behavioural_authority") or {}
+        manifest = (
+            authority.get("complete_candidate_channel_manifest") or {}
+        ).get("channels") or {}
+        supervisor_requested = any(
+            isinstance(value, dict) and value.get("requested") is True
+            for value in manifest.values()
+        )
+        prediction_valid = factual_debug.get("prediction_valid")
+        if isinstance(prediction_valid, (list, tuple)):
+            valid_prediction = any(bool(value) for value in prediction_valid)
+        else:
+            valid_prediction = bool(prediction_valid)
+        replay_input = context.get("prediction_replay_input")
+        replay_ready = (
+            isinstance(replay_input, dict)
+            and replay_input.get("mode") == "model_gmm"
+        )
+        # A factual fallback can still produce a finite controller command,
+        # but it is not a valid same-state input for either learned predictor.
+        # Protocol V2 anchors therefore require both the factual validity flag
+        # and a fully captured model_gmm replay input.
+        valid_prediction = valid_prediction and replay_ready
+        selections = configuration["recorder"].eligibility.select(
+            supervisor_requested=supervisor_requested,
+            valid_prediction=valid_prediction,
+            frozen_state=context,
+        )
+        for event_anchor, selected_context in selections:
+            configuration["recorder"].evaluate_and_record(
+                ego_init_id=configuration["ego_init_id"],
+                factual_rollout_id=configuration["factual_rollout_id"],
+                state_key=state_key,
+                factual_predictor=configuration["factual_predictor"],
+                factual_risk_policy=configuration["factual_risk_policy"],
+                factual_debug=factual_debug,
+                frozen_state=selected_context,
+                solve_shadow=configuration["solve_shadow"],
+                event_anchor=event_anchor,
+            )
 
     def _traffic_light_state_name(self, actor):
         """Return a compact CARLA traffic-light state string, if one applies."""
@@ -1432,6 +1782,15 @@ class RunIntersectionScenario:
                         is_ego_policy = idx_act == self.ego_vehicle_idx
                         policy_started = time.perf_counter() if is_ego_policy else None
                         policy_failed = False
+                        shadow_context = (
+                            self._capture_same_state_shadow_context(
+                                policy=policy,
+                                pred_dict=pred_dict,
+                                loop_step=loop_step,
+                            )
+                            if is_ego_policy
+                            else None
+                        )
                         try:
                             policy_result = policy.run_step(pred_dict)
                         except Exception:
@@ -1470,6 +1829,15 @@ class RunIntersectionScenario:
                             ego_control = control
                             ego_traffic_light_state = traffic_light_state
                             ego_traffic_light_forced_stop = traffic_light_forced_stop
+                            # The actor has not received ``apply_control`` yet.
+                            # Shadow callbacks receive frozen data only and
+                            # their debug-only outputs are discarded after the
+                            # recorder writes the eight-row factorial.
+                            self._record_same_state_shadow_context(
+                                context=shadow_context,
+                                policy=policy,
+                                loop_step=loop_step,
+                            )
                         if self.tv_vehicle_idxs and idx_act == self.tv_vehicle_idxs[0]:
                             target0_control = control
                         policy_done = policy.done()
@@ -1643,6 +2011,14 @@ class RunIntersectionScenario:
             raise
         finally:
             exp_log.flush_step_csv(self.savedir, rows_buffer)
+            shadow_configuration = getattr(
+                self, "_same_state_shadow_configuration", None
+            )
+            if shadow_configuration is not None:
+                try:
+                    shadow_configuration["recorder"].write_eligibility_receipt()
+                except Exception as exc:
+                    log.error("same-state shadow eligibility receipt failed: %s", exc)
             # Freeze native collision telemetry before copying it into the
             # immutable summary. No world ticks occur after this point.
             for sensor in getattr(self, "collision_sensors", []):
@@ -1762,6 +2138,12 @@ class RunIntersectionScenario:
             tvs_mode_dists = [[np.stack([[curr_target_vehicle_position]*self.ego_N]*self.ego_num_modes)],
                               [np.stack([[np.identity(2)]*self.ego_N]*self.ego_num_modes)]]
             tvs_valid_pred = [False]
+            self._last_prediction_replay_input = {
+                "mode": "no_target_fallback",
+                "ego_num_modes": int(self.ego_num_modes),
+                "horizon_steps": int(self.ego_N),
+                "current_target_vehicle_position": curr_target_vehicle_position,
+            }
         else:
             # TODO: clean up and generalize this to many target vehicles.
             target_actor = self.vehicle_actors[self.tv_vehicle_idxs[0]]
@@ -1797,6 +2179,19 @@ class RunIntersectionScenario:
                         np.radians(target_tf.rotation.yaw)
                     ),
                 )
+                self._last_prediction_replay_input = {
+                    "mode": "exogenous_straight_gmm",
+                    "target_position_rhs": np.asarray(position, dtype=float),
+                    "target_velocity_rhs": np.asarray(velocity, dtype=float),
+                    "target_heading_rad_rhs": -float(
+                        np.radians(target_tf.rotation.yaw)
+                    ),
+                    "configuration": dict(self._straight_gmm_config),
+                    "horizon_steps": int(self.ego_N),
+                    "dt_s": float(
+                        self.vehicle_params_list[self.ego_vehicle_idx].dt
+                    ),
+                }
                 return (
                     [np.asarray(position, dtype=float)],
                     [probabilities],
@@ -1818,6 +2213,12 @@ class RunIntersectionScenario:
                 tvs_mode_dists = [[np.stack([[curr_target_vehicle_position]*self.ego_N]*self.ego_num_modes)],
                                   [np.stack([[0.1*np.identity(2)]*self.ego_N]*self.ego_num_modes)]]
                 tvs_valid_pred = [False]
+                self._last_prediction_replay_input = {
+                    "mode": "insufficient_history_fallback",
+                    "past_states_target_local": np.asarray(past_states_tv),
+                    "target_to_world_R": np.asarray(R_target_to_world),
+                    "target_to_world_t": np.asarray(t_target_to_world),
+                }
             else:
                 img_tv = self.rasterizer.rasterize(self.agent_history, target_agent_id)
                 interaction_sample = {
@@ -1846,6 +2247,29 @@ class RunIntersectionScenario:
                     interaction_context = interaction_context_from_sample(
                         interaction_sample
                     )
+                self._last_prediction_replay_input = {
+                    "mode": "model_gmm",
+                    "raster_uint8": np.asarray(img_tv).copy(),
+                    "past_states_target_local": np.asarray(
+                        past_states_tv[:-1]
+                    ).copy(),
+                    "interaction_context": tuple(
+                        np.asarray(value).copy()
+                        for value in (
+                            interaction_context
+                            if isinstance(interaction_context, tuple)
+                            else (interaction_context,)
+                        )
+                    ),
+                    "target_to_world_R": np.asarray(
+                        R_target_to_world, dtype=float
+                    ).copy(),
+                    "target_to_world_t": np.asarray(
+                        t_target_to_world, dtype=float
+                    ).copy(),
+                    "horizon_steps": int(self.ego_N),
+                    "num_modes": int(self.ego_num_modes),
+                }
                 gmm_pred_tv = self.pred_model.predict_instance(
                     img_tv,
                     past_states_tv[:-1],
@@ -2126,6 +2550,7 @@ class RunIntersectionScenario:
         tv_vehicle_idxs   = []
         # Must match _make_predictions: one GMM stack per ``role == "target"`` vehicle.
         n_tv_max_mpc = max(1, sum(1 for vp in vehicle_params_list if vp.role == "target"))
+        self._n_tv_max_mpc = n_tv_max_mpc
 
         route_transforms = []
         for idx, vp in enumerate(vehicle_params_list):
@@ -2153,6 +2578,7 @@ class RunIntersectionScenario:
             self.spawned_actor_telemetry.append(
                 self._actor_telemetry(veh_actor, vp, idx)
             )
+        self._vehicle_route_transforms = list(route_transforms)
 
         if len(ego_vehicle_idxs) != 1:
             raise RuntimeError(f"Invalid number of ego vehicles spawned: {len(ego_vehicle_idxs)}")
