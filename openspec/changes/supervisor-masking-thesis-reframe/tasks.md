@@ -17,8 +17,9 @@
 
 ## 3. Evidence-Gap Decision and Supplemental Protocol
 
+- [x] 3.0 Replace the unweighted SMPC branch sum with normalized joint MultiPath probability-weighted expected cost, remove runnable unweighted identifiers, add fail-closed probability and branch invariants, telemetry and numerical solver tests, and verify the local and non-proprietary CasADi gates pass
 - [ ] 3.1 Regenerate the signed evidence-gap decision after replacing the bundled SF4 off arm with a clean yield-rule-off SMPC baseline; the current H1 sufficiency verdict is deprecated
-- [x] 3.2 If collection is required, freeze an authority-on same-state shadow-policy protocol covering B1/P*, fixed/adaptive policies and enabled/monitor-only supervisor mappings on every shadow command, factual state populations, all seven authority channels, outcomes, uncertainty, stopping rules and source hashes, and verify the pre-outcome validator passes *(conditional)*
+- [ ] 3.2 Freeze a new weighted-V2 authority-on same-state shadow-policy protocol covering B1/P*, the full declared fixed/adaptive risk set and clean rule-enabled/rule-absent mappings on every shadow command, factual state populations, all seven authority channels, outcomes, uncertainty, stopping rules and source hashes, and verify it supersedes the invalidated unweighted protocol before any successful formal outcome *(conditional)*
 - [ ] 3.3 If shadow evaluation cannot reproduce all seven authority paths, freeze the smallest alternative non-saturated design needed to identify the missing interaction and verify it does not use outcome-driven tuning *(conditional)*
 - [ ] 3.4 Implement supplemental shadow logging and replay only after protocol approval, and verify synthetic tests cover active/inactive supervision, upstream reference shaping, post-action replacement, bypass, solver failure and missing fields *(conditional)*
 - [ ] 3.5 Run CARLA 0.9.14 smoke tests with shadow commands blocked from actuation, and verify factual trajectories and commands match the frozen authority-on baseline within declared tolerance *(conditional)*

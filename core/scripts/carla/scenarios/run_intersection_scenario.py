@@ -172,7 +172,7 @@ class VehicleParams:
     smpc_config : str = "full" # "var_risk", "open_loop", "fixed_risk"
     solver_backend : str = "gurobi"
     risk_profile : str = "upstream_code" # "upstream_code", "paper_eps_002", adaptive risk variants, or "rule_aware_static_risk"
-    control_implementation_version : str = "corrected_joint_modes_shared_amin_v1"
+    control_implementation_version : str = "corrected_joint_modes_shared_amin_probability_weighted_v2"
     adaptive_risk_config : Optional[Dict[str, Any]] = None
     collision_d_min : float = 0.5
     collision_ellipse_half_length : float = 3.8

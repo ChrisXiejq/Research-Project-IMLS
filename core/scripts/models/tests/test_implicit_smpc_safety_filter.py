@@ -197,7 +197,7 @@ class SmpcTrackingObjectiveTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn(
-            "_quad_form(nom_z_err, 10*cost_matrix_z[4:,4:])",
+            "nom_z_err, 10 * cost_matrix_z[4:, 4:]",
             source,
         )
         self.assertNotIn(
@@ -382,7 +382,7 @@ class FrozenExperimentConfigurationTests(unittest.TestCase):
         self.assertEqual(ego["risk_profile"], "upstream_code")
         self.assertEqual(
             ego["control_implementation_version"],
-            "legacy_single_tv_mode0_split_amin_v0",
+            "legacy_single_tv_mode0_shared_amin_probability_weighted_v2",
         )
         self.assertEqual(ego["smpc_state_weights"], [5.0, 2.5, 10.0, 1.0])
         self.assertFalse(ego["smpc_correct_path_frame_cost_rotation"])

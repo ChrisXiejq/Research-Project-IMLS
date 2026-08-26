@@ -9,7 +9,7 @@
       "dt": 0.2,
       "num_modes": 3,
       "risk_profile": "upstream_code",
-      "control_implementation_version": "legacy_single_tv_mode0_split_amin_v0",
+      "control_implementation_version": "legacy_single_tv_mode0_shared_amin_probability_weighted_v2",
       "smpc_state_weights": [5.0, 2.5, 10.0, 1.0],
       "smpc_correct_path_frame_cost_rotation": false,
       "smpc_terminal_collision_constraint_enabled": false,

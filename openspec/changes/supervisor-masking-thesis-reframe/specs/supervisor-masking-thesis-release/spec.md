@@ -24,7 +24,7 @@ The Problem Formulation and Methodology SHALL define the right-hand-traffic ego-
 
 #### Scenario: SMPC is explained
 - **WHEN** a reader follows the controller subsection
-- **THEN** ego dynamics, multimodal target uncertainty, horizon and clocks, branch-specific control, objective terms, collision approximation, chance-constraint tightening, solver output and fallback meaning are defined and each symbol is used consistently
+- **THEN** ego dynamics, multimodal target uncertainty, horizon and clocks, normalized joint-mode probability-weighted expected branch cost, shared penalties, branch-specific control, collision approximation, chance-constraint tightening, solver output and fallback meaning are defined and each symbol is used consistently
 
 #### Scenario: Risk allocation is explained
 - **WHEN** fixed and adaptive risk policies are introduced
@@ -73,4 +73,3 @@ The final release SHALL include manuscript source, bibliography, compiled PDF, g
 #### Scenario: Final audit passes
 - **WHEN** the dissertation is ready to submit
 - **THEN** required section order, citations, numerical claims, equation symbols, figure provenance, PDF rendering, tests, clean worktrees, Git object integrity and remote divergence all pass with no unresolved submission dependency
-

@@ -10,6 +10,7 @@ The current dissertation establishes a cross-layer predictor--risk--SMPC--superv
 - Define *retained*, *attenuated*, *compressed*, *not transferred* and causally *masked* as distinct verdicts with explicit identification requirements.
 - Add supplemental analysis or frozen experiments only when the evidence-gap gate shows that an intended headline claim is not identifiable from existing paired or factorial evidence.
 - Rebuild the manuscript methods so that MultiPath, multimodal SMPC, risk allocation and every rule-based supervisor channel are defined from inputs through equations to executed controls.
+- Replace the unweighted active-branch tracking objective with the source-consistent normalized MultiPath probability-weighted expected cost, remove every runnable unweighted option, and prospectively recollect all controller-dependent closed-loop evidence.
 - Regenerate publication figures and tables with Python/Matplotlib only, then rewrite Results first and the title/abstract last using the nature-writing workflow.
 - Preserve the previous release as an immutable evidence snapshot; emit the reframe into a separately versioned release.
 
@@ -26,4 +27,4 @@ None. The completed `supervisor-bottleneck-thesis` change remains an immutable p
 
 ## Impact
 
-The change affects evidence-analysis scripts and tests under `core/scripts/models/`, generated evidence under a new `docs/paper/generated/` release root, OpenSpec artifacts, and the separate `Jiaqi-Xie-Dissertation` manuscript repository. It may add a bounded CARLA 0.9.14 experiment only after a signed evidence-gap decision and frozen protocol. It does not alter historical V3, R3 or SF4 outcomes, CARLA scenario geometry, model weights, solver settings, or the previous release artifacts.
+The change affects evidence-analysis scripts and tests under `core/scripts/models/`, generated evidence under a new `docs/paper/generated/` release root, OpenSpec artifacts, and the separate `Jiaqi-Xie-Dissertation` manuscript repository. It adds a bounded CARLA 0.9.14 weighted-controller experiment only after a signed evidence-gap decision and frozen protocol. Historical V3, R3 and SF4 artifacts remain immutable provenance but are no longer admissible as final controller-dependent evidence. The change does not alter dataset processing, offline predictor results, model weights, CARLA scenario geometry or previous release artifacts.

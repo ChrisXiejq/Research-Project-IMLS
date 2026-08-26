@@ -5,6 +5,13 @@ import numpy as np
 from itertools import product
 import pdb
 
+from .mode_probability_contract import (
+    OBJECTIVE_WEIGHTING_CONTRACT_SHA256,
+    OBJECTIVE_WEIGHTING_ID,
+    active_objective_weights,
+    normalize_probability_vector,
+)
+
 
 def _standard_normal_cdf(x):
     """CDF of N(0,1) at x; avoids SciPy (GLIBCXX / wheel issues on some hosts)."""
@@ -20,15 +27,47 @@ FIXED_FRONTIER_AGGRESSIVE_TIGHTENING = 1.2815515655446004
 FIXED_FRONTIER_MEDIUM_TIGHTENING = UPSTREAM_CODE_TIGHTENING
 FIXED_FRONTIER_CONSERVATIVE_TIGHTENING = PAPER_INTERSECTION_TIGHTENING
 
-# Closed-loop implementation contract.  Corrected-v1 is the only default used
-# by formal experiments.  The legacy identifier exists solely to reproduce the
-# pre-R1 single-TV mode-0 indexing and split acceleration bounds explicitly.
-CONTROL_IMPLEMENTATION_CORRECTED_V1 = "corrected_joint_modes_shared_amin_v1"
-CONTROL_IMPLEMENTATION_LEGACY_V0 = "legacy_single_tv_mode0_split_amin_v0"
-SUPPORTED_CONTROL_IMPLEMENTATIONS = {
-    CONTROL_IMPLEMENTATION_CORRECTED_V1,
-    CONTROL_IMPLEMENTATION_LEGACY_V0,
+# Closed-loop implementation contract.  Probability-weighted V2 is the only
+# objective admitted by current experiments.  The legacy-indexing identifier
+# reproduces only the historical mode-indexing choice; it still uses the same
+# probability-weighted expected-cost objective.
+CONTROL_IMPLEMENTATION_PROBABILITY_WEIGHTED_V2 = (
+    "corrected_joint_modes_shared_amin_probability_weighted_v2"
+)
+CONTROL_IMPLEMENTATION_LEGACY_INDEXING_WEIGHTED_V2 = (
+    "legacy_single_tv_mode0_shared_amin_probability_weighted_v2"
+)
+DEPRECATED_UNWEIGHTED_CONTROL_IMPLEMENTATIONS = {
+    "corrected_joint_modes_shared_amin_v1",
+    "legacy_single_tv_mode0_split_amin_v0",
 }
+SUPPORTED_CONTROL_IMPLEMENTATIONS = {
+    CONTROL_IMPLEMENTATION_PROBABILITY_WEIGHTED_V2,
+    CONTROL_IMPLEMENTATION_LEGACY_INDEXING_WEIGHTED_V2,
+}
+
+
+def _probability_weighted_active_branch_cost(branch_costs, probabilities):
+    """Return the expected active-branch cost used by the production solver.
+
+    A one-branch policy is shared by every mode before the tree splits, so its
+    cost is counted once.  Once the tree has split, the branch list must cover
+    the complete normalized joint-mode probability vector.
+    """
+    branch_count = len(branch_costs)
+    if branch_count < 1:
+        raise ValueError("At least one active SMPC branch cost is required")
+    if branch_count == 1:
+        return branch_costs[0]
+    probability_count = int(probabilities.numel())
+    if probability_count != branch_count:
+        raise ValueError(
+            "Active SMPC branch costs must cover the complete joint-mode "
+            f"probability vector: costs={branch_count}, probabilities={probability_count}"
+        )
+    return sum(
+        probabilities[j] * branch_costs[j] for j in range(branch_count)
+    )
 
 
 def _risk_profile_values(risk_profile, tightening_override=None):
@@ -520,6 +559,7 @@ class SMPC_MMPreds():
         self.risk_target_prob_min = []
 
         self.probs=[]
+        self.current_joint_mode_probabilities=[]
 
         self.collision_avoidance = {i : [] for i in range((self.t_bar_max)*self.N_TV_max)}
 
@@ -650,7 +690,13 @@ class SMPC_MMPreds():
                 point_xy=[0.0, 0.0],
                 bounds_m=np.full(self.N, self.conflict_zone_inactive_bound_m),
             )
-            self.opti[i].set_value(self.probs[i], np.ones(self.N_modes**N_TV)/(self.N_modes**N_TV))
+            initial_probabilities = np.ones(
+                self.N_modes ** N_TV, dtype=float
+            ) / float(self.N_modes ** N_TV)
+            self.opti[i].set_value(self.probs[i], initial_probabilities)
+            self.current_joint_mode_probabilities.append(
+                initial_probabilities.copy()
+            )
             sol=self.solve(i)
 
 
@@ -857,8 +903,15 @@ class SMPC_MMPreds():
             1,
             self.N + 1 if self.enforce_terminal_collision_constraint else self.N,
         )
-        self.collision_avoidance[i] = { j : {t: {k : None for k in range(N_TV)} for t in collision_times} for j in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)) }
-        for j in range(1+(-1+self.N_modes**N_TV)*(t_bar>0)):
+        active_branch_count = 1 + (-1 + self.N_modes ** N_TV) * (t_bar > 0)
+        if not (len(h) == len(M) == active_branch_count):
+            raise RuntimeError(
+                "Policy-tree branch count does not match the complete joint-mode "
+                f"set: h={len(h)}, M={len(M)}, expected={active_branch_count}"
+            )
+        self.collision_avoidance[i] = { j : {t: {k : None for k in range(N_TV)} for t in collision_times} for j in range(active_branch_count) }
+        active_branch_costs = []
+        for j in range(active_branch_count):
             if not self.fixed_risk:
                 self.opti[i].subject_to(self.opti[i].bounded(0.0000001, mmr_std[j],3.0))
                 total_prob+=mmr_p[j]*self.probs[i][j]
@@ -970,11 +1023,29 @@ class SMPC_MMPreds():
             # avoidance manoeuvre.  ``nom_z_err`` is the physically meaningful
             # prediction-minus-reference error for future states; using it
             # makes route recovery an SMPC objective after conflict release.
-            cost+=RefTrajGenerator._quad_form(nom_z_err, 10*cost_matrix_z[4:,4:])+\
-                  RefTrajGenerator._quad_form(h[j],ca.kron(ca.DM.eye(self.N),ca.diag([0, 0])))+\
-                  RefTrajGenerator._quad_form(nom_z_diff,100*cost_matrix_z[4:,4:])+\
-                  RefTrajGenerator._quad_form(nom_diff_u,10*cost_matrix_u)+\
-                  heading_cost
+            branch_cost = (
+                RefTrajGenerator._quad_form(
+                    nom_z_err, 10 * cost_matrix_z[4:, 4:]
+                )
+                + RefTrajGenerator._quad_form(
+                    h[j],
+                    ca.kron(ca.DM.eye(self.N), ca.diag([0, 0])),
+                )
+                + RefTrajGenerator._quad_form(
+                    nom_z_diff, 100 * cost_matrix_z[4:, 4:]
+                )
+                + RefTrajGenerator._quad_form(
+                    nom_diff_u, 10 * cost_matrix_u
+                )
+                + heading_cost
+            )
+            # The source formulation minimizes expected branch cost. Before
+            # the policy tree splits there is one shared policy and therefore
+            # one unit-weight cost. Once branches are explicit, each complete
+            # joint mode is weighted by the normalized MultiPath probability
+            # used by the adaptive risk budget. There is deliberately no
+            # unweighted runtime option.
+            active_branch_costs.append(branch_cost)
                   #+RefTrajGenerator._quad_form(H,ca.kron(ca.MX.eye(self.N),1*ca.MX.eye(2)))
 
             self.opti[i].subject_to( self.opti[i].bounded(self.V_MIN,
@@ -1000,6 +1071,10 @@ class SMPC_MMPreds():
             self.opti[i].subject_to( self.opti[i].bounded(self.DF_DOT_MIN-slack,
                                                       nom_diff_df/self.DT,
                                                       self.DF_DOT_MAX+slack))
+        cost += _probability_weighted_active_branch_cost(
+            active_branch_costs,
+            self.probs[i],
+        )
         if not self.fixed_risk:
             self.opti[i].subject_to(total_prob>=self.risk_target_prob_min[i])
 
@@ -1020,11 +1095,28 @@ class SMPC_MMPreds():
             "N_modes": int(self.N_modes),
             "n_joint_modes": int(self.N_modes ** N_TV),
             "control_implementation_version": (
-                CONTROL_IMPLEMENTATION_LEGACY_V0
+                CONTROL_IMPLEMENTATION_LEGACY_INDEXING_WEIGHTED_V2
                 if self.legacy_mode_indexing
-                else CONTROL_IMPLEMENTATION_CORRECTED_V1
+                else CONTROL_IMPLEMENTATION_PROBABILITY_WEIGHTED_V2
             ),
             "legacy_mode_indexing": bool(self.legacy_mode_indexing),
+            "objective_weighting": OBJECTIVE_WEIGHTING_ID,
+            "objective_weighting_contract_sha256": (
+                OBJECTIVE_WEIGHTING_CONTRACT_SHA256
+            ),
+            "objective_unweighted_option_available": False,
+            "joint_mode_probabilities": (
+                self.current_joint_mode_probabilities[i].tolist()
+            ),
+            "joint_mode_probability_sum": float(
+                np.sum(self.current_joint_mode_probabilities[i])
+            ),
+            "active_objective_weights": active_objective_weights(
+                self.current_joint_mode_probabilities[i],
+                active_branch_count=(
+                    1 + (-1 + self.N_modes ** N_TV) * (t_bar > 0)
+                ),
+            ).tolist(),
             "terminal_collision_constraint": bool(
                 self.enforce_terminal_collision_constraint
             ),
@@ -1249,10 +1341,21 @@ class SMPC_MMPreds():
         self.update_dict=update_dict
 
         N_TV=1+int(i/self.t_bar_max)
-        if "probs" in update_dict.keys():
-            self.opti[i].set_value(self.probs[i], update_dict["probs"])
-        else:
-            self.opti[i].set_value(self.probs[i], np.ones(self.N_modes**N_TV)/(self.N_modes**N_TV))
+        if "probs" not in update_dict:
+            raise KeyError(
+                "Probability-weighted SMPC update requires explicit normalized "
+                "joint-mode probabilities in update_dict['probs']"
+            )
+        raw_probabilities = update_dict["probs"]
+        normalized_probabilities = normalize_probability_vector(
+            raw_probabilities,
+            expected_size=self.N_modes ** N_TV,
+            label=f"SMPC problem {i} joint mode probabilities",
+        )
+        self.opti[i].set_value(self.probs[i], normalized_probabilities)
+        self.current_joint_mode_probabilities[i] = (
+            normalized_probabilities.copy()
+        )
 
         risk_tightening = float(update_dict.get("risk_tightening", self.tight))
         risk_target_prob = float(update_dict.get("risk_target_prob", self.target_prob))

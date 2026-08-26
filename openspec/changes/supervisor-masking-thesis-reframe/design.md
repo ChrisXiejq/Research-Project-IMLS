@@ -77,6 +77,16 @@ New evidence and figures are written under a new release root. The dissertation 
 
 **Why:** A reviewer or future author must be able to reproduce both the prior interpretation and the revised one.
 
+### 8. Make probability-weighted expected branch cost the only controller objective
+
+The implemented post-split SMPC objective uses the normalized joint MultiPath probabilities, `sum_j pi_j J_j`, while shared pre-split and slack penalties are counted once. The same probability vector enters the adaptive-risk budget. Missing, invalid or partial probabilities fail closed, and historical unweighted implementation identifiers cannot be selected at runtime.
+
+All historical controller-dependent CARLA outcomes are retained only as immutable audit provenance. Dataset construction, offline Capacity--Information--Architecture evidence, predictor selection, weights and calibration remain licensed. Final H1--H3 closed-loop claims require prospectively frozen weighted-V2 receipts and may not pool old and new controller populations.
+
+**Why:** An unweighted branch sum discards a primary semantic output of MultiPath in the tracking objective and confounds whether predictor advantages are compressed by SMPC or by the supervisor.
+
+**Alternative considered:** Retain an unweighted ablation switch. Rejected because the dissertation is not testing objective weighting, and a selectable legacy path creates a high risk of mixing scientifically incompatible runs.
+
 ## Risks / Trade-offs
 
 - **Risk: Current evidence supports physical effectiveness but not causal masking.** -> Keep masking as the hypothesis; use `limited downstream sensitivity` or `consistent with masking` in findings unless the aligned gate passes.

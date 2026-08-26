@@ -89,3 +89,13 @@ The release SHALL preserve canonical V3, R3, SF4, foundation and any legacy popu
 - **WHEN** the evidence package is finalised
 - **THEN** every headline scalar resolves to a committed source locator and hash, all denominators reconcile, incompatible populations remain separate, and stale or modified canonical evidence fails closed
 
+### Requirement: Probability-weighted controller evidence contract
+The current SMPC SHALL minimize normalized joint-mode probability-weighted post-split branch cost, count a shared unbranched policy once, and use the same probability vector in adaptive risk allocation. Missing, non-finite, negative, zero-mass, wrong-size or partial joint-mode probabilities SHALL fail closed, and no unweighted runtime option SHALL be available.
+
+#### Scenario: Weighted controller is qualified
+- **WHEN** the controller implementation is admitted to smoke or formal CARLA execution
+- **THEN** source tests, probability-contract tests and a numerical asymmetric-probability solver test pass, and per-solve telemetry records the objective identifier, normalized probabilities, probability sum and active weights
+
+#### Scenario: Historical controller evidence is encountered
+- **WHEN** a V3, R3, SF4 or legacy receipt identifies an unweighted controller implementation
+- **THEN** it remains immutable audit provenance but is excluded from final H1--H3 closed-loop estimates and is never pooled with weighted-V2 evidence

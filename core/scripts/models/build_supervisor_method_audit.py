@@ -16,9 +16,10 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA_VERSION = "supervisor_method_audit_v1"
+SCHEMA_VERSION = "supervisor_method_audit_v2_probability_weighted"
 PAPER = "docs/literature/01_predictive_control_uncertain_multimodal_predictions.pdf"
 MPC = "core/scripts/carla/utils/mpc_utils.py"
+PROBABILITY = "core/scripts/carla/utils/mode_probability_contract.py"
 AGENT = "core/scripts/carla/policies/smpc_agent.py"
 SCENARIO = "core/scripts/carla/scenarios/run_intersection_scenario.py"
 SYNC = "core/scripts/carla/utils/carla_sync_mode.py"
@@ -116,12 +117,12 @@ def formula_rows() -> list[dict[str, Any]]:
         {
             "id": "F08_active_branch_objective",
             "layer": "smpc",
-            "manuscript_formula": "min_{h,M,K,beta} sum_{j in J_active} J_j + J_slack",
-            "plain_language": "The implementation directly adds the cost of every active policy branch. It does not multiply branch costs by MultiPath mode probabilities.",
-            "paper_basis": "The source formulation instead uses sum_j p_j E[C_j] in Eqs. (6a) and (19). This is a documented implementation difference.",
-            "implementation": "cost is initialized once, augmented inside the active-branch loop, and minimized after the loop; self.probs is absent from all cost additions.",
-            "code": [loc(MPC, "825-826", "cost initialization"), loc(MPC, "861-977", "active-branch loop and direct cost accumulation"), loc(MPC, "1006-1006", "minimize(cost)")],
-            "status": "implementation_difference_unweighted_active_branch_sum",
+            "manuscript_formula": "min_{h,M,K,beta} sum_{j in J_active} pi_j J_j + J_shared",
+            "plain_language": "After the policy tree branches, every complete joint MultiPath mode weights its own tracking and control cost by its normalized probability. Before branching there is one shared policy and its cost has unit weight.",
+            "paper_basis": "The source formulation minimizes probability-weighted expected branch cost in Eqs. (6a) and (19).",
+            "implementation": "The branch loop collects every branch_cost and the production helper forms their self.probs-weighted expectation. A single unbranched policy uses weight one; shared slack and corridor penalties are added once outside the branch expectation. Old unweighted runtime identifiers are rejected.",
+            "code": [loc(PROBABILITY, "14-21", "objective semantic identifier and contract hash"), loc(MPC, "872-880", "shared penalty initialization"), loc(MPC, "906-913", "complete active-branch invariant"), loc(MPC, "1048-1077", "production expected-cost helper receives all active branch costs and probabilities")],
+            "status": "paper_equivalent_probability_weighted_expected_cost",
         },
         {
             "id": "F09_adaptive_risk_budget",
@@ -129,8 +130,8 @@ def formula_rows() -> list[dict[str, Any]]:
             "manuscript_formula": "sum_j pi_j beta_j >= beta_req,  r_j approximately Phi^{-1}(beta_j)",
             "plain_language": "Mode probabilities influence how the allowed collision risk is distributed: likely modes carry more weight in the total probability-of-safety budget.",
             "paper_basis": "Primary paper Eqs. (15a), (16)-(18), with eta_j=Phi^{-1}(r_j) and a probability-weighted safety budget.",
-            "implementation": "mmrisk_std is the tightening variable r-like/eta-like scalar; mmrisk_prob approximates beta through affine inverse-CDF constraints; only the total adaptive-risk constraint uses self.probs.",
-            "code": [loc(MPC, "815-867", "mmrisk_std/mmrisk_prob and total_prob"), loc(MPC, "1003-1004", "probability-weighted risk budget")],
+            "implementation": "mmrisk_std is the tightening variable r-like/eta-like scalar; mmrisk_prob approximates beta through affine inverse-CDF constraints. The same normalized self.probs vector used by the objective weights the total adaptive-risk constraint.",
+            "code": [loc(MPC, "836-917", "mmrisk_std/mmrisk_prob and probability-weighted total_prob"), loc(MPC, "1078-1079", "adaptive-risk satisfaction budget")],
             "status": "paper_inspired_piecewise_linear_risk_allocation",
         },
         {
@@ -190,7 +191,8 @@ def channel_rows() -> list[dict[str, Any]]:
 
 
 LANDMARKS = {
-    MPC: ["[h,M,K]=self.policy[i]", "cost+=RefTrajGenerator._quad_form", "total_prob+=mmr_p[j]*self.probs[i][j]", "self.opti[i].subject_to(total_prob>=self.risk_target_prob_min[i])"],
+    MPC: ["[h,M,K]=self.policy[i]", "active_branch_costs.append(branch_cost)", "_probability_weighted_active_branch_cost(", "total_prob+=mmr_p[j]*self.probs[i][j]", "self.opti[i].subject_to(total_prob>=self.risk_target_prob_min[i])"],
+    PROBABILITY: ["OBJECTIVE_WEIGHTING_ID", "OBJECTIVE_WEIGHTING_CONTRACT_SHA256", "normalize_probability_vector", "joint_mode_probabilities"],
     GMM: ["K * T * [dx, dy, raw_std_1, raw_std_2, theta] + K logits", "covariances[..., 0, 1] = off_diagonal"],
     LOSS: ["nearest_mode = tf.argmin", "return tf.reduce_mean(class_loss + regression)"],
     EVAL: ["mode_trajectory_logpdf[mode_index] += logpdf", "trajectory_mixture_NLL_per_step"],
@@ -219,8 +221,8 @@ def build(repo: Path) -> dict[str, Any]:
             "post_solver_action_and_desired_speed", "release_recovery_state",
             "next_control_history",
         ],
-        "objective_mismatch_explicit": next(r for r in formulas if r["id"] == "F08_active_branch_objective")["status"] == "implementation_difference_unweighted_active_branch_sum",
-        "probabilities_only_claimed_for_risk_budget": "only the total adaptive-risk constraint" in next(r for r in formulas if r["id"] == "F09_adaptive_risk_budget")["implementation"],
+        "objective_probability_weighting_explicit": next(r for r in formulas if r["id"] == "F08_active_branch_objective")["status"] == "paper_equivalent_probability_weighted_expected_cost",
+        "probabilities_shared_by_objective_and_risk": "same normalized self.probs vector" in next(r for r in formulas if r["id"] == "F09_adaptive_risk_budget")["implementation"],
         "timing_claim_separates_scales": "not the same quantity" in next(r for r in formulas if r["id"] == "F12_time_discretization")["plain_language"],
     })
     if not all(checks.values()):
@@ -235,8 +237,8 @@ def build(repo: Path) -> dict[str, Any]:
         "formula_to_code": formulas,
         "supervisor_channels": channels,
         "mandatory_corrections": {
-            "objective": "Implementation is an unweighted sum over active branches; do not write sum_j pi_j J_j as implemented.",
-            "probability_use": "Mode probabilities enter the adaptive-risk budget, not the implemented branch cost.",
+            "objective": "Write the implemented post-branch objective as sum_j pi_j J_j plus shared penalties; the unbranched policy has unit weight.",
+            "probability_use": "One normalized joint-mode probability vector weights both expected branch cost and the adaptive-risk budget.",
             "chance_sign": "Define c>=0 as safe.",
             "policy_variables": "Use h, M and K.",
             "covariance": "Use one 2x2 covariance per mode and time; do not imply cross-time covariance.",
@@ -251,7 +253,7 @@ def build(repo: Path) -> dict[str, Any]:
 def write_csv(path: Path, rows: list[dict[str, Any]], fields: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             flat = dict(row)

@@ -26,6 +26,11 @@ scriptdir = os.path.abspath(__file__).split('carla')[0] + 'carla/'
 sys.path.append(scriptdir)
 from utils import frenet_trajectory_handler as fth
 from utils import mpc_utils as smpc
+from utils.mode_probability_contract import (
+    OBJECTIVE_WEIGHTING_CONTRACT_SHA256,
+    OBJECTIVE_WEIGHTING_ID,
+    joint_mode_probabilities,
+)
 from utils.low_level_control import LowLevelControl
 from utils.vehicle_geometry_utils import vehicle_name_to_lf_lr
 from policies.supervisor_action_filter import (
@@ -162,7 +167,7 @@ class SMPCAgent(object):
                  lane_entry_heading_cost_weight=0.2,
                  lane_entry_heading_cost_max_abs_epsi=0.35,
                  adaptive_risk_config=None,
-                 control_implementation_version=smpc.CONTROL_IMPLEMENTATION_CORRECTED_V1,
+                 control_implementation_version=smpc.CONTROL_IMPLEMENTATION_PROBABILITY_WEIGHTED_V2,
                  ):
         self.vehicle = vehicle
         self.map    = vehicle.get_world().get_map()
@@ -689,6 +694,14 @@ class SMPCAgent(object):
         # Used by SMPC_MMPreds_OL (N_TV_MAX); intersection runner passes target count.
         self._n_tv_max_ol = n_tv_max
         self.risk_profile = risk_profile
+        if (
+            control_implementation_version
+            in smpc.DEPRECATED_UNWEIGHTED_CONTROL_IMPLEMENTATIONS
+        ):
+            raise ValueError(
+                "Unweighted SMPC objective implementations were removed; "
+                "use the probability-weighted V2 controller"
+            )
         if control_implementation_version not in smpc.SUPPORTED_CONTROL_IMPLEMENTATIONS:
             raise ValueError(
                 "Unsupported control implementation version: "
@@ -696,7 +709,8 @@ class SMPCAgent(object):
             )
         self.control_implementation_version = control_implementation_version
         self._legacy_control_implementation = (
-            control_implementation_version == smpc.CONTROL_IMPLEMENTATION_LEGACY_V0
+            control_implementation_version
+            == smpc.CONTROL_IMPLEMENTATION_LEGACY_INDEXING_WEIGHTED_V2
         )
         if adaptive_risk_config is None:
             adaptive_risk_config = {}
@@ -724,6 +738,13 @@ class SMPCAgent(object):
 
         else:
             raise ValueError(f"Invalid SMPC config: {smpc_config}")
+
+        if self.ol_flag or self.obca_flag:
+            raise ValueError(
+                "Probability-weighted V2 is implemented only by the closed-loop "
+                "multimodal SMPC used by var_risk and fixed_risk; legacy "
+                "open_loop/OBCA controllers are not admissible experiment paths"
+            )
 
         if self.supervisor_free_smpc_enabled:
             violations = []
@@ -1380,6 +1401,11 @@ class SMPCAgent(object):
             "risk_profile": self.risk_profile,
             "control_implementation": {
                 "version": self.control_implementation_version,
+                "objective_weighting": OBJECTIVE_WEIGHTING_ID,
+                "objective_weighting_contract_sha256": (
+                    OBJECTIVE_WEIGHTING_CONTRACT_SHA256
+                ),
+                "objective_unweighted_option_available": False,
                 "legacy_explicitly_enabled": bool(self._legacy_control_implementation),
                 "mode_indexing": (
                     "legacy_single_tv_mode0"
@@ -4778,14 +4804,16 @@ class SMPCAgent(object):
                 shadow_heading_cost_status
             )
 
-            if target_vehicle_mode_probs is not None:
-                probs = np.asarray(target_vehicle_mode_probs[:N_TV], dtype=float)
-                if probs.shape == (N_TV, self.N_modes):
-                    probs = probs / np.sum(probs, axis=1, keepdims=True)
-                    joint_probs = probs[0]
-                    for mode_probs in probs[1:]:
-                        joint_probs = np.outer(joint_probs, mode_probs).reshape(-1)
-                    update_dict["probs"] = joint_probs / np.sum(joint_probs)
+            if N_TV > 0:
+                if target_vehicle_mode_probs is None:
+                    raise ValueError(
+                        "Probability-weighted SMPC requires MultiPath mode probabilities"
+                    )
+                update_dict["probs"] = joint_mode_probabilities(
+                    target_vehicle_mode_probs[:N_TV],
+                    n_targets=N_TV,
+                    n_modes=self.N_modes,
+                )
 
             adaptive_risk = (
                 {

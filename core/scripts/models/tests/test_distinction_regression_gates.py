@@ -90,11 +90,11 @@ class CorrectedControlContractTests(unittest.TestCase):
         agent = self.agent_path.read_text(encoding="utf-8")
         scenario = self.scenario_path.read_text(encoding="utf-8")
         self.assertIn(
-            "control_implementation_version=smpc.CONTROL_IMPLEMENTATION_CORRECTED_V1",
+            "control_implementation_version=smpc.CONTROL_IMPLEMENTATION_PROBABILITY_WEIGHTED_V2",
             agent,
         )
         self.assertIn(
-            'control_implementation_version : str = "corrected_joint_modes_shared_amin_v1"',
+            'control_implementation_version : str = "corrected_joint_modes_shared_amin_probability_weighted_v2"',
             scenario,
         )
         self.assertIn("default_solver_a_min = (", agent)
