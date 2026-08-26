@@ -11,23 +11,24 @@ RUNNER = (
 
 
 class ProbabilityWeightedFormalRunnerTest(unittest.TestCase):
-    def test_frozen_supervisor_on_matrix_has_eighty_unique_rollouts(self):
+    def test_frozen_supervisor_on_matrix_has_forty_unique_rollouts(self):
         source = RUNNER.read_text()
         matrix = source.split("done <<'CELLS'", 1)[1].split("CELLS", 1)[0]
         rows = [line.split() for line in matrix.splitlines() if line.strip()]
 
-        self.assertEqual(len(rows), 8)
+        self.assertEqual(len(rows), 4)
         self.assertTrue(all(len(row) == 4 for row in rows))
-        self.assertEqual(len({row[0] for row in rows}), 8)
+        self.assertEqual(len({row[0] for row in rows}), 4)
         self.assertEqual({row[1] for row in rows}, {"B1", "P_star"})
         self.assertEqual({row[2] for row in rows}, {"fixed_medium", "adaptive"})
         self.assertEqual(
             {row[3] for row in rows},
-            {"assertive_constant_speed", "defensive_reactive"},
+            {"assertive_constant_speed"},
         )
         self.assertIn("for init_id in {126..135}", source)
-        self.assertRegex(source, r'expected\s*=\s*80')
-        self.assertIn('"expected_unique_rollouts": 80', source)
+        self.assertRegex(source, r'expected\s*=\s*40')
+        self.assertIn('"expected_unique_rollouts": 40', source)
+        self.assertIn('"target_controller_uses_ego_state": False', source)
 
     def test_runner_is_supervisor_on_and_probability_weighted(self):
         source = RUNNER.read_text()

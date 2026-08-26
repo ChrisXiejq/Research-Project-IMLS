@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-/root/autodl-tmp/Research-Project-IMLS-shadow-v2}"
-RESULTS_ROOT="${RESULTS_ROOT:-/root/autodl-tmp/results/weighted_smpc_v2_recovery/formal_supervisor_on_80_v1}"
+RESULTS_ROOT="${RESULTS_ROOT:-/root/autodl-tmp/results/weighted_smpc_v2_recovery/formal_supervisor_on_assertive_40_v1}"
 PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/envs/carla_modern/bin/python}"
 CARLA_ROOT="${CARLA_ROOT:-/root/autodl-tmp/carla_0.9.14}"
 GUROBI_LOADER="${GUROBI_LOADER:-/root/autodl-tmp/load_gurobi11.sh}"
@@ -79,28 +79,25 @@ if missing:
 
 cells = [
     {"cell_id": "B1__fixed_medium__assertive__supervisor_on", "predictor": "B1", "risk": "fixed_medium", "target_style": "assertive_constant_speed"},
-    {"cell_id": "B1__fixed_medium__reactive__supervisor_on", "predictor": "B1", "risk": "fixed_medium", "target_style": "defensive_reactive"},
     {"cell_id": "B1__adaptive__assertive__supervisor_on", "predictor": "B1", "risk": "adaptive", "target_style": "assertive_constant_speed"},
-    {"cell_id": "B1__adaptive__reactive__supervisor_on", "predictor": "B1", "risk": "adaptive", "target_style": "defensive_reactive"},
     {"cell_id": "P_star__fixed_medium__assertive__supervisor_on", "predictor": "P_star", "risk": "fixed_medium", "target_style": "assertive_constant_speed"},
-    {"cell_id": "P_star__fixed_medium__reactive__supervisor_on", "predictor": "P_star", "risk": "fixed_medium", "target_style": "defensive_reactive"},
     {"cell_id": "P_star__adaptive__assertive__supervisor_on", "predictor": "P_star", "risk": "adaptive", "target_style": "assertive_constant_speed"},
-    {"cell_id": "P_star__adaptive__reactive__supervisor_on", "predictor": "P_star", "risk": "adaptive", "target_style": "defensive_reactive"},
 ]
 core = {
-    "protocol_id": "probability_weighted_joint_mode_smpc_supervisor_on_80_v1",
+    "protocol_id": "probability_weighted_joint_mode_smpc_supervisor_on_assertive_40_v1",
     "objective_id": "multipath_joint_probability_expected_cost_v2",
     "objective_unweighted_option_available": False,
     "carla_version": "0.9.14",
     "town": "Town05",
-    "target_styles": ["assertive_constant_speed", "defensive_reactive"],
+    "target_style": "assertive_constant_speed",
+    "target_controller_uses_ego_state": False,
     "camera_enabled": False,
     "formal_init_ids": list(range(126, 136)),
     "excluded_smoke_init_ids": list(range(116, 126)),
     "cells": cells,
     "supervisor_authority": "on",
     "risk_policies": ["fixed_medium", "adaptive"],
-    "expected_unique_rollouts": 80,
+    "expected_unique_rollouts": 40,
     "file_sha256": {name: digest(path) for name, path in tracked.items()},
 }
 encoded = json.dumps(core, sort_keys=True, separators=(",", ":")).encode()
@@ -223,13 +220,9 @@ while read -r cell predictor risk target_style; do
   done
 done <<'CELLS'
 B1__fixed_medium__assertive__supervisor_on B1 fixed_medium assertive_constant_speed
-B1__fixed_medium__reactive__supervisor_on B1 fixed_medium defensive_reactive
 B1__adaptive__assertive__supervisor_on B1 adaptive assertive_constant_speed
-B1__adaptive__reactive__supervisor_on B1 adaptive defensive_reactive
 P_star__fixed_medium__assertive__supervisor_on P_star fixed_medium assertive_constant_speed
-P_star__fixed_medium__reactive__supervisor_on P_star fixed_medium defensive_reactive
 P_star__adaptive__assertive__supervisor_on P_star adaptive assertive_constant_speed
-P_star__adaptive__reactive__supervisor_on P_star adaptive defensive_reactive
 CELLS
 
 "${PYTHON_BIN}" - "${RESULTS_ROOT}" <<'PY'
@@ -240,7 +233,7 @@ import sys
 
 root = pathlib.Path(sys.argv[1])
 records = [json.loads(path.read_text()) for path in sorted(root.glob("*/ego_init_*/FORMAL_ROLLOUT_COMPLETE.json"))]
-expected = 80
+expected = 40
 payload = {
     "schema_version": "probability_weighted_smpc_recovery_complete_v1",
     "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
