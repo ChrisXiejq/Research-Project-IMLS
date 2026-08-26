@@ -848,14 +848,22 @@ class SMPCAgent(object):
             "_rule_yield_phase": "idle",
         }
         self._observed_target_tracks = {}
+        # The source SMPC implementation gives the dynamically feasible
+        # reference problem a 2 s CPU budget.  A previous 0.2 s override in
+        # supervisor-on runs caused valid high-speed initialisations to time
+        # out, after which Ipopt debug iterates were used as references.  The
+        # closed loop is synchronous, so this is an integrity limit rather
+        # than the CARLA control period.
         self._reference_generator_max_cpu_time_s = (
-            5.0 if self.supervisor_free_smpc_enabled else 0.2
+            5.0 if self.supervisor_free_smpc_enabled else 2.0
         )
         self._reference_generation_status = {
             "solve_count": 0,
             "max_cpu_time_s": self._reference_generator_max_cpu_time_s,
             "last_context": None,
             "last_optimal": None,
+            "last_result_valid": None,
+            "last_fallback_used": False,
             "last_return_status": None,
             "last_solve_time_s": None,
         }
@@ -2017,11 +2025,12 @@ class SMPCAgent(object):
             np.isfinite(np.asarray(result[key], dtype=float)).all()
             for key in ("z_opt", "u_opt")
         )
-        if self.supervisor_free_smpc_enabled and (
-            not result.get("optimal", False) or not arrays_finite
-        ):
+        result_valid = bool(result.get("optimal", False) and arrays_finite)
+        self._reference_generation_status["last_result_valid"] = result_valid
+        self._reference_generation_status["last_fallback_used"] = False
+        if not result_valid:
             raise RuntimeError(
-                "Supervisor-free SMPC requires a valid feasible reference; "
+                "SMPC requires a valid dynamically feasible reference; "
                 f"context={context}, status={result.get('return_status')}, "
                 f"solve_time={result.get('solve_time')}, finite={arrays_finite}"
             )
@@ -2096,6 +2105,10 @@ class SMPCAgent(object):
                 np.full(self.N + 1, self.reference_route_s[-1], dtype=float),
             ))
             self.feas_ref_route_s_new = self.feas_ref_route_s.copy()
+            self._last_valid_feas_ref_states = self.feas_ref_states.copy()
+            self._last_valid_feas_ref_inputs = self.feas_ref_inputs.copy()
+            self._last_valid_feas_ref_route_s = self.feas_ref_route_s.copy()
+            return True
 
         else:
 
@@ -2122,9 +2135,26 @@ class SMPCAgent(object):
             self.ref_dict['warm_start']={'z_ws': np.vstack((np.array([[x,y,psi,speed]]),self.feas_ref_states[self.t_ref+1:self.ref_horizon,:])),
                                          'u_ws': np.array([[self.control_prev[0],self.control_prev[1]]]*self.feas_ref_gen.N) }
             self.feas_ref_gen.update(self.ref_dict)
-            self.feas_ref_dict=self._solve_reference_or_raise(
-                "closed_loop_regeneration"
-            )
+            try:
+                self.feas_ref_dict=self._solve_reference_or_raise(
+                    "closed_loop_regeneration"
+                )
+            except RuntimeError:
+                # A transient regeneration timeout must not promote Ipopt's
+                # unconverged debug iterate into the controller.  Retain the
+                # most recent reference that passed the optimality/finite
+                # checks and make the fallback explicit in telemetry.
+                self.feas_ref_states_new = (
+                    self._last_valid_feas_ref_states.copy()
+                )
+                self.feas_ref_inputs_new = (
+                    self._last_valid_feas_ref_inputs.copy()
+                )
+                self.feas_ref_route_s_new = (
+                    self._last_valid_feas_ref_route_s.copy()
+                )
+                self._reference_generation_status["last_fallback_used"] = True
+                return False
             self.feas_ref_states_new=self.feas_ref_dict['z_opt']
 
             self.feas_ref_states_new=np.vstack((self.feas_ref_states_new, np.array([self.feas_ref_states_new[-1,:]]*(self.N+1))))
@@ -2148,8 +2178,10 @@ class SMPCAgent(object):
             else:
                 self.feas_ref_inputs_new=np.array([self.feas_ref_inputs_new]*(self.N+1)).reshape((self.N+1,2))
 
-            self.feas_ref_states_new=self.feas_ref_states_new
-            self.feas_ref_inputs_new=self.feas_ref_inputs_new
+            self._last_valid_feas_ref_states = self.feas_ref_states_new.copy()
+            self._last_valid_feas_ref_inputs = self.feas_ref_inputs_new.copy()
+            self._last_valid_feas_ref_route_s = self.feas_ref_route_s_new.copy()
+            return True
 
 
     def linearization_traj(self, *state):
@@ -4222,9 +4254,14 @@ class SMPCAgent(object):
                 reference_status["forced_reference_linearization"] = True
                 reference_status["skip_reason"] = "lateral_error_too_large"
             elif should_regenerate_reference and self.ref_horizon>self.t_ref+1:
-                self.reference_regeneration(x,y,psi,speed,s)
-                reference_status["regenerated"] = True
-                if recovery_active_for_reference:
+                reference_status["regenerated"] = bool(
+                    self.reference_regeneration(x,y,psi,speed,s)
+                )
+                if not reference_status["regenerated"]:
+                    reference_status["skip_reason"] = (
+                        "reference_generation_failed_retained_last_valid"
+                    )
+                elif recovery_active_for_reference:
                     reference_status["skip_reason"] = "post_yield_recovery_regen"
             elif should_regenerate_reference:
                 reference_status["skip_reason"] = "near_reference_end"
