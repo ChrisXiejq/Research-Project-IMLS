@@ -37,6 +37,7 @@ class ProbabilityWeightedFormalRunnerTest(unittest.TestCase):
             '"objective_id": "multipath_joint_probability_expected_cost_v2"',
             source,
         )
+        self.assertIn('"smpc_model": repo / "core/scripts/carla/utils/mpc_utils.py"', source)
         self.assertIn('"objective_unweighted_option_available": False', source)
         self.assertNotIn("rule_absent", source)
         self.assertNotRegex(source, re.compile(r"fixed_(aggressive|conservative)"))

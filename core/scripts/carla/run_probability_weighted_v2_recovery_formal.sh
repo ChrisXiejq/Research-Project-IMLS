@@ -57,7 +57,7 @@ def digest(path):
 
 tracked = {
     "mode_probability_contract": repo / "core/scripts/carla/utils/mode_probability_contract.py",
-    "smpc_model": repo / "core/scripts/carla/policies/smpc.py",
+    "smpc_model": repo / "core/scripts/carla/utils/mpc_utils.py",
     "smpc_agent": repo / "core/scripts/carla/policies/smpc_agent.py",
     "scenario_runner": repo / "core/scripts/carla/scenarios/run_intersection_scenario.py",
     "batch_runner": repo / "core/scripts/carla/run_all_scenarios.py",
