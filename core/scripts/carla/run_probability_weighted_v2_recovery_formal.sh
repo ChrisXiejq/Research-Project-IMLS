@@ -8,7 +8,7 @@ case "${SUPERVISOR_AUTHORITY_MODE}" in
     DEFAULT_RESULTS_ROOT="/root/autodl-tmp/results/weighted_smpc_v2_recovery/formal_supervisor_on_assertive_40_v2_reference_integrity"
     ;;
   off)
-    DEFAULT_RESULTS_ROOT="/root/autodl-tmp/results/weighted_smpc_v2_recovery/formal_supervisor_off_assertive_h3_10_v2_reference_integrity"
+    DEFAULT_RESULTS_ROOT="/root/autodl-tmp/results/weighted_smpc_v2_recovery/formal_supervisor_off_assertive_20_v2_reference_integrity"
     ;;
   *)
     echo "Unknown SUPERVISOR_AUTHORITY_MODE: ${SUPERVISOR_AUTHORITY_MODE}" >&2
@@ -129,7 +129,7 @@ if authority_mode == "on":
     predictors = ("B1", "P_star")
     formal_init_ids = list(range(126, 136))
 elif authority_mode == "off":
-    predictors = ("B1",)
+    predictors = ("B1", "P_star")
     formal_init_ids = list(range(126, 131))
 else:
     raise SystemExit(f"Unknown supervisor authority mode: {authority_mode}")
@@ -146,7 +146,7 @@ cells = [
 expected_unique_rollouts = len(cells) * len(formal_init_ids)
 core = {
     "protocol_id": f"probability_weighted_joint_mode_smpc_supervisor_{authority_mode}_assertive_h2_h3_v2_reference_integrity",
-    "campaign_id": "probability_weighted_joint_mode_smpc_h2_h3_assertive_unique_50_v2",
+    "campaign_id": "probability_weighted_joint_mode_smpc_h2_h3_assertive_unique_60_v2",
     "objective_id": "multipath_joint_probability_expected_cost_v2",
     "objective_unweighted_option_available": False,
     "carla_version": "0.9.14",
@@ -157,7 +157,9 @@ core = {
     "reference_generator_max_cpu_time_s": 2.0,
     "invalid_reference_solution_policy": "reject_initial_retain_last_valid_closed_loop",
     "formal_init_ids": formal_init_ids,
-    "excluded_smoke_init_ids": list(range(116, 126)),
+    "excluded_smoke_init_ids": (
+        [131] if authority_mode == "off" else list(range(116, 126))
+    ),
     "cells": cells,
     "supervisor_authority": authority_mode,
     "matched_authority_only_tuning": True,
@@ -421,10 +423,12 @@ if [[ "${SUPERVISOR_AUTHORITY_MODE}" == "on" ]]; then
     done
   done
 else
-  for risk in fixed_medium adaptive; do
-    for init_id in {126..130}; do
-      run_rollout "B1__${risk}__assertive__supervisor_off" \
-        B1 "${risk}" assertive_constant_speed "${init_id}"
+  for predictor in B1 P_star; do
+    for risk in fixed_medium adaptive; do
+      for init_id in {126..130}; do
+        run_rollout "${predictor}__${risk}__assertive__supervisor_off" \
+          "${predictor}" "${risk}" assertive_constant_speed "${init_id}"
+      done
     done
   done
 fi
@@ -438,7 +442,7 @@ import sys
 root = pathlib.Path(sys.argv[1])
 authority_mode = sys.argv[2]
 records = [json.loads(path.read_text()) for path in sorted(root.glob("*/ego_init_*/FORMAL_ROLLOUT_COMPLETE.json"))]
-expected = 40 if authority_mode == "on" else 10
+expected = 40 if authority_mode == "on" else 20
 payload = {
     "schema_version": "probability_weighted_smpc_recovery_complete_v2",
     "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),

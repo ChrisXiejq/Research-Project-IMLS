@@ -18,7 +18,7 @@ class ProbabilityWeightedFormalRunnerTest(unittest.TestCase):
         self.assertIn("for risk in fixed_medium adaptive", source)
         self.assertIn("for init_id in {126..135}", source)
         self.assertIn(
-            'expected = 40 if authority_mode == "on" else 10', source
+            'expected = 40 if authority_mode == "on" else 20', source
         )
         self.assertIn(
             "expected_unique_rollouts = len(cells) * len(formal_init_ids)",
@@ -36,14 +36,15 @@ class ProbabilityWeightedFormalRunnerTest(unittest.TestCase):
         self.assertIn('"matrix_execution_complete"', source)
         self.assertNotIn("Formal rollout gate failed", source)
 
-    def test_h3_off_extension_adds_only_ten_unique_rollouts(self):
+    def test_matched_off_extension_adds_twenty_unique_rollouts(self):
         source = RUNNER.read_text()
         self.assertIn('SUPERVISOR_AUTHORITY_MODE="${SUPERVISOR_AUTHORITY_MODE:-on}"', source)
-        self.assertIn("formal_supervisor_off_assertive_h3_10", source)
-        self.assertIn('predictors = ("B1",)', source)
+        self.assertIn("formal_supervisor_off_assertive_20", source)
+        self.assertIn('predictors = ("B1", "P_star")', source)
         self.assertIn("formal_init_ids = list(range(126, 131))", source)
+        self.assertGreaterEqual(source.count("for predictor in B1 P_star"), 2)
         self.assertIn("for init_id in {126..130}", source)
-        self.assertIn('"campaign_id": "probability_weighted_joint_mode_smpc_h2_h3_assertive_unique_50_v2"', source)
+        self.assertIn('"campaign_id": "probability_weighted_joint_mode_smpc_h2_h3_assertive_unique_60_v2"', source)
         self.assertIn('"authority_integrity_pass": True', source)
         self.assertIn('"implementation_manipulation_gate"', source)
         self.assertIn('"reference_and_solver_input_audit"', source)
