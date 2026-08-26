@@ -29,6 +29,10 @@ class ProbabilityWeightedFormalRunnerTest(unittest.TestCase):
         self.assertRegex(source, r'expected\s*=\s*40')
         self.assertIn('"expected_unique_rollouts": 40', source)
         self.assertIn('"target_controller_uses_ego_state": False', source)
+        self.assertIn('ALLOW_ORCHESTRATION_RECOVERY', source)
+        self.assertIn('"execution_complete": True', source)
+        self.assertIn('"matrix_execution_complete"', source)
+        self.assertNotIn("Formal rollout gate failed", source)
 
     def test_runner_is_supervisor_on_and_probability_weighted(self):
         source = RUNNER.read_text()

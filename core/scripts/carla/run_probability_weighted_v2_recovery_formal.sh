@@ -33,6 +33,7 @@ mkdir -p "${RESULTS_ROOT}"
 import datetime
 import hashlib
 import json
+import os
 import pathlib
 import sys
 
@@ -111,7 +112,53 @@ path = results_root / "FROZEN_PROTOCOL.json"
 if path.exists():
     existing = json.loads(path.read_text())
     if existing.get("core_sha256") != payload["core_sha256"]:
-        raise SystemExit("Frozen protocol mismatch; refusing to mix experiment versions")
+        old_core = existing.get("core") or {}
+        old_comparable = json.loads(json.dumps(old_core))
+        new_comparable = json.loads(json.dumps(core))
+        old_runner_sha = (old_comparable.get("file_sha256") or {}).pop(
+            "formal_runner", None
+        )
+        new_runner_sha = (new_comparable.get("file_sha256") or {}).pop(
+            "formal_runner", None
+        )
+        recovery_allowed = os.environ.get("ALLOW_ORCHESTRATION_RECOVERY") == "1"
+        if not recovery_allowed or old_comparable != new_comparable:
+            raise SystemExit(
+                "Frozen protocol mismatch beyond the formal-runner orchestration; "
+                "refusing to mix experiment versions"
+            )
+        amendment = {
+            "schema_version": "formal_orchestration_recovery_amendment_v1",
+            "created_at_utc": datetime.datetime.now(
+                datetime.timezone.utc
+            ).isoformat(),
+            "frozen_protocol_core_sha256": existing.get("core_sha256"),
+            "original_formal_runner_sha256": old_runner_sha,
+            "recovery_formal_runner_sha256": new_runner_sha,
+            "controller_or_model_assets_changed": False,
+            "scientific_protocol_changed": False,
+            "reason": (
+                "Continue all frozen cells after a scientifically valid failed "
+                "rollout; failed outcomes are retained rather than retried or "
+                "silently discarded."
+            ),
+        }
+        amendment_path = results_root / "ORCHESTRATION_RECOVERY_AMENDMENT.json"
+        if amendment_path.exists():
+            previous = json.loads(amendment_path.read_text())
+            stable_keys = (
+                "frozen_protocol_core_sha256",
+                "original_formal_runner_sha256",
+                "recovery_formal_runner_sha256",
+            )
+            if any(previous.get(key) != amendment.get(key) for key in stable_keys):
+                raise SystemExit("Orchestration recovery amendment mismatch")
+        else:
+            amendment_path.write_text(
+                json.dumps(amendment, indent=2, sort_keys=True) + "\n"
+            )
+        print(existing["core_sha256"])
+        raise SystemExit(0)
 else:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 print(payload["core_sha256"])
@@ -149,31 +196,41 @@ run_rollout() {
     return 0
   fi
   mkdir -p "${run_dir}"
-  "${PYTHON_BIN}" "${REPO_DIR}/core/scripts/carla/run_all_scenarios.py" \
-    --scenario_glob "${SCENARIO}" \
-    --init_glob "${INIT_DIR}/ego_init_${init_id}.json" \
-    --results_dir "${run_dir}/rollout" \
-    --policies "${policy}" \
-    --risk_profile "${risk_profile}" \
-    "${adaptive_args[@]}" \
-    --tuning_config "${tuning}" \
-    --prediction_model_weights "${model}" \
-    --prediction_model_anchors "${ANCHORS}" \
-    --prediction_model_calibration "${calibration}" \
-    --target_style "${target_style}" \
-    --disable_camera_viz --skip_postprocess --no_console_log \
-    >"${run_dir}/runner.log" 2>&1
+  if [[ ! -s "${scenario_dir}/scenario_result.pkl" ]]; then
+    "${PYTHON_BIN}" "${REPO_DIR}/core/scripts/carla/run_all_scenarios.py" \
+      --scenario_glob "${SCENARIO}" \
+      --init_glob "${INIT_DIR}/ego_init_${init_id}.json" \
+      --results_dir "${run_dir}/rollout" \
+      --policies "${policy}" \
+      --risk_profile "${risk_profile}" \
+      "${adaptive_args[@]}" \
+      --tuning_config "${tuning}" \
+      --prediction_model_weights "${model}" \
+      --prediction_model_anchors "${ANCHORS}" \
+      --prediction_model_calibration "${calibration}" \
+      --target_style "${target_style}" \
+      --disable_camera_viz --skip_postprocess --no_console_log \
+      >"${run_dir}/runner.log" 2>&1
+  fi
 
   test -s "${scenario_dir}/scenario_result.pkl"
+  set +e
   "${PYTHON_BIN}" "${REPO_DIR}/core/scripts/postcarla_trajectory_gate.py" \
     "${run_dir}/rollout" --required-policies "${policy}" \
     --footprint-margin-m 0.25 --footprint-margins-m 0.0,0.25,0.35,0.50 \
     >"${run_dir}/postprocess.log" 2>&1
+  local gate_exit_code=$?
+  set -e
+  test -s "${run_dir}/rollout/postcarla_trajectory_gate.json"
+  set +e
   "${PYTHON_BIN}" "${REPO_DIR}/core/scripts/compute_scenario_results.py" \
     --results_dir "${run_dir}/rollout" --compute_metrics \
     >>"${run_dir}/postprocess.log" 2>&1
+  local metrics_exit_code=$?
+  set -e
 
-  "${PYTHON_BIN}" - "${run_dir}" "${cell_id}" "${init_id}" <<'PY'
+  "${PYTHON_BIN}" - "${run_dir}" "${cell_id}" "${init_id}" \
+    "${gate_exit_code}" "${metrics_exit_code}" <<'PY'
 import datetime
 import json
 import pathlib
@@ -182,14 +239,21 @@ import sys
 run_dir = pathlib.Path(sys.argv[1])
 cell_id = sys.argv[2]
 init_id = int(sys.argv[3])
+gate_exit_code = int(sys.argv[4])
+metrics_exit_code = int(sys.argv[5])
 gate = json.loads((run_dir / "rollout/postcarla_trajectory_gate.json").read_text())
 evaluation = gate["evaluations"][0]
 pairs = evaluation.get("pair_safety") or []
+if not pairs:
+    raise SystemExit("Formal rollout is missing pair-safety evidence")
+solver_failure = evaluation.get("solver_failure_frac")
+if solver_failure is None:
+    raise SystemExit("Formal rollout is missing solver-failure evidence")
 competence = (
     evaluation.get("completion_valid") is True
     and evaluation.get("collision_envelope_logged") is True
     and all(not pair.get("footprint_collision") for pair in pairs)
-    and float(evaluation.get("solver_failure_frac") or 0.0) <= 0.05
+    and float(solver_failure) <= 0.05
 )
 target_first = all(
     item.get("target_clears_before_ego_enters") is True
@@ -206,11 +270,12 @@ payload = {
     "target_first_yield": target_first,
     "solver_failure_frac": evaluation.get("solver_failure_frac"),
     "postcarla_status": evaluation.get("status"),
+    "postcarla_exit_code": gate_exit_code,
+    "metrics_exit_code": metrics_exit_code,
+    "execution_complete": True,
     "passed": passed,
 }
 (run_dir / "FORMAL_ROLLOUT_COMPLETE.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-if not passed:
-    raise SystemExit(f"Formal rollout gate failed: {payload}")
 PY
 }
 
@@ -240,12 +305,20 @@ payload = {
     "expected_rollouts": expected,
     "completed_rollouts": len(records),
     "passed_rollouts": sum(bool(row.get("passed")) for row in records),
-    "all_passed": len(records) == expected and all(bool(row.get("passed")) for row in records),
+    "failed_rollouts": sum(not bool(row.get("passed")) for row in records),
+    "matrix_execution_complete": (
+        len(records) == expected
+        and all(bool(row.get("execution_complete")) for row in records)
+    ),
+    "all_passed": (
+        len(records) == expected
+        and all(bool(row.get("passed")) for row in records)
+    ),
     "records": records,
 }
 (root / "FORMAL_COMPLETE.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-if not payload["all_passed"]:
-    raise SystemExit("Formal recovery matrix incomplete or failed")
+if not payload["matrix_execution_complete"]:
+    raise SystemExit("Formal recovery matrix execution is incomplete")
 PY
 
 echo "Weighted SMPC recovery formal matrix complete: ${RESULTS_ROOT}"
