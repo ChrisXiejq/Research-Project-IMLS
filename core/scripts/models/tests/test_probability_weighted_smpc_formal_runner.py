@@ -29,6 +29,12 @@ class ProbabilityWeightedFormalRunnerTest(unittest.TestCase):
         self.assertRegex(source, r'expected\s*=\s*40')
         self.assertIn('"expected_unique_rollouts": 40', source)
         self.assertIn('"target_controller_uses_ego_state": False', source)
+        self.assertIn('"reference_generator_max_cpu_time_s": 2.0', source)
+        self.assertIn(
+            '"invalid_reference_solution_policy": '
+            '"reject_initial_retain_last_valid_closed_loop"',
+            source,
+        )
         self.assertIn('ALLOW_ORCHESTRATION_RECOVERY', source)
         self.assertIn('"execution_complete": True', source)
         self.assertIn('"matrix_execution_complete"', source)

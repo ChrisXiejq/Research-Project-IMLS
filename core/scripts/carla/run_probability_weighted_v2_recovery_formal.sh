@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-/root/autodl-tmp/Research-Project-IMLS-shadow-v2}"
-RESULTS_ROOT="${RESULTS_ROOT:-/root/autodl-tmp/results/weighted_smpc_v2_recovery/formal_supervisor_on_assertive_40_v1}"
+RESULTS_ROOT="${RESULTS_ROOT:-/root/autodl-tmp/results/weighted_smpc_v2_recovery/formal_supervisor_on_assertive_40_v2_reference_integrity}"
 PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/envs/carla_modern/bin/python}"
 CARLA_ROOT="${CARLA_ROOT:-/root/autodl-tmp/carla_0.9.14}"
 GUROBI_LOADER="${GUROBI_LOADER:-/root/autodl-tmp/load_gurobi11.sh}"
@@ -85,7 +85,7 @@ cells = [
     {"cell_id": "P_star__adaptive__assertive__supervisor_on", "predictor": "P_star", "risk": "adaptive", "target_style": "assertive_constant_speed"},
 ]
 core = {
-    "protocol_id": "probability_weighted_joint_mode_smpc_supervisor_on_assertive_40_v1",
+    "protocol_id": "probability_weighted_joint_mode_smpc_supervisor_on_assertive_40_v2_reference_integrity",
     "objective_id": "multipath_joint_probability_expected_cost_v2",
     "objective_unweighted_option_available": False,
     "carla_version": "0.9.14",
@@ -93,6 +93,8 @@ core = {
     "target_style": "assertive_constant_speed",
     "target_controller_uses_ego_state": False,
     "camera_enabled": False,
+    "reference_generator_max_cpu_time_s": 2.0,
+    "invalid_reference_solution_policy": "reject_initial_retain_last_valid_closed_loop",
     "formal_init_ids": list(range(126, 136)),
     "excluded_smoke_init_ids": list(range(116, 126)),
     "cells": cells,
@@ -103,7 +105,7 @@ core = {
 }
 encoded = json.dumps(core, sort_keys=True, separators=(",", ":")).encode()
 payload = {
-    "schema_version": "probability_weighted_smpc_recovery_protocol_v1",
+    "schema_version": "probability_weighted_smpc_recovery_protocol_v2",
     "created_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
     "core": core,
     "core_sha256": hashlib.sha256(encoded).hexdigest(),
@@ -261,7 +263,7 @@ target_first = all(
 )
 passed = competence and target_first
 payload = {
-    "schema_version": "probability_weighted_smpc_formal_rollout_gate_v1",
+    "schema_version": "probability_weighted_smpc_formal_rollout_gate_v2",
     "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
     "cell_id": cell_id,
     "init_id": init_id,
@@ -300,7 +302,7 @@ root = pathlib.Path(sys.argv[1])
 records = [json.loads(path.read_text()) for path in sorted(root.glob("*/ego_init_*/FORMAL_ROLLOUT_COMPLETE.json"))]
 expected = 40
 payload = {
-    "schema_version": "probability_weighted_smpc_recovery_complete_v1",
+    "schema_version": "probability_weighted_smpc_recovery_complete_v2",
     "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
     "expected_rollouts": expected,
     "completed_rollouts": len(records),
