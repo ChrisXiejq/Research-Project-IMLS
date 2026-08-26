@@ -1317,26 +1317,41 @@ class RunIntersectionScenario:
             raise ValueError(
                 "Implicit SMPC target must not use a defensive/reactive style"
             )
+        prediction_mode = str(
+            prediction_params.target_prediction_mode
+        ).strip().lower()
+        # The analytic straight GMM is a causal requirement of the dedicated
+        # implicit-filter experiment.  A matched supervisor-ablation must keep
+        # its frozen MultiPath predictor; otherwise removing the rule layer
+        # would also change the upstream information supplied to SMPC.
         if (
-            str(prediction_params.target_prediction_mode).strip().lower()
-            != "exogenous_straight_gmm"
+            ego.implicit_safety_filter_enabled
+            and prediction_mode != "exogenous_straight_gmm"
         ):
             raise ValueError(
-                "Implicit SMPC experiment requires exogenous_straight_gmm predictions"
+                "Implicit safety-filter experiment requires "
+                "exogenous_straight_gmm predictions"
             )
-        if prediction_params.prediction_logging_enabled:
-            raise ValueError(
-                "Dataset logging is not supported for the analytic straight GMM; "
-                "use solver/scenario telemetry for this experiment"
-            )
-        if len(prediction_params.straight_gmm_mode_probabilities) != ego.num_modes:
-            raise ValueError(
-                "Straight-GMM probability count must match ego num_modes"
-            )
-        if len(prediction_params.straight_gmm_speed_offsets_mps) != ego.num_modes:
-            raise ValueError(
-                "Straight-GMM speed-offset count must match ego num_modes"
-            )
+        if prediction_mode == "exogenous_straight_gmm":
+            if prediction_params.prediction_logging_enabled:
+                raise ValueError(
+                    "Dataset logging is not supported for the analytic straight GMM; "
+                    "use solver/scenario telemetry for this experiment"
+                )
+            if (
+                len(prediction_params.straight_gmm_mode_probabilities)
+                != ego.num_modes
+            ):
+                raise ValueError(
+                    "Straight-GMM probability count must match ego num_modes"
+                )
+            if (
+                len(prediction_params.straight_gmm_speed_offsets_mps)
+                != ego.num_modes
+            ):
+                raise ValueError(
+                    "Straight-GMM speed-offset count must match ego num_modes"
+                )
 
     def _write_implicit_safety_filter_contract(self, prediction_params):
         supervisor_free_egos = [
@@ -1359,7 +1374,12 @@ class RunIntersectionScenario:
             "experimental_arm": (
                 "implicit_safety_filter"
                 if ego.implicit_safety_filter_enabled
-                else "paper_equivalent_baseline"
+                else (
+                    "paper_equivalent_baseline"
+                    if str(prediction_params.target_prediction_mode).strip().lower()
+                    == "exogenous_straight_gmm"
+                    else "probability_weighted_multipath_rule_absent"
+                )
             ),
             "ego_control_source": "multimodal_chance_constrained_smpc",
             "ego_policy": {
@@ -1389,16 +1409,26 @@ class RunIntersectionScenario:
                 "uses_ego_state": False,
                 "nominal_speed_mps": float(target.nominal_speed),
             },
-            "target_predictor": {
-                "mode": str(prediction_params.target_prediction_mode),
-                "uses_ego_state": False,
-                "speed_offsets_mps": list(
-                    prediction_params.straight_gmm_speed_offsets_mps
-                ),
-                "mode_probabilities": list(
-                    prediction_params.straight_gmm_mode_probabilities
-                ),
-            },
+            "target_predictor": (
+                {
+                    "mode": "exogenous_straight_gmm",
+                    "uses_ego_state": False,
+                    "speed_offsets_mps": list(
+                        prediction_params.straight_gmm_speed_offsets_mps
+                    ),
+                    "mode_probabilities": list(
+                        prediction_params.straight_gmm_mode_probabilities
+                    ),
+                }
+                if str(prediction_params.target_prediction_mode).strip().lower()
+                == "exogenous_straight_gmm"
+                else {
+                    "mode": "model_gmm",
+                    "frozen_model_weights": str(prediction_params.model_weights),
+                    "frozen_model_anchors": str(prediction_params.model_anchors),
+                    "frozen_model_calibration": prediction_params.model_calibration,
+                }
+            ),
             "evaluation_geometry": self._implicit_filter_conflict_geometry,
             "evaluation_only": True,
             "evaluation_geometry_is_controller_input": bool(
