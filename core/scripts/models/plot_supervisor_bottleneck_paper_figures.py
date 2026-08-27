@@ -18,7 +18,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Polygon, Rectangle
-from matplotlib.ticker import FuncFormatter
 import numpy as np
 
 
@@ -149,12 +148,12 @@ def plot_system_figure(output: Path) -> tuple[list[Path], dict[str, Any]]:
     top = [
         (0.02, "State + history", "map · ego · target\nrecent interaction", GREY),
         (0.375, "MultiPath predictor", "$K$ trajectories\nprobability + covariance", BLUE),
-        (0.73, "Risk allocation", "fixed / adaptive\nrisk budget", PURPLE),
+        (0.73, "Risk allocation", "fixed / adaptive\nrisk budget", DARK),
     ]
     bottom = [
-        (0.73, "Risk-aware SMPC", "nominal $u_t^{nom}$\nchance constraints", GREEN),
+        (0.73, "Risk-aware SMPC", "nominal $u_t^{nom}$\nchance constraints", DARK),
         (0.375, "Rule supervisor", "reference · action\nbypass channels", ORANGE),
-        (0.02, "CARLA execution", "executed $u_t^{exec}$\ncompletion + clearance", DARK),
+        (0.02, "CARLA execution", "executed $u_t^{exec}$\ncompletion + clearance", GREY),
     ]
     for x, title, subtitle, color in top:
         _box(flow, x, top_y, w, h, title, subtitle, color)
@@ -168,7 +167,7 @@ def plot_system_figure(output: Path) -> tuple[list[Path], dict[str, Any]]:
         flow.add_patch(FancyArrowPatch((right[0] - 0.008, bottom_y + h / 2), (left[0] + w + 0.008, bottom_y + h / 2), arrowstyle="-|>", mutation_scale=8, lw=0.9, color=GREY))
     chips = [
         (0.50, 0.84, "offline NLL · ADE", BLUE),
-        (0.855, 0.51, "in-loop prediction", GREEN),
+        (0.855, 0.51, "in-loop prediction", DARK),
         (0.50, 0.16, "requested → applied", ORANGE),
         (0.145, 0.16, "yield · collision · time", DARK),
     ]
@@ -191,21 +190,23 @@ def plot_cia_figure(root: Path, output: Path) -> tuple[list[Path], dict[str, Any
     cells_path = root / "docs/paper/generated/capacity_history_v3/final/table_offline_model_cells.csv"
     contrasts_path = root / "docs/paper/generated/capacity_history_v3/final/table_three_axis_contrasts.csv"
     cells = _csv(cells_path); contrasts = _csv(contrasts_path)
-    fig, axes = plt.subplots(2, 2, figsize=(7.25, 5.35), constrained_layout=True)
-    ax = axes[0, 0]
+    fig, axes = plt.subplots(1, 3, figsize=(7.25, 2.75), constrained_layout=True)
+    ax = axes[0]
     capacity = [row for row in cells if row["model_cell_id"].startswith("transformer-h1p0-")]
     order = {"small": 0, "medium": 1, "large": 2}
     capacity.sort(key=lambda row: order[row["model_cell_id"].rsplit("-", 1)[1]])
     params = np.array([_f(row["trainable_parameters"]) for row in capacity])
+    capacity_x = np.arange(len(capacity))
     for seed, color in zip(("seed_11_nll", "seed_23_nll", "seed_37_nll"), (SKY, PURPLE, YELLOW)):
-        ax.plot(params, [_f(row[seed]) for row in capacity], marker="o", ms=3.2, lw=0.8, alpha=0.72, color=color, label=seed.replace("_nll", "").replace("_", " "))
-    ax.plot(params, [_f(row["heldout_rollout_macro_nll_mean"]) for row in capacity], marker="D", ms=4.2, lw=1.7, color=DARK, label="seed mean")
-    ax.set_xscale("log"); ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x/1e3:.0f}k"))
-    ax.set_xlabel("Trainable parameters"); ax.set_ylabel("Held-out NLL (nats step$^{-1}$)")
-    ax.set_title("Capacity at 1.0 s history"); _clean(ax); _panel_label(ax, "a")
+        ax.plot(capacity_x, [_f(row[seed]) for row in capacity], marker="o", ms=3.2, lw=0.8, alpha=0.72, color=color, label=seed.replace("_nll", "").replace("_", " "))
+    ax.plot(capacity_x, [_f(row["heldout_rollout_macro_nll_mean"]) for row in capacity], marker="D", ms=4.2, lw=1.7, color=DARK, label="seed mean")
+    capacity_labels = [row["model_cell_id"].rsplit("-", 1)[1] for row in capacity]
+    ax.set_xticks(capacity_x, [f"{label}\n{value / 1e3:.0f}k" for label, value in zip(capacity_labels, params)])
+    ax.set_xlabel("Capacity / trainable parameters"); ax.set_ylabel("Held-out NLL (nats step$^{-1}$)")
+    ax.set_title("Capacity (1.0 s history)"); _clean(ax); _panel_label(ax, "a")
     ax.legend(frameon=False, ncol=2, loc="best")
 
-    ax = axes[0, 1]
+    ax = axes[1]
     families = [("mlp", BLUE, "MLP"), ("transformer", ORANGE, "Transformer")]
     for family, color, label in families:
         rows = [row for row in cells if row["model_cell_id"].startswith(family + "-h") and row["model_cell_id"].endswith("-large")]
@@ -215,10 +216,10 @@ def plot_cia_figure(root: Path, output: Path) -> tuple[list[Path], dict[str, Any
             ax.plot(horizons, [_f(row[seed]) for row in rows], color=color, alpha=0.22, lw=0.65)
         ax.plot(horizons, [_f(row["heldout_rollout_macro_nll_mean"]) for row in rows], marker="o", ms=4.0, lw=1.7, color=color, label=label)
     ax.set_xticks([0.0, 0.4, 1.0]); ax.set_xlabel("History horizon (s)"); ax.set_ylabel("Held-out NLL (nats step$^{-1}$)")
-    ax.set_title("Information horizon at matched large capacity"); _clean(ax); _panel_label(ax, "b")
+    ax.set_title("History at matched capacity"); _clean(ax); _panel_label(ax, "b")
     ax.legend(frameon=False)
 
-    ax = axes[1, 0]
+    ax = axes[2]
     ids = [
         ("H2_information_mlp_snapshot_minus_full", "MLP history gain", BLUE),
         ("H2_information_transformer_snapshot_minus_full", "Transformer history gain", ORANGE),
@@ -230,107 +231,80 @@ def plot_cia_figure(root: Path, output: Path) -> tuple[list[Path], dict[str, Any
         ax.errorbar(effect, i, xerr=[[effect-low], [high-effect]], fmt="o", ms=5, color=color, capsize=2.5, lw=1.1)
     ax.axvline(0, color=GREY, lw=0.8, ls="--")
     ax.set_yticks(range(len(ids)), [item[1] for item in ids]); ax.invert_yaxis()
-    ax.set_xlabel("NLL reduction from 1.0 s history (nats step$^{-1}$)")
-    ax.set_title("History gain and architecture interaction"); _clean(ax, "x"); _panel_label(ax, "c")
-
-    ax = axes[1, 1]
-    direct = [row for row in contrasts if row["contrast_id"].startswith("architecture_direct_mlp_minus_transformer")]
-    horizon = {"h0p0": 0.0, "h0p4": 0.4, "h1p0": 1.0}
-    direct.sort(key=lambda row: horizon[row["contrast_id"].split("__")[1]])
-    xs = [horizon[row["contrast_id"].split("__")[1]] for row in direct]
-    ys = [_f(row["effect"]) for row in direct]
-    lows = [_f(row["ci95_low"]) for row in direct]; highs = [_f(row["ci95_high"]) for row in direct]
-    ax.errorbar(xs, ys, yerr=[np.array(ys)-np.array(lows), np.array(highs)-np.array(ys)], marker="o", ms=4.5, lw=1.5, color=GREEN, capsize=2.5)
-    ax.axhline(0, color=GREY, lw=0.8, ls="--")
-    ax.set_xticks([0.0, 0.4, 1.0]); ax.set_xlabel("History horizon (s)")
-    ax.set_ylabel("MLP − Transformer NLL (nats step$^{-1}$)")
-    ax.set_title("Direct family gap at matched information"); _clean(ax); _panel_label(ax, "d")
+    ax.set_xlabel("NLL reduction from 1.0 s history\n(nats step$^{-1}$)")
+    ax.set_title("History gain by architecture"); _clean(ax, "x"); _panel_label(ax, "c")
     files = _save(fig, output / "figure02_capacity_information_architecture")
     return files, {
         "figure_id": "Figure 2",
         "title": "Capacity, information and architecture are experimentally separated",
-        "caption": "Seed-level and mean retrospective held-out NLL for five independent initialization groups. Capacity is non-monotonic, history provides a small rapidly saturating gain in both families, and the history-gain interaction crosses zero even though the Transformer retains a small direct gap.",
+        "caption": "Panels a-c report seed-level and mean retrospective held-out NLL for five independent initialization groups. Capacity is non-monotonic, history provides a small rapidly saturating gain in both families, and the history-gain interaction crosses zero.",
         "sources": [str(cells_path.relative_to(root)), str(contrasts_path.relative_to(root))],
     }
 
 
 def plot_transfer_figure(root: Path, output: Path) -> tuple[list[Path], dict[str, Any]]:
     v3_path = root / "docs/paper/generated/capacity_history_v3/results/closed_loop/closed_loop_rows.json"
-    r3_path = root / "docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/synthesis/table_r3_h4_dominance.csv"
-    rows = _json(v3_path); r3 = _csv(r3_path)
-    fig, axes = plt.subplots(2, 2, figsize=(7.25, 5.45), constrained_layout=True)
+    rows = _json(v3_path)
+    fig, axes = plt.subplots(1, 3, figsize=(7.25, 3.05), constrained_layout=False)
+    fig.subplots_adjust(left=0.08, right=0.99, bottom=0.17, top=0.70, wspace=0.42)
     styles = ["assertive_constant_speed", "defensive_reactive"]
     labels = ["assertive", "reactive"]
     lines = [
-        ("B1", "fixed_medium", BLUE, "o", "B1 · fixed"),
-        ("B1", "adaptive", SKY, "s", "B1 · adaptive"),
-        ("P_star", "fixed_medium", ORANGE, "o", "P* · fixed"),
-        ("P_star", "adaptive", PURPLE, "s", "P* · adaptive"),
+        ("B1", "fixed_medium", BLUE, "o", "-", "Retrained MultiPath · fixed risk"),
+        ("B1", "adaptive", BLUE, "s", "--", "Retrained MultiPath · adaptive risk"),
+        ("P_star", "fixed_medium", ORANGE, "o", "-", "Transformer-adapted MultiPath · fixed risk"),
+        ("P_star", "adaptive", ORANGE, "s", "--", "Transformer-adapted MultiPath · adaptive risk"),
     ]
     metrics = [
-        ("inloop_top1_ADE_m", "In-loop top-1 ADE (m)", "Prediction inside the controller"),
-        ("completion_time_s", "Completion time (s)", "Executed completion"),
-        ("min_footprint_separation_m", "Minimum footprint separation (m)", "Executed clearance"),
+        ("inloop_top1_ADE_m", "In-loop top-1 ADE (m)", "In-loop prediction"),
+        ("completion_time_s", "Completion time (s)", "Completion time"),
+        ("min_footprint_separation_m", "Minimum footprint separation (m)", "Minimum separation"),
     ]
     for panel, (metric, ylabel, title) in enumerate(metrics):
         ax = axes.flat[panel]
-        for line_index, (predictor, risk, color, marker, label) in enumerate(lines):
+        for line_index, (predictor, risk, color, marker, linestyle, label) in enumerate(lines):
             means, lows, highs = [], [], []
             for style_index, style in enumerate(styles):
                 values = [_f(row[metric]) for row in rows if row["predictor"] == predictor and row["risk_policy"] == risk and row["target_style"] == style]
                 m, lo, hi = _bootstrap(values, 4000 + panel * 100 + line_index * 10 + style_index)
                 means.append(m); lows.append(lo); highs.append(hi)
-            ax.errorbar(range(2), means, yerr=[np.array(means)-np.array(lows), np.array(highs)-np.array(means)], color=color, marker=marker, ms=4.0, lw=1.3, capsize=2, label=label)
-        ax.set_xticks(range(2), labels); ax.set_ylabel(ylabel); ax.set_title(title + " (V3, groups 81–90)")
+            ax.errorbar(
+                range(2), means,
+                yerr=[np.array(means)-np.array(lows), np.array(highs)-np.array(means)],
+                color=color, marker=marker, linestyle=linestyle, ms=4.0,
+                lw=1.3, capsize=2, label=label,
+            )
+        ax.set_xticks(range(2), labels); ax.set_ylabel(ylabel); ax.set_title(title)
         _clean(ax); _panel_label(ax, chr(ord("a") + panel))
-        if panel == 0:
-            ax.legend(frameon=False, ncol=2, loc="best")
-
-    ax = axes.flat[3]
-    colors = {"B0": GREY, "B1": BLUE}; markers = {"assertive": "o", "reactive": "s"}
-    fixed_order = {"fixed_aggressive": 0, "fixed_medium": 1, "fixed_conservative": 2}
-    for row in r3:
-        x = _f(row["mean_adaptive_minus_fixed_completion_s"])
-        y = _f(row["mean_adaptive_minus_fixed_separation_m"])
-        ax.scatter(x, y, s=35, color=colors[row["predictor"]], marker=markers[row["target_style"]], edgecolor="white", linewidth=0.45, zorder=3)
-        short = {"fixed_aggressive": "A", "fixed_medium": "M", "fixed_conservative": "C"}[row["fixed_comparator"]]
-        ax.annotate(short, (x, y), xytext=(3, 2), textcoords="offset points", fontsize=6, color=colors[row["predictor"]])
-    ax.axvline(0, color=GREY, lw=0.8); ax.axhline(0, color=GREY, lw=0.8)
-    ax.add_patch(Rectangle((ax.get_xlim()[0], 0), -ax.get_xlim()[0], ax.get_ylim()[1], facecolor=GREEN, alpha=0.07, zorder=0))
-    ax.set_xlabel("Adaptive − fixed completion (s)  ← faster")
-    ax.set_ylabel("Adaptive − fixed separation (m)  ↑ larger")
-    ax.set_title("Adaptive-risk frontier (R3, groups 101–105)")
-    _clean(ax, "both"); _panel_label(ax, "d")
-    handles = [
-        plt.Line2D([], [], color=colors["B0"], marker="o", ls="", label="B0"),
-        plt.Line2D([], [], color=colors["B1"], marker="o", ls="", label="B1"),
-        plt.Line2D([], [], color=DARK, marker="o", ls="", label="assertive"),
-        plt.Line2D([], [], color=DARK, marker="s", ls="", label="reactive"),
-    ]
-    ax.legend(handles=handles, frameon=False, ncol=2, loc="best", title="Labels: A/M/C fixed comparator")
+    transfer_handles, transfer_labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        transfer_handles, transfer_labels, frameon=False, ncol=2,
+        loc="upper center", bbox_to_anchor=(0.5, 0.985), fontsize=6.6,
+        columnspacing=1.5, handlelength=2.4,
+    )
     files = _save(fig, output / "figure03_predictor_risk_transfer")
     return files, {
         "figure_id": "Figure 3",
         "title": "Prediction improvements do not translate uniformly through predictor and risk choices",
-        "caption": "Panels a–c show V3 cluster-bootstrap intervals across target styles; P* improves in-loop ADE most clearly under fixed risk, whereas completion and clearance intervals overlap. Panel d shows the separate R3 population: adaptive risk occupies the favourable faster-and-larger-separation quadrant in only a subset of predictor, style and fixed-comparator cells. R3 and V3 values are not pooled.",
-        "sources": [str(v3_path.relative_to(root)), str(r3_path.relative_to(root))],
+        "caption": "Panels a-c show cluster-bootstrap intervals across target styles; the Transformer-adapted MultiPath improves in-loop ADE most clearly under fixed risk, whereas completion and clearance intervals overlap.",
+        "sources": [str(v3_path.relative_to(root))],
     }
 
 
 def plot_sf4_figure(root: Path, output: Path) -> tuple[list[Path], dict[str, Any]]:
     sf4_path = root / "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/results/analysis/sf4_rollout_outcomes.csv"
     rows = _csv(sf4_path)
-    fig, axes = plt.subplots(2, 2, figsize=(7.25, 5.55), constrained_layout=True)
+    fig, axes = plt.subplots(1, 2, figsize=(7.25, 3.05), constrained_layout=True)
     conditions = [("off", "adaptive"), ("off", "fixed_medium"), ("on", "adaptive"), ("on", "fixed_medium")]
     ticklabels = ["off\nadaptive", "off\nfixed", "on\nadaptive", "on\nfixed"]
     groups = [[row for row in rows if row["supervisor_authority_mode"] == a and row["risk_policy"] == r] for a, r in conditions]
 
-    ax = axes[0, 0]
+    ax = axes[0]
     metrics = [
-        ("supervisor_any_channel_requested_fraction", "any request", GREY, "o"),
-        ("supervisor_candidate_requested_fraction", "post-action request", ORANGE, "s"),
-        ("supervisor_authority_applied_fraction", "authority applied", BLUE, "D"),
-        ("rule_smpc_bypass_applied_fraction", "bypass applied", PURPLE, "^")
+        ("supervisor_any_channel_requested_fraction", "any channel requested", GREY, "o"),
+        ("supervisor_candidate_requested_fraction", "action requested", ORANGE, "s"),
+        ("supervisor_authority_applied_fraction", "action applied", BLUE, "D"),
+        ("rule_smpc_bypass_applied_fraction", "SMPC bypass", PURPLE, "^")
     ]
     for metric_index, (metric, label, color, marker) in enumerate(metrics):
         means, lows, highs = [], [], []
@@ -340,58 +314,28 @@ def plot_sf4_figure(root: Path, output: Path) -> tuple[list[Path], dict[str, Any
             means.append(m); lows.append(lo); highs.append(hi)
         ax.errorbar(range(4), means, yerr=[np.array(means)-np.array(lows), np.array(highs)-np.array(means)], marker=marker, ms=3.7, color=color, lw=1.15, capsize=2, label=label)
     ax.set_xticks(range(4), ticklabels); ax.set_ylabel("Fraction of 10 Hz debug steps")
-    ax.set_title("Requested and applied authority channels"); _clean(ax); _panel_label(ax, "a")
+    ax.set_title("Requested and applied supervisor actions"); _clean(ax); _panel_label(ax, "a")
     ax.legend(frameon=False, ncol=2, loc="best")
 
-    ax = axes[0, 1]
-    for authority, color, marker in (("off", GREY, "o"), ("on", BLUE, "s")):
-        for risk, face in (("adaptive", color), ("fixed_medium", "white")):
-            subset = [row for row in rows if row["supervisor_authority_mode"] == authority and row["risk_policy"] == risk]
-            ax.scatter(
-                [_f(row["candidate_minus_nominal_accel_abs_mean_mps2"]) for row in subset],
-                [_f(row["actual_minus_nominal_accel_abs_mean_mps2"]) for row in subset],
-                s=20, marker=marker, facecolor=face, edgecolor=color, linewidth=0.75, alpha=0.78,
-                label=f"{authority} · {'adaptive' if risk == 'adaptive' else 'fixed'}"
-            )
-    limit = max(ax.get_xlim()[1], ax.get_ylim()[1]); ax.plot([0, limit], [0, limit], color=LIGHT_GREY, lw=0.9, ls="--", zorder=0)
-    ax.set_xlabel("Candidate − nominal |acceleration| (m s$^{-2}$)")
-    ax.set_ylabel("Executed − nominal |acceleration| (m s$^{-2}$)")
-    ax.set_title("Nominal → candidate → executed command"); _clean(ax, "both"); _panel_label(ax, "b")
-    ax.legend(frameon=False, loc="best")
-
-    ax = axes[1, 0]
-    outcomes = [
-        ("completion_success", "completion", GREEN),
-        ("yield_rule_failure", "yield failure", ORANGE),
-        ("adverse_collision_any", "adverse collision", PURPLE),
-    ]
-    x = np.arange(4); width = 0.23
-    for j, (metric, label, color) in enumerate(outcomes):
-        vals = [mean([_f(row[metric]) for row in group]) for group in groups]
-        ax.bar(x + (j - 1) * width, vals, width=width, color=color, alpha=0.88, label=label, zorder=2)
-    ax.set_xticks(x, ticklabels); ax.set_ylim(0, 1.08); ax.set_ylabel("Rollout fraction")
-    ax.set_title("Physical behaviour and authority-off floor"); _clean(ax); _panel_label(ax, "c")
-    ax.legend(frameon=False, ncol=3, loc="upper center")
-    ax.text(0.5, 0.05, "0/40 completion with authority off", transform=ax.transAxes, ha="center", fontsize=6.8, color=ORANGE)
-
-    ax = axes[1, 1]
+    ax = axes[1]
+    x = np.arange(4)
     accepted, fallback, bypass = [], [], []
     for group in groups:
         debug = sum(_f(row["debug_steps"]) for row in group)
         accepted.append(sum(_f(row["attempted_controller_accepted_count"]) for row in group) / debug)
         fallback.append(sum(_f(row["attempted_fallback_or_nonaccepted_count"]) for row in group) / debug)
         bypass.append(sum(_f(row["rule_smpc_bypass_applied_count"]) for row in group) / debug)
-    ax.bar(x, accepted, color=GREEN, label="accepted SMPC", zorder=2)
+    ax.bar(x, accepted, color=GREEN, label="controller-accepted", zorder=2)
     ax.bar(x, fallback, bottom=accepted, color=ORANGE, label="fallback / nonaccepted", zorder=2)
-    ax.bar(x, bypass, bottom=np.array(accepted)+np.array(fallback), color=PURPLE, label="rule bypass", zorder=2)
+    ax.bar(x, bypass, bottom=np.array(accepted)+np.array(fallback), color=PURPLE, label="SMPC bypass", zorder=2)
     ax.set_xticks(x, ticklabels); ax.set_ylim(0, 1.04); ax.set_ylabel("Fraction of debug steps")
-    ax.set_title("Executed controller pathway"); _clean(ax); _panel_label(ax, "d")
+    ax.set_title("Executed controller pathway"); _clean(ax); _panel_label(ax, "b")
     ax.legend(frameon=False, loc="lower center")
     files = _save(fig, output / "figure04_supervisor_authority")
     return files, {
         "figure_id": "Figure 4",
-        "title": "Rule-supervisor authority is active, behaviourally decisive and floor-saturating",
-        "caption": "SF4 uses 10 paired initialization groups for each risk policy and target style. Requests remain frequent in both arms, but only authority-on applies action changes or bypass. Authority-on completes 40/40 rollouts with no yield failures or adverse collisions; authority-off completes 0/40, so risk-by-authority interactions are floor-limited. The command-path panels verify a common authority effect but do not identify selective masking of a predictor or risk policy.",
+        "title": "Rule-supervisor requests and executed controller pathways",
+        "caption": "SF4 uses 10 paired initialization groups for each risk policy and target style. Panel a shows that supervisor channels request intervention in both arms, but only authority-on applies action changes or SMPC bypass. Panel b reports mutually exclusive command-path outcomes as fractions of eligible 10 Hz debug steps; controller-accepted commands are not strict optimizer-optimality flags. The two panels verify a common authority effect but do not identify selective masking of a predictor or risk policy.",
         "sources": [str(sf4_path.relative_to(root))],
     }
 

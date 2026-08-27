@@ -1,0 +1,33 @@
+metric,contrast_type,contrast,effect,ci_low,ci_high,exact_two_sided_sign_flip_p,paired_initialisation_groups
+competence_gate_pass,predictor,Transformer-adapted minus retrained MultiPath | Fixed medium,0.0,0.0,0.0,1.0,5
+competence_gate_pass,predictor,Transformer-adapted minus retrained MultiPath | Adaptive,0.0,0.0,0.0,1.0,5
+competence_gate_pass,risk,Adaptive minus fixed medium | Retrained MultiPath,0.0,0.0,0.0,1.0,5
+competence_gate_pass,risk,Adaptive minus fixed medium | Transformer-adapted MultiPath,0.0,0.0,0.0,1.0,5
+early_conflict_entry,predictor,Transformer-adapted minus retrained MultiPath | Fixed medium,0.0,0.0,0.0,1.0,5
+early_conflict_entry,predictor,Transformer-adapted minus retrained MultiPath | Adaptive,0.0,0.0,0.0,1.0,5
+early_conflict_entry,risk,Adaptive minus fixed medium | Retrained MultiPath,0.0,0.0,0.0,1.0,5
+early_conflict_entry,risk,Adaptive minus fixed medium | Transformer-adapted MultiPath,0.0,0.0,0.0,1.0,5
+footprint_collision,predictor,Transformer-adapted minus retrained MultiPath | Fixed medium,0.0,0.0,0.0,1.0,5
+footprint_collision,predictor,Transformer-adapted minus retrained MultiPath | Adaptive,0.0,0.0,0.0,1.0,5
+footprint_collision,risk,Adaptive minus fixed medium | Retrained MultiPath,0.0,0.0,0.0,1.0,5
+footprint_collision,risk,Adaptive minus fixed medium | Transformer-adapted MultiPath,0.0,0.0,0.0,1.0,5
+completion_time_s,predictor,Transformer-adapted minus retrained MultiPath | Fixed medium,-0.020000000298023225,-0.10000000149011612,0.06000000089406967,0.875,5
+completion_time_s,predictor,Transformer-adapted minus retrained MultiPath | Adaptive,0.0800000011920929,-0.05000000074505806,0.27000000402331353,0.75,5
+completion_time_s,risk,Adaptive minus fixed medium | Retrained MultiPath,-0.15000000223517418,-0.31000000461935995,-0.05000000074505806,0.0625,5
+completion_time_s,risk,Adaptive minus fixed medium | Transformer-adapted MultiPath,-0.05000000074505806,-0.12000000178813934,0.030000000447034835,0.5,5
+min_footprint_separation_m,predictor,Transformer-adapted minus retrained MultiPath | Fixed medium,-0.057165360995405826,-0.17885323199314332,0.02606042159297569,0.625,5
+min_footprint_separation_m,predictor,Transformer-adapted minus retrained MultiPath | Adaptive,-0.003664415503915652,-0.023455691853953575,0.018748370598476227,1.0,5
+min_footprint_separation_m,risk,Adaptive minus fixed medium | Retrained MultiPath,-0.04551011195076422,-0.19278322520010233,0.03989915851546082,1.0,5
+min_footprint_separation_m,risk,Adaptive minus fixed medium | Transformer-adapted MultiPath,0.00799083354072595,-0.0016888347577299178,0.022856799898530324,0.5,5
+solver_failure_fraction,predictor,Transformer-adapted minus retrained MultiPath | Fixed medium,-0.00249360059032825,-0.005463429701013092,0.0005516683241029996,0.3125,5
+solver_failure_fraction,predictor,Transformer-adapted minus retrained MultiPath | Adaptive,0.0013049333660969248,-0.000104566050888813,0.0031606760897378698,0.5,5
+solver_failure_fraction,risk,Adaptive minus fixed medium | Retrained MultiPath,-0.0023929605872946734,-0.0076971091460210864,0.0019663611136344237,0.5,5
+solver_failure_fraction,risk,Adaptive minus fixed medium | Transformer-adapted MultiPath,0.0014055733691305014,0.00013969706875884973,0.0025868904453548226,0.25,5
+average_solve_time_s,predictor,Transformer-adapted minus retrained MultiPath | Fixed medium,0.010306196883242866,-0.0024091166653719825,0.028662720370730106,0.375,5
+average_solve_time_s,predictor,Transformer-adapted minus retrained MultiPath | Adaptive,0.001330315295101342,-0.003627081374682434,0.005979765601047243,0.625,5
+average_solve_time_s,risk,Adaptive minus fixed medium | Retrained MultiPath,0.020347901094651077,0.015722491491057283,0.02506364435284105,0.0625,5
+average_solve_time_s,risk,Adaptive minus fixed medium | Transformer-adapted MultiPath,0.011372019506509554,-0.0071264053364736065,0.02443855510809661,0.25,5
+max_abs_lateral_error_m,predictor,Transformer-adapted minus retrained MultiPath | Fixed medium,-0.0758610644694647,-0.21859506139668844,0.04062854079169416,0.5,5
+max_abs_lateral_error_m,predictor,Transformer-adapted minus retrained MultiPath | Adaptive,-0.15931973048175757,-0.3901701470117418,0.03325587031854908,0.375,5
+max_abs_lateral_error_m,risk,Adaptive minus fixed medium | Retrained MultiPath,0.19676441002471315,-0.04269408114208435,0.4454846538599462,0.25,5
+max_abs_lateral_error_m,risk,Adaptive minus fixed medium | Transformer-adapted MultiPath,0.11330574401242029,0.050543014535710286,0.1760684734891303,0.0625,5
