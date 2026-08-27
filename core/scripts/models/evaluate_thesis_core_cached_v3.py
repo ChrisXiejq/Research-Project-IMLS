@@ -125,7 +125,7 @@ def calibrate(args: argparse.Namespace) -> dict[str, Any]:
         args.batch_size,
     )
     anchors = np.load(args.anchors)
-    labels = arrays["labels"][..., :2]
+    labels = arrays["labels"]
     grid = SimpleNamespace(
         temperature_min=0.25,
         temperature_max=4.0,
@@ -243,7 +243,7 @@ def evaluate_heldout(args: argparse.Namespace) -> dict[str, Any]:
         args.batch_size,
     )
     anchors = np.load(args.anchors)
-    labels = arrays["labels"][..., :2]
+    labels = arrays["labels"]
     uncalibrated = evaluate_decoded(
         decode_raw_predictions(predictions, anchors), labels, rows, 10,
         temperature=1.0, covariance_scale=1.0,

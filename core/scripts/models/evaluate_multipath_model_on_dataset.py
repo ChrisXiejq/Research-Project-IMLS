@@ -20,13 +20,17 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ModuleNotFoundError:  # Numerical evaluation helpers remain locally testable.
+    tf = None
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(SCRIPT_DIR)
-# Import registers the V2 custom Keras layers before SavedModel restoration.
-import interaction_adapter_v2  # noqa: F401,E402
-import interaction_adapter_v3  # noqa: F401,E402
+# Import registers custom Keras layers before SavedModel restoration when TensorFlow exists.
+if tf is not None:
+    import interaction_adapter_v2  # noqa: F401,E402
+    import interaction_adapter_v3  # noqa: F401,E402
 from interaction_sequence_v3 import has_complete_interaction_history  # noqa: E402
 from capacity_study_v3_analysis import (  # noqa: E402
     conflict_zone_probability_mass,
@@ -57,7 +61,11 @@ from prediction_dataset_utils import (
     resolve_raster_path,
     world_future_to_local,
 )
-from prediction_input_contract import load_logged_raster, preprocess_resnet_raster
+try:
+    from prediction_input_contract import load_logged_raster, preprocess_resnet_raster
+except ModuleNotFoundError:  # OpenCV is unnecessary for pure numerical metric tests.
+    load_logged_raster = None
+    preprocess_resnet_raster = None
 
 
 CHI2_THRESHOLDS_2D = {
@@ -87,22 +95,27 @@ def init_group_key(sample: Mapping[str, Any]) -> str:
 
 
 def aggregate_group_rows(
-    rows_by_group: Mapping[str, Sequence[Mapping[str, float]]]
+    rows_by_group: Mapping[str, Sequence[Mapping[str, Any]]]
 ) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Any]]:
+    def values(rows: Sequence[Mapping[str, Any]], field: str) -> List[float]:
+        return [float(row[field]) for row in rows if row.get(field) is not None]
+
     metrics_by_group: Dict[str, Dict[str, Any]] = {}
     for group_key, rows in sorted(rows_by_group.items()):
+        fde_values = values(rows, "top1_FDE")
         metrics_by_group[group_key] = {
             "samples": len(rows),
-            "top1_ADE_mean": finite_or_none(mean([row["top1_ADE"] for row in rows])),
-            "top1_FDE_mean": finite_or_none(mean([row["top1_FDE"] for row in rows])),
+            "full_horizon_FDE_samples": len(fde_values),
+            "top1_ADE_mean": finite_or_none(mean(values(rows, "top1_ADE"))),
+            "top1_FDE_mean": finite_or_none(mean(fde_values)),
             "top1_FDE_p90": finite_or_none(
-                percentile([row["top1_FDE"] for row in rows], 90)
+                percentile(fde_values, 90)
             ),
             "trajectory_mixture_NLL_per_step_mean": finite_or_none(
-                mean([row["trajectory_mixture_NLL_per_step"] for row in rows])
+                mean(values(rows, "trajectory_mixture_NLL_per_step"))
             ),
             "pointwise_mixture_NLL_mean": finite_or_none(
-                mean([row["pointwise_mixture_NLL"] for row in rows])
+                mean(values(rows, "pointwise_mixture_NLL"))
             ),
         }
     fields = (
@@ -114,7 +127,13 @@ def aggregate_group_rows(
     )
     macro = {
         field: finite_or_none(
-            mean([metrics[field] for metrics in metrics_by_group.values()])
+            mean(
+                [
+                    metrics[field]
+                    for metrics in metrics_by_group.values()
+                    if metrics[field] is not None
+                ]
+            )
         )
         for field in fields
     }
@@ -280,6 +299,8 @@ def make_batch(batch, no_image: bool = False):
         if no_image:
             image = np.zeros((500, 500, 3), dtype=np.float32)
         else:
+            if load_logged_raster is None or preprocess_resnet_raster is None:
+                raise RuntimeError("OpenCV-backed raster preprocessing is unavailable")
             image = load_logged_raster(raster_path)
             if tuple(image.shape[:2]) != (500, 500):
                 import cv2
@@ -403,6 +424,91 @@ def summary(values: Sequence[float]) -> Dict[str, Any]:
     }
 
 
+def resolve_future_valid_mask(
+    labels: np.ndarray,
+    samples: Sequence[Mapping[str, Any]],
+    horizon: int,
+    valid_mask: np.ndarray | None = None,
+) -> np.ndarray:
+    """Resolve and cross-check the fail-closed future-validity contract."""
+
+    label_array = np.asarray(labels)
+    if label_array.ndim != 3 or label_array.shape[2] < 2:
+        raise ValueError(f"Labels must have shape [sample,horizon,2+], got {label_array.shape}")
+    if label_array.shape[0] != len(samples) or label_array.shape[1] < horizon:
+        raise ValueError(
+            "Label/sample/horizon mismatch: "
+            f"labels={label_array.shape}, samples={len(samples)}, horizon={horizon}"
+        )
+
+    candidates: List[Tuple[str, np.ndarray]] = []
+    if valid_mask is not None:
+        candidates.append(("explicit", np.asarray(valid_mask)))
+    if label_array.shape[2] >= 3:
+        candidates.append(("label_channel", label_array[:, :horizon, 2]))
+    if samples and all("future_valid_mask" in sample for sample in samples):
+        sample_mask = np.zeros((len(samples), horizon), dtype=np.float64)
+        for sample_index, sample in enumerate(samples):
+            raw = sample.get("future_valid_mask")
+            if raw is None:
+                raise ValueError("Sample future_valid_mask cannot be null")
+            values = np.asarray(raw).reshape(-1)
+            sample_mask[sample_index, : min(horizon, len(values))] = values[:horizon]
+        candidates.append(("sample_metadata", sample_mask))
+    if not candidates:
+        raise ValueError(
+            "Future-valid mask is required; refusing to assume that zero-padded labels are valid"
+        )
+
+    normalized: List[Tuple[str, np.ndarray]] = []
+    for source, candidate in candidates:
+        if candidate.shape != (len(samples), horizon):
+            raise ValueError(
+                f"Future-valid mask from {source} has shape {candidate.shape}; "
+                f"expected {(len(samples), horizon)}"
+            )
+        if not np.all(np.isfinite(candidate)) or not np.all(
+            np.logical_or(candidate == 0, candidate == 1)
+        ):
+            raise ValueError(f"Future-valid mask from {source} must be finite and binary")
+        normalized.append((source, candidate.astype(bool)))
+    resolved_source, resolved = normalized[0]
+    for source, candidate in normalized[1:]:
+        if not np.array_equal(resolved, candidate):
+            raise ValueError(
+                f"Future-valid mask disagreement between {resolved_source} and {source}"
+            )
+    valid_counts = np.sum(resolved, axis=1)
+    if np.any(valid_counts == 0):
+        indices = np.flatnonzero(valid_counts == 0).tolist()
+        raise ValueError(f"Every evaluated sample needs at least one valid future step: {indices}")
+    valid_xy = label_array[:, :horizon, :2][resolved]
+    if not np.all(np.isfinite(valid_xy)):
+        raise ValueError("Valid future labels must be finite")
+    return resolved
+
+
+def future_validity_summary(valid_mask: np.ndarray) -> Dict[str, Any]:
+    mask = np.asarray(valid_mask, dtype=bool)
+    counts = np.sum(mask, axis=1).astype(int)
+    histogram = {
+        str(length): int(np.sum(counts == length))
+        for length in sorted(set(counts.tolist()))
+    }
+    return {
+        "contract": "future_valid_mask_fail_closed_v4",
+        "samples": int(mask.shape[0]),
+        "horizon_steps": int(mask.shape[1]),
+        "full_horizon_samples": int(np.sum(counts == mask.shape[1])),
+        "partial_horizon_samples": int(np.sum(counts < mask.shape[1])),
+        "fixed_horizon_FDE_samples": int(np.sum(mask[:, -1])),
+        "valid_future_steps": int(np.sum(mask)),
+        "invalid_future_steps": int(mask.size - np.sum(mask)),
+        "valid_length_histogram": histogram,
+        "mask_sha256": sha256_payload(mask.astype(int).tolist()),
+    }
+
+
 def evaluate_decoded(
     decoded: GMMDecodeResult,
     labels: np.ndarray,
@@ -411,11 +517,16 @@ def evaluate_decoded(
     *,
     temperature: float,
     covariance_scale: float,
+    valid_mask: np.ndarray | None = None,
 ) -> Dict[str, Any]:
     probabilities = np.asarray(decoded.probabilities)
     means_array = np.asarray(decoded.means)[:, :, :horizon]
     covariance_array = np.asarray(decoded.covariances)[:, :, :horizon]
-    label_array = np.asarray(labels)[:, :horizon]
+    raw_labels = np.asarray(labels)
+    resolved_mask = resolve_future_valid_mask(
+        raw_labels, samples, horizon, valid_mask=valid_mask
+    )
+    label_array = raw_labels[:, :horizon, :2]
     if probabilities.ndim != 2:
         raise ValueError(f"Expected batched probabilities, got {probabilities.shape}")
 
@@ -438,8 +549,8 @@ def evaluate_decoded(
         name: [0 for _ in range(horizon)] for name in CHI2_THRESHOLDS_2D
     }
     per_horizon_total = [0 for _ in range(horizon)]
-    rollout_rows: Dict[str, List[Dict[str, float]]] = collections.defaultdict(list)
-    init_group_rows: Dict[str, List[Dict[str, float]]] = collections.defaultdict(list)
+    rollout_rows: Dict[str, List[Dict[str, Any]]] = collections.defaultdict(list)
+    init_group_rows: Dict[str, List[Dict[str, Any]]] = collections.defaultdict(list)
     sample_metrics: List[Dict[str, Any]] = []
 
     for sample_index, sample in enumerate(samples):
@@ -447,21 +558,25 @@ def evaluate_decoded(
         mus = means_array[sample_index].astype(np.float64)
         covariances = covariance_array[sample_index].astype(np.float64)
         label = label_array[sample_index].astype(np.float64)
+        valid_indices = np.flatnonzero(resolved_mask[sample_index])
+        valid_count = len(valid_indices)
         displacement = np.linalg.norm(mus - label[None, :, :], axis=-1)
-        mode_ade = np.mean(displacement, axis=-1)
-        mode_fde = displacement[:, -1]
+        mode_ade = np.mean(displacement[:, valid_indices], axis=-1)
+        has_fixed_horizon_fde = bool(resolved_mask[sample_index, horizon - 1])
+        mode_fde = displacement[:, horizon - 1] if has_fixed_horizon_fde else None
         best = int(np.argmin(mode_ade))
         top = int(np.argmax(probs))
         mode_counts[best] += 1
         top_is_best += int(best == top)
         top_ade_value = float(mode_ade[top])
         min_ade_value = float(mode_ade[best])
-        top_fde_value = float(mode_fde[top])
-        min_fde_value = float(mode_fde[best])
+        top_fde_value = float(mode_fde[top]) if mode_fde is not None else None
+        min_fde_value = float(mode_fde[best]) if mode_fde is not None else None
         top_ade.append(top_ade_value)
         min_ade.append(min_ade_value)
-        top_fde.append(top_fde_value)
-        min_fde.append(min_fde_value)
+        if top_fde_value is not None and min_fde_value is not None:
+            top_fde.append(top_fde_value)
+            min_fde.append(min_fde_value)
         best_probs.append(float(probs[best]))
         top_probs.append(float(probs[top]))
         entropies.append(float(-np.sum(probs * np.log(np.maximum(probs, 1.0e-300)))))
@@ -469,7 +584,7 @@ def evaluate_decoded(
         log_probabilities = np.log(np.maximum(probs, 1.0e-300))
         mode_trajectory_logpdf = np.zeros(len(probs), dtype=np.float64)
         timestep_nlls: List[float] = []
-        for timestep in range(horizon):
+        for timestep in valid_indices:
             component_logpdf = np.full(len(probs), -np.inf, dtype=np.float64)
             for mode_index in range(len(probs)):
                 residual = label[timestep] - mus[mode_index, timestep]
@@ -491,7 +606,7 @@ def evaluate_decoded(
                 float(-logsumexp(log_probabilities + component_logpdf, axis=0))
             )
         trajectory_nll = float(
-            -logsumexp(log_probabilities + mode_trajectory_logpdf, axis=0) / horizon
+            -logsumexp(log_probabilities + mode_trajectory_logpdf, axis=0) / valid_count
         )
         point_nll = float(np.mean(timestep_nlls))
         trajectory_nll_per_step.append(trajectory_nll)
@@ -504,6 +619,8 @@ def evaluate_decoded(
             "minFDE": min_fde_value,
             "trajectory_mixture_NLL_per_step": trajectory_nll,
             "pointwise_mixture_NLL": point_nll,
+            "valid_future_steps": valid_count,
+            "fixed_horizon_FDE_eligible": has_fixed_horizon_fde,
         }
         rollout_rows[rollout_group_key(sample)].append(row)
         init_group_rows[init_group_key(sample)].append(row)
@@ -542,12 +659,20 @@ def evaluate_decoded(
             dt = float(sample.get("dt_s", sample.get("dt", 0.2)))
             times = [sample_time + (index + 1) * dt for index in range(horizon)]
         times = [float(value) for value in times[:horizon]]
+        valid_times = [times[index] for index in valid_indices]
         rotation = np.asarray(sample["target_to_world_R"], dtype=np.float64)
         translation = np.asarray(sample["target_to_world_t"], dtype=np.float64)
-        mode_world = mus @ rotation.T + translation[None, None, :]
-        truth_world = label @ rotation.T + translation[None, :]
-        predicted_entry = conflict_zone_entry_time_s(times, mode_world[top])
-        true_entry = conflict_zone_entry_time_s(times, truth_world)
+        valid_mus = mus[:, valid_indices]
+        valid_label = label[valid_indices]
+        mode_world = valid_mus @ rotation.T + translation[None, None, :]
+        truth_world = valid_label @ rotation.T + translation[None, :]
+        predicted_entry = conflict_zone_entry_time_s(valid_times, mode_world[top])
+        true_entry = conflict_zone_entry_time_s(valid_times, truth_world)
+        speed_rmse = (
+            target_speed_profile_rmse(valid_mus[top], valid_label, valid_times)
+            if valid_count >= 2
+            else None
+        )
         sample_metrics.append(
             {
                 "sample_id": sample.get("sample_id"),
@@ -559,11 +684,9 @@ def evaluate_decoded(
                 ),
                 "response_stratum": stratum,
                 **row,
-                "target_speed_profile_RMSE_mps": target_speed_profile_rmse(
-                    mus[top], label, times
-                ),
+                "target_speed_profile_RMSE_mps": speed_rmse,
                 "response_onset_timing_error_s": response_onset_timing_error_s(
-                    mus[top], label, times
+                    valid_mus[top], valid_label, valid_times
                 ),
                 "conflict_zone_entry_time_error_s": (
                     float(predicted_entry - true_entry)
@@ -625,6 +748,9 @@ def evaluate_decoded(
             mean(trajectory_nll_per_step)
         ),
         "pointwise_mixture_NLL_mean": finite_or_none(mean(pointwise_nll)),
+        "FDE_definition": "fixed_horizon_step_only",
+        "FDE_horizon_steps": horizon,
+        "FDE_full_horizon_samples": len(top_fde),
     }
     mechanism_fields = (
         "target_speed_profile_RMSE_mps",
@@ -656,6 +782,7 @@ def evaluate_decoded(
         }
     return {
         **flat_metrics,
+        "future_validity": future_validity_summary(resolved_mask),
         "calibration_parameters": {
             "temperature": temperature,
             "covariance_scale": covariance_scale,
@@ -725,17 +852,28 @@ def evaluate_decoded(
 
 
 def calibration_sufficient_statistics(
-    decoded: GMMDecodeResult, labels: np.ndarray, horizon: int
-) -> Tuple[np.ndarray, np.ndarray]:
+    decoded: GMMDecodeResult,
+    labels: np.ndarray,
+    horizon: int,
+    valid_mask: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     means_array = np.asarray(decoded.means, dtype=np.float64)[:, :, :horizon]
     covariance_array = np.asarray(decoded.covariances, dtype=np.float64)[:, :, :horizon]
-    label_array = np.asarray(labels, dtype=np.float64)[:, :horizon]
+    label_array = np.asarray(labels, dtype=np.float64)[:, :horizon, :2]
+    mask = np.asarray(valid_mask, dtype=bool)
     sample_count, mode_count = means_array.shape[:2]
+    if mask.shape != (sample_count, horizon):
+        raise ValueError(
+            f"Calibration mask shape {mask.shape} does not match {(sample_count, horizon)}"
+        )
+    valid_counts = np.sum(mask, axis=1).astype(np.float64)
+    if np.any(valid_counts == 0):
+        raise ValueError("Calibration requires at least one valid future step per sample")
     log_determinant_sums = np.zeros((sample_count, mode_count), dtype=np.float64)
     mahalanobis_sums = np.zeros((sample_count, mode_count), dtype=np.float64)
     for sample_index in range(sample_count):
         for mode_index in range(mode_count):
-            for timestep in range(horizon):
+            for timestep in np.flatnonzero(mask[sample_index]):
                 residual = (
                     label_array[sample_index, timestep]
                     - means_array[sample_index, mode_index, timestep]
@@ -750,7 +888,7 @@ def calibration_sufficient_statistics(
                     )
                 log_determinant_sums[sample_index, mode_index] += log_determinant
                 mahalanobis_sums[sample_index, mode_index] += mahalanobis_sq
-    return log_determinant_sums, mahalanobis_sums
+    return log_determinant_sums, mahalanobis_sums, valid_counts
 
 
 def positive_log_grid(minimum: float, maximum: float, count: int) -> np.ndarray:
@@ -769,15 +907,19 @@ def fit_validation_calibration(
     samples: Sequence[Mapping[str, Any]],
     horizon: int,
     args: argparse.Namespace,
+    valid_mask: np.ndarray | None = None,
 ) -> Dict[str, Any]:
     base = decode_raw_predictions(raw_predictions, anchors)
+    resolved_mask = resolve_future_valid_mask(
+        labels, samples, horizon, valid_mask=valid_mask
+    )
     covariance_audit = audit_covariances(np.asarray(base.covariances)[:, :, :horizon])
     if covariance_audit["invalid_matrices"]:
         raise ValueError(
             f"Cannot calibrate: {covariance_audit['invalid_matrices']} invalid covariance matrices"
         )
-    log_determinants, mahalanobis = calibration_sufficient_statistics(
-        base, labels, horizon
+    log_determinants, mahalanobis, valid_counts = calibration_sufficient_statistics(
+        base, labels, horizon, resolved_mask
     )
     logits = np.asarray(base.logits, dtype=np.float64)
     rollout_indices: Dict[str, List[int]] = collections.defaultdict(list)
@@ -794,20 +936,22 @@ def fit_validation_calibration(
         args.covariance_scale_count,
     )
     candidates: List[Dict[str, float]] = []
-    constant = -horizon * math.log(2.0 * math.pi)
+    constant = -valid_counts[:, None] * math.log(2.0 * math.pi)
     for covariance_scale in covariance_scales:
         mode_logpdf = (
             constant
             - 0.5
             * (
                 log_determinants
-                + 2.0 * horizon * math.log(float(covariance_scale))
+                + 2.0 * valid_counts[:, None] * math.log(float(covariance_scale))
                 + mahalanobis / float(covariance_scale)
             )
         )
         for temperature in temperatures:
             log_probabilities = log_softmax(logits, float(temperature))
-            per_sample = -logsumexp(log_probabilities + mode_logpdf, axis=1) / horizon
+            per_sample = (
+                -logsumexp(log_probabilities + mode_logpdf, axis=1) / valid_counts
+            )
             per_rollout = [
                 float(np.mean(per_sample[indices]))
                 for indices in rollout_indices.values()
@@ -835,7 +979,7 @@ def fit_validation_calibration(
         + abs(math.log(item["covariance_scale"])),
     )
     return {
-        "calibration_schema_version": "multipath_posthoc_calibration_v2",
+        "calibration_schema_version": "multipath_posthoc_calibration_v3_masked",
         "fit_split": "val",
         "fit_criterion": (
             "macro mean over validation rollouts of trajectory mixture NLL per valid step"
@@ -845,6 +989,7 @@ def fit_validation_calibration(
             "covariance_scale": best["covariance_scale"],
             "covariance_scale_semantics": COVARIANCE_SCALE_SEMANTICS,
         },
+        "future_validity": future_validity_summary(resolved_mask),
         "search": {
             "temperature_candidates": len(temperatures),
             "covariance_scale_candidates": len(covariance_scales),
@@ -885,6 +1030,8 @@ def load_calibration(path: str) -> Dict[str, Any]:
 
 
 def evaluate(args: argparse.Namespace) -> Dict[str, Any]:
+    if tf is None:
+        raise RuntimeError("TensorFlow is required for model execution")
     if args.fit_calibration and args.split != "val":
         raise ValueError("--fit-calibration is only allowed with --split val")
     if args.fit_calibration and args.calibration_json:

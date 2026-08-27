@@ -576,7 +576,7 @@ def evaluate_rollout_macro_nll(
     label_batches = []
     for inputs, labels in validation_dataset:
         raw_batches.append(np.asarray(model.predict_on_batch(inputs)))
-        label_batches.append(np.asarray(labels)[..., :2])
+        label_batches.append(np.asarray(labels))
     if not raw_batches:
         raise RuntimeError("Validation dataset emitted no batches")
     raw = np.concatenate(raw_batches, axis=0)
