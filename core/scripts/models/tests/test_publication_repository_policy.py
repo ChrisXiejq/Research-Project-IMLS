@@ -52,6 +52,29 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
         self.assertEqual(report["missing_required_paths"], [])
         self.assertEqual(report["forbidden_tracked_paths"], [])
 
+    def test_manifest_does_not_count_its_own_bytes(self) -> None:
+        tracked_paths = [
+            "README.md",
+            "REPRODUCIBILITY.md",
+            "CITATION.cff",
+            "THIRD_PARTY_NOTICES.md",
+            "core/scripts/carla/run_all_scenarios.py",
+            "core/scripts/carla/policies/smpc_agent.py",
+            "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+            "docs/paper/REPOSITORY_CONTENT_MANIFEST.json",
+        ]
+        file_sizes = {path: 10 for path in tracked_paths}
+        file_sizes["docs/paper/REPOSITORY_CONTENT_MANIFEST.json"] = 999
+
+        report = audit_paths(tracked_paths=tracked_paths, file_sizes=file_sizes)
+
+        self.assertEqual(report["tracked_path_count"], len(tracked_paths))
+        self.assertEqual(report["tracked_bytes"], 70)
+        self.assertEqual(
+            report["tracked_bytes_excluded_paths"],
+            ["docs/paper/REPOSITORY_CONTENT_MANIFEST.json"],
+        )
+
     def test_reports_missing_local_markdown_links_and_repository_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

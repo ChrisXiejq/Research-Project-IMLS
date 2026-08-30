@@ -47,6 +47,9 @@ REQUIRED_PATHS = {
     "core/scripts/models/evaluate_thesis_core_cached_v3.py",
 }
 MAX_TRACKED_FILE_BYTES = 20 * 1024 * 1024
+TRACKED_BYTES_EXCLUDED_PATHS = {
+    "docs/paper/REPOSITORY_CONTENT_MANIFEST.json",
+}
 PUBLIC_MARKDOWN_PATHS = (
     "README.md",
     "REPRODUCIBILITY.md",
@@ -101,7 +104,16 @@ def audit_paths(
         "schema_version": "publication_repository_policy_v1",
         "status": status,
         "tracked_path_count": len(paths),
-        "tracked_bytes": int(sum(int(file_sizes.get(path, 0)) for path in paths)),
+        "tracked_bytes": int(
+            sum(
+                int(file_sizes.get(path, 0))
+                for path in paths
+                if path not in TRACKED_BYTES_EXCLUDED_PATHS
+            )
+        ),
+        "tracked_bytes_excluded_paths": sorted(
+            path for path in paths if path in TRACKED_BYTES_EXCLUDED_PATHS
+        ),
         "missing_required_paths": missing,
         "forbidden_tracked_paths": forbidden,
         "oversized_tracked_files": oversized,
