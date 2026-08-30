@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 import sys
 import unittest
@@ -180,6 +182,15 @@ class FutureValidMaskContractTests(unittest.TestCase):
         )[0]
         self.assertNotIn("[..., :2]", macro_body)
         self.assertNotIn('arrays["labels"][..., :2]', cached_source)
+
+    def test_full_horizon_freeze_binding_precedes_heldout_io(self):
+        cached_source = (SCRIPT_DIR / "evaluate_thesis_core_cached_v3.py").read_text()
+        body = cached_source.split(
+            "def evaluate_full_horizon_sensitivity", 1
+        )[1].split("def main", 1)[0]
+        binding = body.index("_validate_frozen_training_binding")
+        heldout_io = body.index('_load_npz(args.cache_dir / "heldout.npz")')
+        self.assertLess(binding, heldout_io)
 
 
 if __name__ == "__main__":

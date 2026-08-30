@@ -132,6 +132,7 @@ def paired_sign_flip_p(
             statistic = abs(float(np.mean(values * np.asarray(signs))))
             extreme += statistic >= observed - 1.0e-15
             draws += 1
+        return float(extreme / draws)
     else:
         rng = np.random.default_rng(seed)
         for _ in range(maximum_draws):
@@ -161,6 +162,93 @@ def effect_summary(
         "independent_init_groups": len(effects),
         "paired_init_effects": {str(key): value for key, value in sorted(effects.items())},
         "raw_sign_flip_p": paired_sign_flip_p(effects),
+    }
+
+
+def crossed_seed_init_sensitivity(
+    rollout_rows: Sequence[Mapping[str, Any]],
+    *,
+    contrast_id: str,
+    terms: Sequence[tuple[str, float]],
+    metric: str = PRIMARY_METRIC,
+    seed: int = 20260828,
+    replicates: int = 20_000,
+) -> dict[str, Any]:
+    """Propagate both fixed training-seed and held-out init-group variation.
+
+    This is a descriptive crossed bootstrap sensitivity, not a replacement for
+    the five-init paired sign-flip analysis.  Seeds and init groups are sampled
+    independently, preserving the crossed design instead of treating the 15
+    seed-by-init observations as independent replicates.
+    """
+
+    values = _cell_seed_init_values(rollout_rows, metric)
+    pair_sets = [
+        {(run_seed, init_id) for cell, run_seed, init_id in values if cell == cell_id}
+        for cell_id, _ in terms
+    ]
+    if not pair_sets:
+        raise ValueError("Crossed sensitivity requires at least one contrast term")
+    common = set.intersection(*pair_sets)
+    seeds = sorted({run_seed for run_seed, _ in common})
+    init_groups = sorted({init_id for _, init_id in common})
+    expected = {(run_seed, init_id) for run_seed in seeds for init_id in init_groups}
+    if common != expected or len(seeds) < 2 or len(init_groups) < 2:
+        raise ValueError(
+            f"Crossed sensitivity requires a complete seed-by-init matrix: {contrast_id}"
+        )
+    matrix = np.asarray(
+        [
+            [
+                sum(
+                    coefficient * values[(cell_id, run_seed, init_id)]
+                    for cell_id, coefficient in terms
+                )
+                for init_id in init_groups
+            ]
+            for run_seed in seeds
+        ],
+        dtype=np.float64,
+    )
+    rng = np.random.default_rng(seed)
+    seed_indices = rng.integers(0, len(seeds), size=(replicates, len(seeds), 1))
+    init_indices = rng.integers(
+        0, len(init_groups), size=(replicates, 1, len(init_groups))
+    )
+    bootstrap = matrix[seed_indices, init_indices].mean(axis=(1, 2))
+    low, high = np.quantile(bootstrap, (0.025, 0.975))
+    return {
+        "contrast_id": contrast_id,
+        "metric": metric,
+        "terms": [
+            {"model_cell_id": cell, "coefficient": coefficient}
+            for cell, coefficient in terms
+        ],
+        "effect": float(np.mean(matrix)),
+        "crossed_bootstrap_interval_95": [float(low), float(high)],
+        "training_seeds": seeds,
+        "heldout_init_groups": init_groups,
+        "seed_by_init_effects": {
+            str(run_seed): {
+                str(init_id): float(matrix[seed_index, init_index])
+                for init_index, init_id in enumerate(init_groups)
+            }
+            for seed_index, run_seed in enumerate(seeds)
+        },
+        "effects_averaged_by_seed": {
+            str(run_seed): float(np.mean(matrix[seed_index]))
+            for seed_index, run_seed in enumerate(seeds)
+        },
+        "effects_averaged_by_init": {
+            str(init_id): float(np.mean(matrix[:, init_index]))
+            for init_index, init_id in enumerate(init_groups)
+        },
+        "bootstrap_replicates": replicates,
+        "resampling_contract": (
+            "Training seeds and held-out init groups were independently resampled; "
+            "the 15 crossed observations were not treated as independent units."
+        ),
+        "inferential_role": "descriptive_crossed_sensitivity",
     }
 
 

@@ -39,6 +39,10 @@ from interaction_adapter_v3 import (
 from prediction_dataset_utils import read_jsonl, resolve_raster_path
 from prepare_thesis_core_v3_dataset import load_thesis_normalization
 from thesis_core_v3_runs import thesis_core_manifest, validate_thesis_core_manifest
+from training_epoch_integrity_v4 import (
+    inspect_epoch_artifacts,
+    restored_early_stopping_state,
+)
 from train_prediction_model_v3 import (
     artifact_hash,
     load_image,
@@ -53,6 +57,7 @@ from train_prediction_model_v3 import (
 TRAINING_SOURCE_FILES = (
     "build_thesis_core_feature_cache_v3.py",
     "capacity_study_v3_protocol.py",
+    "evaluate_multipath_model_on_dataset.py",
     "interaction_adapter_v2.py",
     "interaction_adapter_v3.py",
     "prediction_dataset_utils.py",
@@ -60,7 +65,30 @@ TRAINING_SOURCE_FILES = (
     "thesis_core_v3_runs.py",
     "train_prediction_model_v3.py",
     "train_thesis_core_cached_v3.py",
+    "training_epoch_integrity_v4.py",
 )
+
+
+class HistoryRestoredEarlyStopping(tf.keras.callbacks.EarlyStopping):
+    """EarlyStopping whose best/wait state survives process boundaries."""
+
+    def __init__(self, prior_scores: list[float]) -> None:
+        super().__init__(
+            monitor="val_rollout_macro_nll",
+            mode="min",
+            patience=EARLY_STOPPING_PATIENCE,
+        )
+        self.restored_state = restored_early_stopping_state(
+            prior_scores, patience=EARLY_STOPPING_PATIENCE
+        )
+
+    def on_train_begin(self, logs=None) -> None:
+        super().on_train_begin(logs)
+        if self.restored_state["best_epoch"] is None:
+            return
+        self.best = float(self.restored_state["best"])
+        self.wait = int(self.restored_state["consecutive_non_improving_epochs"])
+        self.best_epoch = int(self.restored_state["best_epoch"]) - 1
 
 
 def training_source_sha256() -> dict[str, str]:
@@ -266,7 +294,7 @@ def main() -> None:
     output = args.output_dir
     output.mkdir(parents=True, exist_ok=True)
     config = {
-        "schema_version": "capacity_history_thesis_core_training_config_v3",
+        "schema_version": "capacity_history_thesis_core_training_config_v4_masked",
         "run_spec": spec,
         "run_manifest": str(args.run_manifest.resolve()),
         "run_manifest_sha256": sha256_file(args.run_manifest),
@@ -278,6 +306,13 @@ def main() -> None:
         "batch_size": args.batch_size,
         "epochs": CORE_EPOCHS,
         "patience": EARLY_STOPPING_PATIENCE,
+        "early_stopping_state_restoration": (
+            "validation_history_global_best_and_consecutive_wait_v4"
+        ),
+        "future_validity_contract": "future_valid_mask_fail_closed_v4",
+        "checkpoint_selection_metric": (
+            "validation_rollout_macro_masked_trajectory_mixture_NLL_per_valid_step"
+        ),
         "optimization": {
             "optimizer": "adamw",
             "learning_rate": THESIS_CORE_LEARNING_RATE,
@@ -332,13 +367,32 @@ def main() -> None:
     cached_weights = output / "cached_best.weights.h5"
     history_csv = output / "history.csv"
     backup_dir = output / "resume_backup"
+    epoch_checkpoint_dir = output / "epoch_checkpoints"
+    epoch_checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    existing_history = read_history(history_csv)
+    if history_csv.exists() or any(epoch_checkpoint_dir.glob("epoch_*.weights.h5")):
+        epoch_integrity_before = inspect_epoch_artifacts(
+            history_csv,
+            epoch_checkpoint_dir,
+            backup_dir=backup_dir,
+            validate_hdf5=True,
+        )
+        if epoch_integrity_before["status"] != "pass":
+            raise ValueError(
+                "Pre-training epoch recovery integrity failed: "
+                f"{epoch_integrity_before['errors']}"
+            )
+    prior_scores = list(existing_history.get("val_rollout_macro_nll", []))
+    early_stopping_state = restored_early_stopping_state(
+        prior_scores, patience=EARLY_STOPPING_PATIENCE
+    )
     rollout_callback = make_rollout_macro_checkpoint(
         validation_dataset=selection_ds,
         validation_samples=metadata,
         anchors=anchors,
         label_horizon=10,
         best_weights=cached_weights,
-        existing_history=read_history(history_csv),
+        existing_history=existing_history,
     )
     callbacks = [
         tf.keras.callbacks.BackupAndRestore(
@@ -346,20 +400,27 @@ def main() -> None:
         ),
         make_finite_weights_callback(),
         rollout_callback,
-        tf.keras.callbacks.EarlyStopping(
-            monitor="val_rollout_macro_nll", mode="min", patience=EARLY_STOPPING_PATIENCE
+        tf.keras.callbacks.ModelCheckpoint(
+            filepath=str(epoch_checkpoint_dir / "epoch_{epoch:03d}.weights.h5"),
+            save_weights_only=True,
+            save_freq="epoch",
+            verbose=0,
         ),
+        HistoryRestoredEarlyStopping(prior_scores),
         tf.keras.callbacks.CSVLogger(str(history_csv), append=history_csv.exists()),
         tf.keras.callbacks.TerminateOnNaN(),
     ]
     started = time.perf_counter()
-    model.fit(
-        fit_ds,
-        validation_data=selection_ds,
-        epochs=CORE_EPOCHS,
-        callbacks=callbacks,
-        verbose=2,
-    )
+    if early_stopping_state["stop_already_reached"]:
+        model.load_weights(cached_weights)
+    else:
+        model.fit(
+            fit_ds,
+            validation_data=selection_ds,
+            epochs=CORE_EPOCHS,
+            callbacks=callbacks,
+            verbose=2,
+        )
     wall_time = time.perf_counter() - started
     model.load_weights(cached_weights)
     maximum_weight_change = max(
@@ -372,6 +433,20 @@ def main() -> None:
     scores = history.get("val_rollout_macro_nll", [])
     if not scores or not np.all(np.isfinite(scores)):
         raise ValueError("Missing or non-finite selection history")
+    epoch_checkpoints = sorted(epoch_checkpoint_dir.glob("epoch_*.weights.h5"))
+    epoch_integrity_after = inspect_epoch_artifacts(
+        history_csv,
+        epoch_checkpoint_dir,
+        backup_dir=backup_dir,
+        validate_hdf5=True,
+    )
+    if epoch_integrity_after["status"] != "pass":
+        raise ValueError(
+            "Post-training epoch recovery integrity failed: "
+            f"{epoch_integrity_after['errors']}"
+        )
+    if not backup_dir.exists():
+        raise ValueError("Epoch recovery checkpoint is missing after training")
     best_epoch = int(np.argmin(scores)) + 1
     # Rebuild a clean inference graph from the selected checkpoint.  Reusing a
     # model that has been compiled/traced for training can change Transformer
@@ -403,15 +478,13 @@ def main() -> None:
     if best_model.exists():
         shutil.rmtree(best_model)
     os.replace(staging, best_model)
-    if backup_dir.exists():
-        shutil.rmtree(backup_dir)
     parameter_path = output / "parameters.json"
     atomic_json(
         parameter_path,
         {"cached_trainable": parameters, "reconstructed_full": parameter_report(full)},
     )
     health = {
-        "schema_version": "capacity_history_thesis_core_training_health_v3",
+        "schema_version": "capacity_history_thesis_core_training_health_v4_masked",
         "status": "pass",
         "hard_checks_pass": True,
         "run_id": args.run_id,
@@ -425,12 +498,18 @@ def main() -> None:
         "maximum_trainable_weight_change": maximum_weight_change,
         "fit_samples": int(len(fit["labels"])),
         "selection_samples": int(len(selection["labels"])),
+        "future_validity_contract": "future_valid_mask_fail_closed_v4",
+        "per_epoch_checkpoints": len(epoch_checkpoints),
+        "epoch_recovery_preserved": True,
+        "epoch_artifact_integrity": epoch_integrity_after,
+        "early_stopping_resume": early_stopping_state,
+        "epochs_added_in_this_invocation": len(scores) - len(prior_scores),
     }
     health["health_sha256"] = sha256_payload(health)
     health_path = output / "training_health.json"
     atomic_json(health_path, health)
     completion = {
-        "schema_version": "capacity_history_thesis_core_training_complete_v3",
+        "schema_version": "capacity_history_thesis_core_training_complete_v4_masked",
         "status": "pass",
         "formal_run": True,
         "evidence_status": "retrospective_held_out",
@@ -442,7 +521,10 @@ def main() -> None:
         "learning_rate": spec["learning_rate"],
         "seed": spec["seed"],
         "best_epoch": best_epoch,
-        "checkpoint_selection_metric": "validation_rollout_macro_trajectory_mixture_NLL_per_step",
+        "checkpoint_selection_metric": (
+            "validation_rollout_macro_masked_trajectory_mixture_NLL_per_valid_step"
+        ),
+        "future_validity_contract": "future_valid_mask_fail_closed_v4",
         "best_model": artifact_hash(best_model),
         "best_weights": artifact_hash(full_weights),
         "cached_weights": artifact_hash(cached_weights),
@@ -451,6 +533,8 @@ def main() -> None:
         "training_health": artifact_hash(health_path),
         "parameters": artifact_hash(parameter_path),
         "parity": artifact_hash(parity_path),
+        "epoch_checkpoints": artifact_hash(epoch_checkpoint_dir),
+        "resume_backup": artifact_hash(backup_dir),
         "cache_complete_sha256": config["cache_complete_sha256"],
         "dataset_complete_sha256": config["dataset_complete_sha256"],
         "manifest_sha256": manifest["manifest_sha256"],

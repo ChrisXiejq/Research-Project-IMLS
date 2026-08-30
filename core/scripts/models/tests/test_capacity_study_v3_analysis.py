@@ -14,6 +14,7 @@ from capacity_study_v3_analysis import (  # noqa: E402
     conflict_zone_probability_mass,
     holm_adjust,
     measure_latency,
+    paired_sign_flip_p,
     pareto_membership,
     response_onset_timing_error_s,
     synthesize_three_axes,
@@ -52,6 +53,12 @@ def three_axis_fixture():
 
 
 class CapacityStudyV3AnalysisTest(unittest.TestCase):
+    def test_exact_sign_flip_uses_exact_denominator(self):
+        self.assertAlmostEqual(
+            paired_sign_flip_p({index: 1.0 for index in range(5)}),
+            2.0 / 32.0,
+        )
+
     def test_three_axis_known_effects_and_independent_units(self):
         report = synthesize_three_axes(three_axis_fixture())
         self.assertEqual(report["status"], "pass")

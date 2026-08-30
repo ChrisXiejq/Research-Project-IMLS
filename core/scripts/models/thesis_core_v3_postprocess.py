@@ -15,12 +15,27 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 
 from audit_thesis_core_v3_training import audit as audit_training
-from capacity_study_v3_analysis import effect_summary, synthesize_three_axes
+from audit_future_mask_v4_offline import audit_training_curves
+from capacity_study_v3_analysis import (
+    crossed_seed_init_sensitivity,
+    effect_summary,
+    synthesize_three_axes,
+)
 from capacity_study_v3_protocol import atomic_json, sha256_file, sha256_payload
 from thesis_core_v3_runs import shard_runs, thesis_core_runs, validate_thesis_core_manifest
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+TRAINING_AUDIT_SCHEMA = "capacity_history_thesis_core_training_audit_v4_masked"
+CALIBRATION_SCHEMA = "multipath_posthoc_calibration_v4_masked"
+SELECTION_EVALUATION_SCHEMA = "capacity_history_thesis_core_selection_evaluation_v4_masked"
+HELDOUT_EVALUATION_SCHEMA = "capacity_history_thesis_core_heldout_evaluation_v4_masked"
+FULL_HORIZON_EVALUATION_SCHEMA = (
+    "capacity_history_thesis_core_full_horizon_sensitivity_v4_masked"
+)
+SELECTION_FREEZE_SCHEMA = "capacity_history_thesis_core_selection_freeze_v4_masked"
+OFFLINE_SYNTHESIS_SCHEMA = "capacity_history_thesis_core_offline_synthesis_v4_masked"
+FUTURE_VALIDITY_CONTRACT = "future_valid_mask_fail_closed_v4"
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -56,26 +71,130 @@ def _stage_complete(
     output_root: Path,
     freeze: Mapping[str, Any] | None,
 ) -> bool:
-    name, hash_field = {
-        "calibrate": ("calibration.json", "calibration_sha256"),
-        "latency": ("latency.json", "latency_sha256"),
-        "heldout": ("heldout_metrics.json", "evaluation_sha256"),
+    name, hash_field, schema_field, expected_schema = {
+        "calibrate": (
+            "calibration.json",
+            "calibration_sha256",
+            "calibration_schema_version",
+            CALIBRATION_SCHEMA,
+        ),
+        "latency": (
+            "latency.json",
+            "latency_sha256",
+            "schema_version",
+            "capacity_history_thesis_core_latency_v3",
+        ),
+        "heldout": (
+            "heldout_metrics.json",
+            "evaluation_sha256",
+            "schema_version",
+            HELDOUT_EVALUATION_SCHEMA,
+        ),
+        "full_horizon": (
+            "full_horizon_metrics.json",
+            "evaluation_sha256",
+            "schema_version",
+            FULL_HORIZON_EVALUATION_SCHEMA,
+        ),
     }[stage]
     path = output_root / run_id / name
     if not path.is_file():
         return False
     try:
         payload = _load(path)
-        if payload.get("status", "pass") != "pass" or not _hash_valid(payload, hash_field):
+        if (
+            payload.get("status", "pass") != "pass"
+            or payload.get(schema_field) != expected_schema
+            or not _hash_valid(payload, hash_field)
+        ):
             return False
         if payload.get("run_id") != run_id:
             return False
-        if stage == "heldout" and (
+        if stage == "calibrate":
+            selection_path = output_root / run_id / "selection_metrics.json"
+            if not selection_path.is_file():
+                return False
+            selection = _load(selection_path)
+            if (
+                not _hash_valid(selection, "evaluation_sha256")
+                or selection.get("schema_version") != SELECTION_EVALUATION_SCHEMA
+                or selection.get("status") != "pass"
+                or selection.get("run_id") != run_id
+                or selection.get("future_validity_contract")
+                != FUTURE_VALIDITY_CONTRACT
+                or selection.get("calibration_sha256")
+                != payload.get("calibration_sha256")
+                or selection.get("model_cell_id") != payload.get("model_cell_id")
+                or int(selection.get("seed", -1)) != int(payload.get("seed", -2))
+                or selection.get("model_artifact") != payload.get("model_artifact")
+                or selection.get("cached_weights_artifact")
+                != payload.get("cached_weights_artifact")
+                or selection.get("cache_complete_sha256")
+                != payload.get("cache_complete_sha256")
+                or selection.get("dataset_complete_sha256")
+                != payload.get("dataset_complete_sha256")
+            ):
+                return False
+        if stage in {"heldout", "full_horizon"} and (
             freeze is None
             or payload.get("selection_freeze_sha256") != freeze.get("freeze_sha256")
-            or payload.get("evidence_status") != "retrospective_held_out"
+            or payload.get("future_validity_contract") != FUTURE_VALIDITY_CONTRACT
         ):
             return False
+        if stage in {"heldout", "full_horizon"}:
+            frozen_matches = [
+                row for row in freeze.get("runs", []) if row.get("run_id") == run_id
+            ]
+            if len(frozen_matches) != 1:
+                return False
+            frozen = frozen_matches[0]
+            model_identity = payload.get("model_artifact", {}).get(
+                "sha256_tree"
+            ) or payload.get("model_artifact", {}).get("sha256")
+            if (
+                payload.get("training_completion_sha256")
+                != frozen.get("training_completion_sha256")
+                or payload.get("model_cell_id") != frozen.get("model_cell_id")
+                or int(payload.get("seed", -1)) != int(frozen.get("seed", -2))
+                or model_identity != frozen.get("model_identity")
+                or payload.get("cached_weights_artifact", {}).get("sha256")
+                != frozen.get("cached_weights_sha256")
+                or payload.get("cache_complete_sha256")
+                != freeze.get("cache_complete_sha256")
+                or payload.get("dataset_complete_sha256")
+                != freeze.get("dataset_complete_sha256")
+            ):
+                return False
+        if stage == "heldout" and payload.get("evidence_status") != "retrospective_held_out":
+            return False
+        if (
+            stage == "full_horizon"
+            and payload.get("evidence_status")
+            != "retrospective_heldout_full_horizon_sensitivity"
+        ):
+            return False
+        if stage == "full_horizon":
+            calibration = payload.get("calibration", {})
+            if (
+                not _hash_valid(calibration, "calibration_sha256")
+                or calibration.get("calibration_schema_version")
+                != "multipath_posthoc_calibration_v4_full_horizon_sensitivity"
+                or calibration.get("fit_role")
+                != "groups_36_40_full_horizon_only_sensitivity"
+                or calibration.get("calibration_fit_uses_test") is not False
+                or int(payload.get("selection_full_horizon_samples", -1)) != 330
+                or int(payload.get("heldout_full_horizon_samples", -1)) != 326
+                or calibration.get("training_completion_sha256")
+                != payload.get("training_completion_sha256")
+                or calibration.get("model_artifact") != payload.get("model_artifact")
+                or calibration.get("cached_weights_artifact")
+                != payload.get("cached_weights_artifact")
+                or calibration.get("cache_complete_sha256")
+                != payload.get("cache_complete_sha256")
+                or calibration.get("dataset_complete_sha256")
+                != payload.get("dataset_complete_sha256")
+            ):
+                return False
         return True
     except (OSError, ValueError, KeyError, json.JSONDecodeError):
         return False
@@ -90,11 +209,16 @@ def stage_plan(args: argparse.Namespace) -> dict[str, Any]:
         )
     }
     freeze = None
-    if args.stage == "heldout":
+    if args.stage in {"heldout", "full_horizon"}:
         if not args.selection_freeze or not args.selection_freeze.is_file():
             raise ValueError("Held-out stage is blocked until selection freeze exists")
         freeze = _load(args.selection_freeze)
-        if not _hash_valid(freeze, "freeze_sha256") or freeze.get("status") != "pass":
+        if (
+            not _hash_valid(freeze, "freeze_sha256")
+            or freeze.get("schema_version") != SELECTION_FREEZE_SCHEMA
+            or freeze.get("status") != "pass"
+            or freeze.get("future_validity_contract") != FUTURE_VALIDITY_CONTRACT
+        ):
             raise ValueError("Held-out stage is blocked by invalid selection freeze")
     jobs = []
     for spec in manifest["runs"]:
@@ -102,11 +226,16 @@ def stage_plan(args: argparse.Namespace) -> dict[str, Any]:
         if run_id not in assigned:
             continue
         output_dir = args.output_root / run_id
-        if args.stage in {"calibrate", "heldout"}:
+        if args.stage in {"calibrate", "heldout", "full_horizon"}:
+            evaluation_mode = (
+                "full-horizon-sensitivity"
+                if args.stage == "full_horizon"
+                else args.stage
+            )
             command = [
                 args.python_bin,
                 str(SCRIPT_DIR / "evaluate_thesis_core_cached_v3.py"),
-                args.stage,
+                evaluation_mode,
                 "--manifest", str(args.manifest),
                 "--training-root", str(args.training_root),
                 "--dataset-dir", str(args.dataset_dir),
@@ -122,6 +251,10 @@ def stage_plan(args: argparse.Namespace) -> dict[str, Any]:
                         "--calibration-root", str(args.calibration_root),
                         "--selection-freeze", str(args.selection_freeze),
                     ]
+                )
+            elif args.stage == "full_horizon":
+                command.extend(
+                    ["--selection-freeze", str(args.selection_freeze)]
                 )
         else:
             command = [
@@ -144,7 +277,7 @@ def stage_plan(args: argparse.Namespace) -> dict[str, Any]:
             }
         )
     return {
-        "schema_version": f"capacity_history_thesis_core_{args.stage}_plan_v3",
+        "schema_version": f"capacity_history_thesis_core_{args.stage}_plan_v4_masked",
         "status": "pass",
         "stage": args.stage,
         "shard_index": args.shard_index,
@@ -172,8 +305,22 @@ def execute_stage(args: argparse.Namespace) -> dict[str, Any]:
 
 def freeze_selection(args: argparse.Namespace) -> dict[str, Any]:
     audit = _load(args.training_audit)
-    if not _hash_valid(audit, "audit_sha256") or audit.get("status") != "pass":
+    if (
+        not _hash_valid(audit, "audit_sha256")
+        or audit.get("schema_version") != TRAINING_AUDIT_SCHEMA
+        or audit.get("status") != "pass"
+        or audit.get("future_validity_contract") != FUTURE_VALIDITY_CONTRACT
+    ):
         raise ValueError("Selection freeze blocked by invalid training audit")
+    convergence = audit_training_curves(args.training_root, args.manifest)
+    convergence["audit_sha256"] = sha256_payload(convergence)
+    convergence_path = args.output.with_name("training_curve_audit_pre_freeze.json")
+    atomic_json(convergence_path, convergence)
+    if convergence.get("status") != "pass":
+        raise ValueError(
+            "Selection freeze blocked by unresolved boundary-underfit risk: "
+            f"{convergence.get('unresolved_boundary_underfit_runs')}"
+        )
     manifest = _load(args.manifest)
     validate_thesis_core_manifest(manifest)
     spec_by_run = {row["run_id"]: row for row in manifest["runs"]}
@@ -186,9 +333,19 @@ def freeze_selection(args: argparse.Namespace) -> dict[str, Any]:
         completion = _load(args.training_root / run_id / "TRAINING_COMPLETE.json")
         if (
             not _hash_valid(calibration, "calibration_sha256")
+            or calibration.get("calibration_schema_version") != CALIBRATION_SCHEMA
+            or calibration.get("future_validity", {}).get("contract")
+            != FUTURE_VALIDITY_CONTRACT
             or calibration.get("fit_role") != "groups_36_40_selection"
             or calibration.get("calibration_fit_uses_test") is not False
             or calibration.get("run_id") != run_id
+            or calibration.get("model_artifact") != completion.get("best_model")
+            or calibration.get("cached_weights_artifact")
+            != completion.get("cached_weights")
+            or calibration.get("cache_complete_sha256")
+            != completion.get("cache_complete_sha256")
+            or calibration.get("dataset_complete_sha256")
+            != completion.get("dataset_complete_sha256")
         ):
             raise ValueError(f"Invalid selection calibration: {run_id}")
         if (
@@ -208,6 +365,9 @@ def freeze_selection(args: argparse.Namespace) -> dict[str, Any]:
                 "seed": int(spec["seed"]),
                 "training_completion_sha256": completion["completion_sha256"],
                 "model_identity": _artifact_identity(completion["best_model"]),
+                "cached_weights_sha256": completion["cached_weights"]["sha256"],
+                "cache_complete_sha256": completion["cache_complete_sha256"],
+                "dataset_complete_sha256": completion["dataset_complete_sha256"],
                 "calibration_sha256": calibration["calibration_sha256"],
                 "latency_sha256": latency["latency_sha256"],
                 "warmed_batch_one_mean_ms": float(latency["mean_ms"]),
@@ -263,15 +423,18 @@ def freeze_selection(args: argparse.Namespace) -> dict[str, Any]:
     }
     b1 = next(row for row in cells if row["model_cell_id"] == "head-large")
     payload = {
-        "schema_version": "capacity_history_thesis_core_selection_freeze_v3",
+        "schema_version": SELECTION_FREEZE_SCHEMA,
         "status": "pass",
         "evidence_status": "retrospective_held_out",
         "selection_split": "groups_36_40",
         "heldout_split": "groups_41_45_retrospective",
         "heldout_access_authorized": True,
         "post_outcome_budget_extension_performed": False,
+        "future_validity_contract": FUTURE_VALIDITY_CONTRACT,
         "training_audit": str(args.training_audit.resolve()),
         "training_audit_sha256": audit["audit_sha256"],
+        "training_curve_audit": str(convergence_path.resolve()),
+        "training_curve_audit_sha256": convergence["audit_sha256"],
         "manifest_sha256": sha256_file(args.manifest),
         "dataset_complete_sha256": next(iter(audit["dataset_identity_counts"])),
         "cache_complete_sha256": next(iter(audit["cache_identity_counts"])),
@@ -301,13 +464,24 @@ def freeze_selection(args: argparse.Namespace) -> dict[str, Any]:
 
 def _heldout_rows(freeze: Mapping[str, Any], heldout_root: Path) -> list[dict[str, Any]]:
     rows = []
+    frozen_runs = {row["run_id"]: row for row in freeze["runs"]}
     for cell in freeze["cells"]:
         for run_id in cell["retained_run_ids"]:
             report = _load(heldout_root / run_id / "heldout_metrics.json")
+            frozen = frozen_runs[run_id]
             if (
                 not _hash_valid(report, "evaluation_sha256")
+                or report.get("schema_version") != HELDOUT_EVALUATION_SCHEMA
                 or report.get("status") != "pass"
                 or report.get("selection_freeze_sha256") != freeze["freeze_sha256"]
+                or report.get("future_validity_contract") != FUTURE_VALIDITY_CONTRACT
+                or report.get("training_completion_sha256")
+                != frozen["training_completion_sha256"]
+                or report.get("cache_complete_sha256") != freeze["cache_complete_sha256"]
+                or report.get("dataset_complete_sha256")
+                != freeze["dataset_complete_sha256"]
+                or report.get("model_cell_id") != cell["model_cell_id"]
+                or int(report.get("seed", -1)) != int(frozen["seed"])
             ):
                 raise ValueError(f"Invalid held-out evaluation: {run_id}")
             for group_key, metrics in report["calibrated"]["init_group_aggregation"][
@@ -336,16 +510,32 @@ def _heldout_rows(freeze: Mapping[str, Any], heldout_root: Path) -> list[dict[st
 def _branch(effect: Mapping[str, Any]) -> str:
     low, high = effect["cluster_interval_95"]
     value = float(effect["effect"])
+    exact_p = effect.get("holm_adjusted_p")
+    if exact_p is None:
+        exact_p = effect.get("raw_sign_flip_p")
+    exact_resolved = exact_p is not None and float(exact_p) <= 0.05
     if math.isfinite(low) and low > 0.0:
-        return "supports_preregistered_direction"
+        return (
+            "supports_preregistered_direction"
+            if exact_resolved
+            else "directional_descriptive_exact_test_resolution_limited"
+        )
     if math.isfinite(high) and high < 0.0:
-        return "opposes_preregistered_direction"
+        return (
+            "opposes_preregistered_direction"
+            if exact_resolved
+            else "opposing_descriptive_exact_test_resolution_limited"
+        )
     return "inconclusive_or_mixed" if value != 0.0 else "null"
 
 
 def synthesize(args: argparse.Namespace) -> dict[str, Any]:
     freeze = _load(args.selection_freeze)
-    if not _hash_valid(freeze, "freeze_sha256"):
+    if (
+        not _hash_valid(freeze, "freeze_sha256")
+        or freeze.get("schema_version") != SELECTION_FREEZE_SCHEMA
+        or freeze.get("future_validity_contract") != FUTURE_VALIDITY_CONTRACT
+    ):
         raise ValueError("Invalid selection freeze")
     rows = _heldout_rows(freeze, args.heldout_root)
     three_axes = synthesize_three_axes(rows, dataset="retrospective_heldout")
@@ -415,17 +605,36 @@ def synthesize(args: argparse.Namespace) -> dict[str, Any]:
             }
         )
     primary = three_axes["primary_contrasts"]
+    crossed = []
+    for contrast in [*primary, *direct, *supporting]:
+        crossed.append(
+            crossed_seed_init_sensitivity(
+                rows,
+                contrast_id=contrast["contrast_id"],
+                terms=tuple(
+                    (term["model_cell_id"], float(term["coefficient"]))
+                    for term in contrast["terms"]
+                ),
+            )
+        )
     payload = {
-        "schema_version": "capacity_history_thesis_core_offline_synthesis_v3",
+        "schema_version": OFFLINE_SYNTHESIS_SCHEMA,
         "status": "pass",
         "evidence_status": "retrospective_held_out",
         "selection_freeze_sha256": freeze["freeze_sha256"],
         "evaluated_runs": 27,
         "independent_init_groups": 5,
+        "future_validity_contract": FUTURE_VALIDITY_CONTRACT,
+        "statistical_scope": (
+            "Retrospective descriptive inference over five held-out init groups, "
+            "conditional on the three fixed training seeds. Exact two-sided sign-flip "
+            "tests cannot attain p<0.05 at n=5."
+        ),
         "cell_summaries": cell_summaries,
         "three_axes": three_axes,
         "direct_architecture_contrasts": direct,
         "supporting_contrasts": supporting,
+        "crossed_seed_init_sensitivity": crossed,
         "result_branches": {
             row["contrast_id"]: _branch(row) for row in primary
         },
@@ -452,7 +661,11 @@ def main() -> None:
     audit_parser.add_argument("--output", required=True, type=Path)
 
     stage = sub.add_parser("stage")
-    stage.add_argument("--stage", choices=("calibrate", "latency", "heldout"), required=True)
+    stage.add_argument(
+        "--stage",
+        choices=("calibrate", "latency", "heldout", "full_horizon"),
+        required=True,
+    )
     stage.add_argument("--manifest", required=True, type=Path)
     stage.add_argument("--training-root", required=True, type=Path)
     stage.add_argument("--dataset-dir", required=True, type=Path)

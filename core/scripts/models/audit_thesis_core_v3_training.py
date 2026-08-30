@@ -22,6 +22,7 @@ from capacity_study_v3_protocol import (
 )
 from thesis_core_v3_execute import completion_valid
 from thesis_core_v3_runs import validate_thesis_core_manifest
+from training_epoch_integrity_v4 import inspect_epoch_artifacts
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -65,12 +66,28 @@ def audit(manifest_path: Path, training_root: Path) -> dict[str, Any]:
         parameters = _load(directory / "parameters.json")
         config = _load(directory / "run_config.json")
         history_path = directory / "history.csv"
+        epoch_integrity = inspect_epoch_artifacts(
+            history_path,
+            directory / "epoch_checkpoints",
+            backup_dir=directory / "resume_backup",
+            validate_hdf5=True,
+        )
+        if epoch_integrity.get("status") != "pass":
+            invalid.append(f"{run_id}:epoch_artifact_integrity")
+            continue
         history = np.genfromtxt(history_path, delimiter=",", names=True)
         scores = np.atleast_1d(history["val_rollout_macro_nll"]).astype(float)
+        epoch_indices = np.atleast_1d(history["epoch"]).astype(int)
         best_score = float(np.min(scores))
-        best_epoch = int(np.argmin(scores)) + 1
+        best_epoch = int(epoch_indices[int(np.argmin(scores))]) + 1
         if best_epoch != int(completion["best_epoch"]):
             invalid.append(f"{run_id}:best_epoch_drift")
+            continue
+        if (
+            int(health.get("epochs_completed", -1)) != len(scores)
+            or int(health.get("per_epoch_checkpoints", -1)) != len(scores)
+        ):
+            invalid.append(f"{run_id}:epoch_count_drift")
             continue
         source_identity = sha256_payload(config["source_sha256"])
         source_identities[source_identity] += 1
@@ -104,6 +121,7 @@ def audit(manifest_path: Path, training_root: Path) -> dict[str, Any]:
             "training_wall_time_s": float(health["training_wall_time_s"]),
             "completion_sha256": str(completion["completion_sha256"]),
             "source_identity": source_identity,
+            "epoch_artifact_integrity": "pass",
         }
         if (
             not np.isfinite(row["validation_rollout_macro_nll"])
@@ -154,7 +172,7 @@ def audit(manifest_path: Path, training_root: Path) -> dict[str, Any]:
         invalid.append("dataset_identity_not_uniform")
 
     payload = {
-        "schema_version": "capacity_history_thesis_core_training_audit_v3",
+        "schema_version": "capacity_history_thesis_core_training_audit_v4_masked",
         "status": "pass" if not invalid else "fail",
         "evidence_status": "retrospective_held_out",
         "manifest": str(manifest_path.resolve()),
@@ -174,8 +192,9 @@ def audit(manifest_path: Path, training_root: Path) -> dict[str, Any]:
             "protocol_budget_epochs": CORE_EPOCHS,
             "boundary_window_epochs": BOUNDARY_WINDOW_EPOCHS,
             "post_outcome_budget_extension_allowed": False,
-            "boundary_limitation_is_descriptive_not_exclusionary": True,
+            "boundary_limitation_requires_pre_freeze_tail_materiality_audit": True,
         },
+        "future_validity_contract": "future_valid_mask_fail_closed_v4",
         "cells": cell_summaries,
         "runs": rows,
     }

@@ -18,6 +18,11 @@ from thesis_core_v3_runs import (
 from train_prediction_model_v3 import artifact_hash
 
 
+CORRECTED_COMPLETION_SCHEMA = "capacity_history_thesis_core_training_complete_v4_masked"
+CORRECTED_HEALTH_SCHEMA = "capacity_history_thesis_core_training_health_v4_masked"
+FUTURE_VALIDITY_CONTRACT = "future_valid_mask_fail_closed_v4"
+
+
 def completion_valid(path: Path, spec: Mapping[str, Any]) -> bool:
     if not path.is_file():
         return False
@@ -27,7 +32,14 @@ def completion_valid(path: Path, spec: Mapping[str, Any]) -> bool:
         recorded = value.pop("completion_sha256", None)
         if recorded != sha256_payload(value):
             return False
-        if payload.get("status") != "pass" or payload.get("formal_run") is not True:
+        if (
+            payload.get("schema_version") != CORRECTED_COMPLETION_SCHEMA
+            or payload.get("status") != "pass"
+            or payload.get("formal_run") is not True
+            or payload.get("future_validity_contract") != FUTURE_VALIDITY_CONTRACT
+            or payload.get("checkpoint_selection_metric")
+            != "validation_rollout_macro_masked_trajectory_mixture_NLL_per_valid_step"
+        ):
             return False
         if payload.get("run_id") != spec["run_id"]:
             return False
@@ -40,13 +52,23 @@ def completion_valid(path: Path, spec: Mapping[str, Any]) -> bool:
             "training_health",
             "parameters",
             "parity",
+            "epoch_checkpoints",
+            "resume_backup",
         ):
             record = payload[key]
             if artifact_hash(Path(record["path"])) != record:
                 return False
         parity = json.loads(Path(payload["parity"]["path"]).read_text(encoding="utf-8"))
         health = json.loads(Path(payload["training_health"]["path"]).read_text(encoding="utf-8"))
-        if parity.get("status") != "pass" or health.get("hard_checks_pass") is not True:
+        if (
+            parity.get("status") != "pass"
+            or health.get("schema_version") != CORRECTED_HEALTH_SCHEMA
+            or health.get("hard_checks_pass") is not True
+            or health.get("future_validity_contract") != FUTURE_VALIDITY_CONTRACT
+            or health.get("epoch_recovery_preserved") is not True
+            or int(health.get("per_epoch_checkpoints", -1))
+            != int(health.get("epochs_completed", -2))
+        ):
             return False
         return all(
             payload.get(key) == spec.get(key)
