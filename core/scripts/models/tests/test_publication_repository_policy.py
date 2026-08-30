@@ -52,6 +52,45 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
         self.assertEqual(report["missing_required_paths"], [])
         self.assertEqual(report["forbidden_tracked_paths"], [])
 
+    def test_accepts_the_single_publication_video(self) -> None:
+        report = audit_paths(
+            tracked_paths=[
+                "README.md",
+                "REPRODUCIBILITY.md",
+                "CITATION.cff",
+                "THIRD_PARTY_NOTICES.md",
+                "core/scripts/carla/run_all_scenarios.py",
+                "core/scripts/carla/policies/smpc_agent.py",
+                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "docs/paper/CARLA_video.mp4",
+            ],
+            file_sizes={"docs/paper/CARLA_video.mp4": 2_078_047},
+        )
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["forbidden_tracked_paths"], [])
+
+    def test_rejects_other_videos(self) -> None:
+        report = audit_paths(
+            tracked_paths=[
+                "README.md",
+                "REPRODUCIBILITY.md",
+                "CITATION.cff",
+                "THIRD_PARTY_NOTICES.md",
+                "core/scripts/carla/run_all_scenarios.py",
+                "core/scripts/carla/policies/smpc_agent.py",
+                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "docs/paper/raw_rollout.mp4",
+            ],
+            file_sizes={"docs/paper/raw_rollout.mp4": 1024},
+        )
+
+        self.assertEqual(report["status"], "fail")
+        self.assertEqual(
+            report["forbidden_tracked_paths"],
+            ["docs/paper/raw_rollout.mp4"],
+        )
+
     def test_rejects_generated_evidence_outside_public_allowlist(self) -> None:
         report = audit_paths(
             tracked_paths=[

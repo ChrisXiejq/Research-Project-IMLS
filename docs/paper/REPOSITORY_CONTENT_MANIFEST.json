@@ -350,9 +350,9 @@
   "repository_root": ".",
   "schema_version": "publication_repository_policy_v1",
   "status": "pass",
-  "tracked_bytes": 10547167,
+  "tracked_bytes": 12627024,
   "tracked_bytes_excluded_paths": [
     "docs/paper/REPOSITORY_CONTENT_MANIFEST.json"
   ],
-  "tracked_path_count": 557
+  "tracked_path_count": 558
 }

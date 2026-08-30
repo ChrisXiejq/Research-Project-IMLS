@@ -37,6 +37,9 @@ FORBIDDEN_SUFFIXES = (
     ".pb",
 )
 FORBIDDEN_COMPOUND_SUFFIXES = (".tar.gz", ".tar.xz", ".tar.bz2")
+PUBLICATION_MEDIA_PATHS = {
+    "docs/paper/CARLA_video.mp4",
+}
 GENERATED_EVIDENCE_ROOT = "docs/paper/generated/"
 PUBLICATION_EVIDENCE_PREFIXES = (
     "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/prereg/",
@@ -92,7 +95,10 @@ def _is_forbidden(path: str) -> bool:
         )
         or normalised.startswith("docs/literature/")
         or normalised.startswith("docs/dissertation/")
-        or any(lower.endswith(suffix) for suffix in FORBIDDEN_SUFFIXES)
+        or (
+            normalised not in PUBLICATION_MEDIA_PATHS
+            and any(lower.endswith(suffix) for suffix in FORBIDDEN_SUFFIXES)
+        )
         or any(lower.endswith(suffix) for suffix in FORBIDDEN_COMPOUND_SUFFIXES)
     )
 

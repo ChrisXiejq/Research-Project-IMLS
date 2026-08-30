@@ -50,6 +50,7 @@ Thumbs.db
 core/results/
 *.avi
 *.mp4
+!docs/paper/CARLA_video.mp4
 
 # --- Gurobi: large installers + license secrets (never commit) ---
 gurobi/*.tar.gz
