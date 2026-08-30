@@ -7,9 +7,11 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 from pathlib import Path, PurePosixPath
 from typing import Iterable, Mapping
+from urllib.parse import unquote
 
 
 FORBIDDEN_PREFIXES = (
@@ -45,6 +47,17 @@ REQUIRED_PATHS = {
     "core/scripts/models/evaluate_thesis_core_cached_v3.py",
 }
 MAX_TRACKED_FILE_BYTES = 20 * 1024 * 1024
+PUBLIC_MARKDOWN_PATHS = (
+    "README.md",
+    "REPRODUCIBILITY.md",
+    "THIRD_PARTY_NOTICES.md",
+    "docs/README.md",
+    "docs/paper/README.md",
+    "docs/paper/THESIS_EVIDENCE_GUIDE.md",
+)
+MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
+BACKTICK_RE = re.compile(r"`([^`\n]+)`")
+REPOSITORY_PATH_PREFIXES = ("core/", "docs/")
 
 
 def _normalise_path(value: str) -> str:
@@ -143,6 +156,70 @@ def _compact_evidence(
     return records
 
 
+def _local_link_target(raw_target: str) -> str | None:
+    target = raw_target.strip()
+    if target.startswith("<") and ">" in target:
+        target = target[1 : target.index(">")]
+    else:
+        target = target.split(maxsplit=1)[0]
+    target = unquote(target.split("#", 1)[0])
+    if not target or target.startswith(("#", "http://", "https://", "mailto:")):
+        return None
+    return target
+
+
+def _repository_code_path(value: str) -> str | None:
+    candidate = value.strip().rstrip(".,:;")
+    if candidate.startswith("/path/to/") or candidate.endswith("/"):
+        return None
+    if candidate.startswith(REPOSITORY_PATH_PREFIXES):
+        return candidate
+    if candidate in {"README.md", "REPRODUCIBILITY.md", "CITATION.cff", "THIRD_PARTY_NOTICES.md"}:
+        return candidate
+    return None
+
+
+def audit_markdown_links(
+    root: Path, markdown_paths: Iterable[str]
+) -> list[dict[str, str]]:
+    """Return broken local Markdown links and explicit repository code paths."""
+
+    findings: list[dict[str, str]] = []
+    for document_relative in sorted(markdown_paths):
+        document = root / document_relative
+        if not document.is_file():
+            continue
+        text = document.read_text(encoding="utf-8")
+        for match in MARKDOWN_LINK_RE.finditer(text):
+            target = _local_link_target(match.group(1))
+            if target is None:
+                continue
+            if target.startswith("/"):
+                exists = False
+            else:
+                exists = (document.parent / target).resolve().exists()
+            if not exists:
+                findings.append(
+                    {
+                        "document": document_relative,
+                        "target": target,
+                        "kind": "markdown_link",
+                    }
+                )
+        for match in BACKTICK_RE.finditer(text):
+            target = _repository_code_path(match.group(1))
+            if target is None or (root / target).exists():
+                continue
+            findings.append(
+                {
+                    "document": document_relative,
+                    "target": target,
+                    "kind": "repository_path",
+                }
+            )
+    return sorted(findings, key=lambda row: (row["document"], row["target"], row["kind"]))
+
+
 def audit_repository(root: Path) -> dict[str, object]:
     """Audit a Git worktree or an unpacked source archive without mutating it."""
 
@@ -155,13 +232,17 @@ def audit_repository(root: Path) -> dict[str, object]:
     }
     report = audit_paths(tracked_paths, file_sizes)
     evidence = _compact_evidence(resolved_root, tracked_paths)
+    broken_links = audit_markdown_links(resolved_root, PUBLIC_MARKDOWN_PATHS)
     report.update(
         {
-            "repository_root": str(resolved_root),
+            "repository_root": ".",
             "compact_evidence_file_count": len(evidence),
             "compact_evidence": evidence,
+            "broken_public_document_links": broken_links,
         }
     )
+    if broken_links:
+        report["status"] = "fail"
     return report
 
 

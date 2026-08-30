@@ -9,6 +9,21 @@ from pathlib import Path
 
 
 class UniformEpochOverrideTest(unittest.TestCase):
+    def test_public_pipeline_uses_external_model_paths(self) -> None:
+        models_dir = Path(__file__).resolve().parents[1]
+        source = (models_dir / "run_future_mask_v4e_pipeline.sh").read_text()
+        self.assertNotIn("/root/autodl-tmp", source)
+        self.assertIn('base_model="${MULTIPATH_BASE_MODEL:?', source)
+        self.assertIn('anchors="${MULTIPATH_ANCHORS:-', source)
+        self.assertIn('dataset="${PREDICTION_DATASET_ROOT:-', source)
+
+    def test_modern_environment_does_not_install_mismatched_carla(self) -> None:
+        repository = Path(__file__).resolve().parents[4]
+        environment = (repository / "core/env_setup/environment.modern.yml").read_text()
+        requirements = (repository / "core/env_setup/requirements.modern.txt").read_text()
+        self.assertNotIn("carla==0.9.15", environment)
+        self.assertNotIn("carla==0.9.15", requirements)
+
     def test_extension_preserves_frozen_manifest_epoch_budget(self) -> None:
         models_dir = Path(__file__).resolve().parents[1]
         code = r"""

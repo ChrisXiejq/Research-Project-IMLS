@@ -6,14 +6,18 @@ old_root="$2"
 cache_dir="$3"
 extension_protocol="$4"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-python_bin="${PYTHON_BIN:-/root/miniconda3/bin/python}"
-manifest="$old_root/protocol/thesis_core_run_manifest.json"
-dataset="$old_root/dataset_35_5_5"
-base_model=/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_multipath_10
-anchors=/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_clusters_16.npy
+python_bin="${PYTHON_BIN:-python}"
+manifest="${THESIS_RUN_MANIFEST:-$old_root/protocol/thesis_core_run_manifest.json}"
+dataset="${PREDICTION_DATASET_ROOT:-$old_root/dataset_35_5_5}"
+base_model="${MULTIPATH_BASE_MODEL:?Set MULTIPATH_BASE_MODEL to the pretrained SavedModel}"
+anchors="${MULTIPATH_ANCHORS:-$script_dir/l5kit_clusters_16.npy}"
 
 test -s "$extension_protocol"
 test -s "$cache_dir/CACHE_COMPLETE.json"
+test -s "$manifest"
+test -d "$dataset"
+test -e "$base_model"
+test -s "$anchors"
 mkdir -p "$mask_root/logs" "$mask_root/postprocess" "$mask_root/protocol"
 exec >>"$mask_root/logs/offline_pipeline.log" 2>&1
 export CUDA_VISIBLE_DEVICES=0

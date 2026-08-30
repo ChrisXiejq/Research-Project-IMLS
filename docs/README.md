@@ -1,30 +1,19 @@
-# Documentation Index
+# Documentation
 
-The human-facing documentation is intentionally small.
+The public documentation is deliberately small:
 
-## Read these documents
+1. [Repository overview](../README.md) — scientific pipeline and canonical
+   entry points.
+2. [Reproducibility guide](../REPRODUCIBILITY.md) — environment, data, model,
+   CARLA and analysis commands.
+3. [Thesis evidence guide](paper/THESIS_EVIDENCE_GUIDE.md) — corrected results,
+   interpretation and claim boundaries.
+4. [System-to-code map](architecture/流程图与代码映射.md) — predictor, risk,
+   SMPC and supervisor components.
+5. [Server CARLA runbook](architecture/Server_CARLA_Environment_Runbook.md) —
+   solver and simulator health checks.
 
-1. `CODEX_HANDOFF.md` — authoritative cross-repository progress, evidence,
-   limitations and next-action handoff for a new Codex session;
-2. `paper/THESIS_EVIDENCE_GUIDE.md` — study design, final H1--H4 results,
-   supervisor-authority result, claim boundaries and evidence locations;
-3. `architecture/Server_CARLA_Environment_Runbook.md` — CARLA environment and
-   execution conventions;
-4. `architecture/流程图与代码映射.md` — system diagrams and code mapping;
-5. `dissertation/README.md` — relationship between the submission manuscript,
-   the internal generated manuscript and the UCL rubric;
-6. `literature/相关文献解读_SMPC_多模态预测_自动驾驶.md` — literature notes.
-
-## Directories
-
-- `paper/generated/` contains machine evidence and is not a reading list;
-- `dissertation/latex/` is retained for evidence-pipeline compatibility and is
-  not the authoritative submission source;
-- `literature/` stores source papers;
-- `presentation/` stores the earlier presentation and its rubric.
-
-The authoritative paper is maintained outside this repository at
-`../Jiaqi Xie Dissertation/main.tex`.
-
-Do not create new Day-numbered narrative documents. Update the consolidated
-guide or the authoritative manuscript instead.
+`paper/generated/` contains immutable machine evidence, not narrative working
+notes. `dissertation/latex/` is retained only for evidence-pipeline
+compatibility; the experiment repository does not bundle the author’s editable
+submission workspace.

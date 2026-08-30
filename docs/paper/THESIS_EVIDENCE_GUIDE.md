@@ -1,168 +1,170 @@
-# Thesis Study and Evidence Guide
+# Thesis study and evidence guide
 
-Updated: 2026-08-15
+Updated: 2026-08-30
 
-This is the repository's only human-facing source for the study design, result
-verdicts and evidence locations. The submission manuscript is maintained at
-`../../../Jiaqi Xie Dissertation/main.tex`.
+## 1. Research question
 
-## 1. Research question and central claim
+The project studies a right-hand-traffic Town05 give-way interaction in which
+the ego vehicle turns left across an opposing target vehicle travelling
+straight. It asks how three upstream choices—motion predictor, risk allocation
+and rule-based behavioural authority—change the trajectory that CARLA actually
+executes.
 
-The project asks when a local improvement in motion prediction or risk
-allocation remains useful after it enters a coupled predictor--risk--SMPC--
-supervisor system at a CARLA give-way intersection.
-
-The central finding is that task adaptation gives a large and consistent
-in-distribution prediction improvement, but neither additional Transformer
-complexity nor adaptive risk gives uniform additional value. Offline prediction
-quality and closed-loop utility must therefore be evaluated together.
-
-## 2. Frozen experimental design
-
-### Prediction experiment
-
-- CARLA Town05 give-way scenario;
-- 200 data-collection rollouts;
-- rollout-disjoint split: 160 train, 20 validation and 20 test rollouts;
-- 2 s prediction horizon;
-- B0 pretrained MultiPath control;
-- B1 task-adapted final prediction head;
-- B2-M/B2-D MLP residual controls;
-- T1/T2 Transformer residual adapters;
-- five trainable variants × seeds 11, 23 and 37;
-- validation rollout-macro NLL for selection and one frozen test evaluation;
-- constant velocity, clipped constant acceleration and train-mean route prior
-  as physical baselines.
-
-### Corrected closed-loop experiment
-
-The primary matrix is:
+The system is a coupled chain:
 
 ```text
-2 predictors × 4 risk policies × 2 target styles × 5 paired init groups
-= 80 rollouts
+MultiPath GMM -> fixed/adaptive risk -> probability-weighted SMPC
+              -> supervisor authority -> physical CARLA behaviour
 ```
 
-Predictors are B0 and B1. Risk policies are fixed aggressive, fixed medium,
-fixed conservative and adaptive. Target styles are assertive and reactive.
-Primary outcomes are event-clock completion time and minimum physical
-vehicle-footprint separation; collision, yield and completion failures are
-binary guards.
+The key methodological point is that predictor accuracy, optimiser input and
+executed behaviour are different endpoints. A gain at one layer is not assumed
+to survive every downstream layer.
 
-### Supervisor-authority experiment
+## 2. Data and predictor design
 
-The externally requested mechanism ablation is:
+The source protocol collects 200 CARLA rollouts. The corrected frozen model
+study uses four cells per initialisation group and rollout-disjoint groups:
+1--35 for fitting, 36--40 for model selection/calibration and 41--45 for
+held-out evaluation. This gives 3,526 fit, 510 selection and 506 held-out
+windows.
+
+Each window combines a target-centred raster, a six-token ego–target
+interaction sequence and ten future positions at 0.2 s spacing. Partial future
+horizons carry an explicit validity mask. Corrected V4 applies that mask in
+training, validation NLL, checkpointing, early stopping, calibration and
+held-out ADE/FDE/NLL.
+
+The 27-run matrix crosses nine model cells with three fixed seeds. It separates:
+
+- **Capacity:** small, medium and large Transformer adapters;
+- **Information:** current snapshot, partial history and full history;
+- **Architecture:** capacity-matched MLP and Transformer adapters.
+
+The baseline `head-large` cell is the task-adapted MultiPath head (B1). The
+historically deployed temporal candidate is
+`transformer-h1p0-large`; corrected V4 selects `mlp-h0p4-large` as P*.
+
+## 3. Corrected offline conclusions
+
+All 27 corrected runs pass the release and epoch-integrity gates. The uniform
+80-to-120 epoch extension was frozen before held-out access. Five held-out
+initialisation groups are the independent inference units, so exact two-sided
+sign-flip tests have limited resolution.
+
+The corrected evidence supports these bounded statements:
+
+- full interaction history improves NLL over a snapshot-only input for both
+  MLP and Transformer families in the tested large-capacity cells;
+- the tested capacity comparison does not identify a stable medium-capacity
+  optimum;
+- the direct MLP-versus-Transformer offset is not identified uniformly across
+  history conditions;
+- the previous “no attention-specific history gain” conclusion is weakened,
+  not strengthened, after mask correction;
+- the full-horizon-only B0/B1 foundation comparison retains its conclusion
+  because partial windows are excluded from that analysis.
+
+The machine-readable decisions are in
+`docs/paper/generated/future_mask_v4e_120/paper_outputs/claim_decisions.csv`.
+
+## 4. Probability-weighted closed-loop design
+
+The corrected controller uses MultiPath mode probabilities as the branch-cost
+weights in the multimodal SMPC objective. The target follows an assertive
+constant-speed controller that does not use ego state.
+
+The frozen evidence contains 60 unique rollouts:
 
 ```text
-B1 × 2 risk policies × authority on/off × 2 target styles × 10 init groups
-= 80 rollouts
+Supervisor on:  B1/P* × fixed-medium/adaptive × init 126--135 = 40
+Supervisor off: B1/P* × fixed-medium/adaptive × init 126--130 = 20
 ```
 
-It compares adaptive with fixed medium while switching the complete behavioural
-application authority of the corrected rule-aware supervisor. It is a mechanism
-analysis for H4, not a fifth headline hypothesis.
+Here P* denotes the historically deployed large Transformer candidate. These
+rollouts are valid evidence for that deployed stack and for the matched
+authority intervention. Because corrected V4 selects a different P*, they do
+not by themselves establish corrected-V4 offline-to-CARLA transfer.
 
-## 3. Headline hypothesis verdicts
+## 5. Predictor and risk transfer with authority on
 
-| ID | Question | Evidence | Verdict |
-| --- | --- | --- | --- |
-| H1 | Does B1 improve prediction relative to B0? | NLL 2.171→1.857; ADE 1.283→0.100 m; FDE 2.644→0.121 m; all five test groups favour B1 | Supported |
-| H2 | Do Transformer adapters add consistent value? | T1 slightly improves over B2-M, T2 slightly degrades relative to B2-D, neither exceeds B1; sequence ablations confirm input use | Not supported for tested configurations |
-| H3 | Does the B1 offline gain transfer consistently? | Jointly favourable completion/separation in 2/8 policy--style conditions | Conditional transfer only |
-| H4 | Does adaptive risk dominate fixed controls? | Dominance in 3/12 prespecified comparisons | Context dependent; no universal dominance |
+All 40 authority-on rollouts complete, yield in the frozen fixed-geometry gate
+and avoid observed footprint collision. The deployed predictors generate
+different trajectories and mode probabilities, and the audited SMPC weights
+match those probabilities exactly.
 
-All 80 corrected R3 rollouts completed without an observed native collision,
-footprint collision, yield-order failure or completion failure. These are event
-counts, not proof of zero population risk. Continuous footprint separation is
-the discriminating safety-margin measure.
+Physical paired effects remain small. Transformer-adapted minus B1 completion
+is 0.000 s under fixed-medium risk and -0.005 s under adaptive risk. Separation
+effects are +0.0257 m and +0.0092 m, respectively; most paired intervals cross
+zero. Adaptive-minus-fixed completion effects are +0.020 s for B1 and +0.015 s
+for the Transformer candidate. These results show transmission into the
+optimiser, but not a consistent physical advantage from predictor or risk
+choice under authority on.
 
-## 4. Supervisor feedback closure
+## 6. Supervisor-authority result
 
-The fine-tuning audit replaced the earlier 0.98%→100% mode-matching statement
-with rollout-macro NLL/ADE/FDE and paired test-group evidence. Solver analysis
-separates factual solve attempts, controller acceptance/fallback and bypass
-steps instead of treating every historical logger row as MPC infeasibility.
+The matched authority comparison uses five initialisation groups across both
+predictors and both risk policies.
 
-SF4 completed all 80 prespecified rollouts and produced an active authority
-intervention. Supervisor application authority materially changes vehicle
-behaviour and adverse outcomes, so it is not an irrelevant layer. However, the
-primary difference-in-differences for failure-penalised completion time is
-0.020 s with a cluster-bootstrap 95% interval of [-0.260, 0.338] s. The result
-does not support the simple explanation that the supervisor selectively erases
-the adaptive-versus-fixed-medium difference; its major effect applies to both
-risk policies.
+- Endpoint completion is 20/20 with authority on and 20/20 with authority off.
+- The stricter conflict-handling competence gate is 20/20 versus 8/20.
+- Early conflict-zone entry is 0/20 versus 12/20.
+- Observed footprint collision is 0/20 versus 4/20.
+- Authority on applies post-solver action replacement on 26.1% of steps and
+  SMPC bypass on 17.3%; authority off applies neither by construction.
+- The off-arm binary outcome pattern is identical across predictor and risk
+  choices within each initialisation group.
 
-## 5. Claim boundaries
+The experiment therefore supports a causal effect of the complete behavioural
+authority bundle on conflict handling in these five paired initialisations.
+It does not isolate any individual supervisor rule, prove population-level
+safety or show that the ego cannot reach its endpoint without the supervisor.
+
+## 7. Evidence map
+
+Corrected offline primary evidence:
+
+```text
+docs/paper/generated/future_mask_v4e_120/
+  audits/                 mask, cache, convergence and claim-contract audits
+  figures/                Python-generated publication figures
+  paper_outputs/          claim decisions and LaTeX table fragments
+  postprocess/            frozen selection and held-out synthesis
+  protocol/               pre-held-out extension and stage receipts
+```
+
+Probability-weighted closed-loop evidence:
+
+```text
+docs/paper/generated/weighted_smpc_v2_recovery/
+  h2_assertive_40/        authority-on predictor/risk analysis
+  supervisor_authority_assertive_joint60/  matched authority analysis
+  provenance/             joint60 and arm-level integrity receipts
+```
+
+Every newly imported publication file is recorded by a
+`PUBLICATION_EVIDENCE_MANIFEST.json` with byte size and SHA-256.
+
+## 8. Claim boundaries
 
 Allowed claims:
 
-- B1 strongly improves prediction on the frozen Town05 give-way distribution;
-- the tested Transformer adapters use temporal inputs but show no consistent
-  additional advantage;
-- the prediction gain has conditional rather than uniform closed-loop value;
-- adaptive risk is a context-dependent operating point;
-- predictor, risk policy, target response, solver and supervisor jointly shape
-  executed behaviour.
+- future validity must be respected through the entire prediction evaluation
+  pipeline;
+- interaction history contains useful information in the tested dataset;
+- the tested architecture/capacity results are conditional rather than a
+  general ranking of MLPs and Transformers;
+- probability-weighted predictor differences reach the SMPC objective but do
+  not produce a consistent physical advantage under authority on;
+- the complete supervisor-authority bundle materially improves conflict
+  handling in the tested assertive initialisations.
 
 Do not claim:
 
-- Transformers are generally inferior for motion prediction;
-- adaptive risk is useless;
-- the supervisor is the sole cause of similar trajectories;
-- zero observed collisions proves safety or statistical equivalence;
-- the results generalise to other maps or real roads without further evidence.
-
-## 6. Canonical evidence paths
-
-Primary corrected results:
-
-```text
-docs/paper/generated/distinction_v1/08_corrected_closed_loop/r3_final/
-docs/paper/generated/distinction_v1/10_four_hypothesis_evidence/
-```
-
-Supporting ML ablations:
-
-```text
-docs/paper/generated/distinction_v1/01_physical_baselines/
-docs/paper/generated/distinction_v1/02_input_ablations/
-docs/paper/generated/distinction_v1/03_training_budget/
-docs/paper/generated/distinction_v1/04_in_loop_prediction/
-docs/paper/generated/distinction_v1/06_split_balance/
-```
-
-Supervisor-feedback evidence:
-
-```text
-docs/paper/generated/supervisor_feedback_v1/
-docs/paper/generated/distinction_sf4_supervisor_authority_ablation/results/
-```
-
-Generated assets are immutable. Correct a generator and rebuild its outputs;
-never hand-edit a reported number.
-
-## 7. Current closure state
-
-R3 and SF4 are complete. The existing M1/W1 completion receipts still identify
-their evidence cut as `pre-sf4`, so the final non-CARLA task is to rebuild the
-evidence/manuscript audit chain after integrating SF4. No additional large
-CARLA matrix is planned.
-
-The internal repository manuscript at `docs/dissertation/latex/` remains only
-because the evidence scripts reference it. The reader-facing manuscript is
-`../../../Jiaqi Xie Dissertation/main.tex`.
-
-## 8. Reproduction entry points
-
-From the repository root:
-
-```bash
-.venv-precarla/bin/python core/scripts/models/build_r3_paper_synthesis.py
-.venv-precarla/bin/python core/scripts/models/build_m1_evidence_package.py
-.venv-precarla/bin/python -m unittest discover \
-  -s core/scripts/models/tests -p 'test_*.py'
-```
-
-The exact number of tests is allowed to increase; require the current discovery
-run to pass rather than relying on an old hard-coded count.
+- Transformers are generally inferior to MLPs;
+- corrected V4 P* has already been validated in CARLA;
+- adaptive risk is universally better or useless;
+- the supervisor is the unique cause of all upstream masking;
+- zero observed events proves formal or population-level safety;
+- results generalise beyond this map, manoeuvre, target policy or simulator.
 

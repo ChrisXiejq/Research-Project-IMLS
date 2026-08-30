@@ -1,59 +1,110 @@
-# Research-Project-IMLS
+# Prediction, Risk-Aware SMPC and Supervisor Authority for CARLA Give-Way
 
-这个仓库是毕业设计的唯一实验工作区。当前研究聚焦：
+This repository implements the experiment pipeline used to study a
+right-hand-traffic give-way scenario in CARLA Town05: the ego vehicle turns
+left across an opposing vehicle travelling straight. MultiPath predictions
+feed fixed or adaptive risk allocation and probability-weighted multimodal
+SMPC; matched supervisor-authority experiments measure how upstream policy
+differences reach executed vehicle behaviour.
 
-```text
-interaction- and calibration-aware trajectory prediction
-× adaptive/fixed-risk SMPC
-× runtime safety authority
-```
+The repository contains experiment code and compact, hashed dissertation
+evidence. Raw CARLA rollouts, datasets, model checkpoints, videos, Gurobi
+licences and internal planning material are intentionally external.
 
-## 当前文档
-
-Corrected R3 和最终 supervisor-authority SF4 矩阵已经完成，项目进入证据整合与
-论文写作阶段。接手项目时使用三个入口：
-
-1. `docs/CODEX_HANDOFF.md`：实验过程、当前进度、缺口和下一步 Codex 操作边界；
-2. `docs/paper/THESIS_EVIDENCE_GUIDE.md`：研究问题、H1--H4 结果、SF4 机制结论、
-   claim boundaries 和机器证据位置；
-3. `docs/architecture/Server_CARLA_Environment_Runbook.md`：云服务器 CARLA、
-   CasADi 和 Gurobi 环境说明。
-
-完整目录说明见 `docs/README.md`。提交论文只在相邻的
-`../Jiaqi Xie Dissertation/main.tex` 中编辑。
-
-## 代码入口
-
-- `core/scripts/carla/run_all_scenarios.py`：通用 CARLA batch runner。
-- `core/scripts/carla/run_give_way_prediction_dataset_collection.sh`：当前 V1 prediction dataset collector；V2 collector 将按 canonical 方案新增。
-- `core/scripts/carla/run_give_way_init01_fixed_frontier_vs_adaptive.sh`：单点 fixed frontier / adaptive development runner。
-- `core/scripts/carla/run_give_way_init01_v13_risk_owned_yield.sh`：A3 risk-owned-yield development runner。
-- `core/scripts/models/audit_prediction_dataset.py`：V1/V2 grouped-split、horizon、raster 和计数审计。
-- `core/scripts/models/build_prediction_dataset_v2_protocol.py`：生成冻结的 V2 feature schema 与 200-rollout manifest。
-- `core/scripts/models/multipath_gmm_utils.py`：evaluator/deployment 共用的唯一 MultiPath GMM 解码 contract。
-- `core/scripts/models/evaluate_multipath_model_on_dataset.py`：accuracy、NLL、2D coverage、covariance audit、rollout aggregation 和 calibration。
-- `core/scripts/models/prediction_input_contract.py`：V2 offline/online 共享 raster contract。
-- `core/scripts/models/interaction_sequence.py`：V2 共享 6×12 ego-target sequence builder。
-- `core/scripts/carla/run_give_way_prediction_dataset_v2.sh`：S0/S1 × fixed/adaptive V2 数据采集入口。
-- `core/scripts/models/`：MultiPath 训练、部署、dataset utilities 和 evaluator。
-- `core/scripts/postcarla_trajectory_gate.py`：正式闭环安全 gate。
-
-当前保留的控制配置：
+## System at a glance
 
 ```text
-give_way_reduced_clear_path_release_v12_current_best.json
-give_way_reduced_clear_path_release_v13_risk_owned_yield.json
-give_way_smpc_tuning.json
+CARLA rollouts
+    -> raster + interaction-history dataset
+    -> MultiPath GMM predictor (B1 and controlled MLP/Transformer adapters)
+    -> fixed/adaptive chance-risk allocation
+    -> probability-weighted multimodal SMPC
+    -> rule-based behavioural authority on/off
+    -> CARLA command, safety gates and paper evidence
 ```
 
-已完成的一次性 sweep/ablation runner、运行指南和重复 snapshots 已删除；历史版本
-可从 Git 恢复。Corrected R3、H1--H4 和 SF4 的证据入口记录在
-`docs/paper/THESIS_EVIDENCE_GUIDE.md`，不再把旧 `paper_assets_v1` 称为唯一入口。
+The predictor emits multiple future trajectories, their probabilities and
+uncertainty. The SMPC uses those probabilities as branch-cost weights and
+optimises the ego control over the multimodal future. The supervisor-authority
+factor determines whether the rule-aware reference, bypass and post-solver
+command channels may alter the executed control.
 
-## 运行边界
+## Evidence-backed scope
 
-- CARLA/Gurobi 正式实验在云服务器执行。
-- `core/results/`、训练日志、临时模型和视频不提交 Git。
-- Gurobi license 与安装包不得提交；服务器路径由环境变量配置。
-- 密码、token 和 license 内容不得写入脚本、文档或命令日志。
-- 正式实验必须记录 Git commit、dataset/model/config hash 和 result manifest。
+- The source collection protocol contains 200 CARLA rollouts. The corrected
+  model study uses 180 rollout-disjoint runs from 45 initialisation groups and
+  produces 3,526 fit, 510 selection and 506 held-out trajectory windows.
+- The corrected offline matrix contains nine model cells and three fixed
+  training seeds per cell (27 runs). Capacity, history information and
+  architecture are varied separately.
+- Future-valid masks are enforced in training, validation, checkpointing,
+  early stopping, calibration and held-out evaluation. Invalid future points
+  are never scored as local-coordinate origins.
+- The probability-weighted assertive CARLA evidence contains 40
+  supervisor-on rollouts and 20 matched supervisor-off rollouts. All 60 pass
+  the frozen integrity audit.
+- Corrected V4 selects an MLP history adapter rather than the historically
+  deployed Transformer P*. The historical CARLA matrix therefore remains
+  valid for its deployed stack but is not relabelled as corrected-V4 transfer.
+
+See the [thesis evidence guide](docs/paper/THESIS_EVIDENCE_GUIDE.md) for result
+interpretation and claim boundaries.
+
+## Quick start
+
+Create the source/test environment, then run the pure-Python contract suite:
+
+```bash
+conda env create -f core/env_setup/environment.modern.yml
+conda activate carla_modern
+python -m unittest discover -s core/scripts/models/tests -p 'test_*.py'
+```
+
+CARLA 0.9.14 and the licensed Gurobi solver are external dependencies. Follow
+the [reproducibility guide](REPRODUCIBILITY.md) before running closed-loop
+experiments.
+
+## Canonical workflows
+
+1. **Environment setup.** Configure CARLA 0.9.14, the CARLA Python API,
+   CasADi and the Gurobi conic plugin using environment variables documented in
+   [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
+2. **Corrected offline predictor study.** Build the frozen dataset/cache and
+   execute `core/scripts/models/run_future_mask_v4e_pipeline.sh`. This runs the
+   uniform training extension, calibration, freeze-gated held-out evaluation
+   and synthesis.
+3. **Probability-weighted assertive CARLA matrix.** Start CARLA separately,
+   then execute `core/scripts/carla/run_probability_weighted_v2_recovery_formal.sh`
+   once with supervisor authority on and once with it off. The runner freezes
+   model, scenario, controller and configuration identities before outcomes.
+4. **Paper figure/table regeneration.** Use
+   `core/scripts/models/plot_future_mask_v4_offline.py`,
+   `core/scripts/models/materialize_future_mask_v4_paper_outputs.py` and
+   `core/scripts/models/analyze_weighted_smpc_joint60.py`. Generated figures
+   are produced with Python/Matplotlib from audited CSV/JSON inputs.
+
+## Repository map
+
+```text
+core/scripts/carla/       CARLA scenarios, policies, SMPC and formal runners
+core/scripts/models/      dataset, MultiPath, ablations, audits and analysis
+core/env_setup/           reproducible Python environment definitions
+docs/architecture/        system and server execution documentation
+docs/paper/generated/     compact immutable evidence and Python-made figures
+```
+
+Key entry points are `core/scripts/carla/run_all_scenarios.py`,
+`core/scripts/carla/policies/smpc_agent.py`,
+`core/scripts/carla/utils/mpc_utils.py` and
+`core/scripts/models/evaluate_thesis_core_cached_v3.py`.
+
+## Publication boundary
+
+`core/results/`, `artifacts/`, logs, checkpoints and videos are ignored. Use
+`core/scripts/models/materialize_publication_evidence.py` to copy only the
+allowlisted evidence and record SHA-256 identities. Run
+`core/scripts/models/publication_repository_policy.py` before release.
+
+No repository-wide software licence is asserted because this project combines
+original work with upstream research code and separately licensed tools. See
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [CITATION.cff](CITATION.cff).

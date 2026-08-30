@@ -12,6 +12,15 @@ RUNNER = (
 
 
 class ProbabilityWeightedFormalRunnerTest(unittest.TestCase):
+    def test_public_runner_uses_external_paths_instead_of_private_defaults(self):
+        source = RUNNER.read_text()
+        self.assertNotIn("/root/autodl-tmp", source)
+        self.assertIn('REPO_DIR="${REPO_DIR:-${IMLS_REPO:?', source)
+        self.assertIn('TRAINING_ROOT="${TRAINING_ROOT:?', source)
+        self.assertIn('CALIBRATION_ROOT="${CALIBRATION_ROOT:?', source)
+        self.assertIn('CARLA_ROOT="${CARLA_ROOT:?', source)
+        self.assertIn('GUROBI_LOADER="${GUROBI_LOADER:?', source)
+
     def test_frozen_supervisor_on_matrix_has_forty_unique_rollouts(self):
         source = RUNNER.read_text()
         self.assertIn("for predictor in B1 P_star", source)

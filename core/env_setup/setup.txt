@@ -1,9 +1,16 @@
-1) conda env create --file environment.yml 
-      Note: the pip requirements were extracted from those involved in the Carla leaderboard process.
-2) easy_install <path_to_carla>/PythonAPI/carla/dist/carla-0.9.<x>-py3.7-linux-x86_64.egg
-      e.g. easy_install ~/govvijay/carla/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg
-3) Slicot needed for Casadi matrix exponential:
-     sudo apt-get install libslicot-dev
-4) Gurobi needed for SMPC code:
-     See install directions on the Gurobi website, setup licenses, run the tests given.
-     Make a symlink for libgurobi65.so based on the actual one given.
+1) Create the maintained Python environment:
+   conda env create --file environment.modern.yml
+   conda activate carla_modern
+
+2) Use the Python API shipped with the external CARLA 0.9.14 installation:
+   export CARLA_ROOT=/path/to/CARLA_0.9.14
+   export PYTHONPATH="$CARLA_ROOT/PythonAPI/carla:$CARLA_ROOT/PythonAPI/carla/agents:${PYTHONPATH:-}"
+
+3) Install the system libraries required by the selected CasADi build, when
+   applicable (for example SLICOT on Linux).
+
+4) Install and license Gurobi separately. Verify the conic plugin used here:
+   python -c "import casadi as ca; print(ca.has_conic('gurobi'))"
+
+CARLA simulator binaries, model assets and Gurobi licence files are external
+and must not be committed to this repository. See ../../REPRODUCIBILITY.md.

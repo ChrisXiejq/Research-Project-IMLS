@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the associated dissertation."
+title: "Prediction, Risk-Aware SMPC and Supervisor Authority for CARLA Give-Way"
+type: software
+authors:
+  - family-names: Xie
+    given-names: Jiaqi
+repository-code: "https://github.com/ChrisXiejq/Research-Project-IMLS"
+date-released: 2026-08-30

@@ -1,13 +1,20 @@
-# Thesis evidence
+# Dissertation evidence
 
-Human readers should use only:
+Start with the [thesis evidence guide](THESIS_EVIDENCE_GUIDE.md). Generated
+files are immutable research evidence and must not be edited by hand.
 
-- `THESIS_EVIDENCE_GUIDE.md` — consolidated study, results and evidence map;
-- `generated/README.md` — rules for generated artifacts.
+Primary corrected sources:
 
-Everything under `generated/` is machine-produced evidence, provenance or a
-frozen experiment contract. It must not be edited manually or treated as a set
-of narrative documents.
+- [future-mask V4e offline evidence](generated/future_mask_v4e_120/) — masked
+  Capacity–Information–Architecture results, audits, tables and figures;
+- [probability-weighted joint60 evidence](generated/weighted_smpc_v2_recovery/)
+  — historical deployed-predictor transfer, supervisor-authority analysis and
+  frozen integrity provenance.
 
-The submitted paper is written only in
-`../../../Jiaqi Xie Dissertation/main.tex`.
+Older generated directories are retained only where they support provenance,
+tests or secondary diagnostics. Unmasked V3 metrics and unweighted-controller
+results are not final corrected estimates.
+
+The allowlisted import boundary is defined by
+`core/scripts/models/protocols/publication_evidence_v1.json` and enforced by
+`core/scripts/models/materialize_publication_evidence.py`.

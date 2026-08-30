@@ -1,24 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="${REPO_DIR:-/root/autodl-tmp/Research-Project-IMLS-shadow-v2}"
+REPO_DIR="${REPO_DIR:-${IMLS_REPO:?Set IMLS_REPO or REPO_DIR to the repository root}}"
 SUPERVISOR_AUTHORITY_MODE="${SUPERVISOR_AUTHORITY_MODE:-on}"
 case "${SUPERVISOR_AUTHORITY_MODE}" in
   on)
-    DEFAULT_RESULTS_ROOT="/root/autodl-tmp/results/weighted_smpc_v2_recovery/formal_supervisor_on_assertive_40_v2_reference_integrity"
+    DEFAULT_RESULTS_SUFFIX="formal_supervisor_on_assertive_40_v2_reference_integrity"
     ;;
   off)
-    DEFAULT_RESULTS_ROOT="/root/autodl-tmp/results/weighted_smpc_v2_recovery/formal_supervisor_off_assertive_20_v2_reference_integrity"
+    DEFAULT_RESULTS_SUFFIX="formal_supervisor_off_assertive_20_v2_reference_integrity"
     ;;
   *)
     echo "Unknown SUPERVISOR_AUTHORITY_MODE: ${SUPERVISOR_AUTHORITY_MODE}" >&2
     exit 4
     ;;
 esac
-RESULTS_ROOT="${RESULTS_ROOT:-${DEFAULT_RESULTS_ROOT}}"
-PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/envs/carla_modern/bin/python}"
-CARLA_ROOT="${CARLA_ROOT:-/root/autodl-tmp/carla_0.9.14}"
-GUROBI_LOADER="${GUROBI_LOADER:-/root/autodl-tmp/load_gurobi11.sh}"
+if [[ -z "${RESULTS_ROOT:-}" ]]; then
+  : "${EXPERIMENT_RESULTS_ROOT:?Set EXPERIMENT_RESULTS_ROOT or RESULTS_ROOT}"
+  RESULTS_ROOT="${EXPERIMENT_RESULTS_ROOT}/weighted_smpc_v2_recovery/${DEFAULT_RESULTS_SUFFIX}"
+fi
+PYTHON_BIN="${PYTHON_BIN:-python}"
+CARLA_ROOT="${CARLA_ROOT:?Set CARLA_ROOT to the CARLA 0.9.14 installation}"
+GUROBI_LOADER="${GUROBI_LOADER:?Set GUROBI_LOADER to the local Gurobi environment script}"
 
 SCENARIO="${REPO_DIR}/core/scripts/carla/scenarios/scenario_uk_give_way.json"
 INIT_DIR="${REPO_DIR}/core/scripts/carla/scenarios/inits/supervisor_masking_shadow_v2"
@@ -31,8 +34,8 @@ else
   TUNING="${OFF_TUNING}"
 fi
 ADAPTIVE_CONFIG="${REPO_DIR}/core/scripts/carla/scenarios/tuning_configs/adaptive_floor_weak_v1.json"
-TRAINING_ROOT="/root/autodl-tmp/results/capacity_history_thesis_core_v3/training"
-CALIBRATION_ROOT="/root/autodl-tmp/results/capacity_history_thesis_core_v3/postprocess/calibration"
+TRAINING_ROOT="${TRAINING_ROOT:?Set TRAINING_ROOT to the frozen predictor training directory}"
+CALIBRATION_ROOT="${CALIBRATION_ROOT:?Set CALIBRATION_ROOT to the frozen calibration directory}"
 B1_RUN="v3__head-large__lr1e-4__s23__data100"
 PSTAR_RUN="v3__transformer-h1p0-large__lr1e-4__s37__data100"
 
@@ -41,6 +44,8 @@ export PYTHONPATH="${REPO_DIR}/core/scripts/models:${REPO_DIR}/core/scripts/carl
 source "${GUROBI_LOADER}" >/dev/null 2>&1
 
 test -x "${PYTHON_BIN}"
+test -d "${CARLA_ROOT}"
+test -f "${GUROBI_LOADER}"
 test -f "${SCENARIO}"
 test -f "${ON_TUNING}"
 test -f "${OFF_TUNING}"
