@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -u
 
-V3_ROOT="${1:-/root/autodl-tmp/results/capacity_history_thesis_core_v3}"
+V3_ROOT="${1:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/capacity_history_thesis_core_v3}"
 RESULTS_DIR="${V3_ROOT}/closed_loop"
+PYTHON_BIN="${PYTHON_BIN:-python}"
 
 date '+%F %T %Z'
 map_status="unavailable"
-if /root/miniconda3/envs/carla_modern/bin/python -c \
+if "$PYTHON_BIN" -c \
   'import carla; c=carla.Client("127.0.0.1",2000); c.set_timeout(3); print(c.get_world().get_map().name)' \
   >/tmp/thesis_v3_carla_map.txt 2>/dev/null; then
   map_status="$(</tmp/thesis_v3_carla_map.txt)"
@@ -14,7 +15,7 @@ fi
 echo "carla_map=${map_status}"
 
 successful=$(find "${RESULTS_DIR}" -name scenario_run_summary.json -type f -print0 2>/dev/null \
-  | xargs -0 -r /root/miniconda3/envs/carla_modern/bin/python -c \
+  | xargs -0 -r "$PYTHON_BIN" -c \
   'import json,sys; print(sum(json.load(open(p)).get("ran_successfully") is True for p in sys.argv[1:]))' 2>/dev/null)
 successful="${successful:-0}"
 complete=$(find "${RESULTS_DIR}" -name ROLLOUT_COMPLETE.json -type f 2>/dev/null | wc -l | tr -d ' ')

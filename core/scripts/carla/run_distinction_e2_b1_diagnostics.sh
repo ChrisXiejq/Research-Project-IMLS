@@ -2,9 +2,9 @@
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
-DAY7_RESULTS="${DAY7_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1}"
-DAY8_RESULTS="${DAY8_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1}"
-DISTINCTION_RESULTS="${DISTINCTION_RESULTS:-/root/autodl-tmp/results/give_way_transformer/distinction_v1/e2_b1_inputs}"
+DAY7_RESULTS="${DAY7_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day7/day7_v2_merged_v1}"
+DAY8_RESULTS="${DAY8_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day8/day8_validation_v1}"
+DISTINCTION_RESULTS="${DISTINCTION_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/distinction_v1/e2_b1_inputs}"
 
 MODEL="${MODEL:-${DAY8_RESULTS}/runs/B1/seed_37/best_model}"
 CALIBRATION="${CALIBRATION:-${DAY8_RESULTS}/runs/B1/seed_37/calibration.json}"

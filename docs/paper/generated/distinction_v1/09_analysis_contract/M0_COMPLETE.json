@@ -1,8 +1,0 @@
-{
-  "schema_version": "m0_complete_v1",
-  "status": "pass",
-  "stage": "M0",
-  "frozen_before_r3_outcomes": true,
-  "analysis_contract": "M0_R3_ANALYSIS_CONTRACT.json",
-  "analysis_contract_sha256": "81f61798087ce7aac4c76fbe4e6c539a9bc40a45617f823233640589f6d796db"
-}

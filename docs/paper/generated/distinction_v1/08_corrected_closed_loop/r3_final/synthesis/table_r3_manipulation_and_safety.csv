@@ -1,8 +1,0 @@
-check,result,interpretation
-B1 prediction direction,40/40 metric-policy-style checks have B1 better in all five init groups,manipulation observed; not an independent benchmark
-Top1 ADE effect range,-1.352 to -1.125 m (B1−B0),large consistent reduction
-Top1 FDE effect range,-3.152 to -2.315 m (B1−B0),large consistent reduction
-Adaptive solver identity,4/4 adaptive cells use the adaptive solver on every audited step,risk treatment applied as specified
-Adaptive within-rollout variation,20/20 adaptive rollouts vary within rollout,adaptive treatment is not a disguised constant
-Fixed across-init stability,maximum range 4e-15,fixed comparators remain fixed
-Binary scientific failures,0 failures summed over all prespecified binary contrasts,cannot discriminate treatments in this nominal matrix

@@ -10,10 +10,13 @@ Primary corrected sources:
 - [probability-weighted joint60 evidence](generated/weighted_smpc_v2_recovery/)
   — historical deployed-predictor transfer, supervisor-authority analysis and
   frozen integrity provenance.
+- [SF4 preregistration fixture](generated/distinction_sf4_supervisor_authority_ablation/prereg/)
+  — the frozen protocol consumed by the supervisor-authority contract tests;
+  it is retained as a test dependency rather than headline result evidence.
 
-Older generated directories are retained only where they support provenance,
-tests or secondary diagnostics. Unmasked V3 metrics and unweighted-controller
-results are not final corrected estimates.
+Other historical generated directories are excluded from the publication
+release. Unmasked V3 metrics and unweighted-controller results are not final
+corrected estimates.
 
 The allowlisted import boundary is defined by
 `core/scripts/models/protocols/publication_evidence_v1.json` and enforced by

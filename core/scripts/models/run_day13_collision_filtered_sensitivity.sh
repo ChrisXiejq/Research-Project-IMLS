@@ -2,10 +2,10 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DAY7_RESULTS="${DAY7_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1}"
-DAY8_RESULTS="${DAY8_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1}"
-DAY12_RESULTS="${DAY12_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day12/day12_evidence_freeze_v1}"
-DAY13_RESULTS="${DAY13_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day13/day13_collision_filtered_v1}"
+DAY7_RESULTS="${DAY7_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day7/day7_v2_merged_v1}"
+DAY8_RESULTS="${DAY8_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day8/day8_validation_v1}"
+DAY12_RESULTS="${DAY12_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day12/day12_evidence_freeze_v1}"
+DAY13_RESULTS="${DAY13_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day13/day13_collision_filtered_v1}"
 FILTERED_DAY7="${FILTERED_DAY7:-${DAY13_RESULTS}/filtered_day7}"
 FILTERED_VALIDATION="${FILTERED_VALIDATION:-${DAY13_RESULTS}/filtered_validation}"
 
@@ -15,8 +15,6 @@ elif command -v python >/dev/null 2>&1; then
   PYTHON_BIN="$(command -v python)"
 elif command -v python3 >/dev/null 2>&1; then
   PYTHON_BIN="$(command -v python3)"
-elif [[ -x /root/miniconda3/bin/python ]]; then
-  PYTHON_BIN=/root/miniconda3/bin/python
 else
   echo "No Python interpreter found; set PYTHON_BIN" >&2
   exit 2

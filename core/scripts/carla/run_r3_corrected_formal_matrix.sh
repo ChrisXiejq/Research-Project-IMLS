@@ -10,11 +10,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CORE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REPO_DIR="$(cd "${CORE_DIR}/.." && pwd)"
 MODELS_DIR="${CORE_DIR}/scripts/models"
-PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/envs/carla_modern/bin/python}"
-DAY7_RESULTS="${DAY7_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1}"
-DAY8_RESULTS="${DAY8_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1}"
-R2_RESULTS="${R2_RESULTS:-/root/autodl-tmp/results/give_way_transformer/distinction_v1/r2_corrected_pilot_v4}"
-R3_RESULTS="${R3_RESULTS:-/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v3}"
+PYTHON_BIN="${PYTHON_BIN:-python}"
+DAY7_RESULTS="${DAY7_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day7/day7_v2_merged_v1}"
+DAY8_RESULTS="${DAY8_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day8/day8_validation_v1}"
+R2_RESULTS="${R2_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/distinction_v1/r2_corrected_pilot_v4}"
+R3_RESULTS="${R3_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/distinction_v1/r3_corrected_formal_v3}"
 # The server has a history of transient termination.  Ten is a prospective,
 # bounded infrastructure-only ceiling; scientific outcomes are never retried.
 R3_MAX_ATTEMPTS="${R3_MAX_ATTEMPTS:-10}"
@@ -152,7 +152,7 @@ if [[ -n "$(git -C "${REPO_DIR}" status --porcelain --untracked-files=no)" ]]; t
 fi
 
 export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla:${CARLA_ROOT}/PythonAPI/carla/agents:${MODELS_DIR}:${PYTHONPATH:-}"
-GUROBI_BUNDLE_ROOT="${GUROBI_BUNDLE_ROOT:-/root/autodl-tmp/Research-Project-IMLS/gurobi}"
+GUROBI_BUNDLE_ROOT="${GUROBI_BUNDLE_ROOT:-${IMLS_REPO:-/path/to/Research-Project-IMLS}/gurobi}"
 if [[ -z "${GUROBI_HOME:-}" ]]; then
   for candidate in "${REPO_DIR}/gurobi/gurobi1103/linux64" "${GUROBI_BUNDLE_ROOT}/gurobi1103/linux64"; do
     if [[ -d "${candidate}" ]]; then export GUROBI_HOME="${candidate}"; break; fi

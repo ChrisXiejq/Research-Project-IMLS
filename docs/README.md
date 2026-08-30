@@ -14,6 +14,5 @@ The public documentation is deliberately small:
    solver and simulator health checks.
 
 `paper/generated/` contains immutable machine evidence, not narrative working
-notes. `dissertation/latex/` is retained only for evidence-pipeline
-compatibility; the experiment repository does not bundle the author’s editable
-submission workspace.
+notes. The generated manuscript copy and the author’s editable submission
+workspace are intentionally not bundled with this experiment repository.

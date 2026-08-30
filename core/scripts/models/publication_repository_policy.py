@@ -37,6 +37,12 @@ FORBIDDEN_SUFFIXES = (
     ".pb",
 )
 FORBIDDEN_COMPOUND_SUFFIXES = (".tar.gz", ".tar.xz", ".tar.bz2")
+GENERATED_EVIDENCE_ROOT = "docs/paper/generated/"
+PUBLICATION_EVIDENCE_PREFIXES = (
+    "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/prereg/",
+    "docs/paper/generated/future_mask_v4e_120/",
+    "docs/paper/generated/weighted_smpc_v2_recovery/",
+)
 REQUIRED_PATHS = {
     "README.md",
     "REPRODUCIBILITY.md",
@@ -80,6 +86,12 @@ def _is_forbidden(path: str) -> bool:
         or any(normalised.startswith(prefix) for prefix in FORBIDDEN_PREFIXES)
         or pure.name in FORBIDDEN_BASENAMES
         or pure.name.startswith("HANDOFF_")
+        or (
+            normalised.startswith(GENERATED_EVIDENCE_ROOT)
+            and not normalised.startswith(PUBLICATION_EVIDENCE_PREFIXES)
+        )
+        or normalised.startswith("docs/literature/")
+        or normalised.startswith("docs/dissertation/")
         or any(lower.endswith(suffix) for suffix in FORBIDDEN_SUFFIXES)
         or any(lower.endswith(suffix) for suffix in FORBIDDEN_COMPOUND_SUFFIXES)
     )
@@ -153,7 +165,7 @@ def _compact_evidence(
 ) -> list[dict[str, object]]:
     records = []
     for relative in sorted(tracked_paths):
-        if not relative.startswith("docs/paper/generated/"):
+        if not relative.startswith(PUBLICATION_EVIDENCE_PREFIXES):
             continue
         path = root / relative
         if not path.is_file() or _is_forbidden(relative):

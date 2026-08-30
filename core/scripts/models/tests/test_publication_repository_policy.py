@@ -52,6 +52,69 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
         self.assertEqual(report["missing_required_paths"], [])
         self.assertEqual(report["forbidden_tracked_paths"], [])
 
+    def test_rejects_generated_evidence_outside_public_allowlist(self) -> None:
+        report = audit_paths(
+            tracked_paths=[
+                "README.md",
+                "REPRODUCIBILITY.md",
+                "CITATION.cff",
+                "THIRD_PARTY_NOTICES.md",
+                "core/scripts/carla/run_all_scenarios.py",
+                "core/scripts/carla/policies/smpc_agent.py",
+                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "docs/paper/generated/day6/internal_audit.json",
+            ],
+            file_sizes={},
+        )
+
+        self.assertEqual(report["status"], "fail")
+        self.assertEqual(
+            report["forbidden_tracked_paths"],
+            ["docs/paper/generated/day6/internal_audit.json"],
+        )
+
+    def test_rejects_redistributed_literature_pdf(self) -> None:
+        report = audit_paths(
+            tracked_paths=[
+                "README.md",
+                "REPRODUCIBILITY.md",
+                "CITATION.cff",
+                "THIRD_PARTY_NOTICES.md",
+                "core/scripts/carla/run_all_scenarios.py",
+                "core/scripts/carla/policies/smpc_agent.py",
+                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "docs/literature/source_paper.pdf",
+            ],
+            file_sizes={},
+        )
+
+        self.assertEqual(report["status"], "fail")
+        self.assertEqual(
+            report["forbidden_tracked_paths"],
+            ["docs/literature/source_paper.pdf"],
+        )
+
+    def test_rejects_private_assessment_pdf(self) -> None:
+        report = audit_paths(
+            tracked_paths=[
+                "README.md",
+                "REPRODUCIBILITY.md",
+                "CITATION.cff",
+                "THIRD_PARTY_NOTICES.md",
+                "core/scripts/carla/run_all_scenarios.py",
+                "core/scripts/carla/policies/smpc_agent.py",
+                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "docs/dissertation/Marking Rubric.pdf",
+            ],
+            file_sizes={},
+        )
+
+        self.assertEqual(report["status"], "fail")
+        self.assertEqual(
+            report["forbidden_tracked_paths"],
+            ["docs/dissertation/Marking Rubric.pdf"],
+        )
+
     def test_manifest_does_not_count_its_own_bytes(self) -> None:
         tracked_paths = [
             "README.md",

@@ -1,4 +1,0 @@
-split,init_ids,rollouts,raw_samples,usable_samples,full_horizon_samples,partial_horizon_samples
-train,1–40,160,9121,4036,2596,1440
-val,41–45,20,1034,506,326,180
-test,46–50,20,1075,495,315,180

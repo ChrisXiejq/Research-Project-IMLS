@@ -8,8 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CORE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REPO_DIR="$(cd "${CORE_DIR}/.." && pwd)"
 MODELS_DIR="${CORE_DIR}/scripts/models"
-PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/envs/carla_modern/bin/python}"
-RESULTS_DIR="${RESULTS_DIR:-/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200}"
+PYTHON_BIN="${PYTHON_BIN:-python}"
+RESULTS_DIR="${RESULTS_DIR:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day6/formal/day6_formal_v2_200}"
 FROZEN_CONFIG="${FROZEN_CONFIG:-${REPO_DIR}/docs/paper/generated/day5/day5_final_6b71ccc_frozen_config.json}"
 PROTOCOL_MANIFEST="${MODELS_DIR}/protocols/give_way_interaction_v2_collection_manifest.json"
 FEATURE_SCHEMA="${MODELS_DIR}/protocols/give_way_interaction_sequence_v2.schema.json"
@@ -19,7 +19,7 @@ PREDICTION_GIT_COMMIT="6b71ccc"
 MIN_FREE_KB="${MIN_FREE_KB:-5242880}"
 
 case "${RESULTS_DIR}" in
-  ""|/|/root|/root/autodl-tmp|/root/autodl-tmp/results)
+  ""|/|/root|${EXPERIMENT_STORAGE_ROOT:-/path/to/persistent-storage}|${EXPERIMENT_RESULTS_ROOT:-/path/to/results})
     echo "ERROR: RESULTS_DIR is too broad: ${RESULTS_DIR}" >&2
     exit 2
     ;;

@@ -7,7 +7,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-R3_RESULTS_ROOT="${R3_RESULTS_ROOT:-/root/autodl-tmp/results/give_way_transformer/distinction_v1/r3_corrected_formal_v3}"
+R3_RESULTS_ROOT="${R3_RESULTS_ROOT:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/distinction_v1/r3_corrected_formal_v3}"
 R3_ARCHIVE="${R3_ARCHIVE:-${R3_RESULTS_ROOT}/r3_corrected_formal_snapshot.tar.gz}"
 SF_RESULTS_ROOT="${SF_RESULTS_ROOT:-${R3_RESULTS_ROOT}/supervisor_feedback_v1/r3_offline}"
 SF_WORKSPACE_ROOT="${SF_WORKSPACE_ROOT:-${R3_RESULTS_ROOT}/.supervisor_feedback_workspace}"

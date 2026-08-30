@@ -34,7 +34,7 @@ if [[ -z "${CARLA_ROOT:-}" ]]; then
 ERROR: CARLA_ROOT is not set.
 
 Please export the CARLA 0.9.14 root before running this batch, for example:
-  export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
+  export CARLA_ROOT=${CARLA_ROOT:-/path/to/CARLA_0.9.14}
 EOF
   exit 2
 fi

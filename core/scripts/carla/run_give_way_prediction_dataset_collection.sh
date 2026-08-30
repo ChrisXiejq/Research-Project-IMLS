@@ -21,7 +21,7 @@ if [[ -z "${CARLA_ROOT:-}" ]]; then
 ERROR: CARLA_ROOT is not set.
 
 Please export the CARLA 0.9.14 root before running this batch, for example:
-  export CARLA_ROOT=/root/autodl-tmp/CARLA_0.9.14
+  export CARLA_ROOT=${CARLA_ROOT:-/path/to/CARLA_0.9.14}
 EOF
   exit 2
 fi
@@ -35,10 +35,10 @@ Expected file not found:
   ${CARLA_ROOT}/PythonAPI/carla/agents/navigation/global_route_planner.py
 
 Locate the correct root with:
-  find /root /root/autodl-tmp -maxdepth 5 -type f -name global_route_planner.py 2>/dev/null
+  find /root ${EXPERIMENT_STORAGE_ROOT:-/path/to/persistent-storage} -maxdepth 5 -type f -name global_route_planner.py 2>/dev/null
 
 Then export CARLA_ROOT to the directory that contains PythonAPI, for example:
-  export CARLA_ROOT=/root/autodl-tmp/CARLA_0.9.14
+  export CARLA_ROOT=${CARLA_ROOT:-/path/to/CARLA_0.9.14}
 EOF
   exit 2
 fi

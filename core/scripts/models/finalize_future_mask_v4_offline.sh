@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mask_root="${1:-/root/autodl-tmp/results/capacity_history_future_mask_v4}"
-old_root="${2:-/root/autodl-tmp/results/capacity_history_thesis_core_v3}"
+mask_root="${1:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/capacity_history_future_mask_v4}"
+old_root="${2:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/capacity_history_thesis_core_v3}"
 extension_protocol="${3:-$mask_root/protocol/EXTENSION_PROTOCOL.json}"
 pipeline_screen="${4:-mask_v4_offline}"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../../.." && pwd)"
-python_bin="${PYTHON_BIN:-/root/miniconda3/bin/python}"
+python_bin="${PYTHON_BIN:-python}"
 finalizer_log="$mask_root/logs/offline_finalizer.log"
 
 mkdir -p "$mask_root/logs" "$mask_root/audits" "$mask_root/figures"
@@ -38,13 +38,13 @@ echo "FINALIZER_PHASE=pipeline_stage_seal START=$(date -Iseconds)"
 
 echo "FINALIZER_PHASE=foundation_mask_scope START=$(date -Iseconds)"
 "$python_bin" "$script_dir/audit_foundation_future_mask_scope_v4.py" \
-  --validation-jsonl /root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/val.jsonl \
-  --test-jsonl /root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/test.jsonl \
+  --validation-jsonl ${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day7/day7_v2_merged_v1/val.jsonl \
+  --test-jsonl ${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day7/day7_v2_merged_v1/test.jsonl \
   --b0-validation-evaluation "$repo_root/docs/paper/generated/day10/gaps/b0_offline/b0_validation_evaluation.json" \
   --b0-test-evaluation "$repo_root/docs/paper/generated/day10/gaps/b0_offline/b0_test_all.json" \
   --b1-test-evaluation "$repo_root/docs/paper/generated/day8/final_test/B1/seed_37/test_all.json" \
   --b0-summary "$repo_root/docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json" \
-  --legacy-evaluator-source /root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/evaluate_multipath_model_on_dataset.py \
+  --legacy-evaluator-source ${LEGACY_DAY8_REPO:-/path/to/Research-Project-IMLS-day8}/core/scripts/models/evaluate_multipath_model_on_dataset.py \
   --output "$mask_root/audits/FOUNDATION_MASK_SCOPE_AUDIT.json"
 
 echo "FINALIZER_PHASE=full_horizon_recalibration START=$(date -Iseconds)"
@@ -54,8 +54,8 @@ echo "FINALIZER_PHASE=full_horizon_recalibration START=$(date -Iseconds)"
   --training-root "$mask_root/training" \
   --dataset-dir "$old_root/dataset_35_5_5" \
   --cache-dir "$mask_root/feature_cache_v4" \
-  --base-model /root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_multipath_10 \
-  --anchors /root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/l5kit_clusters_16.npy \
+  --base-model ${LEGACY_DAY8_REPO:-/path/to/Research-Project-IMLS-day8}/core/scripts/models/l5kit_multipath_10 \
+  --anchors ${LEGACY_DAY8_REPO:-/path/to/Research-Project-IMLS-day8}/core/scripts/models/l5kit_clusters_16.npy \
   --output-root "$mask_root/postprocess/full_horizon_sensitivity" \
   --selection-freeze "$mask_root/postprocess/selection_freeze.json" \
   --shard-index 0 \

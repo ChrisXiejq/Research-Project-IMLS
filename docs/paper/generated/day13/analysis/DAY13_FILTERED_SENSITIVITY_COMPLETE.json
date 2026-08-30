@@ -1,7 +1,0 @@
-{
-  "schema_version": "day13_filtered_sensitivity_complete_v1",
-  "selected_architecture_stable": true,
-  "status": "pass",
-  "summary_sha256": "df5c7d082ba826b82aec62f703d14bf06e6393bb739dfd69eafa412919a17380",
-  "test_accessed": false
-}

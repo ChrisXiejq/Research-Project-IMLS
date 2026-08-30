@@ -1,9 +1,0 @@
-{
-  "closed_loop_audit_sha256": "c26eda2cc6816283f43ec34b25f7df2b72c142b711a4583078f45730da44dfd4",
-  "deployment_preflight_sha256": "e9f02b4a5530d73b62ead8efc8c3a22fc46275a7184eb56058a6e16cd1ab3422",
-  "formal_evidence": true,
-  "observed_cells": 16,
-  "observed_rollouts": 80,
-  "schema_version": "day11_complete_v1",
-  "status": "pass"
-}

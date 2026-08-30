@@ -2,9 +2,9 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/envs/carla_modern/bin/python}"
-DAY6_RESULTS="${DAY6_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200}"
-DAY7_RESULTS="${DAY7_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1}"
+PYTHON_BIN="${PYTHON_BIN:-python}"
+DAY6_RESULTS="${DAY6_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day6/formal/day6_formal_v2_200}"
+DAY7_RESULTS="${DAY7_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day7/day7_v2_merged_v1}"
 BASE_MODEL="${BASE_MODEL:-${SCRIPT_DIR}/l5kit_multipath_10_carla_finetuned_head_best}"
 ANCHORS="${ANCHORS:-${SCRIPT_DIR}/l5kit_clusters_16.npy}"
 LOG_DIR="$(dirname "${DAY7_RESULTS}")"

@@ -1,9 +1,0 @@
-{
-  "full_horizon_sample_count": 3237,
-  "manifest_sha256": "52a1ed4c817ab5dbb160515fb581ff3a859866230267c21cd79b92bee2a3233d",
-  "normalization_sha256": "2dd054698e0ba0ca204ecc480078603fe8b958cfd3feca201f9c7ed9ffe28b9b",
-  "rollout_count": 200,
-  "split_audit_sha256": "78713b96ff3415bab5f960889c9878ed49b53f8f08446ef60fea6e74d8c555bf",
-  "status": "pass",
-  "usable_sample_count": 5037
-}

@@ -1,9 +1,0 @@
-{
-  "contract": "R1_CORRECTED_CONTROL_CONTRACT.json",
-  "contract_sha256": "ea5b068e240f9999c6a382d0037b2020afbb7b111a2ca995c9ce655a3c1ca422",
-  "failures": [],
-  "implementation_version": "corrected_joint_modes_shared_amin_v1",
-  "schema_version": "r1_complete_v1",
-  "stage": "R1",
-  "status": "pass"
-}

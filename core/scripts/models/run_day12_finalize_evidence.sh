@@ -2,13 +2,13 @@
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
-DAY6_RESULTS="${DAY6_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day6/formal/day6_formal_v2_200}"
-DAY7_RESULTS="${DAY7_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1}"
-DAY8_RESULTS="${DAY8_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day8/day8_validation_v1}"
-DAY9_RESULTS="${DAY9_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day9/day9_smoke_v1}"
-DAY10_RESULTS="${DAY10_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day10/day10_formal_v1}"
-DAY11_RESULTS="${DAY11_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day11/day11_timing_shift_v1}"
-DAY12_RESULTS="${DAY12_RESULTS:-/root/autodl-tmp/results/give_way_transformer/day12/day12_evidence_freeze_v1}"
+DAY6_RESULTS="${DAY6_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day6/formal/day6_formal_v2_200}"
+DAY7_RESULTS="${DAY7_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day7/day7_v2_merged_v1}"
+DAY8_RESULTS="${DAY8_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day8/day8_validation_v1}"
+DAY9_RESULTS="${DAY9_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day9/day9_smoke_v1}"
+DAY10_RESULTS="${DAY10_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day10/day10_formal_v1}"
+DAY11_RESULTS="${DAY11_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day11/day11_timing_shift_v1}"
+DAY12_RESULTS="${DAY12_RESULTS:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/give_way_transformer/day12/day12_evidence_freeze_v1}"
 
 if [[ -n "${PYTHON_BIN:-}" ]]; then
   if [[ ! -x "$PYTHON_BIN" ]]; then
@@ -19,8 +19,6 @@ elif command -v python >/dev/null 2>&1; then
   PYTHON_BIN="$(command -v python)"
 elif command -v python3 >/dev/null 2>&1; then
   PYTHON_BIN="$(command -v python3)"
-elif [[ -x /root/miniconda3/bin/python ]]; then
-  PYTHON_BIN=/root/miniconda3/bin/python
 else
   echo "No Python interpreter found; set PYTHON_BIN explicitly" >&2
   exit 2

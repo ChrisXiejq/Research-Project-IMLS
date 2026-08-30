@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -u
 
-V3_ROOT="${1:-/root/autodl-tmp/results/capacity_history_thesis_core_v3}"
+V3_ROOT="${1:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/capacity_history_thesis_core_v3}"
 POST_ROOT="${V3_ROOT}/postprocess"
 
 date '+%F %T %Z'

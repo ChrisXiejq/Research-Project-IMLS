@@ -5,16 +5,16 @@
 ## 1. 每次启动服务器后的固定配置
 
 ```bash
-cd /root/autodl-tmp/Research-Project-IMLS
+cd ${IMLS_REPO:-/path/to/Research-Project-IMLS}
 
 conda activate carla_modern
 
-export CARLA_ROOT=/root/autodl-tmp/carla_0.9.14
+export CARLA_ROOT=${CARLA_ROOT:-/path/to/CARLA_0.9.14}
 export PYTHONPATH=$CARLA_ROOT/PythonAPI/carla:$CARLA_ROOT/PythonAPI/carla/agents:$PYTHONPATH
 
-export GUROBI_HOME=/root/autodl-tmp/Research-Project-IMLS/gurobi/gurobi1103/linux64
+export GUROBI_HOME=${IMLS_REPO:-/path/to/Research-Project-IMLS}/gurobi/gurobi1103/linux64
 export GUROBI_VERSION=110
-export GRB_LICENSE_FILE=/root/autodl-tmp/Research-Project-IMLS/gurobi/gurobi.lic
+export GRB_LICENSE_FILE=${IMLS_REPO:-/path/to/Research-Project-IMLS}/gurobi/gurobi.lic
 export LD_LIBRARY_PATH=$GUROBI_HOME/lib:${LD_LIBRARY_PATH:-}
 ```
 
@@ -77,12 +77,12 @@ cd "$CARLA_ROOT"
 再在实验终端运行当前 A3 单点 development matrix：
 
 ```bash
-cd /root/autodl-tmp/Research-Project-IMLS/core/scripts/carla
+cd ${IMLS_REPO:-/path/to/Research-Project-IMLS}/core/scripts/carla
 
 TARGET_START_OFFSETS="0.0" \
 ENABLE_CAMERA_VIZ=0 \
 PYTHON_BIN=python \
-RESULTS_DIR=/root/autodl-tmp/Research-Project-IMLS/core/results/$(date +%Y%m%d_%H%M%S)_a3_development_smoke \
+RESULTS_DIR=${IMLS_REPO:-/path/to/Research-Project-IMLS}/core/results/$(date +%Y%m%d_%H%M%S)_a3_development_smoke \
 ./run_give_way_init01_v13_risk_owned_yield.sh
 ```
 

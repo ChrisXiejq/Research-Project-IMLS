@@ -1,8 +1,0 @@
-{
-  "archive": "/root/autodl-tmp/results/give_way_transformer/distinction_v1/r2_corrected_pilot_v4/r2_corrected_pilot_snapshot.tar.gz",
-  "archive_sha256": "e730200d8afb7e333ca708aaeebb5b832794ca420cbcb6d301d46271c167682c",
-  "excludes_model_weights_rasters_and_video": true,
-  "files": 153,
-  "schema_version": "closed_loop_snapshot_v1",
-  "status": "pass"
-}

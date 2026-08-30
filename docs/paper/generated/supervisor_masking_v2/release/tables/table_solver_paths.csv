@@ -1,5 +1,0 @@
-table,hypothesis,block,metric,value,unit,aggregation_unit,population_id,source_locator,note
-solver_path,H1,solver_path,bypass_applied_steps,1393,steps,debug step,F3_sf4_supervisor_authority,docs/paper/generated/supervisor_masking_v2/evidence/supervisor_masking_evidence.json#/H1_authority/mechanism/solver_paths/bypass_applied_steps,
-solver_path,H1,solver_path,controller_accepted_attempts,17822,steps,debug step,F3_sf4_supervisor_authority,docs/paper/generated/supervisor_masking_v2/evidence/supervisor_masking_evidence.json#/H1_authority/mechanism/solver_paths/controller_accepted_attempts,
-solver_path,H1,solver_path,factual_solver_attempts,18552,steps,debug step,F3_sf4_supervisor_authority,docs/paper/generated/supervisor_masking_v2/evidence/supervisor_masking_evidence.json#/H1_authority/mechanism/solver_paths/factual_solver_attempts,
-solver_path,H1,solver_path,fallback_or_nonaccepted_attempts,730,steps,debug step,F3_sf4_supervisor_authority,docs/paper/generated/supervisor_masking_v2/evidence/supervisor_masking_evidence.json#/H1_authority/mechanism/solver_paths/fallback_or_nonaccepted_attempts,

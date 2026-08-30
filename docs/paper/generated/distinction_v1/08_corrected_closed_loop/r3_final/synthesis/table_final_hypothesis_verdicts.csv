@@ -1,5 +1,0 @@
-hypothesis,verdict,paper_claim
-H1,supported,Task-adapted B1 materially improves in-distribution prediction over B0; R3 in-loop checks are consistent across all policy/style cells.
-H2,not_supported,The tested sequence/Transformer variants do not improve on the simpler B1 adaptation under the matched protocol.
-H3,not_supported_as_universal_claim,Large prediction gains do not universally translate into joint closed-loop efficiency and separation gains; only 2/8 cells support both directions.
-H4,not_supported_as_universal_dominance,Adaptive risk is conditionally useful but does not universally dominate fixed risk; dominance occurs in 3/12 prespecified comparisons.

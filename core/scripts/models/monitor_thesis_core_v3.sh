@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
-V3_ROOT="${1:-/root/autodl-tmp/results/capacity_history_thesis_core_v3}"
-PYTHON_BIN="${PYTHON_BIN:-/root/miniconda3/bin/python}"
+V3_ROOT="${1:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/capacity_history_thesis_core_v3}"
+PYTHON_BIN="${PYTHON_BIN:-python}"
 MANIFEST="${V3_ROOT}/protocol/thesis_core_run_manifest.json"
 LOG_DIR="${V3_ROOT}/logs"
 

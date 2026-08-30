@@ -68,16 +68,6 @@ runs/
 *.tar.gz
 *.tar.xz
 *.tar.bz2
-# Day 10 raw compact evidence is 125 MB and exceeds GitHub's single-file
-# limit.  Audited manifests, per-rollout tables and derived statistics remain
-# versioned under docs/paper/generated/day10/.
-docs/paper/generated/day10/day10_formal_snapshot.tar.gz
-docs/paper/generated/day10/day10_df_full.tar.gz
-# Per-seed V3 held-out/calibration JSONs are retained locally and on the
-# persistent server, but their compact audited summaries are versioned.
-docs/paper/generated/capacity_history_v3/results/postprocess/heldout/
-docs/paper/generated/capacity_history_v3/results/postprocess/calibration/
-docs/paper/generated/capacity_history_v3/results/postprocess/latency/
 *.ckpt
 *.h5
 *.pb
@@ -89,6 +79,9 @@ docs/paper/generated/capacity_history_v3/results/postprocess/latency/
 core/scripts/models/*_carla_finetuned*/
 core/scripts/models/*_carla_finetuned*_history.json
 core/scripts/models/*_carla_finetuned*_training_log.csv
+core/scripts/models/l5kit_multipath_10/
+**/variables/variables.data-*
+**/variables/variables.index
 
 # Frozen predictor assets are external inputs; their expected identities are
 # recorded in experiment manifests rather than bundled in Git.
@@ -108,6 +101,14 @@ tmp/
 # Local experiment evidence. Publish only the explicit compact allowlist under
 # docs/paper/generated/ via materialize_publication_evidence.py.
 artifacts/
+docs/paper/generated/*
+!docs/paper/generated/distinction_sf4_supervisor_authority_ablation/
+!docs/paper/generated/distinction_sf4_supervisor_authority_ablation/prereg/
+!docs/paper/generated/distinction_sf4_supervisor_authority_ablation/prereg/**
+!docs/paper/generated/future_mask_v4e_120/
+!docs/paper/generated/future_mask_v4e_120/**
+!docs/paper/generated/weighted_smpc_v2_recovery/
+!docs/paper/generated/weighted_smpc_v2_recovery/**
 
 # Internal agent, planning and handoff material is not part of the publication
 # repository.
@@ -123,3 +124,7 @@ PROJECT_STATUS.md
 # Historical presentation and assessment material is maintained outside the
 # source release.
 docs/presentation/
+
+# Third-party papers and private reading notes are not publication source.
+docs/literature/
+docs/dissertation/

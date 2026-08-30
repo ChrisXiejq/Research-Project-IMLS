@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -u
 
-mask_root="${1:-/root/autodl-tmp/results/capacity_history_future_mask_v4}"
+mask_root="${1:-${EXPERIMENT_RESULTS_ROOT:-/path/to/results}/capacity_history_future_mask_v4}"
 pipeline_log="$mask_root/logs/offline_pipeline.log"
 
 echo "time=$(date -Iseconds)"
