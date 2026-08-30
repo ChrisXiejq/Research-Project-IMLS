@@ -1,5 +1,0 @@
-{"timestamp_utc": "2026-07-31T15:16:54.015613+00:00", "phase": "wrapper_start", "exit_code": null, "successful_rollouts": 0, "prediction_manifests": 0}
-{"timestamp_utc": "2026-07-31T21:38:47.671808+00:00", "phase": "wrapper_exit", "exit_code": 1, "successful_rollouts": 188, "prediction_manifests": 188}
-{"timestamp_utc": "2026-07-31T22:42:58.818031+00:00", "phase": "wrapper_start", "exit_code": null, "successful_rollouts": 188, "prediction_manifests": 188}
-{"timestamp_utc": "2026-07-31T23:04:57.658853+00:00", "phase": "collection_runner_returned", "exit_code": 0, "successful_rollouts": 200, "prediction_manifests": 200}
-{"timestamp_utc": "2026-07-31T23:05:31.384874+00:00", "phase": "audit_passed", "exit_code": 0, "successful_rollouts": 200, "prediction_manifests": 200}

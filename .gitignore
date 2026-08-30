@@ -64,6 +64,10 @@ logs/
 wandb/
 lightning_logs/
 runs/
+*.jsonl
+*.tar.gz
+*.tar.xz
+*.tar.bz2
 # Day 10 raw compact evidence is 125 MB and exceeds GitHub's single-file
 # limit.  Audited manifests, per-rollout tables and derived statistics remain
 # versioned under docs/paper/generated/day10/.
@@ -86,9 +90,8 @@ core/scripts/models/*_carla_finetuned*/
 core/scripts/models/*_carla_finetuned*_history.json
 core/scripts/models/*_carla_finetuned*_training_log.csv
 
-# Required frozen fine-tuned predictor for CARLA give-way experiments.
-!core/scripts/models/l5kit_multipath_10_carla_finetuned_head_best/
-!core/scripts/models/l5kit_multipath_10_carla_finetuned_head_best/**
+# Frozen predictor assets are external inputs; their expected identities are
+# recorded in experiment manifests rather than bundled in Git.
 
 # --- TensorFlow ---
 *.tfevents*
@@ -101,3 +104,22 @@ core/scripts/models/*_carla_finetuned*_training_log.csv
 # Local diagnostic extracts from smoke tests; canonical summaries live under
 # docs/paper/generated and the server-side raw archives remain external.
 tmp/
+
+# Local experiment evidence. Publish only the explicit compact allowlist under
+# docs/paper/generated/ via materialize_publication_evidence.py.
+artifacts/
+
+# Internal agent, planning and handoff material is not part of the publication
+# repository.
+openspec/
+.agents/
+.codex/
+.repo-maintenance/
+docs/CODEX_HANDOFF.md
+docs/internal/
+HANDOFF_*.md
+PROJECT_STATUS.md
+
+# Historical presentation and assessment material is maintained outside the
+# source release.
+docs/presentation/
