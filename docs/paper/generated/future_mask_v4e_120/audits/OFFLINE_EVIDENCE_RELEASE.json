@@ -1,0 +1,22 @@
+{
+  "carla_deployment_decision_sha256": "7d53b90744bb1ae5bab0c0ec4e4c31ffa6d53c7b9d7bd0500f453262c9ff2e2b",
+  "carla_was_launched": false,
+  "claim_consistency_audit_sha256": "d928aed20daf75fef35f00d673460d65aa703f57eb7c734208eedfae0e23feff",
+  "corrected_runs": 27,
+  "future_validity_contract": "future_valid_mask_fail_closed_v4",
+  "gate_artifacts": {
+    "cache_and_mask_audit_sha256": "056d6e2be7b053832252ec57d1128e78415e71909a5fc358ec11431bac071cff",
+    "corrected_synthesis_sha256": "c92bbe06874ed121eb1824b0cea772f768a9db422f9c55d5e896f5a415f5a4c0",
+    "extension_protocol_sha256": "535c6b913e0328d38d9a647769c6ce8fc0bad9a70cb121117a7c2b8597095a63",
+    "formal_report_contract_audit_sha256": "06ea2f419aedb70b3903f662f45b188429bbd73b0d36c60b380c24f4b74f3f6a",
+    "full_horizon_sensitivity_sha256": "c1127bc1187a88bb47156dce91570fcf7a5f253d392b462ca6143d90c946179e",
+    "historical_impact_audit_sha256": "f39c68d9a809ddb992594bee50102d67dcba4a7ff20eb68f9a053f0f22e357d7",
+    "pipeline_receipt_sha256": "949bc48f6170507d30213bbfec6a7555f641e40251ee5943071fa5431b882549",
+    "pipeline_stage_receipt_sha256": "382c412375db89cc869c25bc6ef74d8d4808e702f5bc4047157ba37cb1443214",
+    "selection_freeze_sha256": "c2e895d36515ead3a9b702baed40a93c4d53c6846cec4fb27082393521cd1ba2",
+    "training_curve_audit_sha256": "6fd49871801dd04102c0595e078d27e7a0b33b6087722914732babce5fcb36f2"
+  },
+  "release_sha256": "68c5cdc1452c5e8c272c820130ddcfa20acaa0880b24fe7749b158aa06d7e7e4",
+  "schema_version": "capacity_history_future_mask_v4_offline_evidence_release",
+  "status": "pass"
+}

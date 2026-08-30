@@ -1,0 +1,92 @@
+{
+  "artifacts": {
+    "b0_b1_summary": {
+      "bytes": 10267,
+      "path": "/root/autodl-tmp/Research-Project-IMLS-mask-v4-20fa5a3/docs/paper/generated/day10/gaps/b0_offline/b0_frozen_offline_summary.json",
+      "sha256": "670f16ec68d0be209b6d8b6c1663b4ae8601ebbb22c8b17f03c9d28650b917ee"
+    },
+    "b0_test_evaluation": {
+      "bytes": 39291,
+      "path": "/root/autodl-tmp/Research-Project-IMLS-mask-v4-20fa5a3/docs/paper/generated/day10/gaps/b0_offline/b0_test_all.json",
+      "sha256": "3e4117a59272dc8ee1d990377711f0668e873e9bd5a1c40051c82ab5f706e9cc"
+    },
+    "b0_validation_evaluation": {
+      "bytes": 39288,
+      "path": "/root/autodl-tmp/Research-Project-IMLS-mask-v4-20fa5a3/docs/paper/generated/day10/gaps/b0_offline/b0_validation_evaluation.json",
+      "sha256": "15951434429d83094ad101a64063ca456d8e6b6059bf9f5e3a92e93090a33015"
+    },
+    "b1_test_evaluation": {
+      "bytes": 39583,
+      "path": "/root/autodl-tmp/Research-Project-IMLS-mask-v4-20fa5a3/docs/paper/generated/day8/final_test/B1/seed_37/test_all.json",
+      "sha256": "66c2a9ea823930a9c53fde4cce1d28756136c368b8a9489a4f38a63c1a9b327e"
+    }
+  },
+  "audit_sha256": "420cd6506b9cc137f78753d2d96673ca20850ad164c65ab0581467fe5cb89f3e",
+  "conclusion": "The frozen B0--B1 foundation comparison evaluated only the complete 2.0 s subset. Its reported NLL, ADE and FDE did not consume padded partial futures and therefore do not require numerical replacement for the V4 mask repair. This does not license reuse of the CIA model selection or held-out results, which consumed partial windows.",
+  "evaluated_membership": {
+    "B0_test_samples": 315,
+    "B0_validation_samples": 326,
+    "B1_test_samples": 315,
+    "fixed_horizon_FDE_is_defined_for_every_evaluated_sample": true,
+    "partial_windows_entered_foundation_metrics": 0
+  },
+  "future_validity_contract": "full_horizon_only_legacy_foundation_verified_v4",
+  "schema_version": "capacity_history_foundation_future_mask_scope_audit_v4",
+  "source_gate": {
+    "has_full_horizon_filter_verified": true,
+    "legacy_evaluator": {
+      "bytes": 41078,
+      "path": "/root/autodl-tmp/Research-Project-IMLS-day8/core/scripts/models/evaluate_multipath_model_on_dataset.py",
+      "sha256": "fb97507dda3ab74cd9fa9799db932f5cf0a3fd7c1df0b04e99724f5e806f2cff"
+    }
+  },
+  "status": "pass",
+  "test_source": {
+    "full_horizon_samples": 315,
+    "horizon_steps": 10,
+    "jsonl": {
+      "bytes": 5673913,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/test.jsonl",
+      "sha256": "29291fe2a172047267c3a0c4c3d5693519f550881010a965fb60166a5013d770"
+    },
+    "mask_sha256": "f9d25a1359403f27e8d0ef093c48a058e7c63960a8d20045f9b0162cfaa137dd",
+    "partial_horizon_samples": 180,
+    "samples": 495,
+    "valid_length_histogram": {
+      "1": 20,
+      "10": 315,
+      "2": 20,
+      "3": 20,
+      "4": 20,
+      "5": 20,
+      "6": 20,
+      "7": 20,
+      "8": 20,
+      "9": 20
+    }
+  },
+  "validation_source": {
+    "full_horizon_samples": 326,
+    "horizon_steps": 10,
+    "jsonl": {
+      "bytes": 5808967,
+      "path": "/root/autodl-tmp/results/give_way_transformer/day7/day7_v2_merged_v1/val.jsonl",
+      "sha256": "5ad6210b44b83f5c2ea3a8e64eaae32413bc73bdd337189999d2778b20c993ed"
+    },
+    "mask_sha256": "89bc88ccf6ac97b1e3ba7dc94030c838d5d1babb6812f89c462d3f1e59ae057c",
+    "partial_horizon_samples": 180,
+    "samples": 506,
+    "valid_length_histogram": {
+      "1": 20,
+      "10": 326,
+      "2": 20,
+      "3": 20,
+      "4": 20,
+      "5": 20,
+      "6": 20,
+      "7": 20,
+      "8": 20,
+      "9": 20
+    }
+  }
+}

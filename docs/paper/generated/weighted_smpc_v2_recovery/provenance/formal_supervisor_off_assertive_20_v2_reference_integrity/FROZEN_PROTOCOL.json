@@ -1,0 +1,89 @@
+{
+  "core": {
+    "camera_enabled": false,
+    "campaign_id": "probability_weighted_joint_mode_smpc_h2_h3_assertive_unique_60_v2",
+    "carla_version": "0.9.14",
+    "cells": [
+      {
+        "cell_id": "B1__fixed_medium__assertive__supervisor_off",
+        "predictor": "B1",
+        "risk": "fixed_medium",
+        "target_style": "assertive_constant_speed"
+      },
+      {
+        "cell_id": "B1__adaptive__assertive__supervisor_off",
+        "predictor": "B1",
+        "risk": "adaptive",
+        "target_style": "assertive_constant_speed"
+      },
+      {
+        "cell_id": "P_star__fixed_medium__assertive__supervisor_off",
+        "predictor": "P_star",
+        "risk": "fixed_medium",
+        "target_style": "assertive_constant_speed"
+      },
+      {
+        "cell_id": "P_star__adaptive__assertive__supervisor_off",
+        "predictor": "P_star",
+        "risk": "adaptive",
+        "target_style": "assertive_constant_speed"
+      }
+    ],
+    "excluded_smoke_init_ids": [
+      131
+    ],
+    "expected_unique_rollouts": 20,
+    "file_sha256": {
+      "B1_calibration": "ea3ef215fa1f53306430fa991fda7b186fc3e3699a084953fad2a01f3c2a9d3c",
+      "B1_model": "832c7ced66a78527b475113cc16e62d6ec345628100f4cd21430afd5ec9ab6b8",
+      "P_star_calibration": "682e02174ba266388d4dcc4929794c6833483cae143e09703d2ed037e19d4c05",
+      "P_star_model": "83cc465c384041684007d79500af9e1c652c198383c9e6ee51f0befb45606509",
+      "adaptive_config": "6acdfcf55d56eac21ad10fa56ccd6fa8779c70b1c94782e3fc80c96f7f0039de",
+      "anchors": "52ab777b9bf695ed56f069b96cbce337014a47f457ed19c638abfb1cde6aa982",
+      "batch_runner": "cd7ae69fd8eb19aa79ffea5a44e8a934c833884168c7f13be5edc6c3243648c0",
+      "formal_runner": "ad2fba8de34e76d411e86696b0b1627f7d03f9a8cd3e221e8e5fdc6a3896e66d",
+      "init_126": "91530a6964952280116ad83c1a01843a60c3956dc5cf96a30b9f402616ccdc32",
+      "init_127": "91d7a44cc1fa49590c3934a866e9af81bd52e885034d5f4e54acaa758499ea17",
+      "init_128": "5f406979dd05913890e351151e58113e613c285206347cb5435c3ee19119763d",
+      "init_129": "1e2563eb46091cb280b0687b86b8c002df231a833ffd29b076b43d60e852078c",
+      "init_130": "a773a19be8cab946ad7c476913b04800e15a717f2ec950226e304e3b476b6c7e",
+      "init_131": "5d1f599e839929858aad838e2eb64868af4a448b096e18a67f405683b8fb6e84",
+      "init_132": "8c0e2ecaf881e412601b3853441a565db56f74c60b90ab48752484959604ddf8",
+      "init_133": "b1ad0c52842157b3848b3a69a34ed3dbde09203024b1f5c83a4d1345bcb4c64e",
+      "init_134": "74bc839eb42b4fcf343b04a40783a6ac5458cce2930095b04c303a8c4b14af8d",
+      "init_135": "77335ef52f91234bda3dd2265d335b63feb9e7c7bc16aa8a6309438c7530c200",
+      "mode_probability_contract": "a7b3e29bf234a704b8cb96621047c77fbe9a332c268c8db9541561c7a685cf04",
+      "off_tuning": "10b87dcc2ac03be0b1dd9b613f6afd4ff319cb2e75fff70b770ff0412fc5d828",
+      "on_tuning": "f297a84672f62ef1a178457285a03b8e9881608b7abc9ee86c0045a46b27f4b8",
+      "scenario": "95b4c15074143cba15e3fcf958f3e334483127f823a811a28c932077a96b2df2",
+      "scenario_runner": "fe36f9353c71e532745a9de8c58603bc6052465ee95e2d48dc84c3a832df97fe",
+      "smpc_agent": "5166e0b5b9587731f182a19222404a352c748a8ef42a8c01c2ada40df3044dd6",
+      "smpc_model": "1826e25fa6cf90ad1f1298009b82bac89f992d4127ed9eb5bc52e742f2b21ec8"
+    },
+    "formal_init_ids": [
+      126,
+      127,
+      128,
+      129,
+      130
+    ],
+    "invalid_reference_solution_policy": "reject_initial_retain_last_valid_closed_loop",
+    "matched_authority_only_tuning": true,
+    "objective_id": "multipath_joint_probability_expected_cost_v2",
+    "objective_unweighted_option_available": false,
+    "protocol_id": "probability_weighted_joint_mode_smpc_supervisor_off_assertive_h2_h3_v2_reference_integrity",
+    "reference_generator_max_cpu_time_s": 2.0,
+    "risk_policies": [
+      "fixed_medium",
+      "adaptive"
+    ],
+    "selected_tuning": "off_tuning",
+    "supervisor_authority": "off",
+    "target_controller_uses_ego_state": false,
+    "target_style": "assertive_constant_speed",
+    "town": "Town05"
+  },
+  "core_sha256": "c62ee5170d0764e0ec815d98ced17a09b69f3b65ecbba81e7d097170b975b69c",
+  "created_at_utc": "2026-08-26T17:55:29.855935+00:00",
+  "schema_version": "probability_weighted_smpc_recovery_protocol_v2"
+}

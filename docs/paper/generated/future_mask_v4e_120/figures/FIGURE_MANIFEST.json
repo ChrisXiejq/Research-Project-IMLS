@@ -1,0 +1,20 @@
+{
+  "files": {
+    "figure_corrected_capacity_information_architecture.pdf": "810b556c1522dd03a3606955cd73278186266135d3fafd6ec199d0f6a3c047f3",
+    "figure_corrected_capacity_information_architecture.png": "b973ffbdd8db699d7a99a96c3f18c91b5aecfdd5e9afbe03f6e584f14911945e",
+    "figure_mask_correction_impact.pdf": "ed1c5a303d308a62120eb8724b3bf5a25b860538ca01f242f8e94d7c82c8c46e",
+    "figure_mask_correction_impact.png": "83291985b14d6a20f0feaddd8a527a942db87ab1583d62500d1674f904e4d5d9",
+    "figure_selection_stability_v4_validation_frozen.pdf": "b56e2042d1ea1e4ca5d1e6110d8a09c8a05ded73d8f7d4834066afd1cfdaf8a2",
+    "figure_selection_stability_v4_validation_frozen.png": "e96a759b261e69644cc552a892ef988bb2cc46216fe22bb6c19de4b6be1780a1"
+  },
+  "generation_method": "Python/Matplotlib",
+  "manifest_sha256": "0d1dd336f749acde024bb9db2612d8bceff821be0d0b5e51bf85f65fe656e40a",
+  "schema_version": "capacity_history_future_mask_v4_figure_manifest",
+  "source_artifacts": {
+    "full_horizon_sensitivity_sha256": "c1127bc1187a88bb47156dce91570fcf7a5f253d392b462ca6143d90c946179e",
+    "impact_audit_sha256": "f39c68d9a809ddb992594bee50102d67dcba4a7ff20eb68f9a053f0f22e357d7",
+    "offline_synthesis_sha256": "c92bbe06874ed121eb1824b0cea772f768a9db422f9c55d5e896f5a415f5a4c0",
+    "selection_freeze_sha256": "c2e895d36515ead3a9b702baed40a93c4d53c6846cec4fb27082393521cd1ba2"
+  },
+  "status": "pass"
+}

@@ -1,0 +1,274 @@
+{
+  "audit_sha256": "d928aed20daf75fef35f00d673460d65aa703f57eb7c734208eedfae0e23feff",
+  "claims": [
+    {
+      "claim_id": "capacity_medium_observed_optimum",
+      "conclusion_status": "not_identifiable",
+      "corrected": {
+        "best": "large",
+        "best_by_training_seed": {
+          "11": "large",
+          "23": "small",
+          "37": "large"
+        },
+        "means": {
+          "large": -1.9251868009567261,
+          "medium": -1.8512917836507163,
+          "small": -1.812811001141866
+        }
+      },
+      "evidence_role": "retrospective_descriptive_observed_ranking",
+      "old": {
+        "best": "medium",
+        "means": {
+          "large": 3.916339747111003,
+          "medium": 3.915355491638184,
+          "small": 3.9167527516682945
+        }
+      }
+    },
+    {
+      "claim_id": "recent_history_captures_most_gain",
+      "conclusion_status": "same",
+      "evidence_role": "retrospective_descriptive_observed_gain",
+      "old_and_corrected": {
+        "mlp": {
+          "corrected": {
+            "later_gain_0p4_minus_1p0": 0.17321888605753588,
+            "nll_h0p0": -1.3785492420196535,
+            "nll_h0p4": -1.998978837331136,
+            "nll_h1p0": -2.172197723388672,
+            "recent_gain_0p0_minus_0p4": 0.6204295953114825,
+            "recent_gain_fraction": 0.7817435676828376,
+            "recent_history_captures_most_predicate": true,
+            "total_gain_0p0_minus_1p0": 0.7936484813690183
+          },
+          "old": {
+            "later_gain_0p4_minus_1p0": 0.0002767086029051846,
+            "nll_h0p0": 3.927073987325033,
+            "nll_h0p4": 3.923324282964071,
+            "nll_h1p0": 3.9230475743611657,
+            "recent_gain_0p0_minus_0p4": 0.003749704360962003,
+            "recent_gain_fraction": 0.9312766461392925,
+            "recent_history_captures_most_predicate": true,
+            "total_gain_0p0_minus_1p0": 0.0040264129638671875
+          }
+        },
+        "transformer": {
+          "corrected": {
+            "later_gain_0p4_minus_1p0": -0.1205611546834311,
+            "nll_h0p0": -1.3465480645497638,
+            "nll_h0p4": -2.045747955640157,
+            "nll_h1p0": -1.9251868009567261,
+            "recent_gain_0p0_minus_0p4": 0.6991998910903934,
+            "recent_gain_fraction": 1.208353065735024,
+            "recent_history_captures_most_predicate": true,
+            "total_gain_0p0_minus_1p0": 0.5786387364069623
+          },
+          "old": {
+            "later_gain_0p4_minus_1p0": -0.0005184968312583749,
+            "nll_h0p0": 3.9200677553812664,
+            "nll_h0p4": 3.9158212502797447,
+            "nll_h1p0": 3.916339747111003,
+            "recent_gain_0p0_minus_0p4": 0.0042465051015216915,
+            "recent_gain_fraction": 1.1390814595005585,
+            "recent_history_captures_most_predicate": true,
+            "total_gain_0p0_minus_1p0": 0.0037280082702633166
+          }
+        }
+      }
+    },
+    {
+      "claim_id": "transformer_direct_offset_across_horizons",
+      "conclusion_status": "not_identifiable",
+      "corrected_mlp_minus_transformer": {
+        "h0p0": -0.03200117746988962,
+        "h0p4": 0.04676911830902131,
+        "h1p0": -0.24701092243194567
+      },
+      "evidence_role": "retrospective_descriptive_observed_offset",
+      "old_mlp_minus_transformer": {
+        "h0p0": 0.007006231943766483,
+        "h0p4": 0.007503032684326172,
+        "h1p0": 0.006707827250162612
+      }
+    },
+    {
+      "claim_id": "no_attention_specific_history_gain",
+      "conclusion_status": "weakened",
+      "corrected_effect": {
+        "cluster_interval_95": [
+          -0.35486621061960855,
+          -0.0751532793045044
+        ],
+        "contrast_id": "H3_attention_history_gain_difference_in_differences",
+        "effect": -0.21500974496205644,
+        "holm_adjusted_p": 0.25,
+        "independent_init_groups": 5,
+        "metric": "rollout_macro_nll",
+        "paired_init_effects": {
+          "41": -0.3615209261576335,
+          "42": -0.2742385466893514,
+          "43": -0.3885253270467122,
+          "44": -0.04658039410909017,
+          "45": -0.004183530807495117
+        },
+        "raw_sign_flip_p": 0.0625,
+        "terms": [
+          {
+            "coefficient": 1.0,
+            "model_cell_id": "transformer-h0p0-large"
+          },
+          {
+            "coefficient": -1.0,
+            "model_cell_id": "transformer-h1p0-large"
+          },
+          {
+            "coefficient": -1.0,
+            "model_cell_id": "mlp-h0p0-large"
+          },
+          {
+            "coefficient": 1.0,
+            "model_cell_id": "mlp-h1p0-large"
+          }
+        ]
+      },
+      "crossed_seed_init_sensitivity": {
+        "bootstrap_replicates": 20000,
+        "contrast_id": "H3_attention_history_gain_difference_in_differences",
+        "crossed_bootstrap_interval_95": [
+          -0.39456302066644033,
+          -0.053940900166829425
+        ],
+        "effect": -0.21500974496205646,
+        "effects_averaged_by_init": {
+          "41": -0.3615209261576335,
+          "42": -0.2742385466893514,
+          "43": -0.3885253270467122,
+          "44": -0.04658039410909017,
+          "45": -0.004183530807495117
+        },
+        "effects_averaged_by_seed": {
+          "11": -0.1794677972793579,
+          "23": -0.17699036598205567,
+          "37": -0.28857107162475587
+        },
+        "heldout_init_groups": [
+          41,
+          42,
+          43,
+          44,
+          45
+        ],
+        "inferential_role": "descriptive_crossed_sensitivity",
+        "metric": "rollout_macro_nll",
+        "resampling_contract": "Training seeds and held-out init groups were independently resampled; the 15 crossed observations were not treated as independent units.",
+        "seed_by_init_effects": {
+          "11": {
+            "41": -0.30986154079437256,
+            "42": -0.1458272933959961,
+            "43": -0.37537682056427,
+            "44": 0.1642705202102661,
+            "45": -0.230543851852417
+          },
+          "23": {
+            "41": -0.3308490514755249,
+            "42": -0.19520509243011475,
+            "43": -0.29151272773742676,
+            "44": -0.00821375846862793,
+            "45": -0.059171199798583984
+          },
+          "37": {
+            "41": -0.44385218620300293,
+            "42": -0.48168325424194336,
+            "43": -0.49868643283843994,
+            "44": -0.2957979440689087,
+            "45": 0.2771644592285156
+          }
+        },
+        "terms": [
+          {
+            "coefficient": 1.0,
+            "model_cell_id": "transformer-h0p0-large"
+          },
+          {
+            "coefficient": -1.0,
+            "model_cell_id": "transformer-h1p0-large"
+          },
+          {
+            "coefficient": -1.0,
+            "model_cell_id": "mlp-h0p0-large"
+          },
+          {
+            "coefficient": 1.0,
+            "model_cell_id": "mlp-h1p0-large"
+          }
+        ],
+        "training_seeds": [
+          11,
+          23,
+          37
+        ]
+      },
+      "evidence_role": "retrospective_descriptive_interaction_unresolved_at_n5",
+      "interpretive_rule": "A confidence interval spanning zero is not evidence of no effect; it is classified as not identifiable at the available resolution.",
+      "old_effect": {
+        "cluster_interval_95": [
+          -0.0014114379882812498,
+          0.0006196498870849609
+        ],
+        "contrast_id": "H3_attention_history_gain_difference_in_differences",
+        "effect": -0.0002984046936035156,
+        "holm_adjusted_p": 0.696969696969697,
+        "independent_init_groups": 5,
+        "metric": "rollout_macro_nll",
+        "paired_init_effects": {
+          "41": 0.000291903813680013,
+          "42": -0.0002453327178955078,
+          "43": 0.0011963049570719402,
+          "44": -0.0023070971171061196,
+          "45": -0.00042780240376790363
+        },
+        "raw_sign_flip_p": 0.696969696969697,
+        "terms": [
+          {
+            "coefficient": 1.0,
+            "model_cell_id": "transformer-h0p0-large"
+          },
+          {
+            "coefficient": -1.0,
+            "model_cell_id": "transformer-h1p0-large"
+          },
+          {
+            "coefficient": -1.0,
+            "model_cell_id": "mlp-h0p0-large"
+          },
+          {
+            "coefficient": 1.0,
+            "model_cell_id": "mlp-h1p0-large"
+          }
+        ]
+      }
+    }
+  ],
+  "corrected_metric_contract": "future_valid_mask_fail_closed_v4",
+  "corrected_offline_to_closed_loop_status": "not_identifiable_without_carla_rerun",
+  "deployment_decision_sha256": "7d53b90744bb1ae5bab0c0ec4e4c31ffa6d53c7b9d7bd0500f453262c9ff2e2b",
+  "gate_artifacts": {
+    "cache_and_mask_audit_sha256": "056d6e2be7b053832252ec57d1128e78415e71909a5fc358ec11431bac071cff",
+    "corrected_synthesis_sha256": "c92bbe06874ed121eb1824b0cea772f768a9db422f9c55d5e896f5a415f5a4c0",
+    "extension_protocol_sha256": "535c6b913e0328d38d9a647769c6ce8fc0bad9a70cb121117a7c2b8597095a63",
+    "formal_report_contract_audit_sha256": "06ea2f419aedb70b3903f662f45b188429bbd73b0d36c60b380c24f4b74f3f6a",
+    "full_horizon_sensitivity_sha256": "c1127bc1187a88bb47156dce91570fcf7a5f253d392b462ca6143d90c946179e",
+    "historical_impact_audit_sha256": "f39c68d9a809ddb992594bee50102d67dcba4a7ff20eb68f9a053f0f22e357d7",
+    "pipeline_receipt_sha256": "949bc48f6170507d30213bbfec6a7555f641e40251ee5943071fa5431b882549",
+    "pipeline_stage_receipt_sha256": "382c412375db89cc869c25bc6ef74d8d4808e702f5bc4047157ba37cb1443214",
+    "selection_freeze_sha256": "c2e895d36515ead3a9b702baed40a93c4d53c6846cec4fb27082393521cd1ba2",
+    "training_curve_audit_sha256": "6fd49871801dd04102c0595e078d27e7a0b33b6087722914732babce5fcb36f2"
+  },
+  "old_metric_contract": "diagnostic_invalid_future_mask_v3",
+  "overall_offline_conclusion_status": "not_identifiable",
+  "schema_version": "capacity_history_future_mask_v4_claim_consistency_audit",
+  "statistical_boundary": "Five held-out init groups provide retrospective descriptive evidence; exact two-sided sign-flip tests cannot attain p<0.05 at n=5.",
+  "status": "pass"
+}

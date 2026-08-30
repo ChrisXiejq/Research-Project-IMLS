@@ -1,0 +1,253 @@
+{
+  "allowlist": [
+    "OFFLINE_AUDIT_COMPLETE.json",
+    "audits/",
+    "figures/",
+    "paper_outputs/",
+    "postprocess/offline_cells.csv",
+    "postprocess/offline_synthesis.json",
+    "postprocess/selection_freeze.json",
+    "postprocess/training_audit.json",
+    "postprocess/training_curve_audit_final.json",
+    "protocol/EXTENSION_PROTOCOL.json",
+    "protocol/PIPELINE_STAGE_COMPLETE.json"
+  ],
+  "collection_id": "future_mask_v4e_120",
+  "excluded_by_default": [
+    "raw rollout trajectories",
+    "training logs",
+    "model checkpoints",
+    "videos",
+    "archives",
+    "credentials and licence files"
+  ],
+  "file_count": 37,
+  "files": [
+    {
+      "bytes": 1679,
+      "sha256": "62dc61c1a4735a3798f54e7ab0111d5376c82beec98287706059ef23de76ff8f",
+      "source_path": "OFFLINE_AUDIT_COMPLETE.json",
+      "target_path": "OFFLINE_AUDIT_COMPLETE.json"
+    },
+    {
+      "bytes": 88733,
+      "sha256": "63a738c80fcaa4b71067d5bcb9c47d38c61840a957a318adf2b1e8d2da639c41",
+      "source_path": "audits/CACHE_AND_MASK_AUDIT.json",
+      "target_path": "audits/CACHE_AND_MASK_AUDIT.json"
+    },
+    {
+      "bytes": 7034,
+      "sha256": "58b668b240a6abce166cd8d988d1853b4203e06de9019dd26cf776484c16e90c",
+      "source_path": "audits/CARLA_DEPLOYMENT_DECISION.json",
+      "target_path": "audits/CARLA_DEPLOYMENT_DECISION.json"
+    },
+    {
+      "bytes": 10094,
+      "sha256": "601ee3498d408867783a8630fc9119588bb96e7978c1d5cdf2a78f85e78ffb6c",
+      "source_path": "audits/CLAIM_CONSISTENCY_AUDIT.json",
+      "target_path": "audits/CLAIM_CONSISTENCY_AUDIT.json"
+    },
+    {
+      "bytes": 39535,
+      "sha256": "cd4adcccc6b4aaeccc26a0ee072f12fd7f8e204d8ac62a3bfe78cf850bc7fbef",
+      "source_path": "audits/FORMAL_REPORT_CONTRACT_AUDIT.json",
+      "target_path": "audits/FORMAL_REPORT_CONTRACT_AUDIT.json"
+    },
+    {
+      "bytes": 3616,
+      "sha256": "35bd74d0ddd7a42b024bc9106f59d5e06893aea957cb7a593a5b9afccbf49f18",
+      "source_path": "audits/FOUNDATION_MASK_SCOPE_AUDIT.json",
+      "target_path": "audits/FOUNDATION_MASK_SCOPE_AUDIT.json"
+    },
+    {
+      "bytes": 308252,
+      "sha256": "14c2de8cad6fddd22f82ce9f3716b0f1b0dd23dc38ba0a03d90fe15e871c9cf9",
+      "source_path": "audits/FULL_HORIZON_SENSITIVITY.json",
+      "target_path": "audits/FULL_HORIZON_SENSITIVITY.json"
+    },
+    {
+      "bytes": 67806,
+      "sha256": "02b9e5f4faa0d022f9d9c8ac704aa87779266ec8108c5a101c3fe4bf9644436d",
+      "source_path": "audits/HISTORICAL_CHECKPOINT_IMPACT_AUDIT.json",
+      "target_path": "audits/HISTORICAL_CHECKPOINT_IMPACT_AUDIT.json"
+    },
+    {
+      "bytes": 1584,
+      "sha256": "1c22bbbb66817591ba1f3e6ddd16e17ca30bf2dcf697d0e8ee428dcb1b4d4079",
+      "source_path": "audits/OFFLINE_EVIDENCE_RELEASE.json",
+      "target_path": "audits/OFFLINE_EVIDENCE_RELEASE.json"
+    },
+    {
+      "bytes": 25884,
+      "sha256": "99a98afab86bc14c36c0c4097a1bd719438b00b01bb050bd055e00a8f07a5b11",
+      "source_path": "audits/TRAINING_CURVE_AUDIT.json",
+      "target_path": "audits/TRAINING_CURVE_AUDIT.json"
+    },
+    {
+      "bytes": 24987,
+      "sha256": "b8b04a3e92673fecaf331651058c7e24b3cea4ac0a9cfcfad3ac5457d7389630",
+      "source_path": "audits/formal_report_contract_rows.csv",
+      "target_path": "audits/formal_report_contract_rows.csv"
+    },
+    {
+      "bytes": 43059,
+      "sha256": "d6b870d2b48c01d4dd0038483bac51d7cfc2c3bde52fefb3c0ecd9b6c35c4bda",
+      "source_path": "audits/full_horizon_rows.csv",
+      "target_path": "audits/full_horizon_rows.csv"
+    },
+    {
+      "bytes": 28313,
+      "sha256": "bbf5ae13ded7159000798afa599e8b485fda5295850845567874601960bae0bb",
+      "source_path": "audits/historical_checkpoint_impact_rows.csv",
+      "target_path": "audits/historical_checkpoint_impact_rows.csv"
+    },
+    {
+      "bytes": 9221,
+      "sha256": "7492f19f4952f86516293ed8d893c2799eb637f55dd379efe7f005012399f0ca",
+      "source_path": "audits/training_curve_rows.csv",
+      "target_path": "audits/training_curve_rows.csv"
+    },
+    {
+      "bytes": 1405,
+      "sha256": "1962fd361e2a13f50df24e3eaf19a3c1e6854d34617a523a75fdf9672e4fbb6f",
+      "source_path": "figures/FIGURE_MANIFEST.json",
+      "target_path": "figures/FIGURE_MANIFEST.json"
+    },
+    {
+      "bytes": 42912,
+      "sha256": "810b556c1522dd03a3606955cd73278186266135d3fafd6ec199d0f6a3c047f3",
+      "source_path": "figures/figure_corrected_capacity_information_architecture.pdf",
+      "target_path": "figures/figure_corrected_capacity_information_architecture.pdf"
+    },
+    {
+      "bytes": 669792,
+      "sha256": "b973ffbdd8db699d7a99a96c3f18c91b5aecfdd5e9afbe03f6e584f14911945e",
+      "source_path": "figures/figure_corrected_capacity_information_architecture.png",
+      "target_path": "figures/figure_corrected_capacity_information_architecture.png"
+    },
+    {
+      "bytes": 32959,
+      "sha256": "ed1c5a303d308a62120eb8724b3bf5a25b860538ca01f242f8e94d7c82c8c46e",
+      "source_path": "figures/figure_mask_correction_impact.pdf",
+      "target_path": "figures/figure_mask_correction_impact.pdf"
+    },
+    {
+      "bytes": 232608,
+      "sha256": "83291985b14d6a20f0feaddd8a527a942db87ab1583d62500d1674f904e4d5d9",
+      "source_path": "figures/figure_mask_correction_impact.png",
+      "target_path": "figures/figure_mask_correction_impact.png"
+    },
+    {
+      "bytes": 31145,
+      "sha256": "b56e2042d1ea1e4ca5d1e6110d8a09c8a05ded73d8f7d4834066afd1cfdaf8a2",
+      "source_path": "figures/figure_selection_stability_v4_validation_frozen.pdf",
+      "target_path": "figures/figure_selection_stability_v4_validation_frozen.pdf"
+    },
+    {
+      "bytes": 301699,
+      "sha256": "e96a759b261e69644cc552a892ef988bb2cc46216fe22bb6c19de4b6be1780a1",
+      "source_path": "figures/figure_selection_stability_v4_validation_frozen.png",
+      "target_path": "figures/figure_selection_stability_v4_validation_frozen.png"
+    },
+    {
+      "bytes": 2186,
+      "sha256": "e15f69d47c446cbddacee3394e44f0a726657df684983743886c9ecc996acaba",
+      "source_path": "paper_outputs/PAPER_OUTPUTS_MANIFEST.json",
+      "target_path": "paper_outputs/PAPER_OUTPUTS_MANIFEST.json"
+    },
+    {
+      "bytes": 647,
+      "sha256": "12bce28d3444fb35034ac53460f27623a5082a099fa677fedce73f0b5f41f5ea",
+      "source_path": "paper_outputs/claim_decisions.csv",
+      "target_path": "paper_outputs/claim_decisions.csv"
+    },
+    {
+      "bytes": 3592,
+      "sha256": "b72471df5bc993fb8e179e999c3ba70e552f0cf2c8c8ce5968058b87f4b7f80c",
+      "source_path": "paper_outputs/controlled_effects.csv",
+      "target_path": "paper_outputs/controlled_effects.csv"
+    },
+    {
+      "bytes": 1925,
+      "sha256": "6eedc4eb8cb96df4300c9291abe1e2849a039da3d2c77bd7d59997c34bab0af9",
+      "source_path": "paper_outputs/corrected_v4_conclusion_audit.md",
+      "target_path": "paper_outputs/corrected_v4_conclusion_audit.md"
+    },
+    {
+      "bytes": 14592,
+      "sha256": "84c371eeb1ca738e179079e16d626426ed369f5bf101886b098e4d992e240a5b",
+      "source_path": "paper_outputs/model_seed_metrics.csv",
+      "target_path": "paper_outputs/model_seed_metrics.csv"
+    },
+    {
+      "bytes": 2670,
+      "sha256": "b790cc781e00f890c25a3d347ce85c4cc08ca0cd9bff644d44b23da47e3a99a6",
+      "source_path": "paper_outputs/paper_update_map.csv",
+      "target_path": "paper_outputs/paper_update_map.csv"
+    },
+    {
+      "bytes": 273,
+      "sha256": "a18d7cf2684a8ddf0c6b1fab17919b26b517e3d17176ba98dfc5dcabbf87b4e0",
+      "source_path": "paper_outputs/table_mask_audit_v4.tex",
+      "target_path": "paper_outputs/table_mask_audit_v4.tex"
+    },
+    {
+      "bytes": 1340,
+      "sha256": "7dc4c6f53a8b335a5054b6cfe405d213e070dbc3fe89485c475f05b175ff789d",
+      "source_path": "paper_outputs/table_offline_effects_v4.tex",
+      "target_path": "paper_outputs/table_offline_effects_v4.tex"
+    },
+    {
+      "bytes": 936,
+      "sha256": "f2491deffb876d52ee5a44aa258859f65ad7c3ba473d0c32c781c61187001e47",
+      "source_path": "paper_outputs/table_offline_matrix_v4.tex",
+      "target_path": "paper_outputs/table_offline_matrix_v4.tex"
+    },
+    {
+      "bytes": 1725,
+      "sha256": "0bf90c4fec319d87d2deab557596e71ba2abb4fef83fa5058d5265194c38dab1",
+      "source_path": "postprocess/offline_cells.csv",
+      "target_path": "postprocess/offline_cells.csv"
+    },
+    {
+      "bytes": 40819,
+      "sha256": "c5c21dfbc477d82e6807f24d40b93a99b4f26a062ce263cab865e0ce5c34b2bc",
+      "source_path": "postprocess/offline_synthesis.json",
+      "target_path": "postprocess/offline_synthesis.json"
+    },
+    {
+      "bytes": 33854,
+      "sha256": "65ce41a1b81e45db89d397ce404b9b5849017442290067434d915b9da0015215",
+      "source_path": "postprocess/selection_freeze.json",
+      "target_path": "postprocess/selection_freeze.json"
+    },
+    {
+      "bytes": 33080,
+      "sha256": "6f3d5d153605470ff6aaf600f5c06a4825e5eb2d85b43580abbab565e52c4457",
+      "source_path": "postprocess/training_audit.json",
+      "target_path": "postprocess/training_audit.json"
+    },
+    {
+      "bytes": 25883,
+      "sha256": "bbdc9b4084b9702bde1cce2f6d83dbf778f7dfa8b3d1029e21d97a4e123c69b9",
+      "source_path": "postprocess/training_curve_audit_final.json",
+      "target_path": "postprocess/training_curve_audit_final.json"
+    },
+    {
+      "bytes": 4358,
+      "sha256": "bd58772351bdfb4bb935b4e0425df6ff2e06b545bcf6655ecb0520c0c4eba8da",
+      "source_path": "protocol/EXTENSION_PROTOCOL.json",
+      "target_path": "protocol/EXTENSION_PROTOCOL.json"
+    },
+    {
+      "bytes": 7496,
+      "sha256": "dc2bb5022ca155fbd7bae11fe9a3d4666611bef13f892f51db958de8ca2d8366",
+      "source_path": "protocol/PIPELINE_STAGE_COMPLETE.json",
+      "target_path": "protocol/PIPELINE_STAGE_COMPLETE.json"
+    }
+  ],
+  "schema_version": "publication_evidence_manifest_v1",
+  "source_root_policy": "caller_supplied_external_path_not_recorded",
+  "status": "pass",
+  "total_bytes": 2147693
+}

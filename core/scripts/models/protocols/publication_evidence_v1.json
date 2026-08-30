@@ -1,0 +1,46 @@
+{
+  "schema_version": "publication_evidence_protocol_v1",
+  "status": "frozen",
+  "collections": {
+    "future_mask_v4e_120": {
+      "source_role": "corrected masked offline predictor evidence",
+      "target": "docs/paper/generated/future_mask_v4e_120",
+      "allowlist": [
+        "OFFLINE_AUDIT_COMPLETE.json",
+        "audits/",
+        "figures/",
+        "paper_outputs/",
+        "postprocess/offline_cells.csv",
+        "postprocess/offline_synthesis.json",
+        "postprocess/selection_freeze.json",
+        "postprocess/training_audit.json",
+        "postprocess/training_curve_audit_final.json",
+        "protocol/EXTENSION_PROTOCOL.json",
+        "protocol/PIPELINE_STAGE_COMPLETE.json"
+      ]
+    },
+    "weighted_smpc_joint60_provenance": {
+      "source_role": "probability-weighted assertive closed-loop integrity evidence",
+      "target": "docs/paper/generated/weighted_smpc_v2_recovery/provenance",
+      "allowlist": [
+        "JOINT60_INTEGRITY_AUDIT.json",
+        "JOINT60_COMMAND_PATH_BY_ROLLOUT.csv",
+        "JOINT60_COMMAND_PATH_SUMMARY.json",
+        "formal_supervisor_on_assertive_40_v2_reference_integrity/FROZEN_PROTOCOL.json",
+        "formal_supervisor_on_assertive_40_v2_reference_integrity/FORMAL_COMPLETE.json",
+        "formal_supervisor_on_assertive_40_v2_reference_integrity/ON40_INTEGRITY_AUDIT.json",
+        "formal_supervisor_off_assertive_20_v2_reference_integrity/FROZEN_PROTOCOL.json",
+        "formal_supervisor_off_assertive_20_v2_reference_integrity/FORMAL_COMPLETE.json",
+        "formal_supervisor_off_assertive_20_v2_reference_integrity/OFF20_INTEGRITY_AUDIT.json"
+      ]
+    }
+  },
+  "excluded": [
+    "raw rollout trajectories",
+    "training logs",
+    "model checkpoints",
+    "videos",
+    "archives",
+    "credentials and licence files"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "authority_rows": 7067,
+  "debug_files": 40,
+  "failure_count": 0,
+  "failures": [],
+  "generated_at_utc": "2026-08-26T17:47:44.989036+00:00",
+  "objective_weighting_contract_sha256": [
+    "5190b9cb3af946ebeb9dfc48ff18cc4bcb362156bfb809efde0f3b707a303fdb"
+  ],
+  "rollouts": 40,
+  "schema_version": "weighted_smpc_on40_posthoc_integrity_audit_v1",
+  "shadow_request_rows": 5204,
+  "solver_rows": 5890,
+  "status": "pass",
+  "unique_cell_init": 40
+}

@@ -1,0 +1,25 @@
+{
+  "failures": [],
+  "generated_at_utc": "2026-08-26T18:35:39.403873+00:00",
+  "off_rollouts": 20,
+  "on_extra_init_ids": [
+    131,
+    132,
+    133,
+    134,
+    135
+  ],
+  "on_rollouts": 40,
+  "paired_factorial_rollouts": 40,
+  "paired_init_ids": [
+    126,
+    127,
+    128,
+    129,
+    130
+  ],
+  "paired_missing": [],
+  "schema_version": "weighted_smpc_joint60_integrity_audit_v1",
+  "status": "pass",
+  "unique_rollouts": 60
+}

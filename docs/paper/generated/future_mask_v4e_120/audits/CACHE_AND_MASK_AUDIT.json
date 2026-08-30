@@ -1,0 +1,2689 @@
+{
+  "analysis_source_sha256": "f872533217671cc72847497d294811b3eeb7764a72ee6cceff389b9e39e5b567",
+  "audit_sha256": "056d6e2be7b053832252ec57d1128e78415e71909a5fc358ec11431bac071cff",
+  "changed_source_files": {
+    "train_prediction_model_v3.py": {
+      "corrected": "2c85b354218ff1f894bbcb4587010876c1a534f23a67851ec59e4057761c985b",
+      "old": "3b8e8c613bb268ac9e6e62e59278d1bd063e6e093c64ca859d42c50ba814c917"
+    }
+  },
+  "corrected_manifest_sha256": "212ac7d05687df79bddcc000afae3fcd48eaf03a1e1c63ccfe0f10dfcc1025c3",
+  "dataset_mask_strata": {
+    "future_valid_prefix_and_time_grid_verified": true,
+    "splits": {
+      "fit": {
+        "full_horizon_membership_sha256": "1691b6dabaa29f33369e90e956e65563852440124ab73873a6e89cf8a5c0dc67",
+        "full_horizon_terminal_time_s": 2.0,
+        "future_validity": {
+          "full_horizon_samples": 2266,
+          "horizon_steps": 10,
+          "invalid_future_steps": 6300,
+          "mask_sha256": "979f608737dd73be5dc2de1b8c24005865a4777b0f172d89c13259cf806bef28",
+          "partial_horizon_samples": 1260,
+          "samples": 3526,
+          "valid_future_steps": 28960,
+          "valid_length_histogram": {
+            "1": 140,
+            "10": 2266,
+            "2": 140,
+            "3": 140,
+            "4": 140,
+            "5": 140,
+            "6": 140,
+            "7": 140,
+            "8": 140,
+            "9": 140
+          }
+        },
+        "maximum_full_horizon_terminal_time_error_s": 0.0,
+        "maximum_time_step_error_s": 7.275846591880963e-13,
+        "sample_membership_sha256": "2bee6dd6a57d0204cf7d5dcb254bdefd6db8a576da6b40c6f937eb902f2931e7",
+        "strata": [
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 10,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_10_smpc_var_risk"
+            ],
+            "stratum": "ego_init_10::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 10,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_10_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_10::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 10,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_10_smpc_var_risk"
+            ],
+            "stratum": "ego_init_10::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 10,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_10_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_10::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 11,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_11_smpc_var_risk"
+            ],
+            "stratum": "ego_init_11::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 11,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_11_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_11::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 11,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_11_smpc_var_risk"
+            ],
+            "stratum": "ego_init_11::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 11,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_11_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_11::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 12,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_12_smpc_var_risk"
+            ],
+            "stratum": "ego_init_12::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 12,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_12_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_12::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 12,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_12_smpc_var_risk"
+            ],
+            "stratum": "ego_init_12::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 12,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_12_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_12::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 13,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_13_smpc_var_risk"
+            ],
+            "stratum": "ego_init_13::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 13,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_13_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_13::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 13,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_13_smpc_var_risk"
+            ],
+            "stratum": "ego_init_13::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 13,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_13_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_13::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 14,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_14_smpc_var_risk"
+            ],
+            "stratum": "ego_init_14::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 14,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_14_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_14::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 14,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_14_smpc_var_risk"
+            ],
+            "stratum": "ego_init_14::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 14,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_14_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_14::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 15,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_15_smpc_var_risk"
+            ],
+            "stratum": "ego_init_15::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 15,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_15_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_15::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 15,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_15_smpc_var_risk"
+            ],
+            "stratum": "ego_init_15::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 15,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_15_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_15::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 16,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_16_smpc_var_risk"
+            ],
+            "stratum": "ego_init_16::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 16,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_16_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_16::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 16,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_16_smpc_var_risk"
+            ],
+            "stratum": "ego_init_16::S1_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 16,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_16_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_16::S1_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 17,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_17_smpc_var_risk"
+            ],
+            "stratum": "ego_init_17::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 17,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_17_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_17::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 17,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_17_smpc_var_risk"
+            ],
+            "stratum": "ego_init_17::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 17,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_17_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_17::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 18,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_18_smpc_var_risk"
+            ],
+            "stratum": "ego_init_18::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 18,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_18_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_18::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 18,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_18_smpc_var_risk"
+            ],
+            "stratum": "ego_init_18::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 18,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_18_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_18::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 19,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_19_smpc_var_risk"
+            ],
+            "stratum": "ego_init_19::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 19,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_19_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_19::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 19,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_19_smpc_var_risk"
+            ],
+            "stratum": "ego_init_19::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 19,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_19_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_19::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 1,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_01_smpc_var_risk"
+            ],
+            "stratum": "ego_init_1::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 1,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_01_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_1::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 1,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_01_smpc_var_risk"
+            ],
+            "stratum": "ego_init_1::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 1,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_01_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_1::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 20,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_20_smpc_var_risk"
+            ],
+            "stratum": "ego_init_20::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 20,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_20_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_20::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 20,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_20_smpc_var_risk"
+            ],
+            "stratum": "ego_init_20::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 20,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_20_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_20::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 21,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_21_smpc_var_risk"
+            ],
+            "stratum": "ego_init_21::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 21,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_21_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_21::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 21,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_21_smpc_var_risk"
+            ],
+            "stratum": "ego_init_21::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 21,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_21_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_21::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 22,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_22_smpc_var_risk"
+            ],
+            "stratum": "ego_init_22::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 22,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_22_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_22::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 22,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_22_smpc_var_risk"
+            ],
+            "stratum": "ego_init_22::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 22,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_22_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_22::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 23,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_23_smpc_var_risk"
+            ],
+            "stratum": "ego_init_23::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 23,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_23_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_23::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 23,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_23_smpc_var_risk"
+            ],
+            "stratum": "ego_init_23::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 23,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_23_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_23::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 24,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_24_smpc_var_risk"
+            ],
+            "stratum": "ego_init_24::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 24,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_24_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_24::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 24,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_24_smpc_var_risk"
+            ],
+            "stratum": "ego_init_24::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 24,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_24_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_24::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 25,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_25_smpc_var_risk"
+            ],
+            "stratum": "ego_init_25::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 25,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_25_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_25::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 25,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_25_smpc_var_risk"
+            ],
+            "stratum": "ego_init_25::S1_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 25,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_25_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_25::S1_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 26,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_26_smpc_var_risk"
+            ],
+            "stratum": "ego_init_26::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 26,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_26_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_26::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 26,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_26_smpc_var_risk"
+            ],
+            "stratum": "ego_init_26::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 26,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_26_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_26::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 27,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_27_smpc_var_risk"
+            ],
+            "stratum": "ego_init_27::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 27,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_27_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_27::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 27,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_27_smpc_var_risk"
+            ],
+            "stratum": "ego_init_27::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 27,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_27_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_27::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 28,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_28_smpc_var_risk"
+            ],
+            "stratum": "ego_init_28::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 28,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_28_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_28::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 28,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_28_smpc_var_risk"
+            ],
+            "stratum": "ego_init_28::S1_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 28,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_28_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_28::S1_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 29,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_29_smpc_var_risk"
+            ],
+            "stratum": "ego_init_29::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 29,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_29_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_29::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 29,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_29_smpc_var_risk"
+            ],
+            "stratum": "ego_init_29::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 29,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_29_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_29::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 2,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_02_smpc_var_risk"
+            ],
+            "stratum": "ego_init_2::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 2,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_02_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_2::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 2,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_02_smpc_var_risk"
+            ],
+            "stratum": "ego_init_2::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 2,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_02_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_2::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 30,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_30_smpc_var_risk"
+            ],
+            "stratum": "ego_init_30::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 30,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_30_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_30::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 30,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_30_smpc_var_risk"
+            ],
+            "stratum": "ego_init_30::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 30,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_30_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_30::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 31,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_31_smpc_var_risk"
+            ],
+            "stratum": "ego_init_31::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 31,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_31_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_31::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 31,
+            "full_horizon_samples": 16,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 25,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_31_smpc_var_risk"
+            ],
+            "stratum": "ego_init_31::S1_ADAPTIVE",
+            "valid_future_steps": 205
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 31,
+            "full_horizon_samples": 16,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 25,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_31_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_31::S1_FIXED",
+            "valid_future_steps": 205
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 32,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_32_smpc_var_risk"
+            ],
+            "stratum": "ego_init_32::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 32,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_32_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_32::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 32,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_32_smpc_var_risk"
+            ],
+            "stratum": "ego_init_32::S1_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 32,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_32_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_32::S1_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 33,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_33_smpc_var_risk"
+            ],
+            "stratum": "ego_init_33::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 33,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_33_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_33::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 33,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_33_smpc_var_risk"
+            ],
+            "stratum": "ego_init_33::S1_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 33,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_33_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_33::S1_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 34,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_34_smpc_var_risk"
+            ],
+            "stratum": "ego_init_34::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 34,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_34_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_34::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 34,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_34_smpc_var_risk"
+            ],
+            "stratum": "ego_init_34::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 34,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_34_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_34::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 35,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_35_smpc_var_risk"
+            ],
+            "stratum": "ego_init_35::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 35,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_35_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_35::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 35,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_35_smpc_var_risk"
+            ],
+            "stratum": "ego_init_35::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 35,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_35_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_35::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 3,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_03_smpc_var_risk"
+            ],
+            "stratum": "ego_init_3::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 3,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_03_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_3::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 3,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_03_smpc_var_risk"
+            ],
+            "stratum": "ego_init_3::S1_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 3,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_03_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_3::S1_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 4,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_04_smpc_var_risk"
+            ],
+            "stratum": "ego_init_4::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 4,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_04_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_4::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 4,
+            "full_horizon_samples": 16,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 25,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_04_smpc_var_risk"
+            ],
+            "stratum": "ego_init_4::S1_ADAPTIVE",
+            "valid_future_steps": 205
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 4,
+            "full_horizon_samples": 16,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 25,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_04_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_4::S1_FIXED",
+            "valid_future_steps": 205
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 5,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_05_smpc_var_risk"
+            ],
+            "stratum": "ego_init_5::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 5,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_05_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_5::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 5,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_05_smpc_var_risk"
+            ],
+            "stratum": "ego_init_5::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 5,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_05_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_5::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 6,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_06_smpc_var_risk"
+            ],
+            "stratum": "ego_init_6::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 6,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_06_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_6::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 6,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_06_smpc_var_risk"
+            ],
+            "stratum": "ego_init_6::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 6,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_06_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_6::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 7,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_07_smpc_var_risk"
+            ],
+            "stratum": "ego_init_7::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 7,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_07_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_7::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 7,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_07_smpc_var_risk"
+            ],
+            "stratum": "ego_init_7::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 7,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_07_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_7::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 8,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_08_smpc_var_risk"
+            ],
+            "stratum": "ego_init_8::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 8,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_08_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_8::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 8,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_08_smpc_var_risk"
+            ],
+            "stratum": "ego_init_8::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 8,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_08_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_8::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 9,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_09_smpc_var_risk"
+            ],
+            "stratum": "ego_init_9::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 9,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_09_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_9::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 9,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_09_smpc_var_risk"
+            ],
+            "stratum": "ego_init_9::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 9,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_09_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_9::S1_FIXED",
+            "valid_future_steps": 225
+          }
+        ],
+        "strata_count": 140
+      },
+      "heldout": {
+        "full_horizon_membership_sha256": "cf2a7d6f453a6ce0d1e5749a9e9a4b52e36551b461fa02ace6f3ba3acb5775bb",
+        "full_horizon_terminal_time_s": 2.0,
+        "future_validity": {
+          "full_horizon_samples": 326,
+          "horizon_steps": 10,
+          "invalid_future_steps": 900,
+          "mask_sha256": "89bc88ccf6ac97b1e3ba7dc94030c838d5d1babb6812f89c462d3f1e59ae057c",
+          "partial_horizon_samples": 180,
+          "samples": 506,
+          "valid_future_steps": 4160,
+          "valid_length_histogram": {
+            "1": 20,
+            "10": 326,
+            "2": 20,
+            "3": 20,
+            "4": 20,
+            "5": 20,
+            "6": 20,
+            "7": 20,
+            "8": 20,
+            "9": 20
+          }
+        },
+        "maximum_full_horizon_terminal_time_error_s": 0.0,
+        "maximum_time_step_error_s": 2.728373083016322e-13,
+        "sample_membership_sha256": "572406b9dd5dda8f4bac3c1b978ed0a93d2fa94f8e71d92fa3af3485c0e0a065",
+        "strata": [
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 41,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_41_smpc_var_risk"
+            ],
+            "stratum": "ego_init_41::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 41,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_41_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_41::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 41,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_41_smpc_var_risk"
+            ],
+            "stratum": "ego_init_41::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 41,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_41_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_41::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 42,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_42_smpc_var_risk"
+            ],
+            "stratum": "ego_init_42::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 42,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_42_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_42::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 42,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_42_smpc_var_risk"
+            ],
+            "stratum": "ego_init_42::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 42,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_42_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_42::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 43,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_43_smpc_var_risk"
+            ],
+            "stratum": "ego_init_43::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 43,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_43_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_43::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 43,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_43_smpc_var_risk"
+            ],
+            "stratum": "ego_init_43::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 43,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_43_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_43::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 44,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_44_smpc_var_risk"
+            ],
+            "stratum": "ego_init_44::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 44,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_44_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_44::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 44,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_44_smpc_var_risk"
+            ],
+            "stratum": "ego_init_44::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 44,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_44_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_44::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 45,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_45_smpc_var_risk"
+            ],
+            "stratum": "ego_init_45::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 45,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_45_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_45::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 45,
+            "full_horizon_samples": 16,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 25,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_45_smpc_var_risk"
+            ],
+            "stratum": "ego_init_45::S1_ADAPTIVE",
+            "valid_future_steps": 205
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 45,
+            "full_horizon_samples": 16,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 25,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_45_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_45::S1_FIXED",
+            "valid_future_steps": 205
+          }
+        ],
+        "strata_count": 20
+      },
+      "selection": {
+        "full_horizon_membership_sha256": "d2e167bee6f01057f72588a9bb48bb7f1f011c97b909c0253a8cf6c6d713dcc0",
+        "full_horizon_terminal_time_s": 2.0,
+        "future_validity": {
+          "full_horizon_samples": 330,
+          "horizon_steps": 10,
+          "invalid_future_steps": 900,
+          "mask_sha256": "013e66ea7f4478080829a25d0df10939b0025992d40ddaeb5e528c3c998bdecb",
+          "partial_horizon_samples": 180,
+          "samples": 510,
+          "valid_future_steps": 4200,
+          "valid_length_histogram": {
+            "1": 20,
+            "10": 330,
+            "2": 20,
+            "3": 20,
+            "4": 20,
+            "5": 20,
+            "6": 20,
+            "7": 20,
+            "8": 20,
+            "9": 20
+          }
+        },
+        "maximum_full_horizon_terminal_time_error_s": 0.0,
+        "maximum_time_step_error_s": 7.275846591880963e-13,
+        "sample_membership_sha256": "dd7cacf2aa891c4e018977747ea8b59bd51e51875300e7644c04ba3f4951c5ad",
+        "strata": [
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 36,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_36_smpc_var_risk"
+            ],
+            "stratum": "ego_init_36::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 36,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_36_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_36::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 36,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_36_smpc_var_risk"
+            ],
+            "stratum": "ego_init_36::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 36,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_36_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_36::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 37,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_37_smpc_var_risk"
+            ],
+            "stratum": "ego_init_37::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 37,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_37_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_37::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 37,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_37_smpc_var_risk"
+            ],
+            "stratum": "ego_init_37::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 37,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_37_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_37::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 38,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_38_smpc_var_risk"
+            ],
+            "stratum": "ego_init_38::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 38,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_38_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_38::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 38,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_38_smpc_var_risk"
+            ],
+            "stratum": "ego_init_38::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 38,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_38_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_38::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 39,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_39_smpc_var_risk"
+            ],
+            "stratum": "ego_init_39::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 39,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_39_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_39::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 39,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_39_smpc_var_risk"
+            ],
+            "stratum": "ego_init_39::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 39,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_39_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_39::S1_FIXED",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S0_ADAPTIVE",
+            "ego_init_id": 40,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_40_smpc_var_risk"
+            ],
+            "stratum": "ego_init_40::S0_ADAPTIVE",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S0_FIXED",
+            "ego_init_id": 40,
+            "full_horizon_samples": 15,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 24,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_40_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_40::S0_FIXED",
+            "valid_future_steps": 195
+          },
+          {
+            "cell_id": "S1_ADAPTIVE",
+            "ego_init_id": 40,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_40_smpc_var_risk"
+            ],
+            "stratum": "ego_init_40::S1_ADAPTIVE",
+            "valid_future_steps": 225
+          },
+          {
+            "cell_id": "S1_FIXED",
+            "ego_init_id": 40,
+            "full_horizon_samples": 18,
+            "invalid_future_steps": 45,
+            "partial_horizon_samples": 9,
+            "samples": 27,
+            "source_subruns": [
+              "scenario_uk_give_way_ego_init_40_smpc_fixed_risk"
+            ],
+            "stratum": "ego_init_40::S1_FIXED",
+            "valid_future_steps": 225
+          }
+        ],
+        "strata_count": 20
+      }
+    },
+    "status": "pass"
+  },
+  "evaluation_source_sha256": "7b0e27581ca96ce257f37ab3c82bbd7e1675330fe973eca110f6189fdd96fdbd",
+  "future_masks": {
+    "fit": {
+      "full_horizon_samples": 2266,
+      "horizon_steps": 10,
+      "invalid_future_steps": 6300,
+      "mask_sha256": "979f608737dd73be5dc2de1b8c24005865a4777b0f172d89c13259cf806bef28",
+      "partial_horizon_samples": 1260,
+      "samples": 3526,
+      "valid_future_steps": 28960,
+      "valid_length_histogram": {
+        "1": 140,
+        "10": 2266,
+        "2": 140,
+        "3": 140,
+        "4": 140,
+        "5": 140,
+        "6": 140,
+        "7": 140,
+        "8": 140,
+        "9": 140
+      }
+    },
+    "heldout": {
+      "full_horizon_samples": 326,
+      "horizon_steps": 10,
+      "invalid_future_steps": 900,
+      "mask_sha256": "89bc88ccf6ac97b1e3ba7dc94030c838d5d1babb6812f89c462d3f1e59ae057c",
+      "partial_horizon_samples": 180,
+      "samples": 506,
+      "valid_future_steps": 4160,
+      "valid_length_histogram": {
+        "1": 20,
+        "10": 326,
+        "2": 20,
+        "3": 20,
+        "4": 20,
+        "5": 20,
+        "6": 20,
+        "7": 20,
+        "8": 20,
+        "9": 20
+      }
+    },
+    "selection": {
+      "full_horizon_samples": 330,
+      "horizon_steps": 10,
+      "invalid_future_steps": 900,
+      "mask_sha256": "013e66ea7f4478080829a25d0df10939b0025992d40ddaeb5e528c3c998bdecb",
+      "partial_horizon_samples": 180,
+      "samples": 510,
+      "valid_future_steps": 4200,
+      "valid_length_histogram": {
+        "1": 20,
+        "10": 330,
+        "2": 20,
+        "3": 20,
+        "4": 20,
+        "5": 20,
+        "6": 20,
+        "7": 20,
+        "8": 20,
+        "9": 20
+      }
+    }
+  },
+  "interpretation": "All cached tensors are byte-for-byte and array-for-array identical; V4 changes future-mask consumption, not dataset membership or features.",
+  "old_manifest_sha256": "3b349f30665b9a13f840bba47c2d99c0d769986e2c6ce78b52f081ba5f6907ec",
+  "splits": {
+    "fit": {
+      "arrays": {
+        "base_raw": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            3526,
+            2016
+          ]
+        },
+        "head_features": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            3526,
+            512
+          ]
+        },
+        "labels": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            3526,
+            10,
+            3
+          ]
+        },
+        "mask": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            3526,
+            6
+          ]
+        },
+        "sample_ids": {
+          "dtype": "<U17",
+          "exactly_equal": true,
+          "shape": [
+            3526
+          ]
+        },
+        "sequence": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            3526,
+            6,
+            12
+          ]
+        }
+      },
+      "corrected_sha256": "53dac95166c7852f209e0178706ecfd0d8393e5c974ae7c973cb2048b916f0e4",
+      "file_sha256_equal": true,
+      "old_sha256": "53dac95166c7852f209e0178706ecfd0d8393e5c974ae7c973cb2048b916f0e4"
+    },
+    "heldout": {
+      "arrays": {
+        "base_raw": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            506,
+            2016
+          ]
+        },
+        "head_features": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            506,
+            512
+          ]
+        },
+        "labels": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            506,
+            10,
+            3
+          ]
+        },
+        "mask": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            506,
+            6
+          ]
+        },
+        "sample_ids": {
+          "dtype": "<U17",
+          "exactly_equal": true,
+          "shape": [
+            506
+          ]
+        },
+        "sequence": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            506,
+            6,
+            12
+          ]
+        }
+      },
+      "corrected_sha256": "f2b5b9fc1aecbf7084579d156ccf7893414388ed29a69c168fc1c995fc7022da",
+      "file_sha256_equal": true,
+      "old_sha256": "f2b5b9fc1aecbf7084579d156ccf7893414388ed29a69c168fc1c995fc7022da"
+    },
+    "selection": {
+      "arrays": {
+        "base_raw": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            510,
+            2016
+          ]
+        },
+        "head_features": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            510,
+            512
+          ]
+        },
+        "labels": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            510,
+            10,
+            3
+          ]
+        },
+        "mask": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            510,
+            6
+          ]
+        },
+        "sample_ids": {
+          "dtype": "<U17",
+          "exactly_equal": true,
+          "shape": [
+            510
+          ]
+        },
+        "sequence": {
+          "dtype": "float32",
+          "exactly_equal": true,
+          "shape": [
+            510,
+            6,
+            12
+          ]
+        }
+      },
+      "corrected_sha256": "3c1361a2681f391e19a98c30674405a9baa9b386221cce7e0eba4760fbbd6363",
+      "file_sha256_equal": true,
+      "old_sha256": "3c1361a2681f391e19a98c30674405a9baa9b386221cce7e0eba4760fbbd6363"
+    }
+  },
+  "status": "pass"
+}

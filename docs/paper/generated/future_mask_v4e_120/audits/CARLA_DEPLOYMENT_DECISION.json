@@ -1,0 +1,163 @@
+{
+  "carla_execution_authorized": false,
+  "claim_boundary": "A rerun-required decision does not invalidate historical physical rollouts; it limits them to the historical V3 deployed stack.",
+  "corrected_B1": {
+    "model_cell_id": "head-large",
+    "representative_run_id": "v3__head-large__lr1e-4__s11__data100",
+    "retained_run_ids": [
+      "v3__head-large__lr1e-4__s11__data100",
+      "v3__head-large__lr1e-4__s23__data100",
+      "v3__head-large__lr1e-4__s37__data100"
+    ],
+    "role": "B1"
+  },
+  "corrected_offline_to_closed_loop_claim_allowed": false,
+  "corrected_p_star": {
+    "median_validation_rollout_macro_nll": 1.8606008291244507,
+    "median_warmed_batch_one_latency_ms": 49.96886692941189,
+    "model_cell_id": "mlp-h0p4-large",
+    "representative_run_id": "v3__mlp-h0p4-large__lr1e-4__s11__data100",
+    "retained_run_ids": [
+      "v3__mlp-h0p4-large__lr1e-4__s11__data100",
+      "v3__mlp-h0p4-large__lr1e-4__s23__data100",
+      "v3__mlp-h0p4-large__lr1e-4__s37__data100"
+    ],
+    "role": "P_star",
+    "selection_rule": [
+      "median_validation_rollout_macro_nll",
+      "trainable_parameters",
+      "median_warmed_batch_one_latency_ms",
+      "model_cell_id"
+    ],
+    "trainable_parameters": 1035312
+  },
+  "corrected_selection_freeze_sha256": "c2e895d36515ead3a9b702baed40a93c4d53c6846cec4fb27082393521cd1ba2",
+  "corrected_synthesis_sha256": "c92bbe06874ed121eb1824b0cea772f768a9db422f9c55d5e896f5a415f5a4c0",
+  "decision": "rerun_required",
+  "decision_sha256": "7d53b90744bb1ae5bab0c0ec4e4c31ffa6d53c7b9d7bd0500f453262c9ff2e2b",
+  "gate_artifacts": {
+    "cache_and_mask_audit_sha256": "056d6e2be7b053832252ec57d1128e78415e71909a5fc358ec11431bac071cff",
+    "corrected_synthesis_sha256": "c92bbe06874ed121eb1824b0cea772f768a9db422f9c55d5e896f5a415f5a4c0",
+    "extension_protocol_sha256": "535c6b913e0328d38d9a647769c6ce8fc0bad9a70cb121117a7c2b8597095a63",
+    "formal_report_contract_audit_sha256": "06ea2f419aedb70b3903f662f45b188429bbd73b0d36c60b380c24f4b74f3f6a",
+    "full_horizon_sensitivity_sha256": "c1127bc1187a88bb47156dce91570fcf7a5f253d392b462ca6143d90c946179e",
+    "historical_impact_audit_sha256": "f39c68d9a809ddb992594bee50102d67dcba4a7ff20eb68f9a053f0f22e357d7",
+    "pipeline_receipt_sha256": "949bc48f6170507d30213bbfec6a7555f641e40251ee5943071fa5431b882549",
+    "pipeline_stage_receipt_sha256": "382c412375db89cc869c25bc6ef74d8d4808e702f5bc4047157ba37cb1443214",
+    "selection_freeze_sha256": "c2e895d36515ead3a9b702baed40a93c4d53c6846cec4fb27082393521cd1ba2",
+    "training_curve_audit_sha256": "6fd49871801dd04102c0595e078d27e7a0b33b6087722914732babce5fcb36f2"
+  },
+  "historical_v3_carla_claim_allowed": true,
+  "identity": {
+    "actual_carla_predictor_bundle_identity_verified": false,
+    "feature_cache_tensors_exactly_equal": true,
+    "offline_B1_and_P_star_bundle_exact": false,
+    "roles": {
+      "B1": {
+        "corrected": {
+          "model_cell_id": "head-large",
+          "representative_run_id": "v3__head-large__lr1e-4__s11__data100",
+          "retained_run_ids": [
+            "v3__head-large__lr1e-4__s11__data100",
+            "v3__head-large__lr1e-4__s23__data100",
+            "v3__head-large__lr1e-4__s37__data100"
+          ],
+          "role": "B1"
+        },
+        "old": {
+          "model_cell_id": "head-large",
+          "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+          "retained_run_ids": [
+            "v3__head-large__lr1e-4__s11__data100",
+            "v3__head-large__lr1e-4__s23__data100",
+            "v3__head-large__lr1e-4__s37__data100"
+          ],
+          "role": "B1"
+        },
+        "same_calibration": false,
+        "same_configuration": true,
+        "same_model_weights": false,
+        "same_representative_run": false
+      },
+      "P_star": {
+        "corrected": {
+          "median_validation_rollout_macro_nll": 1.8606008291244507,
+          "median_warmed_batch_one_latency_ms": 49.96886692941189,
+          "model_cell_id": "mlp-h0p4-large",
+          "representative_run_id": "v3__mlp-h0p4-large__lr1e-4__s11__data100",
+          "retained_run_ids": [
+            "v3__mlp-h0p4-large__lr1e-4__s11__data100",
+            "v3__mlp-h0p4-large__lr1e-4__s23__data100",
+            "v3__mlp-h0p4-large__lr1e-4__s37__data100"
+          ],
+          "role": "P_star",
+          "selection_rule": [
+            "median_validation_rollout_macro_nll",
+            "trainable_parameters",
+            "median_warmed_batch_one_latency_ms",
+            "model_cell_id"
+          ],
+          "trainable_parameters": 1035312
+        },
+        "old": {
+          "median_validation_rollout_macro_nll": 4.555816650390625,
+          "median_warmed_batch_one_latency_ms": 44.743313789367676,
+          "model_cell_id": "transformer-h1p0-large",
+          "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+          "retained_run_ids": [
+            "v3__transformer-h1p0-large__lr1e-4__s11__data100",
+            "v3__transformer-h1p0-large__lr1e-4__s23__data100",
+            "v3__transformer-h1p0-large__lr1e-4__s37__data100"
+          ],
+          "role": "P_star",
+          "selection_rule": [
+            "median_validation_rollout_macro_nll",
+            "trainable_parameters",
+            "median_warmed_batch_one_latency_ms",
+            "model_cell_id"
+          ],
+          "trainable_parameters": 1026816
+        },
+        "same_calibration": false,
+        "same_configuration": false,
+        "same_model_weights": false,
+        "same_representative_run": false
+      }
+    },
+    "same_dataset": true
+  },
+  "old_B1": {
+    "model_cell_id": "head-large",
+    "representative_run_id": "v3__head-large__lr1e-4__s23__data100",
+    "retained_run_ids": [
+      "v3__head-large__lr1e-4__s11__data100",
+      "v3__head-large__lr1e-4__s23__data100",
+      "v3__head-large__lr1e-4__s37__data100"
+    ],
+    "role": "B1"
+  },
+  "old_p_star": {
+    "median_validation_rollout_macro_nll": 4.555816650390625,
+    "median_warmed_batch_one_latency_ms": 44.743313789367676,
+    "model_cell_id": "transformer-h1p0-large",
+    "representative_run_id": "v3__transformer-h1p0-large__lr1e-4__s37__data100",
+    "retained_run_ids": [
+      "v3__transformer-h1p0-large__lr1e-4__s11__data100",
+      "v3__transformer-h1p0-large__lr1e-4__s23__data100",
+      "v3__transformer-h1p0-large__lr1e-4__s37__data100"
+    ],
+    "role": "P_star",
+    "selection_rule": [
+      "median_validation_rollout_macro_nll",
+      "trainable_parameters",
+      "median_warmed_batch_one_latency_ms",
+      "model_cell_id"
+    ],
+    "trainable_parameters": 1026816
+  },
+  "old_selection_freeze_sha256": "26053340000fb75981ee71c1d74779a028b08bd15b5d2778a26774aa5404039d",
+  "old_synthesis_sha256": "27525badccc796a7fd273243078c28db843395b71b6090555120e022c5ac4848",
+  "required_next_action": "Rerun corrected B1/P* CARLA before claiming corrected V4 offline-to-closed-loop transfer.",
+  "schema_version": "capacity_history_future_mask_v4_carla_deployment_decision",
+  "status": "pass"
+}
