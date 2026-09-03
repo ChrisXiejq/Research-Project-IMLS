@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -23,6 +22,7 @@ FORBIDDEN_PREFIXES = (
     ".repo-maintenance/",
     "docs/internal/",
     "docs/presentation/",
+    "docs/paper/",
 )
 FORBIDDEN_BASENAMES = {"CODEX_HANDOFF.md", "PROJECT_STATUS.md"}
 FORBIDDEN_SUFFIXES = (
@@ -37,15 +37,6 @@ FORBIDDEN_SUFFIXES = (
     ".pb",
 )
 FORBIDDEN_COMPOUND_SUFFIXES = (".tar.gz", ".tar.xz", ".tar.bz2")
-PUBLICATION_MEDIA_PATHS = {
-    "docs/paper/CARLA_video.mp4",
-}
-GENERATED_EVIDENCE_ROOT = "docs/paper/generated/"
-PUBLICATION_EVIDENCE_PREFIXES = (
-    "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/prereg/",
-    "docs/paper/generated/future_mask_v4e_120/",
-    "docs/paper/generated/weighted_smpc_v2_recovery/",
-)
 REQUIRED_PATHS = {
     "README.md",
     "REPRODUCIBILITY.md",
@@ -56,16 +47,12 @@ REQUIRED_PATHS = {
     "core/scripts/models/evaluate_thesis_core_cached_v3.py",
 }
 MAX_TRACKED_FILE_BYTES = 20 * 1024 * 1024
-TRACKED_BYTES_EXCLUDED_PATHS = {
-    "docs/paper/REPOSITORY_CONTENT_MANIFEST.json",
-}
+TRACKED_BYTES_EXCLUDED_PATHS: set[str] = set()
 PUBLIC_MARKDOWN_PATHS = (
     "README.md",
     "REPRODUCIBILITY.md",
     "THIRD_PARTY_NOTICES.md",
     "docs/README.md",
-    "docs/paper/README.md",
-    "docs/paper/THESIS_EVIDENCE_GUIDE.md",
 )
 MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 BACKTICK_RE = re.compile(r"`([^`\n]+)`")
@@ -89,16 +76,9 @@ def _is_forbidden(path: str) -> bool:
         or any(normalised.startswith(prefix) for prefix in FORBIDDEN_PREFIXES)
         or pure.name in FORBIDDEN_BASENAMES
         or pure.name.startswith("HANDOFF_")
-        or (
-            normalised.startswith(GENERATED_EVIDENCE_ROOT)
-            and not normalised.startswith(PUBLICATION_EVIDENCE_PREFIXES)
-        )
         or normalised.startswith("docs/literature/")
         or normalised.startswith("docs/dissertation/")
-        or (
-            normalised not in PUBLICATION_MEDIA_PATHS
-            and any(lower.endswith(suffix) for suffix in FORBIDDEN_SUFFIXES)
-        )
+        or any(lower.endswith(suffix) for suffix in FORBIDDEN_SUFFIXES)
         or any(lower.endswith(suffix) for suffix in FORBIDDEN_COMPOUND_SUFFIXES)
     )
 
@@ -156,34 +136,6 @@ def _repository_paths(root: Path) -> list[str]:
         for path in root.rglob("*")
         if path.is_file() and ".git" not in path.relative_to(root).parts
     )
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def _compact_evidence(
-    root: Path, tracked_paths: Iterable[str]
-) -> list[dict[str, object]]:
-    records = []
-    for relative in sorted(tracked_paths):
-        if not relative.startswith(PUBLICATION_EVIDENCE_PREFIXES):
-            continue
-        path = root / relative
-        if not path.is_file() or _is_forbidden(relative):
-            continue
-        records.append(
-            {
-                "path": relative,
-                "bytes": path.stat().st_size,
-                "sha256": _sha256(path),
-            }
-        )
-    return records
 
 
 def _local_link_target(raw_target: str) -> str | None:
@@ -261,13 +213,10 @@ def audit_repository(root: Path) -> dict[str, object]:
         if (resolved_root / relative).is_file()
     }
     report = audit_paths(tracked_paths, file_sizes)
-    evidence = _compact_evidence(resolved_root, tracked_paths)
     broken_links = audit_markdown_links(resolved_root, PUBLIC_MARKDOWN_PATHS)
     report.update(
         {
             "repository_root": ".",
-            "compact_evidence_file_count": len(evidence),
-            "compact_evidence": evidence,
             "broken_public_document_links": broken_links,
         }
     )

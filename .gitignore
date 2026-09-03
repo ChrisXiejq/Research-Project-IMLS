@@ -50,7 +50,6 @@ Thumbs.db
 core/results/
 *.avi
 *.mp4
-!docs/paper/CARLA_video.mp4
 
 # --- Gurobi: large installers + license secrets (never commit) ---
 gurobi/*.tar.gz
@@ -95,21 +94,14 @@ core/scripts/models/l5kit_multipath_10/
 .env.local
 *.local.yml
 
-# Local diagnostic extracts from smoke tests; canonical summaries live under
-# docs/paper/generated and the server-side raw archives remain external.
+# Local diagnostic extracts from smoke tests; server-side raw archives remain
+# external.
 tmp/
 
-# Local experiment evidence. Publish only the explicit compact allowlist under
-# docs/paper/generated/ via materialize_publication_evidence.py.
+# Manuscript material and locally generated paper outputs belong in the
+# separate dissertation repository.
 artifacts/
-docs/paper/generated/*
-!docs/paper/generated/distinction_sf4_supervisor_authority_ablation/
-!docs/paper/generated/distinction_sf4_supervisor_authority_ablation/prereg/
-!docs/paper/generated/distinction_sf4_supervisor_authority_ablation/prereg/**
-!docs/paper/generated/future_mask_v4e_120/
-!docs/paper/generated/future_mask_v4e_120/**
-!docs/paper/generated/weighted_smpc_v2_recovery/
-!docs/paper/generated/weighted_smpc_v2_recovery/**
+docs/paper/
 
 # Internal agent, planning and handoff material is not part of the publication
 # repository.

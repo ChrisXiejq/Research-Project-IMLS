@@ -44,10 +44,8 @@ probability-weighted branch costs, risk-allocation variants and
 supervisor-authority instrumentation. These changes do not relicense upstream
 material; consult the source repository and publication before reuse.
 
-## Data and generated evidence
+## Data and generated outputs
 
-Raw simulator data and model weights are not distributed. Compact numerical
-evidence and figures under `docs/paper/generated/` are provided for scholarly
-audit of the associated dissertation. Their inclusion does not grant rights to
-external datasets, simulator assets or pretrained models from which the
-experiments were produced.
+Raw simulator data, generated experiment outputs and model weights are not
+distributed. External datasets, simulator assets and pretrained models remain
+subject to their respective licences and terms.

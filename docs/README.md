@@ -1,18 +1,15 @@
 # Documentation
 
-The public documentation is deliberately small:
+The public code documentation is deliberately small:
 
 1. [Repository overview](../README.md) — scientific pipeline and canonical
    entry points.
 2. [Reproducibility guide](../REPRODUCIBILITY.md) — environment, data, model,
    CARLA and analysis commands.
-3. [Thesis evidence guide](paper/THESIS_EVIDENCE_GUIDE.md) — corrected results,
-   interpretation and claim boundaries.
-4. [System-to-code map](architecture/流程图与代码映射.md) — predictor, risk,
+3. [System-to-code map](architecture/流程图与代码映射.md) — predictor, risk,
    SMPC and supervisor components.
-5. [Server CARLA runbook](architecture/Server_CARLA_Environment_Runbook.md) —
+4. [Server CARLA runbook](architecture/Server_CARLA_Environment_Runbook.md) —
    solver and simulator health checks.
 
-`paper/generated/` contains immutable machine evidence, not narrative working
-notes. The generated manuscript copy and the author’s editable submission
-workspace are intentionally not bundled with this experiment repository.
+Manuscript files, submission PDFs and generated paper evidence are maintained
+outside this experiment-code repository.

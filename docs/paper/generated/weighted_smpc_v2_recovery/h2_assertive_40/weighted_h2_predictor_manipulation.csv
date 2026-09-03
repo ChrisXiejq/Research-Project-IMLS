@@ -1,3 +1,0 @@
-risk_policy,risk_label,paired_initialization_groups,matched_prediction_steps,mean_probability_l1_distance_mean,mean_probability_l1_distance_ci_low,mean_probability_l1_distance_ci_high,trajectory_mean_hash_difference_fraction_mean,trajectory_mean_hash_difference_fraction_ci_low,trajectory_mean_hash_difference_fraction_ci_high
-fixed_medium,Fixed medium,10,1583,0.05025944602948211,0.04998377352577437,0.0505681810647003,1.0,1.0,1.0
-adaptive,Adaptive,10,1587,0.05034427140395514,0.0500216379356905,0.05066517365748631,1.0,1.0,1.0

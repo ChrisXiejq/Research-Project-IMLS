@@ -1,35 +1,30 @@
 # Reproducibility
 
-This document separates lightweight source verification from full CARLA/GPU
-reproduction. Commands are written with portable environment variables; no
-private server path is required by the documentation.
+This guide separates lightweight source verification from full CARLA, GPU and
+licensed-solver reproduction. Generated results and manuscript materials are
+not part of this source repository.
 
-## 1. Required external paths
+## 1. External paths
+
+Define the paths used by the workflows:
 
 ```bash
 export IMLS_REPO=/path/to/Research-Project-IMLS
 export CARLA_ROOT=/path/to/CARLA_0.9.14
-export PREDICTION_DATASET_ROOT=/path/to/dataset_35_5_5
+export PREDICTION_DATASET_ROOT=/path/to/prediction-dataset
 export MULTIPATH_BASE_MODEL=/path/to/l5kit_multipath_10
 export EXPERIMENT_RESULTS_ROOT=/path/to/persistent/results
-```
-
-For the formal CARLA solver path also define:
-
-```bash
 export GUROBI_LOADER=/path/to/load_gurobi.sh
 export PYTHON_BIN=/path/to/carla_modern/bin/python
 ```
 
-CARLA assets, pretrained/fine-tuned models and Gurobi licence files are not
-bundled. The repository does include `core/scripts/models/l5kit_clusters_16.npy`
-because these anchors are a small, required model-structure input.
+CARLA assets, datasets, model checkpoints and Gurobi licence files are external
+and must not be committed. The small anchor file required by the model
+structure is included at `core/scripts/models/l5kit_clusters_16.npy`.
 
 ## 2. Python environment
 
-The maintained environment is
-[core/env_setup/environment.modern.yml](core/env_setup/environment.modern.yml).
-Create it with:
+Create and activate the maintained environment:
 
 ```bash
 cd "$IMLS_REPO"
@@ -37,70 +32,47 @@ conda env create -f core/env_setup/environment.modern.yml
 conda activate carla_modern
 ```
 
-Use the Python API shipped with CARLA 0.9.14, rather than a mismatched PyPI
-CARLA package:
+Use the Python API distributed with CARLA 0.9.14:
 
 ```bash
 export PYTHONPATH="$CARLA_ROOT/PythonAPI/carla:$CARLA_ROOT/PythonAPI/carla/agents:${PYTHONPATH:-}"
 ```
 
-Gurobi is optional for documentation, audit and most source tests. It is
-required for the formal `ca.Opti("conic")` solver path. After loading the
-locally licensed installation, verify:
+For the formal solver path, load the local Gurobi installation and verify the
+CasADi plugin:
 
 ```bash
 "$PYTHON_BIN" -c "import casadi as ca; print(ca.__version__); print(ca.has_conic('gurobi'))"
 ```
 
-The second line must be `True`. A missing Gurobi plugin is an environment
-failure and must not be counted as a scientific rollout failure.
+The final line must be `True`. A missing solver plugin is an environment error,
+not a scientific rollout failure.
 
-## 3. Source and contract tests
+## 3. Source checks
 
-The local writing environment can run tests through the standard library:
+Run the contract suite from the repository root:
 
 ```bash
-cd "$IMLS_REPO"
 python -m unittest discover -s core/scripts/models/tests -p 'test_*.py'
 ```
 
-The licensed production solver smoke is intentionally skipped unless its
-environment gate is enabled. Before any release, also run:
+Check the tracked release boundary without writing into the repository:
 
 ```bash
 python core/scripts/models/publication_repository_policy.py \
   --root . \
-  --output docs/paper/REPOSITORY_CONTENT_MANIFEST.json
+  --output /tmp/imls-repository-content-manifest.json
 ```
 
-## 4. Dataset and representation
+The licensed production-solver smoke test is skipped unless its environment
+gate is explicitly enabled.
 
-The collection protocol creates four scenario cells per initialisation group:
-two target-interaction settings crossed with fixed/adaptive collection policy.
-Two hundred CARLA source rollouts are collected. The corrected frozen study
-uses groups 1--35 for fitting, 36--40 for selection/calibration and 41--45 for
-held-out evaluation, preserving rollout-disjoint splits.
+## 4. Offline predictor pipeline
 
-Each supervised window contains:
-
-- a MultiPath raster representation around the target vehicle;
-- a six-token, 12-feature ego--target interaction history;
-- ten future target positions at 0.2 s spacing (2 s horizon);
-- a future-valid mask for windows truncated near rollout termination.
-
-The corrected cache contains 3,526 fit, 510 selection and 506 held-out windows.
-Mask validity is fail-closed throughout validation, checkpoint selection,
-calibration and held-out metrics.
-
-## 5. Corrected offline predictor pipeline
-
-The full run requires the frozen V3 protocol/dataset root, feature cache and a
-pre-held-out extension protocol. The public entry point accepts them as four
-arguments:
+The offline workflow requires an external dataset root, feature cache and
+extension protocol:
 
 ```bash
-export PYTHON_BIN=/path/to/training/python
-export MULTIPATH_BASE_MODEL=/path/to/l5kit_multipath_10
 export MULTIPATH_ANCHORS="$IMLS_REPO/core/scripts/models/l5kit_clusters_16.npy"
 
 bash core/scripts/models/run_future_mask_v4e_pipeline.sh \
@@ -110,23 +82,18 @@ bash core/scripts/models/run_future_mask_v4e_pipeline.sh \
   "$EXPERIMENT_RESULTS_ROOT/capacity_history_future_mask_v4e_120/protocol/EXTENSION_PROTOCOL.json"
 ```
 
-The pipeline trains all 27 cells under the same amended budget, audits every
-epoch/checkpoint, fits calibration only on groups 36--40, freezes selection,
-then opens groups 41--45 once. Raw outputs remain under
-`$EXPERIMENT_RESULTS_ROOT`; compact evidence is imported with
-`core/scripts/models/materialize_publication_evidence.py`.
+All raw outputs remain below `EXPERIMENT_RESULTS_ROOT`.
 
-## 6. Probability-weighted CARLA experiment
+## 5. Closed-loop CARLA workflow
 
-Start CARLA 0.9.14 in one terminal:
+Start CARLA in a separate terminal:
 
 ```bash
 cd "$CARLA_ROOT"
 ./CarlaUE4.sh -RenderOffScreen -quality-level=Low
 ```
 
-Set model/calibration roots produced by the offline pipeline, then run the
-assertive matrix:
+Then provide the trained-model and calibration roots and run the formal matrix:
 
 ```bash
 export REPO_DIR="$IMLS_REPO"
@@ -142,41 +109,5 @@ RESULTS_ROOT="$EXPERIMENT_RESULTS_ROOT/weighted_smpc_v2_recovery/formal_supervis
 bash core/scripts/carla/run_probability_weighted_v2_recovery_formal.sh
 ```
 
-The on arm contains B1/P* × fixed-medium/adaptive × ten paired initialisation
-groups (40 rollouts). The off arm uses the same factorial over five paired
-groups (20 rollouts). Target behaviour is assertive constant speed and does not
-use ego state. Camera visualisation is disabled during formal timing runs.
-
-## 7. Regenerate tables and figures
-
-Offline figures:
-
-```bash
-python core/scripts/models/plot_future_mask_v4_offline.py \
-  --impact-audit docs/paper/generated/future_mask_v4e_120/audits/HISTORICAL_CHECKPOINT_IMPACT_AUDIT.json \
-  --offline-synthesis docs/paper/generated/future_mask_v4e_120/postprocess/offline_synthesis.json \
-  --full-horizon-sensitivity docs/paper/generated/future_mask_v4e_120/audits/FULL_HORIZON_SENSITIVITY.json \
-  --selection-freeze docs/paper/generated/future_mask_v4e_120/postprocess/selection_freeze.json \
-  --output-dir /tmp/imls-offline-figures
-```
-
-Closed-loop joint analysis requires the external raw joint60 result root:
-
-```bash
-python core/scripts/models/analyze_weighted_smpc_joint60.py \
-  --input-root "$EXPERIMENT_RESULTS_ROOT/weighted_smpc_v2_recovery" \
-  --output-dir /tmp/imls-joint60-analysis
-```
-
-All publication plots are generated by Python/Matplotlib. Numerical source
-files under `docs/paper/generated/` are immutable: fix a generator and rebuild,
-never hand-edit a reported result.
-
-## 8. Evidence and claim boundary
-
-The corrected offline evidence is under
-`docs/paper/generated/future_mask_v4e_120/`. The weighted closed-loop analysis
-and joint60 integrity evidence are under
-`docs/paper/generated/weighted_smpc_v2_recovery/`. Historical unmasked V3 and
-unweighted-controller outputs may support provenance only; they are not final
-corrected estimates.
+Keep generated outputs outside Git. If a script defaults to `docs/paper/`, that
+directory is intentionally ignored and must not be added to the code release.

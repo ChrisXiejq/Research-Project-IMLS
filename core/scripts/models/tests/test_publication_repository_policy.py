@@ -33,7 +33,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
             ],
         )
 
-    def test_accepts_core_and_compact_evidence(self) -> None:
+    def test_accepts_core_repository(self) -> None:
         report = audit_paths(
             tracked_paths=[
                 "README.md",
@@ -43,7 +43,6 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
                 "core/scripts/carla/run_all_scenarios.py",
                 "core/scripts/carla/policies/smpc_agent.py",
                 "core/scripts/models/evaluate_thesis_core_cached_v3.py",
-                "docs/paper/generated/future_mask_v4e_120/offline_synthesis.json",
             ],
             file_sizes={},
         )
@@ -52,7 +51,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
         self.assertEqual(report["missing_required_paths"], [])
         self.assertEqual(report["forbidden_tracked_paths"], [])
 
-    def test_accepts_the_single_publication_video(self) -> None:
+    def test_rejects_paper_materials(self) -> None:
         report = audit_paths(
             tracked_paths=[
                 "README.md",
@@ -62,13 +61,16 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
                 "core/scripts/carla/run_all_scenarios.py",
                 "core/scripts/carla/policies/smpc_agent.py",
                 "core/scripts/models/evaluate_thesis_core_cached_v3.py",
-                "docs/paper/CARLA_video.mp4",
+                "docs/paper/generated/result.json",
             ],
-            file_sizes={"docs/paper/CARLA_video.mp4": 2_078_047},
+            file_sizes={},
         )
 
-        self.assertEqual(report["status"], "pass")
-        self.assertEqual(report["forbidden_tracked_paths"], [])
+        self.assertEqual(report["status"], "fail")
+        self.assertEqual(
+            report["forbidden_tracked_paths"],
+            ["docs/paper/generated/result.json"],
+        )
 
     def test_rejects_other_videos(self) -> None:
         report = audit_paths(
@@ -154,7 +156,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
             ["docs/dissertation/Marking Rubric.pdf"],
         )
 
-    def test_manifest_does_not_count_its_own_bytes(self) -> None:
+    def test_manifest_bytes_are_counted(self) -> None:
         tracked_paths = [
             "README.md",
             "REPRODUCIBILITY.md",
@@ -163,19 +165,16 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
             "core/scripts/carla/run_all_scenarios.py",
             "core/scripts/carla/policies/smpc_agent.py",
             "core/scripts/models/evaluate_thesis_core_cached_v3.py",
-            "docs/paper/REPOSITORY_CONTENT_MANIFEST.json",
+            "docs/REPOSITORY_CONTENT_MANIFEST.json",
         ]
         file_sizes = {path: 10 for path in tracked_paths}
-        file_sizes["docs/paper/REPOSITORY_CONTENT_MANIFEST.json"] = 999
+        file_sizes["docs/REPOSITORY_CONTENT_MANIFEST.json"] = 999
 
         report = audit_paths(tracked_paths=tracked_paths, file_sizes=file_sizes)
 
         self.assertEqual(report["tracked_path_count"], len(tracked_paths))
-        self.assertEqual(report["tracked_bytes"], 70)
-        self.assertEqual(
-            report["tracked_bytes_excluded_paths"],
-            ["docs/paper/REPOSITORY_CONTENT_MANIFEST.json"],
-        )
+        self.assertEqual(report["tracked_bytes"], 1069)
+        self.assertEqual(report["tracked_bytes_excluded_paths"], [])
 
     def test_reports_missing_local_markdown_links_and_repository_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

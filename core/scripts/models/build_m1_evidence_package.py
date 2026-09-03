@@ -1451,8 +1451,8 @@ def audit_supervisor_feedback_closure(
     )
     sf4_prereg_path = (
         repo
-        / "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/prereg/"
-        "SF4_SUPERVISOR_BEHAVIOURAL_AUTHORITY_PREREG.json"
+        / "core/scripts/models/protocols/"
+        "sf4_supervisor_behavioural_authority_prereg.json"
     )
     sf4_receipts = sorted(sf4_root.glob("SF4_*/SF4_ROLLOUT_*_COMPLETE.json"))
     sf4_core_ok = False

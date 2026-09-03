@@ -1180,8 +1180,8 @@ class SupervisorFeedbackFinalClosureTest(unittest.TestCase):
 
         prereg = (
             repo
-            / "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/"
-            "prereg/SF4_SUPERVISOR_BEHAVIOURAL_AUTHORITY_PREREG.json"
+            / "core/scripts/models/protocols/"
+            "sf4_supervisor_behavioural_authority_prereg.json"
         )
         write_json(
             prereg,

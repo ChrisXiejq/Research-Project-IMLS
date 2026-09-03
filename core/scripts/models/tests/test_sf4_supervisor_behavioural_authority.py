@@ -420,9 +420,8 @@ class FrozenDesignTests(unittest.TestCase):
 
     def test_preregistration_includes_approach_and_signed_stop_geometry(self):
         prereg_path = (
-            ROOT / "docs" / "paper" / "generated"
-            / "distinction_sf4_supervisor_authority_ablation" / "prereg"
-            / "SF4_SUPERVISOR_BEHAVIOURAL_AUTHORITY_PREREG.json"
+            ROOT / "core" / "scripts" / "models" / "protocols"
+            / "sf4_supervisor_behavioural_authority_prereg.json"
         )
         prereg = prepare.validate_prereg(prereg_path)
         self.assertIn(
@@ -462,9 +461,8 @@ class FrozenDesignTests(unittest.TestCase):
         self.assertEqual(observed, expected)
 
         prereg_path = (
-            ROOT / "docs" / "paper" / "generated"
-            / "distinction_sf4_supervisor_authority_ablation" / "prereg"
-            / "SF4_SUPERVISOR_BEHAVIOURAL_AUTHORITY_PREREG.json"
+            ROOT / "core" / "scripts" / "models" / "protocols"
+            / "sf4_supervisor_behavioural_authority_prereg.json"
         )
         prereg = prepare.validate_prereg(prereg_path)
         smoke = prereg["design"]["excluded_full_stack_smoke"]

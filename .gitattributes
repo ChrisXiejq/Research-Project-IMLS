@@ -1,2 +1,0 @@
-# Frozen publication evidence is copied byte-for-byte and verified by SHA-256.
-docs/paper/generated/** -text -diff
