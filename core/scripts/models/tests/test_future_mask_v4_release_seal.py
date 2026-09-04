@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import json
 import subprocess
 import sys
@@ -11,6 +20,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
+sys.path.insert(0, str(SCRIPT_DIR / "experimental"))
 
 from capacity_study_v3_protocol import (  # noqa: E402
     atomic_json,
@@ -105,7 +115,7 @@ class FutureMaskV4ReleaseSealTest(unittest.TestCase):
         return subprocess.run(
             [
                 sys.executable,
-                str(SCRIPT_DIR / "seal_future_mask_v4_release.py"),
+                str(SCRIPT_DIR / "experimental/seal_future_mask_v4_release.py"),
                 "--evidence", str(root / "evidence.json"),
                 "--figures", str(root / "figures.json"),
                 "--paper-outputs", str(root / "paper.json"),

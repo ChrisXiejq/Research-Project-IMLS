@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import json
 import subprocess
 import sys
@@ -12,6 +21,7 @@ from unittest import mock
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
+sys.path.insert(0, str(SCRIPT_DIR / "experimental"))
 
 from capacity_study_v3_protocol import atomic_json, sha256_payload  # noqa: E402
 
@@ -193,7 +203,7 @@ class FutureMaskV4PlotTest(unittest.TestCase):
             result = subprocess.run(
                 [
                     sys.executable,
-                    str(SCRIPT_DIR / "plot_future_mask_v4_offline.py"),
+                    str(SCRIPT_DIR / "experimental/plot_future_mask_v4_offline.py"),
                     "--impact-audit",
                     str(root / "impact.json"),
                     "--offline-synthesis",

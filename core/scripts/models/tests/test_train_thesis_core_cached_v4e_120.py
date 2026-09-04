@@ -1,5 +1,14 @@
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import json
 import os
 import subprocess
@@ -11,7 +20,7 @@ from pathlib import Path
 class UniformEpochOverrideTest(unittest.TestCase):
     def test_public_pipeline_uses_external_model_paths(self) -> None:
         models_dir = Path(__file__).resolve().parents[1]
-        source = (models_dir / "run_future_mask_v4e_pipeline.sh").read_text()
+        source = (models_dir / "experimental/run_future_mask_v4e_pipeline.sh").read_text()
         self.assertNotIn("/root/autodl-tmp", source)
         self.assertIn('base_model="${MULTIPATH_BASE_MODEL:?', source)
         self.assertIn('anchors="${MULTIPATH_ANCHORS:-', source)
@@ -49,7 +58,9 @@ print("V4E_CONTRACT=" + json.dumps({
 }, sort_keys=True))
 """
         environment = dict(os.environ)
-        environment["PYTHONPATH"] = str(models_dir)
+        environment["PYTHONPATH"] = os.pathsep.join(
+            (str(models_dir / "experimental"), str(models_dir))
+        )
         completed = subprocess.run(
             [sys.executable, "-c", code],
             cwd=models_dir,

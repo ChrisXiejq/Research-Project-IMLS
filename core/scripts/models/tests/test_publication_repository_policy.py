@@ -1,5 +1,14 @@
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import sys
 import tempfile
 import unittest
@@ -8,6 +17,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
+sys.path.insert(0, str(SCRIPT_DIR / "experimental"))
 
 from publication_repository_policy import audit_markdown_links, audit_paths  # noqa: E402
 
@@ -42,7 +52,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
                 "THIRD_PARTY_NOTICES.md",
                 "core/scripts/carla/run_all_scenarios.py",
                 "core/scripts/carla/policies/smpc_agent.py",
-                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "core/scripts/models/evaluate_prediction_model.py",
             ],
             file_sizes={},
         )
@@ -60,7 +70,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
                 "THIRD_PARTY_NOTICES.md",
                 "core/scripts/carla/run_all_scenarios.py",
                 "core/scripts/carla/policies/smpc_agent.py",
-                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "core/scripts/models/evaluate_prediction_model.py",
                 "docs/paper/generated/result.json",
             ],
             file_sizes={},
@@ -72,6 +82,24 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
             ["docs/paper/generated/result.json"],
         )
 
+    def test_accepts_public_demonstration_video(self) -> None:
+        report = audit_paths(
+            tracked_paths=[
+                "README.md",
+                "REPRODUCIBILITY.md",
+                "CITATION.cff",
+                "THIRD_PARTY_NOTICES.md",
+                "core/scripts/carla/run_all_scenarios.py",
+                "core/scripts/carla/policies/smpc_agent.py",
+                "core/scripts/models/evaluate_prediction_model.py",
+                "docs/paper/CARLA_video.mp4",
+            ],
+            file_sizes={"docs/paper/CARLA_video.mp4": 2_078_047},
+        )
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["forbidden_tracked_paths"], [])
+
     def test_rejects_other_videos(self) -> None:
         report = audit_paths(
             tracked_paths=[
@@ -81,7 +109,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
                 "THIRD_PARTY_NOTICES.md",
                 "core/scripts/carla/run_all_scenarios.py",
                 "core/scripts/carla/policies/smpc_agent.py",
-                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "core/scripts/models/evaluate_prediction_model.py",
                 "docs/paper/raw_rollout.mp4",
             ],
             file_sizes={"docs/paper/raw_rollout.mp4": 1024},
@@ -102,7 +130,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
                 "THIRD_PARTY_NOTICES.md",
                 "core/scripts/carla/run_all_scenarios.py",
                 "core/scripts/carla/policies/smpc_agent.py",
-                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "core/scripts/models/evaluate_prediction_model.py",
                 "docs/paper/generated/day6/internal_audit.json",
             ],
             file_sizes={},
@@ -123,7 +151,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
                 "THIRD_PARTY_NOTICES.md",
                 "core/scripts/carla/run_all_scenarios.py",
                 "core/scripts/carla/policies/smpc_agent.py",
-                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "core/scripts/models/evaluate_prediction_model.py",
                 "docs/literature/source_paper.pdf",
             ],
             file_sizes={},
@@ -144,7 +172,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
                 "THIRD_PARTY_NOTICES.md",
                 "core/scripts/carla/run_all_scenarios.py",
                 "core/scripts/carla/policies/smpc_agent.py",
-                "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+                "core/scripts/models/evaluate_prediction_model.py",
                 "docs/dissertation/Marking Rubric.pdf",
             ],
             file_sizes={},
@@ -164,7 +192,7 @@ class PublicationRepositoryPolicyTest(unittest.TestCase):
             "THIRD_PARTY_NOTICES.md",
             "core/scripts/carla/run_all_scenarios.py",
             "core/scripts/carla/policies/smpc_agent.py",
-            "core/scripts/models/evaluate_thesis_core_cached_v3.py",
+            "core/scripts/models/evaluate_prediction_model.py",
             "docs/REPOSITORY_CONTENT_MANIFEST.json",
         ]
         file_sizes = {path: 10 for path in tracked_paths}

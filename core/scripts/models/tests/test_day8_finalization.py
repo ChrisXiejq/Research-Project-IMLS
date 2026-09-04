@@ -3,6 +3,15 @@
 
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import hashlib
 import json
 import subprocess
@@ -120,7 +129,7 @@ class Day8FinalizationTest(unittest.TestCase):
             subprocess.run(
                 [
                     sys.executable,
-                    str(SCRIPT_DIR / "freeze_day8_model_selection.py"),
+                    str(SCRIPT_DIR / "experimental/freeze_day8_model_selection.py"),
                     "--results-dir",
                     str(root),
                     "--output-json",
@@ -184,7 +193,7 @@ class Day8FinalizationTest(unittest.TestCase):
             subprocess.run(
                 [
                     sys.executable,
-                    str(SCRIPT_DIR / "summarize_day8_frozen_test.py"),
+                    str(SCRIPT_DIR / "experimental/summarize_day8_frozen_test.py"),
                     "--results-dir",
                     str(root),
                     "--test-dir",
@@ -208,7 +217,7 @@ class Day8FinalizationTest(unittest.TestCase):
             subprocess.run(
                 [
                     sys.executable,
-                    str(SCRIPT_DIR / "package_day8_test_snapshot.py"),
+                    str(SCRIPT_DIR / "experimental/package_day8_test_snapshot.py"),
                     "--test-dir",
                     str(test_dir),
                     "--output",

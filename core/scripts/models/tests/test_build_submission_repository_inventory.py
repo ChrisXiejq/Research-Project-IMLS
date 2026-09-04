@@ -1,6 +1,15 @@
+
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
 import unittest
 
-from core.scripts.models.build_submission_repository_inventory import (
+from core.scripts.models.tools.build_submission_repository_inventory import (
     classify_dissertation_path,
     classify_experiment_path,
     _sanitize_remote,
@@ -10,7 +19,7 @@ from core.scripts.models.build_submission_repository_inventory import (
 class SubmissionRepositoryInventoryTest(unittest.TestCase):
     def test_experiment_categories_cover_current_scientific_roles(self):
         expected = {
-            "core/scripts/models/generate_capacity_history_v3_results.py": "v3_canonical",
+            "core/scripts/models/experimental/generate_capacity_history_v3_results.py": "v3_canonical",
             "docs/paper/generated/capacity_history_v3/final/result.csv": "v3_canonical",
             "core/scripts/carla/policies/conflict_zone_safety_filter.py": "implicit_filter_exploratory",
             "tmp/pdfs/page.png": "reproducible_cache",

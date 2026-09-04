@@ -79,6 +79,8 @@ runs/
 core/scripts/models/*_carla_finetuned*/
 core/scripts/models/*_carla_finetuned*_history.json
 core/scripts/models/*_carla_finetuned*_training_log.csv
+core/scripts/models/assets/*_carla_finetuned*_history.json
+core/scripts/models/assets/*_carla_finetuned*_training_log.csv
 core/scripts/models/l5kit_multipath_10/
 **/variables/variables.data-*
 **/variables/variables.index
@@ -101,7 +103,8 @@ tmp/
 # Manuscript material and locally generated paper outputs belong in the
 # separate dissertation repository.
 artifacts/
-docs/paper/
+docs/paper/*
+!docs/paper/CARLA_video.mp4
 
 # Internal agent, planning and handoff material is not part of the publication
 # repository.

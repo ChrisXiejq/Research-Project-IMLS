@@ -1,5 +1,14 @@
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import math
 import sys
 import unittest
@@ -11,6 +20,7 @@ import numpy as np
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
+sys.path.insert(0, str(SCRIPT_DIR / "experimental"))
 
 from evaluate_multipath_model_on_dataset import (  # noqa: E402
     evaluate_decoded,
@@ -175,8 +185,8 @@ class FutureValidMaskContractTests(unittest.TestCase):
         self.assertTrue(math.isfinite(baseline["search"]["best_validation_NLL_per_step"]))
 
     def test_training_and_cached_evaluation_do_not_drop_mask_channel(self):
-        training_source = (SCRIPT_DIR / "train_prediction_model_v3.py").read_text()
-        cached_source = (SCRIPT_DIR / "evaluate_thesis_core_cached_v3.py").read_text()
+        training_source = (SCRIPT_DIR / "experimental/train_prediction_model_v3.py").read_text()
+        cached_source = (SCRIPT_DIR / "experimental/evaluate_thesis_core_cached_v3.py").read_text()
         macro_body = training_source.split("def evaluate_rollout_macro_nll", 1)[1].split(
             "def make_rollout_macro_checkpoint", 1
         )[0]
@@ -184,7 +194,7 @@ class FutureValidMaskContractTests(unittest.TestCase):
         self.assertNotIn('arrays["labels"][..., :2]', cached_source)
 
     def test_full_horizon_freeze_binding_precedes_heldout_io(self):
-        cached_source = (SCRIPT_DIR / "evaluate_thesis_core_cached_v3.py").read_text()
+        cached_source = (SCRIPT_DIR / "experimental/evaluate_thesis_core_cached_v3.py").read_text()
         body = cached_source.split(
             "def evaluate_full_horizon_sensitivity", 1
         )[1].split("def main", 1)[0]

@@ -1,3 +1,12 @@
+
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
 import re
 import json
 import unittest
@@ -7,7 +16,7 @@ from pathlib import Path
 RUNNER = (
     Path(__file__).resolve().parents[2]
     / "carla"
-    / "run_probability_weighted_v2_recovery_formal.sh"
+    / "experimental/run_probability_weighted_v2_recovery_formal.sh"
 )
 
 
@@ -62,7 +71,7 @@ class ProbabilityWeightedFormalRunnerTest(unittest.TestCase):
         self.assertIn('if authority_failures:', source)
 
     def test_off_tuning_differs_only_in_authority_after_defaults(self):
-        tuning_dir = RUNNER.parent / "scenarios" / "tuning_configs"
+        tuning_dir = RUNNER.parent.parent / "scenarios" / "tuning_configs"
         on = json.loads(
             (tuning_dir / "give_way_reduced_clear_path_release_v13_risk_owned_yield.json").read_text()
         )

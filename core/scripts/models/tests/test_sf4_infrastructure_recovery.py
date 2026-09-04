@@ -2,6 +2,15 @@
 
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import ast
 import importlib.util
 import contextlib
@@ -19,6 +28,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[4]
 MODELS = ROOT / "core" / "scripts" / "models"
 sys.path.insert(0, str(MODELS))
+sys.path.insert(0, str(MODELS / "experimental"))
 
 
 def load(name: str, path: Path):
@@ -32,7 +42,7 @@ def load(name: str, path: Path):
 
 recovery = load(
     "sf4_infrastructure_recovery_tested",
-    MODELS / "prepare_sf4_infrastructure_recovery.py",
+    MODELS / "experimental/prepare_sf4_infrastructure_recovery.py",
 )
 
 
@@ -174,7 +184,7 @@ class RecoveryEligibilityTests(unittest.TestCase):
     def test_runner_keeps_original_git_identity_and_per_key_cap(self):
         source = (
             ROOT / "core" / "scripts" / "carla"
-            / "run_sf4_infrastructure_recovery.sh"
+            / "experimental/run_sf4_infrastructure_recovery.sh"
         ).read_text(encoding="utf-8")
         self.assertIn('--prediction_git_commit "${CONTRACT_COMMIT}"', source)
         self.assertIn('max_attempts="$(max_attempts_for', source)
@@ -189,7 +199,7 @@ class RecoveryEligibilityTests(unittest.TestCase):
     def test_recovery_helper_is_python38_compatible(self):
         source = (
             ROOT / "core" / "scripts" / "models"
-            / "prepare_sf4_infrastructure_recovery.py"
+            / "experimental/prepare_sf4_infrastructure_recovery.py"
         ).read_text(encoding="utf-8")
         ast.parse(source, feature_version=(3, 8))
         for python39_api in (

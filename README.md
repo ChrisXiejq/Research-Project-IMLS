@@ -40,40 +40,54 @@ Gurobi solver are external dependencies. See
 1. **Environment setup.** Configure CARLA 0.9.14, CasADi and Gurobi as
    described in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 2. **Offline predictor experiments.** Use
-   `core/scripts/models/run_future_mask_v4e_pipeline.sh` with explicit dataset,
-   model and output roots.
+   `core/scripts/models/run_offline_experiment.sh` with explicit dataset, model
+   and output roots.
 3. **Closed-loop CARLA experiments.** Start CARLA separately, then run
-   `core/scripts/carla/run_probability_weighted_v2_recovery_formal.sh` with
-   explicit model, calibration and result roots.
+   `core/scripts/carla/run_closed_loop_experiment.sh` with explicit model,
+   calibration and result roots.
 4. **Repository checks.** Run the unit-test command above and
-   `core/scripts/models/publication_repository_policy.py` before release.
+   `core/scripts/models/tools/publication_repository_policy.py` before release.
 
 ## Repository map
 
 ```text
 core/scripts/carla/       CARLA scenarios, policies, SMPC and formal runners
-core/scripts/models/      dataset, model, audit and analysis utilities
+core/scripts/models/      maintained predictor entry points
+  modeling/               reusable model components and contracts
+  data/                   dataset preparation and validation
+  training/               training, evaluation and deployment utilities
+  analysis/               post-processing, statistics and plotting
+  tools/                  audit, packaging and release utilities
+  assets/                 small tracked model-structure assets
+  experimental/           historical process files and milestones
 core/env_setup/           reproducible Python environment definitions
-core/results_template/    example post-processing utilities and templates
 docs/architecture/        system and server execution documentation
 ```
 
 Key entry points include:
 
 - `core/scripts/carla/run_all_scenarios.py`
+- `core/scripts/carla/run_closed_loop_experiment.sh`
 - `core/scripts/carla/policies/smpc_agent.py`
 - `core/scripts/carla/utils/mpc_utils.py`
-- `core/scripts/models/evaluate_thesis_core_cached_v3.py`
+- `core/scripts/models/run_offline_experiment.sh`
+- `core/scripts/models/train_prediction_model.py`
+- `core/scripts/models/evaluate_prediction_model.py`
+
+Files whose names retain internal day, revision or version identifiers are
+grouped under the package-specific `experimental/` directories. They are kept
+for reproducibility of historical runs and are not public entry points.
 
 ## Repository boundary
 
-Raw CARLA rollouts, datasets, checkpoints, videos, licences and generated
-analysis outputs are not committed. The ignore rules keep these local files,
-including anything generated under `docs/paper/`, outside the source release.
+Raw CARLA rollouts, datasets, checkpoints, licences and generated analysis
+outputs are not committed. The repository includes one public demonstration
+video at `docs/paper/CARLA_video.mp4`; other videos remain ignored. The ignore
+rules keep generated files under `docs/paper/` outside the source release.
 Run the repository policy check before committing:
 
 ```bash
-python core/scripts/models/publication_repository_policy.py \
+python core/scripts/models/tools/publication_repository_policy.py \
   --root . \
   --output /tmp/imls-repository-content-manifest.json
 ```

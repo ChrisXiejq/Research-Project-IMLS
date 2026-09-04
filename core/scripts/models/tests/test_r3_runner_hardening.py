@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import contextlib
 import io
 import json
@@ -14,6 +23,7 @@ from types import SimpleNamespace
 
 MODELS_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(MODELS_DIR))
+sys.path.insert(0, str(MODELS_DIR / "experimental"))
 
 from capture_r3_execution_provenance import assert_no_sensitive_text
 from package_closed_loop_snapshot import (
@@ -290,7 +300,7 @@ class ProvenanceSecurityTest(unittest.TestCase):
 
 class RunnerShellRegressionTest(unittest.TestCase):
     def test_cell_directory_does_not_reference_an_unbound_local(self) -> None:
-        runner = MODELS_DIR.parent / "carla" / "run_r3_corrected_formal_matrix.sh"
+        runner = MODELS_DIR.parent / "carla" / "experimental/run_r3_corrected_formal_matrix.sh"
         source = runner.read_text(encoding="utf-8")
         self.assertNotIn(
             'local cell_id="${predictor}_${policy}_${style}" cell_dir="${R3_RESULTS}/${cell_id}"',

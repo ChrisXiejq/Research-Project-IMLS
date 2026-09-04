@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import json
 import os
 import subprocess
@@ -25,7 +34,7 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
 
 class Day9AuditTest(unittest.TestCase):
     def test_legacy_boolean_solver_failure_is_recognized(self) -> None:
-        from core.scripts.models.audit_day9_smoke import solver_failed
+        from core.scripts.models.experimental.audit_day9_smoke import solver_failed
 
         self.assertTrue(solver_failed({"optimal": False}))
         self.assertTrue(solver_failed({"optimal": 0}))
@@ -149,7 +158,7 @@ class Day9AuditTest(unittest.TestCase):
             subprocess.run(
                 [
                     sys.executable,
-                    str(SCRIPT_DIR / "audit_day9_smoke.py"),
+                    str(SCRIPT_DIR / "experimental/audit_day9_smoke.py"),
                     "--results-dir",
                     str(root),
                     "--contract-json",
@@ -175,7 +184,7 @@ class Day9AuditTest(unittest.TestCase):
                     str(
                         SCRIPT_DIR.parent
                         / "carla"
-                        / "finalize_day9_deployment_smoke.sh"
+                        / "experimental/finalize_day9_deployment_smoke.sh"
                     ),
                 ],
                 check=True,

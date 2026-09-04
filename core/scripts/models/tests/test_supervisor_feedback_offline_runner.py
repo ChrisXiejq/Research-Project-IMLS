@@ -1,9 +1,18 @@
+
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
 import unittest
 from pathlib import Path
 
 
 REPO = Path(__file__).resolve().parents[4]
-RUNNER = REPO / "core/scripts/models/run_supervisor_feedback_r3_offline_audits.sh"
+RUNNER = REPO / "core/scripts/models/experimental/run_supervisor_feedback_r3_offline_audits.sh"
 
 
 class SupervisorFeedbackOfflineRunnerTests(unittest.TestCase):

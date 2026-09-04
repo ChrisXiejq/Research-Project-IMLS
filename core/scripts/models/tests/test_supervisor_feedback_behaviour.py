@@ -1,3 +1,12 @@
+
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
 import hashlib
 import json
 import sys
@@ -9,6 +18,7 @@ from pathlib import Path
 MODELS_DIR = Path(__file__).resolve().parents[1]
 if str(MODELS_DIR) not in sys.path:
     sys.path.insert(0, str(MODELS_DIR))
+    sys.path.insert(0, str(MODELS_DIR / "experimental"))
 
 from analyze_supervisor_feedback_behaviour import (  # noqa: E402
     analyze_formal,
@@ -244,11 +254,11 @@ class SupervisorFeedbackBehaviourTests(unittest.TestCase):
             self.assertIn("behaviour_analysis_contract.json", receipt["artifacts"])
             self.assertIn("behaviour_threshold_sensitivity.csv", receipt["artifacts"])
             self.assertIn(
-                "core/scripts/models/analyze_supervisor_feedback_behaviour.py",
+                "core/scripts/models/analysis/analyze_supervisor_feedback_behaviour.py",
                 receipt["source_sha256"],
             )
             self.assertIn(
-                "core/scripts/models/run_supervisor_feedback_r3_offline_audits.sh",
+                "core/scripts/models/experimental/run_supervisor_feedback_r3_offline_audits.sh",
                 receipt["source_sha256"],
             )
             paired = (output / "behaviour_policy_paired_contrasts.csv").read_text(

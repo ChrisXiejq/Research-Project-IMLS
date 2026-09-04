@@ -20,7 +20,7 @@ export PYTHON_BIN=/path/to/carla_modern/bin/python
 
 CARLA assets, datasets, model checkpoints and Gurobi licence files are external
 and must not be committed. The small anchor file required by the model
-structure is included at `core/scripts/models/l5kit_clusters_16.npy`.
+structure is included at `core/scripts/models/assets/l5kit_clusters_16.npy`.
 
 ## 2. Python environment
 
@@ -59,7 +59,7 @@ python -m unittest discover -s core/scripts/models/tests -p 'test_*.py'
 Check the tracked release boundary without writing into the repository:
 
 ```bash
-python core/scripts/models/publication_repository_policy.py \
+python core/scripts/models/tools/publication_repository_policy.py \
   --root . \
   --output /tmp/imls-repository-content-manifest.json
 ```
@@ -73,9 +73,9 @@ The offline workflow requires an external dataset root, feature cache and
 extension protocol:
 
 ```bash
-export MULTIPATH_ANCHORS="$IMLS_REPO/core/scripts/models/l5kit_clusters_16.npy"
+export MULTIPATH_ANCHORS="$IMLS_REPO/core/scripts/models/assets/l5kit_clusters_16.npy"
 
-bash core/scripts/models/run_future_mask_v4e_pipeline.sh \
+bash core/scripts/models/run_offline_experiment.sh \
   "$EXPERIMENT_RESULTS_ROOT/capacity_history_future_mask_v4e_120" \
   "$EXPERIMENT_RESULTS_ROOT/capacity_history_thesis_core_v3" \
   "$EXPERIMENT_RESULTS_ROOT/capacity_history_future_mask_v4/cache" \
@@ -102,11 +102,11 @@ export CALIBRATION_ROOT="$EXPERIMENT_RESULTS_ROOT/capacity_history_thesis_core_v
 
 SUPERVISOR_AUTHORITY_MODE=on \
 RESULTS_ROOT="$EXPERIMENT_RESULTS_ROOT/weighted_smpc_v2_recovery/formal_supervisor_on" \
-bash core/scripts/carla/run_probability_weighted_v2_recovery_formal.sh
+bash core/scripts/carla/run_closed_loop_experiment.sh
 
 SUPERVISOR_AUTHORITY_MODE=off \
 RESULTS_ROOT="$EXPERIMENT_RESULTS_ROOT/weighted_smpc_v2_recovery/formal_supervisor_off" \
-bash core/scripts/carla/run_probability_weighted_v2_recovery_formal.sh
+bash core/scripts/carla/run_closed_loop_experiment.sh
 ```
 
 Keep generated outputs outside Git. If a script defaults to `docs/paper/`, that

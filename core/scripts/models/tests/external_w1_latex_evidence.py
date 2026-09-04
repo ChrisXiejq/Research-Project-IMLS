@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import hashlib
 import json
 import shutil
@@ -8,7 +17,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from core.scripts.models.build_w1_latex_evidence import build
+from core.scripts.models.experimental.build_w1_latex_evidence import build
 
 
 class W1LatexEvidenceTest(unittest.TestCase):
@@ -68,7 +77,7 @@ class W1LatexEvidenceTest(unittest.TestCase):
             self.skipTest("Node.js is unavailable")
         script = (
             self.repo / "core" / "scripts" / "models"
-            / "render_w1_r3_figures_png.cjs"
+            / "experimental/render_w1_r3_figures_png.cjs"
         )
         completed = subprocess.run(
             [node, str(script), "--repo-root", str(self.repo), "--self-test"],
@@ -84,7 +93,7 @@ class W1LatexEvidenceTest(unittest.TestCase):
 
     def test_w1_audit_freezes_discovery_before_running_mutating_regressions(self) -> None:
         source = (
-            self.repo / "core" / "scripts" / "models" / "audit_w1_manuscript.py"
+            self.repo / "core" / "scripts" / "models" / "experimental/audit_w1_manuscript.py"
         ).read_text(encoding="utf-8")
         count_line = "discovered_test_count = discover_regression_test_count(REPO_ROOT)"
         execute_line = "tests = subprocess.run("

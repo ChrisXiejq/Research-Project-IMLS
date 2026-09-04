@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import csv
 import hashlib
 import json
@@ -7,7 +16,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from core.scripts.models.build_m1_evidence_package import (
+from core.scripts.models.experimental.build_m1_evidence_package import (
     SF2_REQUIRED_FINAL_ARTIFACTS,
     SF3_REQUIRED_ARTIFACTS,
     SF4_REQUIRED_ANALYSIS_PRODUCTS,
@@ -18,7 +27,7 @@ from core.scripts.models.build_m1_evidence_package import (
     audit_supervisor_feedback_content_integration,
     stage_aware_status,
 )
-from core.scripts.models.build_supervisor_feedback_paper_integration import (
+from core.scripts.models.tools.build_supervisor_feedback_paper_integration import (
     ALL_CONTENT_EVIDENCE_IDS,
     CANONICAL_EVIDENCE_ASSETS,
     CANONICAL_EVIDENCE_DATA_SOURCES,
@@ -194,15 +203,15 @@ class SupervisorFeedbackFinalClosureTest(unittest.TestCase):
             / "docs/paper/generated/distinction_sf4_supervisor_authority_ablation/server_runs"
             / "sf4_supervisor_behavioural_authority_v1"
         )
-        behaviour_source = repo / "core/scripts/models/analyze_supervisor_feedback_behaviour.py"
-        behaviour_runner = repo / "core/scripts/models/run_supervisor_feedback_r3_offline_audits.sh"
-        cost_source = repo / "core/scripts/models/analyze_supervisor_feedback_cost_feasibility.py"
+        behaviour_source = repo / "core/scripts/models/analysis/analyze_supervisor_feedback_behaviour.py"
+        behaviour_runner = repo / "core/scripts/models/experimental/run_supervisor_feedback_r3_offline_audits.sh"
+        cost_source = repo / "core/scripts/models/analysis/analyze_supervisor_feedback_cost_feasibility.py"
         for path, contents in (
             (behaviour_source, "# behaviour analyzer\n"),
             (behaviour_runner, "#!/usr/bin/env bash\n# offline runner\n"),
             (cost_source, "# cost analyzer\n"),
             (
-                repo / "core/scripts/models/build_supervisor_feedback_paper_integration.py",
+                repo / "core/scripts/models/tools/build_supervisor_feedback_paper_integration.py",
                 "# final paper integration builder\n",
             ),
         ):
@@ -431,10 +440,10 @@ class SupervisorFeedbackFinalClosureTest(unittest.TestCase):
             write_text(path, contents)
             behaviour_artifacts[path.name] = digest(path)
         sf1_source_hashes = {
-            "core/scripts/models/analyze_supervisor_feedback_behaviour.py": digest(
+            "core/scripts/models/analysis/analyze_supervisor_feedback_behaviour.py": digest(
                 behaviour_source
             ),
-            "core/scripts/models/run_supervisor_feedback_r3_offline_audits.sh": digest(
+            "core/scripts/models/experimental/run_supervisor_feedback_r3_offline_audits.sh": digest(
                 behaviour_runner
             ),
             "matrix_audit": digest(r3_matrix),
@@ -982,13 +991,13 @@ class SupervisorFeedbackFinalClosureTest(unittest.TestCase):
                     ),
                 },
                 "source_sha256": {
-                    "core/scripts/models/analyze_supervisor_feedback_behaviour.py": digest(
+                    "core/scripts/models/analysis/analyze_supervisor_feedback_behaviour.py": digest(
                         behaviour_source
                     ),
-                    "core/scripts/models/analyze_supervisor_feedback_cost_feasibility.py": digest(
+                    "core/scripts/models/analysis/analyze_supervisor_feedback_cost_feasibility.py": digest(
                         cost_source
                     ),
-                    "core/scripts/models/run_supervisor_feedback_r3_offline_audits.sh": digest(
+                    "core/scripts/models/experimental/run_supervisor_feedback_r3_offline_audits.sh": digest(
                         behaviour_runner
                     ),
                     "r3_corrected_matrix_audit.json": digest(r3_matrix),
@@ -1772,9 +1781,9 @@ class SupervisorFeedbackFinalClosureTest(unittest.TestCase):
     def test_sf1_contract_and_source_drift_are_fatal(self) -> None:
         mutations = (
             "docs/paper/generated/supervisor_feedback_v1/r3_offline/01_behaviour/behaviour_analysis_contract.json",
-            "core/scripts/models/analyze_supervisor_feedback_behaviour.py",
-            "core/scripts/models/run_supervisor_feedback_r3_offline_audits.sh",
-            "core/scripts/models/analyze_supervisor_feedback_cost_feasibility.py",
+            "core/scripts/models/analysis/analyze_supervisor_feedback_behaviour.py",
+            "core/scripts/models/experimental/run_supervisor_feedback_r3_offline_audits.sh",
+            "core/scripts/models/analysis/analyze_supervisor_feedback_cost_feasibility.py",
         )
         for relative in mutations:
             with self.subTest(relative=relative), tempfile.TemporaryDirectory() as temporary:

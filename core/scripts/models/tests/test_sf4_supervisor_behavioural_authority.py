@@ -2,6 +2,15 @@
 
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_MODELS_TEST_ROOT = _Path(__file__).resolve().parents[1]
+for _package_name in ("analysis", "data", "experimental", "modeling", "training", "tools"):
+    _package_path = _MODELS_TEST_ROOT / _package_name
+    if str(_package_path) not in _sys.path:
+        _sys.path.insert(0, str(_package_path))
+
 import importlib.util
 import contextlib
 import io
@@ -20,6 +29,7 @@ ROOT = Path(__file__).resolve().parents[4]
 MODELS = ROOT / "core" / "scripts" / "models"
 CARLA_POLICIES = ROOT / "core" / "scripts" / "carla" / "policies"
 sys.path.insert(0, str(MODELS))
+sys.path.insert(0, str(MODELS / "experimental"))
 
 
 def load(name: str, path: Path):
@@ -31,19 +41,19 @@ def load(name: str, path: Path):
     return module
 
 
-attempts = load("r3_attempt_manager", MODELS / "r3_attempt_manager.py")
-analysis = load("sf4_analysis_tested", MODELS / "analyze_sf4_supervisor_behavioural_authority.py")
-prepare = load("sf4_prepare_tested", MODELS / "prepare_sf4_supervisor_behavioural_authority.py")
+attempts = load("r3_attempt_manager", MODELS / "experimental/r3_attempt_manager.py")
+analysis = load("sf4_analysis_tested", MODELS / "experimental/analyze_sf4_supervisor_behavioural_authority.py")
+prepare = load("sf4_prepare_tested", MODELS / "experimental/prepare_sf4_supervisor_behavioural_authority.py")
 init_generator = load(
     "sf4_init_generator_tested",
-    MODELS / "generate_sf4_supervisor_authority_inits.py",
+    MODELS / "experimental/generate_sf4_supervisor_authority_inits.py",
 )
 action_filter = load("sf4_filter_tested", CARLA_POLICIES / "supervisor_action_filter.py")
-packager = load("sf4_packager_tested", MODELS / "package_sf4_compact_evidence.py")
-full_packager = load("sf4_full_packager_tested", MODELS / "package_sf4_full_raw_snapshot.py")
+packager = load("sf4_packager_tested", MODELS / "experimental/package_sf4_compact_evidence.py")
+full_packager = load("sf4_full_packager_tested", MODELS / "experimental/package_sf4_full_raw_snapshot.py")
 smoke_validator = load(
     "sf4_smoke_validator_tested",
-    MODELS / "validate_sf4_supervisor_authority_smoke.py",
+    MODELS / "experimental/validate_sf4_supervisor_authority_smoke.py",
 )
 
 
@@ -477,7 +487,7 @@ class FrozenDesignTests(unittest.TestCase):
 
         runner = (
             ROOT / "core" / "scripts" / "carla"
-            / "run_sf4_supervisor_behavioural_authority_ablation.sh"
+            / "experimental/run_sf4_supervisor_behavioural_authority_ablation.sh"
         ).read_text(encoding="utf-8")
         for label, risk, mode in expected:
             self.assertIn(f"run_smoke_case {label} {risk} {mode}", runner)
